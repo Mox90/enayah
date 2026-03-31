@@ -12,12 +12,18 @@ const pool = new Pool({
 const db = drizzle(pool)
 
 async function runMigration() {
-  await migrate(db, { migrationsFolder: 'drizzle' })
-  console.log('✅ Migrations applied')
-  process.exit(0)
+  try {
+    await migrate(db, { migrationsFolder: 'drizzle' })
+    console.log('✅ Migrations applied')
+  } finally {
+    await pool.end()
+  }
 }
 
-runMigration().catch((err) => {
-  console.error('❌ Migration failed:', err)
-  process.exit(1)
-})
+runMigration()
+  .then(() => process.exit(0))
+  .catch(async (err) => {
+    console.error('❌ Migration failed:', err)
+    await pool.end()
+    process.exit(1)
+  })

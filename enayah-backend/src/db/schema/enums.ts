@@ -8,7 +8,7 @@ export const authProviderEnum = pgEnum('auth_providers', [
   'openid',
 ])
 
-export const genderEnum = pgEnum('gender', ['male', 'female'])
+export const genderEnum = pgEnum('gender', ['male', 'female', 'not_specified'])
 
 export const appraisalRatingEnum = pgEnum('appraisal_rating', [
   'outstanding',
@@ -16,4 +16,21 @@ export const appraisalRatingEnum = pgEnum('appraisal_rating', [
   'good',
   'needs_improvement',
   'unsatisfactory',
+])
+
+export const employmentTypeEnum = pgEnum('employment_type', [
+  'full_time',
+  'part_time',
+  'contract',
+  'temporary',
+  'locum',
+])
+
+export const employmentStatusEnum = pgEnum('employment_status', [
+  'active',
+  'terminated',
+  'resigned',
+  'eoc',
+  'transferred',
+  'on_leave',
 ])
