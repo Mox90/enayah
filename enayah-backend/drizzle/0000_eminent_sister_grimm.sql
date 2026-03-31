@@ -1,0 +1,20 @@
+CREATE TABLE "users" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"email" varchar(255) NOT NULL,
+	"username" varchar(100),
+	"password_hash" varchar(255),
+	"is_active" boolean DEFAULT true NOT NULL,
+	"failed_login_attempts" integer DEFAULT 0 NOT NULL,
+	"locked_until" timestamp,
+	"last_login_at" timestamp,
+	"last_failed_login_at" timestamp,
+	"password_changed_at" timestamp,
+	"must_change_password" boolean DEFAULT false NOT NULL,
+	"employee_id" uuid,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"is_deleted" boolean DEFAULT false NOT NULL,
+	"deleted_at" timestamp,
+	"deleted_by" uuid,
+	"version" integer DEFAULT 1 NOT NULL
+);
