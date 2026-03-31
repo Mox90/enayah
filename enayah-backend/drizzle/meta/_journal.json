@@ -15,6 +15,13 @@
       "when": 1774938714664,
       "tag": "0001_young_joseph",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774979045883,
+      "tag": "0002_lazy_metal_master",
+      "breakpoints": true
     }
   ]
 }

@@ -7,3 +7,13 @@ export const authProviderEnum = pgEnum('auth_providers', [
   'saml',
   'openid',
 ])
+
+export const genderEnum = pgEnum('gender', ['male', 'female'])
+
+export const appraisalRatingEnum = pgEnum('appraisal_rating', [
+  'outstanding',
+  'very_good',
+  'good',
+  'needs_improvement',
+  'unsatisfactory',
+])
