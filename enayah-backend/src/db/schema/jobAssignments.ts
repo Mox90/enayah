@@ -1,8 +1,16 @@
-import { pgTable, uuid, timestamp, boolean, index } from 'drizzle-orm/pg-core'
+import {
+  pgTable,
+  uuid,
+  timestamp,
+  boolean,
+  index,
+  check,
+} from 'drizzle-orm/pg-core'
 import { employments } from './employments'
 import { departments, positions } from './org'
 import { employees } from './employees'
 import { baseColumns } from './base'
+import { sql } from 'drizzle-orm'
 
 export const jobAssignments = pgTable(
   'job_assignments',
@@ -16,7 +24,9 @@ export const jobAssignments = pgTable(
     departmentId: uuid('department_id').references(() => departments.id),
     positionId: uuid('position_id').references(() => positions.id),
 
-    managerId: uuid('manager_id').references(() => employees.id),
+    managerId: uuid('manager_id').references(() => employees.id, {
+      onDelete: 'restrict',
+    }),
 
     startDate: timestamp('start_date').notNull(),
     endDate: timestamp('end_date'),
@@ -29,6 +39,10 @@ export const jobAssignments = pgTable(
   (table) => ({
     employmentIdx: index('idx_job_assignments_employment_id').on(
       table.employmentId,
+    ),
+    validDateRange: check(
+      'chk_job_assignments_valid_date_range',
+      sql`${table.endDate} IS NULL OR ${table.endDate} >= ${table.startDate}`,
     ),
   }),
 )
