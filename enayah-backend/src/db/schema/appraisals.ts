@@ -9,6 +9,8 @@ import {
   jsonb,
   check,
   date,
+  uniqueIndex,
+  integer,
 } from 'drizzle-orm/pg-core'
 import { baseColumns } from './base'
 import { appraisalRatingEnum, appraisalStatusEnum } from './enums'
@@ -16,90 +18,111 @@ import { employees } from './employees'
 import { sql } from 'drizzle-orm'
 //import { appraisalCycles } from './appraisalCycles'
 
-export const appraisalCycles = pgTable('appraisal_cycles', {
-  id: uuid('id').defaultRandom().primaryKey(),
+export const appraisalCycles = pgTable(
+  'appraisal_cycles',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
 
-  name: varchar('name', { length: 150 }).notNull(),
-  startDate: timestamp('start_date').notNull(),
-  endDate: timestamp('end_date').notNull(),
+    name: varchar('name', { length: 150 }).notNull(),
+    startDate: timestamp('start_date').notNull(),
+    endDate: timestamp('end_date').notNull(),
 
-  status: varchar('status', { length: 30 }),
-})
+    status: varchar('status', { length: 30 }),
+  },
+  (table) => ({
+    validDateRange: check(
+      'chk_appraisal_valid_date_range',
+      sql`${table.endDate} IS NULL OR ${table.endDate} >= ${table.startDate}`,
+    ),
+  }),
+)
 
-export const employeeAppraisals = pgTable('employee_appraisals', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  employeeId: uuid('employee_id')
-    .notNull()
-    .references(() => employees.id, { onDelete: 'restrict' }),
-  cycleId: uuid('cycle_id')
-    .notNull()
-    .references(() => appraisalCycles.id, { onDelete: 'restrict' }),
-  appraiserId: uuid('appraiser_id').references(() => employees.id),
-  //employeeNumberSnapshot: varchar('employee_number_snapshot', { length: 50 }),
-  //employeeNameSnapshot: varchar('employee_name_snapshot', { length: 255 }),
-  //employeeNameArSnapshot: varchar('employee_name_ar_snapshot', { length: 255 }),
-  //jobTitleSnapshot: varchar('job_title_snapshot', { length: 255 }),
-  //jobTitleArSnapshot: varchar('job_title_ar_snapshot', { length: 255 }),
-  //departmentSnapshot: varchar('department_snapshot', { length: 255 }),
-  //departmentArSnapshot: varchar('department_ar_snapshot', { length: 255 }),
-  //goalsScore: numeric('goals_score'),
-  //competenciesScore: numeric('competencies_score'),
-  finalScore: numeric('final_score'),
-  overallRating: appraisalRatingEnum('overall_rating'),
-  status: appraisalStatusEnum('appraisal_status').default('draft').notNull(),
-  //phase: varchar('phase', { length: 50 })
-  //  .notNull()
-  //  .$type<'planning' | 'evaluation'>()
-  //  .default('planning'),
+export const employeeAppraisals = pgTable(
+  'employee_appraisals',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    employeeId: uuid('employee_id')
+      .notNull()
+      .references(() => employees.id, { onDelete: 'restrict' }),
+    cycleId: uuid('cycle_id')
+      .notNull()
+      .references(() => appraisalCycles.id, { onDelete: 'restrict' }),
+    appraiserId: uuid('appraiser_id').references(() => employees.id),
+    //employeeNumberSnapshot: varchar('employee_number_snapshot', { length: 50 }),
+    //employeeNameSnapshot: varchar('employee_name_snapshot', { length: 255 }),
+    //employeeNameArSnapshot: varchar('employee_name_ar_snapshot', { length: 255 }),
+    //jobTitleSnapshot: varchar('job_title_snapshot', { length: 255 }),
+    //jobTitleArSnapshot: varchar('job_title_ar_snapshot', { length: 255 }),
+    //departmentSnapshot: varchar('department_snapshot', { length: 255 }),
+    //departmentArSnapshot: varchar('department_ar_snapshot', { length: 255 }),
+    //goalsScore: numeric('goals_score'),
+    //competenciesScore: numeric('competencies_score'),
+    goalSectionWeight: numeric('goal_section_weight'), // e.g. 0.5 or 0.4 or 0.7
+    competencySectionWeight: numeric('competency_section_weight'), // 0.5 or 0.6 or 0.3
+    finalScore: numeric('final_score'),
+    overallRating: appraisalRatingEnum('overall_rating'),
+    status: appraisalStatusEnum('appraisal_status').default('draft').notNull(),
+    //phase: varchar('phase', { length: 50 })
+    //  .notNull()
+    //  .$type<'planning' | 'evaluation'>()
+    //  .default('planning'),
 
-  strengths: jsonb('strengths').$type<string[]>(),
-  developmentAreas: jsonb('development_areas').$type<string[]>(),
-  comments: text('comments'),
-  //pip: jsonb('pip'),
+    strengths: jsonb('strengths').$type<string[]>(),
+    developmentAreas: jsonb('development_areas').$type<string[]>(),
+    comments: text('comments'),
+    //pip: jsonb('pip'),
 
-  // 🟢 PLANNING SIGNATURES
-  planningSubmittedAt: timestamp('planning_submitted_at'),
-  planningSubmittedBy: uuid('planning_submitted_by'),
+    // 🟢 PLANNING SIGNATURES
+    planningSubmittedAt: timestamp('planning_submitted_at'),
+    planningSubmittedBy: uuid('planning_submitted_by'),
 
-  //acknowledgedAt: timestamp('acknowledged_at'),
-  //acknowledgedBy: uuid('acknowledged_by'),
+    //acknowledgedAt: timestamp('acknowledged_at'),
+    //acknowledgedBy: uuid('acknowledged_by'),
 
-  planningAcknowledgedAt: timestamp('planning_acknowledged_at'),
-  planningAcknowledgedBy: uuid('planning_acknowledged_by'),
+    planningAcknowledgedAt: timestamp('planning_acknowledged_at'),
+    planningAcknowledgedBy: uuid('planning_acknowledged_by'),
 
-  // 🔵 FINAL SIGNATURES
-  finalSubmittedAt: timestamp('final_submitted_at'),
-  finalSubmittedBy: uuid('final_submitted_by'),
+    // 🔵 FINAL SIGNATURES
+    finalSubmittedAt: timestamp('final_submitted_at'),
+    finalSubmittedBy: uuid('final_submitted_by'),
 
-  finalAcknowledgedAt: timestamp('final_acknowledged_at'),
-  finalAcknowledgedBy: uuid('final_acknowledged_by'),
+    finalAcknowledgedAt: timestamp('final_acknowledged_at'),
+    finalAcknowledgedBy: uuid('final_acknowledged_by'),
 
-  // 🟣 HR
-  hrApprovedAt: timestamp('hr_approved_at'),
-  hrApprovedBy: uuid('hr_approved_by'),
+    // 🟣 HR
+    hrApprovedAt: timestamp('hr_approved_at'),
+    hrApprovedBy: uuid('hr_approved_by'),
 
-  // OPTIONAL
-  isRejected: boolean('is_rejected').default(false),
-  rejectionReason: text('rejection_reason'),
+    // OPTIONAL
+    isRejected: boolean('is_rejected').notNull().default(false),
+    rejectionReason: text('rejection_reason'),
 
-  calibratedAt: timestamp('calibrated_at'),
-  calibratedBy: uuid('calibrated_by'),
+    calibratedAt: timestamp('calibrated_at'),
+    calibratedBy: uuid('calibrated_by'),
 
-  managerSignedAt: timestamp('manager_signed_at'),
-  managerSignedBy: uuid('manager_signed_by'),
+    managerSignedAt: timestamp('manager_signed_at'),
+    managerSignedBy: uuid('manager_signed_by'),
 
-  employeeSignedAt: timestamp('employee_signed_at'),
-  employeeSignedBy: uuid('employee_signed_by'),
+    employeeSignedAt: timestamp('employee_signed_at'),
+    employeeSignedBy: uuid('employee_signed_by'),
 
-  aiGenerated: boolean('ai_generated').default(false),
+    aiGenerated: boolean('ai_generated').notNull().default(false),
 
-  ...baseColumns,
-})
+    ...baseColumns,
+  },
+  (table) => ({
+    uniqueEmployeeCycle: uniqueIndex('ux_employee_appraisal_employee_cycle')
+      .on(table.employeeId, table.cycleId)
+      .where(sql`${table.deletedAt} IS NULL`),
+  }),
+)
 
 export const appraisalOutcomes = pgTable('appraisal_outcomes', {
   id: uuid('id').defaultRandom().primaryKey(),
 
-  appraisalId: uuid('appraisal_id').references(() => employeeAppraisals.id),
+  appraisalId: uuid('appraisal_id')
+    .notNull()
+    .references(() => employeeAppraisals.id, { onDelete: 'cascade' }),
 
   recommendedAction: varchar('recommended_action', { length: 50 }), // promotion, increment
   salaryIncreasePercent: numeric('salary_increase_percent'),
@@ -124,7 +147,7 @@ export const appraisalGoals = pgTable('appraisal_goals', {
   targetOutput: varchar('target_output', { length: 255 }),
 
   // evaluation
-  score: numeric('score'), // 1–5
+  score: integer('score'), // 1–5
   comments: varchar('comments', { length: 500 }),
 
   ...baseColumns,
@@ -146,7 +169,7 @@ export const appraisalCompetencies = pgTable('appraisal_competencies', {
 
   relativeWeight: numeric('relative_weight'), // e.g. 30%
 
-  score: numeric('score'), // 1–5
+  score: integer('score'), // 1–5
   //comments: varchar('comments', { length: 500 }),
 
   ...baseColumns,
