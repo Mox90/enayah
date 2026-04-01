@@ -29,6 +29,20 @@
       "when": 1774987209558,
       "tag": "0003_gifted_reptil",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1775027899323,
+      "tag": "0004_chubby_venus",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1775032001215,
+      "tag": "0005_optimal_rocket_raccoon",
+      "breakpoints": true
     }
   ]
 }

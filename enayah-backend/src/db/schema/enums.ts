@@ -34,3 +34,15 @@ export const employmentStatusEnum = pgEnum('employment_status', [
   'transferred',
   'on_leave',
 ])
+
+export const appraisalStatusEnum = pgEnum('appraisal_status', [
+  'draft',
+  'planning_submitted',
+  'planning_acknowledged',
+  'evaluation_in_progress',
+  'submitted',
+  'manager_review',
+  'hr_review',
+  'calibrated',
+  'closed',
+])
