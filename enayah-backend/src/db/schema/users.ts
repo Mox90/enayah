@@ -6,9 +6,11 @@ import {
   uuid,
   varchar,
   uniqueIndex,
+  index,
 } from 'drizzle-orm/pg-core'
 import { baseColumns } from './base'
 import { authProviderEnum } from './enums'
+import { employees } from './employees'
 //import { roleEnum, authProviderEnum } from './enums'
 
 export const users = pgTable(
@@ -39,21 +41,37 @@ export const users = pgTable(
       .default(false)
       .notNull(),
 
-    employeeId: uuid('employee_id'),
-    /* .notNull()
+    employeeId: uuid('employee_id')
+      .notNull()
       .references(() => employees.id, {
         onDelete: 'restrict',
-      }),*/
+      }),
 
     ...baseColumns,
   },
-  /*(table) => {
+  (table) => {
     return {
       emailIdx: uniqueIndex('users_email_unique').on(table.email),
       usernameIdx: uniqueIndex('users_username_unique').on(table.username),
-      employeeIdx: uniqueIndex('users_employee_unique').on(
-        table.employeeId
-      ),
+      employeeIdx: uniqueIndex('users_employee_unique').on(table.employeeId),
     }
-  }*/
+  },
+)
+
+export const passwordHistory = pgTable(
+  'password_history',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    passwordHash: varchar('password_hash', { length: 255 }).notNull(),
+
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdx: index('password_history_user_idx').on(table.userId), // ✅ CRITICAL
+  }),
 )
