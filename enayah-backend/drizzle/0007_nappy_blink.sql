@@ -1,0 +1,1 @@
+CREATE INDEX "password_history_user_idx" ON "password_history" USING btree ("user_id");

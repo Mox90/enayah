@@ -6,10 +6,10 @@ export const permissions = pgTable('permissions', {
   name: varchar('name', { length: 100 }).notNull().unique(),
   ...baseColumns,
   // examples:
-  // create_employee
-  // view_employee
-  // update_employee
-  // delete_employee
+  // create:employee
+  // view:employee
+  // update:employee
+  // delete:employee
 })
 
 /*

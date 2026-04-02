@@ -6,6 +6,7 @@ import {
   uuid,
   varchar,
   uniqueIndex,
+  index,
 } from 'drizzle-orm/pg-core'
 import { baseColumns } from './base'
 import { authProviderEnum } from './enums'
@@ -57,14 +58,20 @@ export const users = pgTable(
   },
 )
 
-export const passwordHistory = pgTable('password_history', {
-  id: uuid('id').defaultRandom().primaryKey(),
+export const passwordHistory = pgTable(
+  'password_history',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
 
-  userId: uuid('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
 
-  passwordHash: varchar('password_hash', { length: 255 }).notNull(),
+    passwordHash: varchar('password_hash', { length: 255 }).notNull(),
 
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-})
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => ({
+    userIdx: index('password_history_user_idx').on(table.userId), // ✅ CRITICAL
+  }),
+)
