@@ -43,6 +43,13 @@
       "when": 1775032001215,
       "tag": "0005_optimal_rocket_raccoon",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1775142756350,
+      "tag": "0006_nebulous_lyja",
+      "breakpoints": true
     }
   ]
 }

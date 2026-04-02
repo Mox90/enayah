@@ -1,8 +1,15 @@
 import { pgTable, uuid, varchar } from 'drizzle-orm/pg-core'
+import { baseColumns } from './base'
 
 export const permissions = pgTable('permissions', {
   id: uuid('id').defaultRandom().primaryKey(),
   name: varchar('name', { length: 100 }).notNull().unique(),
+  ...baseColumns,
+  // examples:
+  // create_employee
+  // view_employee
+  // update_employee
+  // delete_employee
 })
 
 /*
