@@ -51,14 +51,14 @@ export const AuthService = {
     const user = await findUserByUsername(username)
 
     if (!user || !user.passwordHash) {
-      await loginLimiter.consume(ip) // Consume a point for this username
+      //await loginLimiter.consume(ip) // Consume a point for this username
       throw new AppError('Invalid credentials', 401)
     }
 
     const isValid = await comparePassword(password, user.passwordHash)
 
     if (!isValid) {
-      await loginLimiter.consume(ip) // Consume a point for this username
+      //await loginLimiter.consume(ip) // Consume a point for this username
       throw new AppError('Invalid credentials', 401)
     }
 
@@ -66,7 +66,12 @@ export const AuthService = {
       throw new AppError('Account disabled', 403)
     }
 
-    await loginLimiter.delete(ip) // Reset rate limiter on successful login
+    try {
+      await loginLimiter.delete(ip) // Reset rate limiter on successful login
+    } catch (err) {
+      // best-effort cleanup; auth success should not depend on Redis availability
+      console.warn('loginLimiter.delete failed', err)
+    }
 
     const roles = await getRoles(user.id)
     const roleIds = roles.map((r: any) => r.roleId)

@@ -51,7 +51,7 @@ export const UserRoleController = {
       const validated = req.validated
 
       if (!validated?.params) {
-        throw new AppError('Validation middleware missing', 401)
+        throw new AppError('Validation middleware missing', 500)
       }
       const { userId, roleId } = validated.params
 

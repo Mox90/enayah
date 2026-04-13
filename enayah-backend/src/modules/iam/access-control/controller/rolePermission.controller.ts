@@ -42,7 +42,7 @@ export const RolePermissionController = {
       const validated = req.validated
 
       if (!validated?.params) {
-        throw new AppError('Validation middleware missing', 401)
+        throw new AppError('Validation middleware missing', 500)
       }
 
       const { roleId } = validated.params
