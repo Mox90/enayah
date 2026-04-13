@@ -13,6 +13,7 @@ import {
 } from '../repository/auth.repository'
 import { AppError } from '../../../../core/errors/AppError'
 import { toAuthResponse } from '../dto/auth.mapper'
+import { loginLimiter } from '../../../../core/security/rateLimiter'
 
 export const AuthService = {
   signup: async (data: any) => {
@@ -46,21 +47,30 @@ export const AuthService = {
     return toAuthResponse(user)
   },
 
-  login: async (username: string, password: string) => {
+  login: async (username: string, password: string, ip: string) => {
     const user = await findUserByUsername(username)
 
     if (!user || !user.passwordHash) {
+      //await loginLimiter.consume(ip) // Consume a point for this username
       throw new AppError('Invalid credentials', 401)
     }
 
     const isValid = await comparePassword(password, user.passwordHash)
 
     if (!isValid) {
+      //await loginLimiter.consume(ip) // Consume a point for this username
       throw new AppError('Invalid credentials', 401)
     }
 
     if (!user.isActive) {
       throw new AppError('Account disabled', 403)
+    }
+
+    try {
+      await loginLimiter.delete(ip) // Reset rate limiter on successful login
+    } catch (err) {
+      // best-effort cleanup; auth success should not depend on Redis availability
+      console.warn('loginLimiter.delete failed', err)
     }
 
     const roles = await getRoles(user.id)
