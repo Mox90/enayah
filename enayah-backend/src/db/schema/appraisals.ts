@@ -48,24 +48,11 @@ export const employeeAppraisals = pgTable(
       .notNull()
       .references(() => appraisalCycles.id, { onDelete: 'restrict' }),
     appraiserId: uuid('appraiser_id').references(() => employees.id),
-    //employeeNumberSnapshot: varchar('employee_number_snapshot', { length: 50 }),
-    //employeeNameSnapshot: varchar('employee_name_snapshot', { length: 255 }),
-    //employeeNameArSnapshot: varchar('employee_name_ar_snapshot', { length: 255 }),
-    //jobTitleSnapshot: varchar('job_title_snapshot', { length: 255 }),
-    //jobTitleArSnapshot: varchar('job_title_ar_snapshot', { length: 255 }),
-    //departmentSnapshot: varchar('department_snapshot', { length: 255 }),
-    //departmentArSnapshot: varchar('department_ar_snapshot', { length: 255 }),
-    //goalsScore: numeric('goals_score'),
-    //competenciesScore: numeric('competencies_score'),
     goalSectionWeight: numeric('goal_section_weight'), // e.g. 0.5 or 0.4 or 0.7
     competencySectionWeight: numeric('competency_section_weight'), // 0.5 or 0.6 or 0.3
     finalScore: numeric('final_score'),
     overallRating: appraisalRatingEnum('overall_rating'),
     status: appraisalStatusEnum('appraisal_status').default('draft').notNull(),
-    //phase: varchar('phase', { length: 50 })
-    //  .notNull()
-    //  .$type<'planning' | 'evaluation'>()
-    //  .default('planning'),
 
     strengths: jsonb('strengths').$type<string[]>(),
     developmentAreas: jsonb('development_areas').$type<string[]>(),

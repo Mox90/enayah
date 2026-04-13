@@ -3,26 +3,34 @@ services:
     image: postgres:15
     container_name: enayah-postgres
     restart: always
-    env_file:
-      - .env
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: enayah_db
     ports:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     build: ./enayah-backend
     container_name: enayah-backend
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
-      - '3000:3000'
+      - '4000:4000'
     env_file:
-      - .env
+      - ./enayah-backend/.env
     volumes:
       - ./enayah-backend:/app
       - /app/node_modules
-    command: npm run dev
+    command: sh -c "npm install && npm run dev"
 
 volumes:
   postgres_data:

@@ -2,6 +2,7 @@ import { date, index, pgTable, uuid, varchar } from 'drizzle-orm/pg-core'
 import { employees } from './employees'
 import { baseColumns } from './base'
 import { employmentStatusEnum, employmentTypeEnum } from './enums'
+import { positionItems } from './positionItems'
 
 export const employments = pgTable(
   'employments',
@@ -11,6 +12,10 @@ export const employments = pgTable(
     employeeId: uuid('employee_id')
       .notNull()
       .references(() => employees.id, { onDelete: 'cascade' }),
+    //itemNumber: varchar('item_number', { length: 50 }),
+    positionItemId: uuid('position_item_id')
+      .notNull()
+      .references(() => positionItems.id, { onDelete: 'restrict' }),
 
     hireDate: date('hire_date').notNull(),
     startDate: date('start_date').notNull(),
