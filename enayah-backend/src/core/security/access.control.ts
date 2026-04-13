@@ -21,6 +21,7 @@ export const canAccessEmployee = async ({
   // SAME DEPARTMENT
   const sameDept = currentUser.roles.some(
     (r) =>
+      r.isActive &&
       r.scope === 'department' &&
       r.departmentId === targetEmployee.departmentId,
   )

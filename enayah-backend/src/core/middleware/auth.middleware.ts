@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { NextFunction, Request, Response } from 'express'
+import { NextFunction, Request, RequestHandler, Response } from 'express'
 import { roles } from '../../db'
 import { AppError } from '../errors/AppError'
 import { env } from '../../config/env'
@@ -7,6 +7,7 @@ import {
   AppJwtPayload,
   jwtPayloadSchema,
 } from '../../modules/iam/auth/types/auth.types'
+import { loginLimiter } from '../security/rateLimiter'
 
 export const requireAuth = (
   req: Request,
@@ -58,5 +59,18 @@ export const requireAuth = (
     next()
   } catch (error) {
     next(error)
+  }
+}
+
+export const rateLimitLogin = async (
+  req: any,
+  res: any,
+  next: NextFunction,
+) => {
+  try {
+    await loginLimiter.consume(req.ip)
+    next()
+  } catch {
+    throw new AppError('Too many login attempts', 429)
   }
 }

@@ -1,10 +1,10 @@
-import { eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { db, permissions, rolePermissions, userRoles } from '../../../../db'
 
 export const PermissionRepository = {
   findPermissionsByUserId: async (userId: string) => {
     const roles = await db.query.userRoles.findMany({
-      where: eq(userRoles.userId, userId),
+      where: and(eq(userRoles.userId, userId), eq(userRoles.isActive, true)),
     })
 
     const roleIds = roles.map((r) => r.roleId)

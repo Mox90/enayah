@@ -11,6 +11,28 @@ import { validatePositionItemAssignment } from '../validators/positionItem.valid
 type EmploymentInsert = InferInsertModel<typeof employments>
 
 export const PositionItemService = {
+  assignEmployee: async (positionItemId: string, employeeId: string) => {
+    const today = new Date().toISOString().split('T')[0]!
+
+    return db.transaction(async (tx) => {
+      // 🔥 1. atomic check + update
+      const item = await PositionItemRepository.assignIfAvailable(
+        positionItemId,
+        tx as any, // pass transaction
+      )
+
+      // 🔥 2. insert employment
+      await tx.insert(employments).values({
+        employeeId,
+        positionItemId,
+        hireDate: today,
+        startDate: today,
+      })
+
+      return { message: 'Employee assigned successfully' }
+    })
+  },
+
   create: async (data: any) => {
     const [positionItem] = await await PositionItemRepository.create(
       toPositionItemDB(data),
@@ -37,22 +59,6 @@ export const PositionItemService = {
       toPositionItemDB(data),
     )
     return toPositionItemResponse(updatedPositionItem)
-  },
-
-  assignEmployee: async (positionItemId: string, employeeId: string) => {
-    await validatePositionItemAssignment(positionItemId)
-    const today = new Date().toISOString().split('T')[0]!
-
-    const data: EmploymentInsert = {
-      employeeId,
-      positionItemId,
-      hireDate: today,
-      startDate: today,
-    }
-    await db.insert(employments).values(data)
-    await PositionItemRepository.updateStatus(positionItemId, 'filled')
-
-    return { message: 'Employee assigned successfully' }
   },
 
   unassignedEmployee: async (positionItemId: string) => {

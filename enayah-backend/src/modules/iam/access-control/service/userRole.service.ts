@@ -9,7 +9,9 @@ export const UserRoleService = {
       throw new AppError('User already has this role assigned', 409)
     }
 
-    await UserRoleRepository.create(userId, roleId)
+    const result = await UserRoleRepository.create(userId, roleId)
+
+    if (!result) throw new AppError('User already has this role', 409)
 
     PermissionCache.invalidate(userId)
 

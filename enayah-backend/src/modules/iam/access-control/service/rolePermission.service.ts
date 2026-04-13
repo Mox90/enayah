@@ -18,5 +18,7 @@ export const RolePermissionService = {
 
   removePermission: async (roleId: string, permissionId: string) => {
     await RolePermissionRepository.delete(roleId, permissionId)
+
+    PermissionCache.clearAll()
   },
 }

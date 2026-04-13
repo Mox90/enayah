@@ -1,7 +1,27 @@
-import { eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { db, positionItems } from '../../../../db'
+import { AppError } from '../../../../core/errors/AppError'
 
 export const PositionItemRepository = {
+  assignIfAvailable: async (id: string, tx = db) => {
+    const result = await tx
+      .update(positionItems)
+      .set({ status: 'filled' })
+      .where(
+        and(
+          eq(positionItems.id, id),
+          inArray(positionItems.status, ['vacant']), // or 'open'
+        ),
+      )
+      .returning()
+
+    if (result.length === 0) {
+      throw new AppError('Position not available', 400)
+    }
+
+    return result[0]
+  },
+
   create: (data: any) => {
     return db.insert(positionItems).values(data).returning()
   },
@@ -11,7 +31,10 @@ export const PositionItemRepository = {
   },
 
   findById: (id: string) => {
-    return db.select().from(positionItems).where(eq(positionItems.id, id))
+    //return db.select().from(positionItems).where(eq(positionItems.id, id))
+    return db.query.positionItems.findFirst({
+      where: eq(positionItems.id, id),
+    })
   },
 
   update: (id: string, data: any) => {

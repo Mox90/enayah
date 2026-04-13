@@ -10,7 +10,7 @@ export const UserRoleRepository = {
         userId,
         roleId,
       })
-      .returning()
+      .onConflictDoNothing()
   },
 
   exists: async (userId: string, roleId: string) => {

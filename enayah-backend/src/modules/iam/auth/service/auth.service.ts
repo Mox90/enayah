@@ -12,6 +12,7 @@ import {
   getPermissionsByRoleIds,
 } from '../repository/auth.repository'
 import { AppError } from '../../../../core/errors/AppError'
+import { toAuthResponse } from '../dto/auth.mapper'
 
 export const AuthService = {
   signup: async (data: any) => {
@@ -41,7 +42,8 @@ export const AuthService = {
       throw new AppError('User creation failed', 500)
     }
 
-    return user
+    //return user
+    return toAuthResponse(user)
   },
 
   login: async (username: string, password: string) => {
