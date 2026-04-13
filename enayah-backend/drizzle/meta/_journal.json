@@ -57,6 +57,41 @@
       "when": 1775145814150,
       "tag": "0007_nappy_blink",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1775152858470,
+      "tag": "0008_motionless_rattler",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1775162355017,
+      "tag": "0009_even_dragon_lord",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1775397361488,
+      "tag": "0010_nosy_manta",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1775499609289,
+      "tag": "0011_sticky_living_tribunal",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1775501219391,
+      "tag": "0012_outgoing_wong",
+      "breakpoints": true
     }
   ]
 }

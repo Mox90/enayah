@@ -16,4 +16,9 @@ export const db = drizzle(pool, {
   logger: env.NODE_ENV !== 'production',
 })
 
+// 🔥 NEW FUNCTION
+export const setDbContext = async (userId: string, employeeId: string) => {
+  await pool.query(`SELECT set_app_context($1, $2)`, [userId, employeeId])
+}
+
 export { pool }
