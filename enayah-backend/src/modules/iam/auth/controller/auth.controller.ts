@@ -2,21 +2,23 @@ import { NextFunction, Request, Response } from 'express'
 import { sign } from 'node:crypto'
 import { loginSchema, signupSchema } from '../dto/auth.request'
 import { AuthService } from '../service/auth.service'
+import { asyncHandler } from '../../../../core/utils/asyncHandler'
 
 export const AuthController = {
-  signup: async (req: Request, res: Response) => {
+  signup: asyncHandler(async (req: Request, res: Response) => {
     const body = signupSchema.parse(req.body)
 
     const result = await AuthService.signup(body)
     res.status(201).json(result)
-  },
+  }),
 
-  login: async (req: Request, res: Response) => {
+  login: asyncHandler(async (req: Request, res: Response) => {
     const body = loginSchema.parse(req.body)
+    const ip = req.ip ?? 'unknown'
 
-    const result = await AuthService.login(body.username, body.password)
+    const result = await AuthService.login(body.username, body.password, ip)
     res.status(200).json(result)
-  },
+  }),
 }
 
 /*export const signupHandler = async (req: Request, res: Response) => {

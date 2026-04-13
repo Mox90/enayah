@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { NextFunction, Request, RequestHandler, Response } from 'express'
-import { roles } from '../../db'
+import { NextFunction, Request, Response } from 'express'
 import { AppError } from '../errors/AppError'
 import { env } from '../../config/env'
 import {
@@ -8,6 +7,7 @@ import {
   jwtPayloadSchema,
 } from '../../modules/iam/auth/types/auth.types'
 import { loginLimiter } from '../security/rateLimiter'
+import crypto from 'node:crypto'
 
 export const requireAuth = (
   req: Request,
@@ -42,6 +42,10 @@ export const requireAuth = (
       throw new AppError('Unauthorized: Invalid or expired token', 401)
     }
 
+    if (typeof decoded !== 'object' || !decoded) {
+      throw new AppError('Invalid token payload', 401)
+    }
+
     // 🔐 3. Validate payload (ZERO TRUST)
     const payload: AppJwtPayload = jwtPayloadSchema.parse(decoded)
 
@@ -66,8 +70,8 @@ export const requireAuth = (
 }
 
 export const rateLimitLogin = async (
-  req: any,
-  res: any,
+  req: Request,
+  res: Response,
   next: NextFunction,
 ) => {
   try {

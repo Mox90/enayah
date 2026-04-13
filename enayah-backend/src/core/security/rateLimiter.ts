@@ -14,7 +14,11 @@ if (!Number.isInteger(redisPort) || redisPort < 1 || redisPort > 65535) {
 const redis = new Redis({
   host: process.env.REDIS_HOST,
   port: redisPort,
-  // password: process.env.REDIS_PASSWORD,
+  password: process.env.REDIS_PASSWORD,
+})
+
+redis.on('error', (err) => {
+  console.error('Redis error', err)
 })
 
 export const loginLimiter = new RateLimiterRedis({

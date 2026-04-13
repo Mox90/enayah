@@ -13,6 +13,7 @@ import {
   users,
 } from '../../../../db/schema'
 import { and, eq, inArray, isNull, or } from 'drizzle-orm'
+import e from 'express'
 
 export const findUserByEmail = (email: string) =>
   db.query.users.findFirst({
@@ -44,7 +45,12 @@ export const createUserWithRole = async (data: {
     try {
       console.log('🔥 Creating user with:', data)
 
-      const [user] = await tx.insert(users).values(data).returning()
+      const [user] = await tx.insert(users).values(data).returning({
+        id: users.id,
+        email: users.email,
+        username: users.username,
+        employeeId: users.employeeId,
+      })
 
       console.log('✅ User created:', user)
 
@@ -88,7 +94,7 @@ export const getPermissionsByRoleIds = async (roleIds: string[]) => {
 export const getRoles = async (userId: string) => {
   return db.transaction(async (tx) => {
     const roles = await tx.query.userRoles.findMany({
-      where: eq(userRoles.userId, userId),
+      where: and(eq(userRoles.userId, userId), eq(userRoles.isActive, true)),
     })
 
     return roles
