@@ -2,7 +2,8 @@ import { AppError } from '../../../../core/errors/AppError'
 import { PositionItemRepository } from '../repository/positionItem.repository'
 
 export const validatePositionItemAssignment = async (id: string) => {
-  const item = (await PositionItemRepository.findById(id))[0]
+  //const item = (await PositionItemRepository.findById(id))[0]
+  const item = await PositionItemRepository.findById(id)
 
   if (!item) {
     throw new AppError('Position item not found', 404)

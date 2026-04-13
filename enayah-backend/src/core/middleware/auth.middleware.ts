@@ -34,7 +34,10 @@ export const requireAuth = (
     let decoded: unknown
 
     try {
-      decoded = jwt.verify(token, env.JWT_SECRET) as unknown
+      //decoded = jwt.verify(token, env.JWT_SECRET) as unknown
+      decoded = jwt.verify(token, env.JWT_SECRET, {
+        algorithms: ['HS256'],
+      }) as unknown
     } catch (error) {
       throw new AppError('Unauthorized: Invalid or expired token', 401)
     }
@@ -68,9 +71,18 @@ export const rateLimitLogin = async (
   next: NextFunction,
 ) => {
   try {
-    await loginLimiter.consume(req.ip)
+    //await loginLimiter.consume(req.ip)
+    const key = req.ip || req.socket.remoteAddress || 'unknown'
+    await loginLimiter.consume(key)
     next()
-  } catch {
-    throw new AppError('Too many login attempts', 429)
+  } catch (error) {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'msBeforeNext' in error
+    ) {
+      return next(new AppError('Too many login attempts', 429))
+    }
+    return next(error)
   }
 }

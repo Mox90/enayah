@@ -1,10 +1,20 @@
 import Redis from 'ioredis'
 import { RateLimiterRedis } from 'rate-limiter-flexible'
 
+//const redis = new Redis({
+//  host: process.env.REDIS_HOST,
+//  port: parseInt(process.env.REDIS_PORT || '6379'),
+//password: process.env.REDIS_PASSWORD,
+//})
+const redisPort = Number(process.env.REDIS_PORT ?? '6379')
+if (!Number.isInteger(redisPort) || redisPort < 1 || redisPort > 65535) {
+  throw new Error('Invalid REDIS_PORT: expected an integer between 1 and 65535')
+}
+
 const redis = new Redis({
   host: process.env.REDIS_HOST,
-  port: parseInt(process.env.REDIS_PORT || '6379'),
-  //password: process.env.REDIS_PASSWORD,
+  port: redisPort,
+  // password: process.env.REDIS_PASSWORD,
 })
 
 export const loginLimiter = new RateLimiterRedis({

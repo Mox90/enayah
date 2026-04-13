@@ -6,7 +6,7 @@ export const PositionItemRepository = {
   assignIfAvailable: async (id: string, tx = db) => {
     const result = await tx
       .update(positionItems)
-      .set({ status: 'filled' })
+      .set({ status: 'filled', updatedAt: new Date() }) // Update the status to 'filled' and set the updatedAt field
       .where(
         and(
           eq(positionItems.id, id),
@@ -38,12 +38,23 @@ export const PositionItemRepository = {
   },
 
   update: (id: string, data: any) => {
-    data.updatedAt = new Date() // Update the updatedAt field to the current date and time
-    data.version = (data.version || 0) + 1 // Increment the version number for optimistic locking
+    //    data.updatedAt = new Date() // Update the updatedAt field to the current date and time
+    //    data.version = (data.version || 0) + 1 // Increment the version number for optimistic locking
+    const now = new Date()
+    const currentVersion = data.version
+    if (typeof currentVersion !== 'number') {
+      throw new AppError('Version is required for update', 409)
+    }
+
     return db
       .update(positionItems)
-      .set(data)
-      .where(eq(positionItems.id, id))
+      .set({ ...data, updatedAt: now, version: currentVersion + 1 }) // Update the fields along with updatedAt and version
+      .where(
+        and(
+          eq(positionItems.id, id),
+          eq(positionItems.version, currentVersion),
+        ),
+      ) // Ensure the version matches for optimistic locking
       .returning()
   },
 
