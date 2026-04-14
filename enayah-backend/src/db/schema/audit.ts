@@ -1,4 +1,11 @@
-import { pgTable, uuid, varchar, timestamp, jsonb } from 'drizzle-orm/pg-core'
+import {
+  pgTable,
+  uuid,
+  varchar,
+  timestamp,
+  jsonb,
+  text,
+} from 'drizzle-orm/pg-core'
 
 export const auditLogs = pgTable('audit_logs', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -12,7 +19,9 @@ export const auditLogs = pgTable('audit_logs', {
   metadata: jsonb('metadata'),
 
   ip: varchar('ip', { length: 45 }),
-  userAgent: varchar('user_agent', { length: 255 }),
+  userAgent: text('user_agent'),
 
-  createdAt: timestamp('created_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true })
+    .defaultNow()
+    .notNull(),
 })

@@ -27,8 +27,8 @@ router.post(
   requirePermission('role.assign'),
   validate({ params: userParamsSchema, body: assignRoleSchema }),
   audit('ASSIGN_ROLE_TO_USER', 'USER_ROLE', (req) =>
-    typeof req.params.roleId === 'string'
-      ? `${req.params.roleId}:${req.params.permissionId}`
+    typeof req.params.userId === 'string' && typeof req.body.roleId === 'string'
+      ? `${req.params.userId}:${req.body.roleId}`
       : undefined,
   ),
   UserRoleController.assignRoleToUser,
@@ -40,9 +40,7 @@ router.get(
   requirePermission('role.view'),
   validate({ params: userParamsSchema }),
   audit('VIEW_USER_ROLES', 'USER_ROLE', (req) =>
-    typeof req.params.roleId === 'string'
-      ? `${req.params.roleId}:${req.params.permissionId}`
-      : undefined,
+    typeof req.params.userId === 'string' ? `${req.params.userId}` : undefined,
   ),
   UserRoleController.getUserRoles,
 )
@@ -53,8 +51,9 @@ router.delete(
   requirePermission('role.remove'),
   validate({ params: userRoleParamsSchema }),
   audit('REMOVE_ROLE_FROM_USER', 'USER_ROLE', (req) =>
+    typeof req.params.userId === 'string' &&
     typeof req.params.roleId === 'string'
-      ? `${req.params.roleId}:${req.params.permissionId}`
+      ? `${req.params.userId}:${req.params.roleId}`
       : undefined,
   ),
   UserRoleController.removeRoleFromUser,

@@ -7,5 +7,5 @@ export interface AuditResponseDTO {
   metadata?: any
   ip?: string
   userAgent?: string
-  createdAt: Date
+  createdAt: string
 }

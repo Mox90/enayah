@@ -27,8 +27,9 @@ router.post(
   requirePermission('permission.assign'),
   validate({ params: roleParamsSchema, body: assignPermissionSchema }),
   audit('ASSIGN_PERMISSION_TO_ROLE', 'ROLE_PERMISSION', (req) =>
-    typeof req.params.roleId === 'string'
-      ? `${req.params.roleId}:${req.params.permissionId}`
+    typeof req.params.roleId === 'string' &&
+    typeof req.body.permissionId === 'string'
+      ? `${req.params.roleId}:${req.body.permissionId}` /*`${req.params.roleId}:${req.params.permissionId}`*/
       : undefined,
   ),
   RolePermissionController.assign,
@@ -40,8 +41,9 @@ router.get(
   requirePermission('permission.view'),
   validate({ params: roleParamsSchema }),
   audit('ASSIGN_PERMISSION_TO_ROLE', 'ROLE_PERMISSION', (req) =>
-    typeof req.params.roleId === 'string'
-      ? `${req.params.roleId}:${req.params.permissionId}`
+    typeof req.params.roleId === 'string' &&
+    typeof req.body.permissionId === 'string'
+      ? `${req.params.roleId}:${req.body.permissionId}` /*`${req.params.roleId}:${req.params.permissionId}`*/
       : undefined,
   ),
   RolePermissionController.getRolePermissions,
@@ -53,8 +55,9 @@ router.delete(
   requirePermission('permission.remove'),
   validate({ params: rolePermissionParamsSchema }),
   audit('ASSIGN_PERMISSION_TO_ROLE', 'ROLE_PERMISSION', (req) =>
-    typeof req.params.roleId === 'string'
-      ? `${req.params.roleId}:${req.params.permissionId}`
+    typeof req.params.roleId === 'string' &&
+    typeof req.body.permissionId === 'string'
+      ? `${req.params.roleId}:${req.body.permissionId}` /*`${req.params.roleId}:${req.params.permissionId}`*/
       : undefined,
   ),
   RolePermissionController.remove,

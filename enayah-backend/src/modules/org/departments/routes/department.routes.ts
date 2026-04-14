@@ -31,7 +31,7 @@ router.get('/:id', DepartmentController.findById)
 router.put(
   '/:id',
   requirePermission('department.update'),
-  audit('DELETE_DEPARTMENT', 'DEPARTMENT', (req) =>
+  audit('UPDATE_DEPARTMENT', 'DEPARTMENT', (req) =>
     typeof req.params.id === 'string' ? req.params.id : undefined,
   ),
   DepartmentController.update,

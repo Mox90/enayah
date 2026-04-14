@@ -14,7 +14,7 @@ export const audit =
       void (async () => {
         try {
           // 🔥 dynamic + fallback
-          const resourceId =
+          /*const resourceId =
             getResourceId?.(req) ??
             (typeof req.params?.id === 'string'
               ? req.params.id
@@ -24,7 +24,16 @@ export const audit =
                   ? req.params.roleId
                   : typeof req.params?.permissionId === 'string'
                     ? req.params.permissionId
-                    : undefined)
+                    : undefined)*/
+          const resourceId =
+            getResourceId?.(req) ??
+            (typeof req.params?.id === 'string' ? req.params.id : undefined)
+
+          if (!resourceId && process.env.NODE_ENV !== 'production') {
+            console.warn(
+              `[AUDIT WARNING] Missing resourceId for action "${action}" on ${req.originalUrl}`,
+            )
+          }
 
           await auditLogger.log({
             action,
