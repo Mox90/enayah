@@ -6,6 +6,7 @@ import {
   attachPermissions,
   requirePermission,
 } from '../../../../core/middleware/permission.middleware'
+import { audit } from '../../../../core/middleware/audit.middleware'
 
 const router = Router()
 
@@ -18,6 +19,7 @@ router.get('/tree', DepartmentController.findTree) // Static route must always c
 router.post(
   '/',
   requirePermission('department.create'),
+  audit('ADD_DEPARTMENT', 'DEPARTMENT'),
   DepartmentController.create,
 )
 
@@ -29,6 +31,9 @@ router.get('/:id', DepartmentController.findById)
 router.put(
   '/:id',
   requirePermission('department.update'),
+  audit('DELETE_DEPARTMENT', 'DEPARTMENT', (req) =>
+    typeof req.params.id === 'string' ? req.params.id : undefined,
+  ),
   DepartmentController.update,
 )
 
@@ -36,6 +41,11 @@ router.put(
 router.delete(
   '/:id',
   requirePermission('department.delete'),
+  audit('DELETE_DEPARTMENT', 'DEPARTMENT', (req) =>
+    typeof req.params.roleId === 'string'
+      ? `${req.params.roleId}:${req.params.permissionId}`
+      : undefined,
+  ),
   DepartmentController.delete,
 )
 

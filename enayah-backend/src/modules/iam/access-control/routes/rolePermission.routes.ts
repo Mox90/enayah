@@ -8,6 +8,7 @@ import {
   roleParamsSchema,
   rolePermissionParamsSchema,
 } from '../dto/rolePermission.request'
+import { audit } from '../../../../core/middleware/audit.middleware'
 
 const router = Router()
 /*
@@ -21,19 +22,15 @@ router.post(
 router.use(requireAuth)
 
 // ✅ Assign permissions
-/*router.post(
-  '/roles/:roleId/permissions',
-  requirePermission('permission.assign'),
-  validate({
-    params: roleParamsSchema,
-    body: assignPermissionSchema,
-  }),
-  RolePermissionController.assign,
-)*/
 router.post(
   '/roles/:roleId/permissions',
   requirePermission('permission.assign'),
   validate({ params: roleParamsSchema, body: assignPermissionSchema }),
+  audit('ASSIGN_PERMISSION_TO_ROLE', 'ROLE_PERMISSION', (req) =>
+    typeof req.params.roleId === 'string'
+      ? `${req.params.roleId}:${req.params.permissionId}`
+      : undefined,
+  ),
   RolePermissionController.assign,
 )
 
@@ -42,6 +39,11 @@ router.get(
   '/roles/:roleId/permissions',
   requirePermission('permission.view'),
   validate({ params: roleParamsSchema }),
+  audit('ASSIGN_PERMISSION_TO_ROLE', 'ROLE_PERMISSION', (req) =>
+    typeof req.params.roleId === 'string'
+      ? `${req.params.roleId}:${req.params.permissionId}`
+      : undefined,
+  ),
   RolePermissionController.getRolePermissions,
 )
 
@@ -50,6 +52,11 @@ router.delete(
   '/roles/:roleId/permissions/:permissionId',
   requirePermission('permission.remove'),
   validate({ params: rolePermissionParamsSchema }),
+  audit('ASSIGN_PERMISSION_TO_ROLE', 'ROLE_PERMISSION', (req) =>
+    typeof req.params.roleId === 'string'
+      ? `${req.params.roleId}:${req.params.permissionId}`
+      : undefined,
+  ),
   RolePermissionController.remove,
 )
 
