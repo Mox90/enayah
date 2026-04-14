@@ -23,7 +23,7 @@ router.get('/', (_req, res) => {
 router.get('/health', (req, res) => {
   res.json({
     status: 'ok',
-    message: 'Enayah backend running',
+    message: 'Enayah backend running...',
   })
 })
 

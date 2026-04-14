@@ -7,7 +7,7 @@ export const RolePermissionService = {
   assignPermissions: async (roleId: string, permissionIds: string[]) => {
     await RolePermissionRepository.bulkInsert(roleId, permissionIds)
 
-    PermissionCache.clearAll()
+    await PermissionCache.clearAll()
 
     return { message: 'Permissions assigned to role' }
   },
@@ -19,6 +19,6 @@ export const RolePermissionService = {
   removePermission: async (roleId: string, permissionId: string) => {
     await RolePermissionRepository.delete(roleId, permissionId)
 
-    PermissionCache.clearAll()
+    await PermissionCache.clearAll()
   },
 }

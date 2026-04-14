@@ -13,7 +13,7 @@ export const UserRoleService = {
 
     if (!result) throw new AppError('User already has this role', 409)
 
-    PermissionCache.invalidate(userId)
+    await PermissionCache.invalidate(userId)
 
     return { message: 'Role assigned to user successfully' }
   },
@@ -24,5 +24,6 @@ export const UserRoleService = {
 
   removeRoleFromUser: async (userId: string, roleId: string) => {
     await UserRoleRepository.delete(userId, roleId)
+    await PermissionCache.invalidate(userId)
   },
 }
