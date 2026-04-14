@@ -93,7 +93,7 @@ export const AuthService = {
     */
     const session = await SessionService.createSession(user.id, {
       ip,
-      userAgent: 'unknown',
+      userAgent: userAgent ?? 'unknown',
     })
 
     return {

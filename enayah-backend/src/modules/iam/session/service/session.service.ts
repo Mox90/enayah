@@ -30,7 +30,7 @@ export const SessionService = {
     }
   },
 
-  refreshSession: async (refreshToken: string) => {
+  /*refreshSession: async (refreshToken: string) => {
     const hash = hashToken(refreshToken)
 
     const session = await SessionRepository.findByTokenHash(hash)
@@ -47,9 +47,41 @@ export const SessionService = {
     await SessionRepository.revoke(session.id)
 
     return await SessionService.createSession(session.userId, {
-      ip: session.ip,
-      userAgent: session.userAgent,
+      ip: session.ip ?? '',
+      userAgent: session.userAgent ?? '',
     })
+  },*/
+
+  refreshSession: async (refreshToken: string) => {
+    const hash = hashToken(refreshToken)
+
+    const session = await SessionRepository.findByTokenHash(hash)
+
+    if (!session) {
+      throw new AppError('Invalid session', 401)
+    }
+
+    if (new Date(session.expiresAt) < new Date()) {
+      throw new AppError('Session expired', 401)
+    }
+
+    try {
+      const result = await SessionRepository.rotate(session)
+
+      return {
+        accessToken: generateAccessToken(result.userId),
+        refreshToken: result.refreshToken,
+      }
+    } catch (err: any) {
+      if (err.message === 'TOKEN_ALREADY_USED') {
+        // 🔥 SECURITY: possible replay attack
+        await SessionRepository.revokeAllByUser(session.userId)
+
+        throw new AppError('Session compromised. All sessions revoked.', 401)
+      }
+
+      throw err
+    }
   },
 
   logout: async (refreshToken: string) => {

@@ -4,6 +4,7 @@ import { loginSchema, signupSchema } from '../dto/auth.request'
 import { AuthService } from '../service/auth.service'
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
 import { SessionService } from '../../session/service/session.service'
+import { refreshSchema } from '../../session/dto/session.request'
 
 export const AuthController = {
   signup: asyncHandler(async (req: Request, res: Response) => {
@@ -27,7 +28,8 @@ export const AuthController = {
   }),
 
   refresh: asyncHandler(async (req: Request, res: Response) => {
-    const { refreshToken } = req.body
+    //const { refreshToken } = req.body
+    const { refreshToken } = refreshSchema.parse(req.body)
 
     const result = await SessionService.refreshSession(refreshToken)
 
