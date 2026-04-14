@@ -2,10 +2,7 @@ import jwt from 'jsonwebtoken'
 import { NextFunction, Request, Response } from 'express'
 import { AppError } from '../errors/AppError'
 import { env } from '../../config/env'
-import {
-  AppJwtPayload,
-  jwtPayloadSchema,
-} from '../../modules/iam/auth/types/auth.types'
+import { AppJwtPayload, jwtPayloadSchema } from '../types/auth.types'
 import { loginLimiter } from '../security/rateLimiter'
 import crypto from 'node:crypto'
 
