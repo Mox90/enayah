@@ -28,13 +28,17 @@ export const PermissionCache = {
     if (redis) {
       const cached = await redis.get(getRedisKey(userId))
       if (cached) {
-        const permissions = JSON.parse(cached)
-        memoryCache.set(userId, {
-          permissions,
-          expiresAt: Date.now() + TTL,
-        })
-
-        return permissions
+        try {
+          const permissions = JSON.parse(cached)
+          memoryCache.set(userId, {
+            permissions,
+            expiresAt: Date.now() + TTL,
+          })
+          return permissions
+        } catch {
+          // Corrupted cache entry, treat as cache miss
+          await redis.del(getRedisKey(userId))
+        }
       }
     }
 
@@ -69,10 +73,23 @@ export const PermissionCache = {
     memoryCache.clear()
 
     if (redis) {
-      const keys = await redis.keys('perm:*')
-      if (keys.length) {
-        await redis.del(keys)
-      }
+      //const keys = await redis.keys('perm:*')
+      //if (keys.length) {
+      //  await redis.del(keys)
+      let cursor = '0'
+      do {
+        const [nextCursor, keys] = await redis.scan(
+          cursor,
+          'MATCH',
+          'perm:*',
+          'COUNT',
+          100,
+        )
+        cursor = nextCursor
+        if (keys.length) {
+          await redis.del(...keys)
+        }
+      } while (cursor !== '0')
     }
   },
 }
