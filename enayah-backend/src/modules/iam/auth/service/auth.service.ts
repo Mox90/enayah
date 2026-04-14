@@ -14,6 +14,7 @@ import {
 import { AppError } from '../../../../core/errors/AppError'
 import { toAuthResponse } from '../dto/auth.mapper'
 import { loginLimiter } from '../../../../core/security/rateLimiter'
+import { SessionService } from '../../session/service/session.service'
 
 export const AuthService = {
   signup: async (data: any) => {
@@ -47,7 +48,12 @@ export const AuthService = {
     return toAuthResponse(user)
   },
 
-  login: async (username: string, password: string, ip: string) => {
+  login: async (
+    username: string,
+    password: string,
+    ip: string,
+    userAgent?: string,
+  ) => {
     const user = await findUserByUsername(username)
 
     if (!user || !user.passwordHash) {
@@ -73,10 +79,8 @@ export const AuthService = {
       console.warn('loginLimiter.delete failed', err)
     }
 
-    const roles = await getRoles(user.id)
-    const roleIds = roles.map((r: any) => r.roleId)
-
-    //const permissions = await getPermissionsByRoleIds(roleIds)
+    /*const roles = await getRoles(user.id)
+    /const roleIds = roles.map((r: any) => r.roleId)
 
     const token = generateToken({
       sub: user.id,
@@ -86,5 +90,15 @@ export const AuthService = {
     })
 
     return { token }
+    */
+    const session = await SessionService.createSession(user.id, {
+      ip,
+      userAgent: userAgent ?? 'unknown',
+    })
+
+    return {
+      user: toAuthResponse(user),
+      ...session,
+    }
   },
 }
