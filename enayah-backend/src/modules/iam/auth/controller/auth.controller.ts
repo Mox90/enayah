@@ -3,6 +3,7 @@ import { sign } from 'node:crypto'
 import { loginSchema, signupSchema } from '../dto/auth.request'
 import { AuthService } from '../service/auth.service'
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
+import { SessionService } from '../../session/service/session.service'
 
 export const AuthController = {
   signup: asyncHandler(async (req: Request, res: Response) => {
@@ -16,8 +17,21 @@ export const AuthController = {
     const body = loginSchema.parse(req.body)
     const ip = req.ip ?? 'unknown'
 
-    const result = await AuthService.login(body.username, body.password, ip)
+    const result = await AuthService.login(
+      body.username,
+      body.password,
+      ip,
+      req.headers['user-agent'] ?? 'unknown',
+    )
     res.status(200).json(result)
+  }),
+
+  refresh: asyncHandler(async (req: Request, res: Response) => {
+    const { refreshToken } = req.body
+
+    const result = await SessionService.refreshSession(refreshToken)
+
+    res.json(result)
   }),
 }
 
