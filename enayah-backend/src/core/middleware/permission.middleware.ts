@@ -4,14 +4,15 @@ import { resolvePermissions } from '../security/permissionResolver'
 
 export const requirePermission =
   (...requiredPermissions: string[]) =>
-  (req: Request, res: Response, next: NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user
 
     if (!user) {
       throw new AppError('Unauthorized', 401)
     }
 
-    const permissions: string[] = user.permissions ?? []
+    //const permissions: string[] = user.permissions ?? []
+    const permissions = user.permissions ?? (await resolvePermissions(user.id))
 
     if (permissions.length === 0) {
       throw new AppError('Forbidden: No permissions', 403)
@@ -23,6 +24,10 @@ export const requirePermission =
 
     if (!hasPermission) {
       throw new AppError('Forbidden: Insufficient permissions', 403)
+    }
+
+    if (!user.permissions) {
+      user.permissions = permissions
     }
 
     next()
