@@ -39,6 +39,10 @@ export const AuthController = {
   logout: asyncHandler(async (req: Request, res: Response) => {
     const { refreshToken } = refreshSchema.parse(req.body)
 
+    if (!req.user?.id) {
+      throw new AppError('Unauthorized', 401)
+    }
+
     await SessionService.logout(refreshToken)
 
     res.json({ message: 'Logged out successfully' })

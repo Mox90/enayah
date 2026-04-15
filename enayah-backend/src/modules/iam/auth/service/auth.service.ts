@@ -78,6 +78,7 @@ export const AuthService = {
     try {
       UserSecurityService.checkLock(user)
     } catch (err) {
+      if (!(err instanceof AppError) || err.statusCode !== 403) throw err
       await auditLogger.log({
         userId: user.id,
         action: 'LOGIN_BLOCKED',
@@ -98,8 +99,9 @@ export const AuthService = {
 
       // 🔒 2. HANDLE FAILED ATTEMPT
       try {
-        await UserSecurityService.handleFailedLogin(user)
+        await UserSecurityService.handleFailedLogin(user.id)
       } catch (err) {
+        if (!(err instanceof AppError) || err.statusCode !== 403) throw err
         // 🔥 ACCOUNT LOCKED HERE
         await auditLogger.log({
           userId: user.id,
