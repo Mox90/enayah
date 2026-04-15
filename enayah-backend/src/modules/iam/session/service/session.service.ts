@@ -86,7 +86,6 @@ export const SessionService = {
 
   logout: async (refreshToken: string) => {
     const hash = hashToken(refreshToken)
-
     const session = await SessionRepository.findByTokenHash(hash)
 
     if (session) {
