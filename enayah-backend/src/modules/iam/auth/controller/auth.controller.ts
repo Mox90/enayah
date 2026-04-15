@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express'
-import { sign } from 'node:crypto'
 import { loginSchema, signupSchema } from '../dto/auth.request'
 import { AuthService } from '../service/auth.service'
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
 import { SessionService } from '../../session/service/session.service'
 import { refreshSchema } from '../../session/dto/session.request'
+import { AppError } from '../../../../core/errors/AppError'
 
 export const AuthController = {
   signup: asyncHandler(async (req: Request, res: Response) => {
@@ -34,6 +34,24 @@ export const AuthController = {
     const result = await SessionService.refreshSession(refreshToken)
 
     res.json(result)
+  }),
+
+  logout: asyncHandler(async (req: Request, res: Response) => {
+    const { refreshToken } = refreshSchema.parse(req.body)
+
+    await SessionService.logout(refreshToken)
+
+    res.json({ message: 'Logged out successfully' })
+  }),
+
+  logoutAll: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user?.id) {
+      throw new AppError('Unauthorized', 401)
+    }
+
+    await SessionService.logoutAll(req.user.id)
+
+    res.json({ message: 'Logged out from all devices' })
   }),
 }
 
