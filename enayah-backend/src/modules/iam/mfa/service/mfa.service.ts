@@ -6,9 +6,27 @@ import { MFARepository } from '../repository/mfa.repository'
 
 export const MFAService = {
   setup: async (user: any) => {
-    const secret = TOTP.generateSecret(user.email)
+    const currentUser = await UserRepository.findUserById(user.id)
 
-    await MFARepository.saveSecret(user.id, secret.base32)
+    if (!currentUser) {
+      throw new AppError('User not found', 404)
+    }
+
+    if (!currentUser.isActive) {
+      throw new AppError('Account disabled', 403)
+    }
+
+    if (currentUser.mfaEnabled) {
+      throw new AppError('MFA already enabled', 400)
+    }
+
+    if (!currentUser.email) {
+      throw new AppError('User email is required for MFA setup', 400)
+    }
+
+    const secret = TOTP.generateSecret(currentUser.email)
+
+    await MFARepository.saveSecret(currentUser.id, secret.base32)
 
     const qr = await TOTP.generateQRCode(secret.otpauth_url!)
 
@@ -45,6 +63,14 @@ export const MFAService = {
 
     if (!user) {
       throw new AppError('User not found', 404)
+    }
+
+    if (!user.isActive) {
+      throw new AppError('Account disabled', 403)
+    }
+
+    if (user.mfaEnabled) {
+      throw new AppError('MFA already enabled', 400)
     }
 
     if (!user.mfaSecret) {
@@ -87,6 +113,14 @@ export const MFAService = {
 
     if (!user) throw new AppError('User not found', 404)
 
+    if (!user.isActive) {
+      throw new AppError('Account disabled', 403)
+    }
+
+    if (!user.mfaEnabled) {
+      throw new AppError('MFA not enabled', 400)
+    }
+
     if (!user.mfaSecret) {
       throw new AppError('MFA not configured', 400)
     }
@@ -101,7 +135,21 @@ export const MFAService = {
   },
 
   disable: async (user: any) => {
-    await MFARepository.disableMFA(user.id)
+    const res = await UserRepository.findUserById(user.id)
+
+    if (!res) {
+      throw new AppError('User not found', 404)
+    }
+
+    if (!res.isActive) {
+      throw new AppError('Account disabled', 403)
+    }
+
+    if (!res.mfaEnabled) {
+      throw new AppError('MFA is not enabled', 400)
+    }
+
+    await MFARepository.disableMFA(res.id)
 
     await auditLogger.log({
       userId: user.id,

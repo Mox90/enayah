@@ -19,6 +19,7 @@ import { SessionService } from '../../session/service/session.service'
 import { UserSecurityService } from '../../users/service/userSecurity.service'
 import { auditLogger } from '../../../../core/logging/auditLogger'
 import { MFAService } from '../../mfa/service/mfa.service'
+import { UserRepository } from '../../users/repository/user.repository'
 
 export const AuthService = {
   signup: async (data: any) => {
@@ -146,6 +147,7 @@ export const AuthService = {
     }
 
     if (user.mfaEnabled) {
+      //const challenge = await
       return {
         mfaRequired: true,
         userId: user.id,
@@ -201,12 +203,22 @@ export const AuthService = {
     ip: string,
     userAgent: string,
   ) => {
-    const user = await findUserById(userId)
+    const user = await UserRepository.findUserById(userId) //findUserById(userId)
 
     if (!user) throw new AppError('User not found', 404)
 
     // 🔐 verify OTP
     await MFAService.verifyLogin(user.id, token)
+
+    // 🔒 3. RESET ON SUCCESS
+    await UserSecurityService.handleSuccessfulLogin(user.id)
+
+    try {
+      await loginLimiter.delete(ip) // Reset rate limiter on successful login
+    } catch (err) {
+      // best-effort cleanup; auth success should not depend on Redis availability
+      console.warn('loginLimiter.delete failed', err)
+    }
 
     // 🔑 create session
     const session = await SessionService.createSession(user.id, {

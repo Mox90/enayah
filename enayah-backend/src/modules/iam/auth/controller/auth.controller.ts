@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { loginSchema, signupSchema } from '../dto/auth.request'
+import { loginSchema, signupSchema, verifyMfaSchema } from '../dto/auth.request'
 import { AuthService } from '../service/auth.service'
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
 import { SessionService } from '../../session/service/session.service'
@@ -59,7 +59,7 @@ export const AuthController = {
   }),
 
   verifyMfa: asyncHandler(async (req: Request, res: Response) => {
-    const { userId, token } = req.body
+    const { userId, token } = verifyMfaSchema.parse(req.body)
 
     const result = await AuthService.verifyMfaLogin(
       userId,

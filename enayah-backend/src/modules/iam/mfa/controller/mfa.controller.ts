@@ -5,6 +5,11 @@ import { AuthenticatedRequest } from '../../../../core/types/authenticatedReques
 
 export const MFAController = {
   setup: asyncHandler(async (req: Request, res: Response) => {
+    if (!req.user) {
+      res.status(401).json({ message: 'Unauthorized' })
+      return
+    }
+
     const result = await MFAService.setup(req.user)
     res.json(result)
   }),
@@ -14,7 +19,18 @@ export const MFAController = {
       res.status(401).json({ message: 'Unauthorized' })
       return
     }
-    const { token } = req.body
+
+    const { token, password } = req.body
+
+    // ❌ nothing provided
+    if (!token && !password) {
+      res.status(400).json({
+        message: 'TOTP token or password is required to disable MFA',
+      })
+      return
+    }
+
+    //const { token } = req.body
     const result = await MFAService.verifyAndEnable(req.user.id, token)
     res.json(result)
   }),

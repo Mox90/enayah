@@ -13,7 +13,6 @@ import {
   users,
 } from '../../../../db/schema'
 import { and, eq, inArray, isNull, or } from 'drizzle-orm'
-import e from 'express'
 
 export const findUserByEmail = (email: string) =>
   db.query.users.findFirst({
