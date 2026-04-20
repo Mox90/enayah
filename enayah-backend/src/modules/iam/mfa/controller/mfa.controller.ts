@@ -20,10 +20,9 @@ export const MFAController = {
       return
     }
 
-    const { token, password } = req.body
+    const { token } = req.body
 
-    // ❌ nothing provided
-    if (!token && !password) {
+    if (!token) {
       res.status(400).json({
         message: 'TOTP token or password is required to disable MFA',
       })

@@ -64,7 +64,7 @@ export const AuthController = {
     const result = await AuthService.verifyMfaLogin(
       userId,
       token,
-      req.ip ?? '',
+      req.ip ?? 'unknown',
       req.headers['user-agent'] ?? 'unknown',
     )
 
