@@ -1,5 +1,6 @@
 import { db, users } from '../../../../db'
 import { and, eq, isNull, lt, or, sql } from 'drizzle-orm'
+import { findUserById } from '../../auth/repository/auth.repository'
 
 export const UserRepository = {
   incrementFailedAttempts: async (userId: string) => {
@@ -53,9 +54,14 @@ export const UserRepository = {
       })
 
     if (!result[0]) {
-      throw new Error('User not found')
+      throw new Error('ACCOUNT_LOCKED_OR_NOT_FOUND')
     }
 
     return result[0].failedLoginAttempts
   },
+
+  findUserById: async (id: string) =>
+    db.query.users.findFirst({
+      where: eq(users.id, id),
+    }),
 }

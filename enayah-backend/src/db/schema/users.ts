@@ -7,10 +7,13 @@ import {
   varchar,
   uniqueIndex,
   index,
+  check,
+  text,
 } from 'drizzle-orm/pg-core'
 import { baseColumns } from './base'
 import { authProviderEnum } from './enums'
 import { employees } from './employees'
+import { sql } from 'drizzle-orm'
 //import { roleEnum, authProviderEnum } from './enums'
 
 export const users = pgTable(
@@ -33,6 +36,17 @@ export const users = pgTable(
     isActive: boolean('is_active').default(true).notNull(),
     failedLoginAttempts: integer('failed_login_attempts').default(0).notNull(),
     lockedUntil: timestamp('locked_until'),
+
+    mfaEnabled: boolean('mfa_enabled').default(false).notNull(),
+    mfaSecret: varchar('mfa_secret', { length: 255 }),
+
+    mfaSecretCipher: text('mfa_secret_cipher'),
+    mfaSecretIv: varchar('mfa_secret_iv', { length: 24 }), // base64 IV
+    mfaSecretTag: varchar('mfa_secret_tag', { length: 24 }), // base64 auth tag
+
+    mfaEnabledAt: timestamp('mfa_enabled_at'),
+    mfaDisabledAt: timestamp('mfa_disabled_at'),
+
     lastLoginAt: timestamp('last_login_at'),
     lastFailedLoginAt: timestamp('last_failed_login_at'),
 
@@ -54,6 +68,10 @@ export const users = pgTable(
       emailIdx: uniqueIndex('users_email_unique').on(table.email),
       usernameIdx: uniqueIndex('users_username_unique').on(table.username),
       employeeIdx: uniqueIndex('users_employee_unique').on(table.employeeId),
+      mfaConstraint: check(
+        'users_mfa_enabled_requires_secret',
+        sql`${table.mfaEnabled} = false OR ${table.mfaSecret} IS NOT NULL`,
+      ),
     }
   },
 )

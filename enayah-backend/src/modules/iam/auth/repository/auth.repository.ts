@@ -13,11 +13,15 @@ import {
   users,
 } from '../../../../db/schema'
 import { and, eq, inArray, isNull, or } from 'drizzle-orm'
-import e from 'express'
 
 export const findUserByEmail = (email: string) =>
   db.query.users.findFirst({
     where: eq(users.email, email),
+  })
+
+export const findUserById = (id: string) =>
+  db.query.users.findFirst({
+    where: eq(users.id, id),
   })
 
 export const findUserByEmailOrUsername = async (

@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { loginSchema, signupSchema } from '../dto/auth.request'
+import { loginSchema, signupSchema, verifyMfaSchema } from '../dto/auth.request'
 import { AuthService } from '../service/auth.service'
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
 import { SessionService } from '../../session/service/session.service'
@@ -56,6 +56,19 @@ export const AuthController = {
     await SessionService.logoutAll(req.user.id)
 
     res.json({ message: 'Logged out from all devices' })
+  }),
+
+  verifyMfa: asyncHandler(async (req: Request, res: Response) => {
+    const { userId, token } = verifyMfaSchema.parse(req.body)
+
+    const result = await AuthService.verifyMfaLogin(
+      userId,
+      token,
+      req.ip ?? 'unknown',
+      req.headers['user-agent'] ?? 'unknown',
+    )
+
+    res.json(result)
   }),
 }
 
