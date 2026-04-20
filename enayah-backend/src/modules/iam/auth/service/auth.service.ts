@@ -10,6 +10,7 @@ import {
   findUserByUsername,
   getRoles,
   getPermissionsByRoleIds,
+  findUserById,
 } from '../repository/auth.repository'
 import { AppError } from '../../../../core/errors/AppError'
 import { toAuthResponse } from '../dto/auth.mapper'
@@ -17,6 +18,7 @@ import { loginLimiter } from '../../../../core/security/rateLimiter'
 import { SessionService } from '../../session/service/session.service'
 import { UserSecurityService } from '../../users/service/userSecurity.service'
 import { auditLogger } from '../../../../core/logging/auditLogger'
+import { MFAService } from '../../mfa/service/mfa.service'
 
 export const AuthService = {
   signup: async (data: any) => {
@@ -143,6 +145,13 @@ export const AuthService = {
       throw new AppError('Account disabled', 403)
     }
 
+    if (user.mfaEnabled) {
+      return {
+        mfaRequired: true,
+        userId: user.id,
+      }
+    }
+
     // 🔒 3. RESET ON SUCCESS
     await UserSecurityService.handleSuccessfulLogin(user.id)
 
@@ -178,6 +187,36 @@ export const AuthService = {
       },
       ...(ip && { ip }),
       ...(userAgent && { userAgent }),
+    })
+
+    return {
+      user: toAuthResponse(user),
+      ...session,
+    }
+  },
+
+  verifyMfaLogin: async (
+    userId: string,
+    token: string,
+    ip: string,
+    userAgent: string,
+  ) => {
+    const user = await findUserById(userId)
+
+    if (!user) throw new AppError('User not found', 404)
+
+    // 🔐 verify OTP
+    await MFAService.verifyLogin(user.id, token)
+
+    // 🔑 create session
+    const session = await SessionService.createSession(user.id, {
+      ip,
+      userAgent,
+    })
+
+    await auditLogger.log({
+      userId: user.id,
+      action: 'LOGIN_SUCCESS_MFA',
     })
 
     return {

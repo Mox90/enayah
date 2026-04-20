@@ -33,6 +33,10 @@ export const users = pgTable(
     isActive: boolean('is_active').default(true).notNull(),
     failedLoginAttempts: integer('failed_login_attempts').default(0).notNull(),
     lockedUntil: timestamp('locked_until'),
+
+    mfaEnabled: boolean('mfa_enabled').default(false).notNull(),
+    mfaSecret: varchar('mfa_secret', { length: 255 }),
+
     lastLoginAt: timestamp('last_login_at'),
     lastFailedLoginAt: timestamp('last_failed_login_at'),
 

@@ -57,6 +57,19 @@ export const AuthController = {
 
     res.json({ message: 'Logged out from all devices' })
   }),
+
+  verifyMfa: asyncHandler(async (req: Request, res: Response) => {
+    const { userId, token } = req.body
+
+    const result = await AuthService.verifyMfaLogin(
+      userId,
+      token,
+      req.ip ?? '',
+      req.headers['user-agent'] ?? 'unknown',
+    )
+
+    res.json(result)
+  }),
 }
 
 /*export const signupHandler = async (req: Request, res: Response) => {
