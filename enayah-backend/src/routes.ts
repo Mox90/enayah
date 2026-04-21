@@ -11,6 +11,7 @@ const router = Router()
 router.use('/iam', iamModule.routes)
 router.use('/org', orgModule.routes)
 router.use('/hr', hrModule.routes)
+
 //router.use('/departments', departmentModule.routes)
 //router.use('/positions', positionModule.routes)
 //router.use('/job-grades', jobGradeModule.routes)

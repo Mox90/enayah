@@ -2,6 +2,7 @@ import { date, pgTable, uuid, varchar } from 'drizzle-orm/pg-core'
 import { baseColumns } from './base'
 import { countries } from './countries'
 import { genderEnum } from './enums'
+import { relations } from 'drizzle-orm'
 
 export const employees = pgTable('employees', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -16,8 +17,15 @@ export const employees = pgTable('employees', {
   familyNameAr: varchar('family_name_ar', { length: 100 }).notNull(),
   dateOfBirth: date('date_of_birth'),
   gender: genderEnum('gender'),
-  nationality: uuid('country_id').references((): any => countries.id, {
+  countryId: uuid('country_id').references((): any => countries.id, {
     onDelete: 'restrict',
   }),
   ...baseColumns,
 })
+
+export const employeesRelations = relations(employees, ({ one }) => ({
+  nationality: one(countries, {
+    fields: [employees.countryId],
+    references: [countries.id],
+  }),
+}))
