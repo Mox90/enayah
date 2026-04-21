@@ -1,7 +1,7 @@
 // employee.repository.ts
 import { db } from '../../../../db'
 import { employees } from '../../../../db/schema/employees'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 
 const isActive = eq(employees.isDeleted, false)
 
@@ -47,7 +47,7 @@ export const EmployeeRepository = {
       .set({
         ...data,
         updatedAt: new Date(), // from baseColumns
-        version: (data.version || 0) + 1,
+        version: sql`${employees.version} + 1`,
       })
       .where(eq(employees.id, id))
       .returning()

@@ -17,19 +17,19 @@ export const EmployeeController = {
 
   findAll: asyncHandler(async (req: Request, res: Response) => {
     const result = await EmployeeService.findAll()
-    res.status(201).json(result.map(toEmployeeResponse))
+    res.status(200).json(result.map(toEmployeeResponse))
   }),
 
   findById: asyncHandler(async (req: Request, res: Response) => {
     const { id } = employeeIdSchema.parse(req.params)
     const employee = await EmployeeService.findById(id)
-    res.status(201).json(toEmployeeResponse(employee))
+    res.status(200).json(toEmployeeResponse(employee))
   }),
 
   update: asyncHandler(async (req: Request, res: Response) => {
     const { id } = employeeIdSchema.parse(req.params)
     const body = updateEmployeeSchema.parse(req.body)
     const updated = await EmployeeService.update(id, body)
-    res.status(201).json(toEmployeeResponse(updated))
+    res.status(200).json(toEmployeeResponse(updated))
   }),
 }

@@ -22,18 +22,18 @@ export const toEmployeeDb = (dto: CreateEmployeeDto) => ({
 })
 
 export const toEmployeeUpdateDb = (dto: UpdateEmployeeDto) => ({
-  ...(dto.firstNameEn && { firstNameEn: dto.firstNameEn }),
-  ...(dto.secondNameEn && { secondNameEn: dto.secondNameEn }),
-  ...(dto.thirdNameEn && { thirdNameEn: dto.thirdNameEn }),
-  ...(dto.familyNameEn && { familyNameEn: dto.familyNameEn }),
+  ...(dto.firstNameEn !== undefined && { firstNameEn: dto.firstNameEn }),
+  ...(dto.secondNameEn !== undefined && { secondNameEn: dto.secondNameEn }),
+  ...(dto.thirdNameEn !== undefined && { thirdNameEn: dto.thirdNameEn }),
+  ...(dto.familyNameEn !== undefined && { familyNameEn: dto.familyNameEn }),
 
-  ...(dto.firstNameAr && { firstNameAr: dto.firstNameAr }),
-  ...(dto.secondNameAr && { secondNameAr: dto.secondNameAr }),
-  ...(dto.thirdNameAr && { thirdNameAr: dto.thirdNameAr }),
-  ...(dto.familyNameAr && { familyNameAr: dto.familyNameAr }),
+  ...(dto.firstNameAr !== undefined && { firstNameAr: dto.firstNameAr }),
+  ...(dto.secondNameAr !== undefined && { secondNameAr: dto.secondNameAr }),
+  ...(dto.thirdNameAr !== undefined && { thirdNameAr: dto.thirdNameAr }),
+  ...(dto.familyNameAr !== undefined && { familyNameAr: dto.familyNameAr }),
 
   ...(dto.dateOfBirth !== undefined && { dateOfBirth: dto.dateOfBirth }),
-  ...(dto.gender && { gender: dto.gender }),
+  ...(dto.gender !== undefined && { gender: dto.gender }),
 
   ...(dto.countryId !== undefined && { countryId: dto.countryId }),
 })

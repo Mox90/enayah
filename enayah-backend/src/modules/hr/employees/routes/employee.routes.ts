@@ -33,3 +33,5 @@ router.put(
   ),
   EmployeeController.update,
 )
+
+export default router

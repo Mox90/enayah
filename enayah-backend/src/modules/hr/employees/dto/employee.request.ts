@@ -2,19 +2,19 @@
 import { z } from 'zod'
 
 export const createEmployeeSchema = z.object({
-  employeeNumber: z.string().max(10),
+  employeeNumber: z.string().trim().min(1).max(10),
 
-  firstNameEn: z.string(),
-  secondNameEn: z.string().optional(),
-  thirdNameEn: z.string().optional(),
-  familyNameEn: z.string(),
+  firstNameEn: z.string().trim().min(1),
+  secondNameEn: z.string().trim().min(1).optional(),
+  thirdNameEn: z.string().trim().min(1).optional(),
+  familyNameEn: z.string().trim().min(1),
 
-  firstNameAr: z.string(),
-  secondNameAr: z.string().optional(),
-  thirdNameAr: z.string().optional(),
-  familyNameAr: z.string(),
+  firstNameAr: z.string().trim().min(1),
+  secondNameAr: z.string().trim().min(1).optional(),
+  thirdNameAr: z.string().trim().min(1).optional(),
+  familyNameAr: z.string().trim().min(1),
 
-  dateOfBirth: z.string().optional(),
+  dateOfBirth: z.iso.date().optional(),
   gender: z.enum(['male', 'female']).optional(),
 
   countryId: z.uuid().optional(),

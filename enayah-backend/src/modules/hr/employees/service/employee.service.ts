@@ -25,7 +25,8 @@ export const EmployeeService = {
       throw new AppError('Employee not found', 404)
     }
 
-    return employee
+    //return employee
+    return toEmployeeResponse(employee)
   },
 
   update: async (id: string, data: UpdateEmployeeDto) => {
