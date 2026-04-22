@@ -32,8 +32,12 @@ async function findByIdOrThrow(executor: any, id: string) {
   return result
 }
 
-function assertExists<T>(value: T | undefined, message: string): T {
-  if (!value) throw new AppError(message, 500)
+function assertExists<T>(
+  value: T | undefined,
+  message: string,
+  statusCode = 500,
+): T {
+  if (!value) throw new AppError(message, statusCode)
   return value
 }
 
@@ -97,13 +101,6 @@ export const EmployeeRepository = {
 
     return updated*/
     return db.transaction(async (tx) => {
-      //const current = await tx.query.employees.findFirst({
-      //  where: eq(employees.id, id),
-      //})
-
-      //console.log('DB VERSION:', current?.version)
-      //console.log('INCOMING VERSION:', data.version)
-
       const [updatedRaw] = await tx
         .update(employees)
         .set({
@@ -118,6 +115,7 @@ export const EmployeeRepository = {
       const updated = assertExists(
         updatedRaw,
         'Update failed: Employee not found or version conflict',
+        409,
       )
 
       return findByIdOrThrow(tx, updated.id)
