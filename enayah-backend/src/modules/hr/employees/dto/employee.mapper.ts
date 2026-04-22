@@ -61,5 +61,17 @@ export const toEmployeeResponse = (employee: any): EmployeeResponse => {
       .join(' '),
 
     gender: employee.gender,
+    dateOfBirth: employee.dateOfBirth,
+    //countryId: employee.countryId,
+    nationality: employee.nationality
+      ? {
+          countryId: employee.nationality.id,
+          name: employee.nationality.name,
+          nameAr: employee.nationality.nameAr,
+          nationalityEn: employee.nationality.nationalityEn,
+          nationalityAr: employee.nationality.nationalityAr,
+        }
+      : null,
+    version: employee.version,
   }
 }
