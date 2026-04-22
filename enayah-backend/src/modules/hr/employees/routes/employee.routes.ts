@@ -1,12 +1,16 @@
 import { Router } from 'express'
 import { requireAuth } from '../../../../core/middleware/auth.middleware'
-import { requirePermission } from '../../../../core/middleware/permission.middleware'
+import {
+  attachPermissions,
+  requirePermission,
+} from '../../../../core/middleware/permission.middleware'
 import { audit } from '../../../../core/middleware/audit.middleware'
 import { EmployeeController } from '../controller/employee.controller'
 
 const router = Router()
 
 router.use(requireAuth)
+router.use(attachPermissions)
 
 router.post(
   '/',

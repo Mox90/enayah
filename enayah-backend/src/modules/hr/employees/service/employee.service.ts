@@ -9,12 +9,13 @@ import { EmployeeRepository } from '../repository/employee.repository'
 
 export const EmployeeService = {
   create: async (data: CreateEmployeeDto) => {
-    const employee = await EmployeeRepository.create(toEmployeeDb(data))
+    const employee = await EmployeeRepository.create(data)
     return toEmployeeResponse(employee)
   },
 
   findAll: async () => {
     const employees = await EmployeeRepository.findAll()
+
     return employees.map(toEmployeeResponse)
   },
 
@@ -36,10 +37,7 @@ export const EmployeeService = {
       throw new AppError('Employee not found', 404)
     }
 
-    const updated = await EmployeeRepository.update(
-      id,
-      toEmployeeUpdateDb(data),
-    )
+    const updated = await EmployeeRepository.update(id, data)
 
     return toEmployeeResponse(updated)
   },

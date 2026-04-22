@@ -20,7 +20,9 @@ export const createEmployeeSchema = z.object({
   countryId: z.uuid().optional(),
 })
 
-export const updateEmployeeSchema = createEmployeeSchema.partial()
+export const updateEmployeeSchema = createEmployeeSchema.partial().extend({
+  version: z.number().int().positive(),
+})
 
 export const employeeIdSchema = z.object({
   id: z.uuid().describe('The unique identifier of the employee'),
