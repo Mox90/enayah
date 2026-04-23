@@ -1,6 +1,7 @@
 import { pgTable, numeric, uuid, varchar, integer } from 'drizzle-orm/pg-core'
 import { baseColumns } from './base'
 import { departments, positions, jobGrades } from './org'
+import { workforceCategoryEnum } from './enums'
 
 export const positionItems = pgTable('position_items', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -17,7 +18,8 @@ export const positionItems = pgTable('position_items', {
 
   jobGradeId: uuid('job_grade_id').references(() => jobGrades.id),
 
-  categoryCode: integer('category_code'), // 1000, 2000...
+  workforceCategory: workforceCategoryEnum('workforce_category'), // workforce classification
+  categoryCode: integer('category_code'), // 1000, 2000... // workforce classification
 
   minSalary: numeric('min_salary'),
   maxSalary: numeric('max_salary'),

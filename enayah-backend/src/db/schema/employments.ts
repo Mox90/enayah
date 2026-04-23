@@ -1,7 +1,11 @@
 import { date, index, pgTable, uuid, varchar } from 'drizzle-orm/pg-core'
 import { employees } from './employees'
 import { baseColumns } from './base'
-import { employmentStatusEnum, employmentTypeEnum } from './enums'
+import {
+  employmentStatusEnum,
+  employmentTypeEnum,
+  staffCategoryEnum,
+} from './enums'
 import { positionItems } from './positionItems'
 
 export const employments = pgTable(
@@ -13,15 +17,18 @@ export const employments = pgTable(
       .notNull()
       .references(() => employees.id, { onDelete: 'cascade' }),
     //itemNumber: varchar('item_number', { length: 50 }),
-    positionItemId: uuid('position_item_id')
-      .notNull()
-      .references(() => positionItems.id, { onDelete: 'restrict' }),
+    positionItemId: uuid('position_item_id').references(
+      () => positionItems.id,
+      { onDelete: 'restrict' },
+    ), // WHERE they are budgeted (PCN)
 
     hireDate: date('hire_date').notNull(),
     startDate: date('start_date').notNull(),
     endDate: date('end_date'),
 
-    employmentType: employmentTypeEnum('employment_type'), // full-time, contract
+    employmentType: employmentTypeEnum('employment_type'), // full-time, part-time, locum //HOW they work
+    staffCategory: staffCategoryEnum('staff_category').notNull(), //WHO they are
+
     status: employmentStatusEnum('employment_status')
       .default('active')
       .notNull(), // active, terminated

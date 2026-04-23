@@ -134,6 +134,13 @@
       "when": 1776683505986,
       "tag": "0018_pale_nemesis",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1776857470106,
+      "tag": "0019_round_sabretooth",
+      "breakpoints": true
     }
   ]
 }

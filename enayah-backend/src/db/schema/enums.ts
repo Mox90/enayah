@@ -26,6 +26,20 @@ export const employmentTypeEnum = pgEnum('employment_type', [
   'locum',
 ])
 
+export const staffCategoryEnum = pgEnum('staff_category', [
+  'civilian',
+  'military',
+  'contractual',
+])
+
+export const workforceCategoryEnum = pgEnum('workforce_category', [
+  'physician', // 1000
+  'nurse', // 2000
+  'allied_health', // 3000
+  'administrative', // 4000
+  'support_service', // 5000
+])
+
 export const employmentStatusEnum = pgEnum('employment_status', [
   'active',
   'terminated',

@@ -1,0 +1,112 @@
+import { eq, and, sql } from 'drizzle-orm'
+import { AppError } from '../../../../core/errors/AppError'
+import { employments, DB, db, positionItems } from '../../../../db'
+import {
+  CreateEmploymentDto,
+  TerminateEmploymentDto,
+} from '../dto/employment.request'
+import { toEmploymentDb } from '../dto/employment.mapper'
+
+const isActive = eq(employments.isDeleted, false)
+
+function assertExists<T>(
+  value: T | undefined,
+  message: string,
+  statusCode = 500,
+): T {
+  if (!value) throw new AppError(message, statusCode)
+  return value
+}
+
+function findByIdOrThrow(executor: DB, id: string): Promise<any>
+function findByIdOrThrow(executor: any, id: string) {
+  return executor.query.employments
+    .findFirst({
+      where: and(eq(employments.id, id), isActive),
+    })
+    .then((res: any) => {
+      if (!res) throw new AppError('Employment not found', 404)
+
+      return res
+    })
+}
+
+export const EmploymentRepository = {
+  create: async (data: CreateEmploymentDto) => {
+    return db.transaction(async (tx) => {
+      const [createdRaw] = await tx
+        .insert(employments)
+        .values(toEmploymentDb(data))
+        .returning({ id: employments.id })
+
+      const created = assertExists(createdRaw, 'Failed to create employment')
+
+      return findByIdOrThrow(tx, created.id)
+    })
+  },
+
+  findActiveByEmployee: async (employeeId: string) => {
+    return db.query.employments.findFirst({
+      where: and(
+        eq(employments.employeeId, employeeId),
+        eq(employments.status, 'active'),
+        isActive,
+      ),
+    })
+  },
+
+  findPositionItemOrThrow: async (id: string) => {
+    const result = await db.query.positionItems.findFirst({
+      where: eq(positionItems.id, id),
+    })
+
+    if (!result) throw new AppError('Position item not found', 404)
+
+    return result
+  },
+
+  markPositionFilled: async (tx: DB, id: string) => {
+    await tx
+      .update(positionItems)
+      .set({ status: 'filled' })
+      .where(eq(positionItems.id, id))
+  },
+
+  markPositionVacant: async (tx: DB, id: string) => {
+    await tx
+      .update(positionItems)
+      .set({ status: 'vacant' })
+      .where(eq(positionItems.id, id))
+  },
+
+  terminate: async (id: string, data: TerminateEmploymentDto) => {
+    return db.transaction(async (tx) => {
+      const existing = await findByIdOrThrow(tx, id)
+
+      if (existing.status !== 'active') {
+        throw new AppError('Employment already terminated', 400)
+      }
+
+      const [updatedRaw] = await tx
+        .update(employments)
+        .set({
+          ...data,
+          status: 'terminated',
+          updatedAt: new Date(),
+        })
+        .where(eq(employments.id, id))
+        .returning({ id: employments.id })
+
+      const updated = assertExists(updatedRaw, 'Termination failed')
+
+      if (existing.positionItem) {
+        await tx
+          .update(positionItems)
+          .set({ status: 'vacant' })
+          .where(eq(positionItems.id, existing.positionItemId))
+      }
+
+      return findByIdOrThrow(tx, updated.id)
+    })
+  },
+}
