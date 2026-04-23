@@ -1,0 +1,1 @@
+ALTER TABLE "employments" ALTER COLUMN "staff_category" SET DEFAULT 'contractual';
