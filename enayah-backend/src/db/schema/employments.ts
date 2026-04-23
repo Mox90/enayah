@@ -27,7 +27,9 @@ export const employments = pgTable(
     endDate: date('end_date'),
 
     employmentType: employmentTypeEnum('employment_type'), // full-time, part-time, locum //HOW they work
-    staffCategory: staffCategoryEnum('staff_category').notNull(), //WHO they are
+    staffCategory: staffCategoryEnum('staff_category')
+      .default('contractual')
+      .notNull(), //WHO they are
 
     status: employmentStatusEnum('employment_status')
       .default('active')

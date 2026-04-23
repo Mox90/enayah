@@ -32,7 +32,7 @@ function findByIdOrThrow(executor: any, id: string) {
 }
 
 export const EmploymentRepository = {
-  create: async (data: CreateEmploymentDto) => {
+  /*create: async (data: CreateEmploymentDto) => {
     return db.transaction(async (tx) => {
       const [createdRaw] = await tx
         .insert(employments)
@@ -41,6 +41,30 @@ export const EmploymentRepository = {
 
       const created = assertExists(createdRaw, 'Failed to create employment')
 
+      return findByIdOrThrow(tx, created.id)
+    })
+  },*/
+
+  create: async (data: CreateEmploymentDto) => {
+    return db.transaction(async (tx) => {
+      if (data.positionItemId) {
+        const [reservedPosition] = await tx
+          .update(positionItems)
+          .set({ status: 'filled' })
+          .where(
+            and(
+              eq(positionItems.id, data.positionItemId),
+              eq(positionItems.status, 'vacant'),
+            ),
+          )
+          .returning({ id: positionItems.id })
+        assertExists(reservedPosition, 'Position item not available', 400)
+      }
+      const [createdRaw] = await tx
+        .insert(employments)
+        .values(toEmploymentDb(data))
+        .returning({ id: employments.id })
+      const created = assertExists(createdRaw, 'Failed to create employment')
       return findByIdOrThrow(tx, created.id)
     })
   },
@@ -99,7 +123,7 @@ export const EmploymentRepository = {
 
       const updated = assertExists(updatedRaw, 'Termination failed')
 
-      if (existing.positionItem) {
+      if (existing.positionItemId) {
         await tx
           .update(positionItems)
           .set({ status: 'vacant' })

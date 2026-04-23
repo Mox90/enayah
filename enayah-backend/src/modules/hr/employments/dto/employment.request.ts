@@ -6,9 +6,9 @@ export const createEmploymentSchema = z.object({
 
   positionItemId: z.uuid().optional(),
 
-  hireDate: z.string(),
-  startDate: z.string(),
-  endDate: z.string().optional(),
+  hireDate: z.iso.date(),
+  startDate: z.iso.date(),
+  endDate: z.iso.date().optional(),
 
   employmentType: z
     .enum(['full_time', 'part_time', 'locum', 'contract', 'temporary'])
