@@ -16,7 +16,7 @@ const employeeWithRelations = {
 } as const
 
 function findByIdOrThrow(executor: DB, id: string): Promise<any>
-function findByIdOrThrow(executor: Tx, id: string): Promise<any>
+function findByIdOrThrow(executor: DB | Tx, id: string): Promise<any>
 async function findByIdOrThrow(executor: any, id: string) {
   const result = await executor.query.employees.findFirst({
     where: and(eq(employees.id, id), isActive),

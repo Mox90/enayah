@@ -1,6 +1,10 @@
 // employee.mapper.ts
 import { EmployeeResponse } from './employee.response'
 import { CreateEmployeeDto, UpdateEmployeeDto } from './employee.request'
+import { InferSelectModel } from 'drizzle-orm'
+import { employees } from '../../../../db'
+
+type EmployeeSelect = InferSelectModel<typeof employees>
 
 export const toEmployeeDb = (dto: CreateEmployeeDto) => ({
   employeeNumber: dto.employeeNumber,
@@ -38,7 +42,9 @@ export const toEmployeeUpdateDb = (dto: UpdateEmployeeDto) => ({
   ...(dto.countryId !== undefined && { countryId: dto.countryId }),
 })
 
-export const toEmployeeResponse = (employee: any): EmployeeResponse => {
+export const toEmployeeResponse = (
+  employee: EmployeeSelect & { nationality?: any },
+): EmployeeResponse => {
   return {
     id: employee.id,
     employeeNumber: employee.employeeNumber,
@@ -60,8 +66,8 @@ export const toEmployeeResponse = (employee: any): EmployeeResponse => {
       .filter(Boolean)
       .join(' '),
 
-    gender: employee.gender,
-    dateOfBirth: employee.dateOfBirth,
+    gender: employee.gender ?? undefined,
+    dateOfBirth: employee.dateOfBirth ?? undefined,
     //countryId: employee.countryId,
     nationality: employee.nationality
       ? {

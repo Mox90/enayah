@@ -1,38 +1,65 @@
-import { CreateEmploymentDto } from './employment.request'
+import { InferInsertModel, InferSelectModel } from 'drizzle-orm'
+import {
+  CreateEmploymentDto,
+  TerminateEmploymentDto,
+  UpdateEmploymentDto,
+} from './employment.request'
 import { EmploymentResponse } from './employment.response'
+import { employments } from '../../../../db'
 
-export const toEmploymentResponse = (e: any): EmploymentResponse => ({
-  id: e.id,
-  employeeId: e.employeeId,
-  staffCategory: e.staffCategory,
-  positionItemId: e.positionItemId ?? undefined,
-  status: e.status,
-  startDate: e.startDate,
-  endDate: e.endDate ?? undefined,
+//type EmploymentUpdate = Partial<InferInsertModel<typeof employments>>
+type EmploymentInsert = InferInsertModel<typeof employments>
+type EmploymentSelect = InferSelectModel<typeof employments>
+
+export const toEmploymentDb = (dto: CreateEmploymentDto): EmploymentInsert => ({
+  employeeId: dto.employeeId,
+  staffCategory: dto.staffCategory,
+  positionItemId: dto.positionItemId ?? undefined,
+  //status: dto.status,
+  hireDate: dto.hireDate,
+  startDate: dto.startDate,
+  endDate: dto.endDate ?? undefined,
+  employmentType: dto.employmentType ?? undefined,
 })
 
-export const toEmploymentDb = (e: CreateEmploymentDto) => ({
-  employeeId: e.employeeId,
-  staffCategory: e.staffCategory,
-  positionItemId: e.positionItemId ?? undefined,
-  //status: e.status,
-  hireDate: e.hireDate,
-  startDate: e.startDate,
-  endDate: e.endDate ?? undefined,
-  employmentType: e.employmentType ?? undefined,
+export const toEmploymentUpdateDb = (
+  dto: UpdateEmploymentDto,
+): Partial<EmploymentInsert> => ({
+  ...(dto.employeeId !== undefined && { employeeId: dto.employeeId }),
+  ...(dto.staffCategory !== undefined && { staffCategory: dto.staffCategory }),
+  ...(dto.positionItemId !== undefined && {
+    positionItemId: dto.positionItemId,
+  }),
+  ...(dto.hireDate !== undefined && { hireDate: dto.hireDate }),
+  ...(dto.startDate !== undefined && { startDate: dto.startDate }),
+  ...(dto.endDate !== undefined && { endDate: dto.endDate }),
+  ...(dto.employmentType !== undefined && {
+    employmentType: dto.employmentType,
+  }),
+  //...(dto.employeeId !== undefined && { employeeId: dto.employeeId }),
+  ...(dto.causeOfLeaving !== undefined && {
+    causeOfLeaving: dto.causeOfLeaving,
+  }),
+  ...(dto.status !== undefined && { status: dto.status }),
+  updatedAt: new Date(),
+  //...(dto.updatedAt !== undefined && { updatedAt: dto.updatedAt }),
 })
 
-const mapEmploymentType = (type?: string) => {
-  if (!type) return undefined
+export const toEmploymentResponse = (dto: any): EmploymentResponse => ({
+  id: dto.id,
+  employeeId: dto.employeeId,
+  staffCategory: dto.staffCategory,
+  positionItemId: dto.positionItemId ?? undefined,
+  status: dto.status,
+  startDate: dto.startDate,
+  endDate: dto.endDate ?? undefined,
+})
 
-  switch (type) {
-    case 'full-time':
-      return 'full_time'
-    case 'part-time':
-      return 'part_time'
-    case 'locum':
-      return 'locum'
-    default:
-      return undefined
-  }
-}
+export const toEmploymentTerminateDb = (
+  dto: TerminateEmploymentDto,
+): Partial<EmploymentInsert> => ({
+  endDate: dto.endDate,
+  causeOfLeaving: dto.causeOfLeaving ?? undefined,
+  status: 'terminated',
+  updatedAt: new Date(),
+})

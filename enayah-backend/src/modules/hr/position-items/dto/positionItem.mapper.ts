@@ -4,14 +4,17 @@ import {
 } from './positionItem.request'
 
 export const toPositionItemDB = (dto: CreatePositionItemDTO) => ({
-  itemNumber: dto.itemNumber,
+  /*itemNumber: dto.itemNumber,
   departmentId: dto.departmentId,
   positionId: dto.positionId,
   jobGradeId: dto.jobGradeId,
   categoryCode: dto.categoryCode,
   minSalary: dto.minSalary,
-  maxSalary: dto.maxSalary,
-  status: dto.status,
+  maxSalary: dto.maxSalary,*/
+  ...dto,
+  minSalary: dto.minSalary !== undefined ? dto.minSalary.toString() : undefined,
+  maxSalary: dto.maxSalary !== undefined ? dto.maxSalary.toString() : undefined,
+  status: 'vacant',
 })
 
 export const toPositionItemUpdateDB = (dto: UpdatePositionItemDTO) => ({
@@ -22,7 +25,7 @@ export const toPositionItemUpdateDB = (dto: UpdatePositionItemDTO) => ({
   ...(dto.categoryCode !== undefined && { categoryCode: dto.categoryCode }),
   ...(dto.minSalary !== undefined && { minSalary: dto.minSalary }),
   ...(dto.maxSalary !== undefined && { maxSalary: dto.maxSalary }),
-  ...(dto.status !== undefined && { status: dto.status }),
+  //...(dto.status !== undefined && { status: dto.status }),
 })
 
 export const toPositionItemResponse = (dbRecord: any) => ({
@@ -36,7 +39,7 @@ export const toPositionItemResponse = (dbRecord: any) => ({
         name: dbRecord.jobGrade.name,
       }
     : null,
-  categoryCode: dbRecord.categoryCode,
+  categoryCode: dbRecord.categoryCode ?? undefined,
   minSalary: dbRecord.minSalary,
   maxSalary: dbRecord.maxSalary,
   status: dbRecord.status,

@@ -2,6 +2,7 @@ import { AppError } from '../../../../core/errors/AppError'
 import {
   CreateEmploymentDto,
   TerminateEmploymentDto,
+  UpdateEmploymentDto,
 } from '../dto/employment.request'
 import { EmploymentRepository } from '../repository/employment.repository'
 
@@ -42,7 +43,7 @@ export const EmploymentService = {
     return employment
   },
 
-  terminate: async (id: string, dto: TerminateEmploymentDto) => {
+  terminate: async (id: string, dto: UpdateEmploymentDto) => {
     return EmploymentRepository.terminate(id, dto)
   },
 }
