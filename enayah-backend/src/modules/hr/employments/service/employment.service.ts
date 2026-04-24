@@ -44,6 +44,6 @@ export const EmploymentService = {
   },
 
   terminate: async (id: string, dto: UpdateEmploymentDto) => {
-    return EmploymentRepository.terminate(id, dto)
+    return EmploymentRepository.terminate(id, { ...dto, status: 'terminated' })
   },
 }

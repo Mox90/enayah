@@ -14,7 +14,7 @@ export const toPositionItemDB = (dto: CreatePositionItemDTO) => ({
   ...dto,
   minSalary: dto.minSalary !== undefined ? dto.minSalary.toString() : undefined,
   maxSalary: dto.maxSalary !== undefined ? dto.maxSalary.toString() : undefined,
-  status: 'vacant',
+  status: 'vacant' as const,
 })
 
 export const toPositionItemUpdateDB = (dto: UpdatePositionItemDTO) => ({

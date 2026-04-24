@@ -20,7 +20,7 @@ export const EmploymentController = {
     const dto = terminateEmploymentSchema.parse(req.body)
     const result = await EmploymentService.terminate(id, {
       ...dto,
-      updatedAt: new Date(),
+      status: 'terminated',
     })
     res.json(toEmploymentResponse(result))
   }),

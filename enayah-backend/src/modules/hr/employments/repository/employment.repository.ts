@@ -87,7 +87,7 @@ export const EmploymentRepository = {
       where: eq(positionItems.id, id),
     })
 
-    if (!row) throw new AppError('Position item not found', 400)
+    if (!row) throw new AppError('Position item not found', 404)
 
     if (row.status !== 'vacant') {
       throw new AppError('Position item not available', 400)
@@ -96,6 +96,39 @@ export const EmploymentRepository = {
 
   update: async (id: string, dto: UpdateEmploymentDto) => {
     return db.transaction(async (tx) => {
+      const existing = await findByIdOrThrow(tx, id)
+
+      if (existing.status === 'terminated') {
+        throw new AppError('Cannot update terminated employment', 400)
+      }
+
+      const newPositionId = dto.positionItemId
+      const oldPositionId = existing.positionItemId
+
+      if (newPositionId !== undefined && newPositionId !== oldPositionId) {
+        if (newPositionId) {
+          const [reserved] = await tx
+            .update(positionItems)
+            .set({ status: 'filled' })
+            .where(
+              and(
+                eq(positionItems.id, newPositionId),
+                eq(positionItems.status, 'vacant'),
+              ),
+            )
+            .returning({ id: positionItems.id })
+
+          assertExists(reserved, 'New position not available', 400)
+        }
+
+        if (oldPositionId) {
+          await tx
+            .update(positionItems)
+            .set({ status: 'vacant' })
+            .where(eq(positionItems.id, oldPositionId))
+        }
+      }
+
       const [updated] = await tx
         .update(employments)
         .set(toEmploymentUpdateDb(dto))

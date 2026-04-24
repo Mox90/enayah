@@ -27,7 +27,7 @@ export const updateEmploymentSchema = createEmploymentSchema.partial().extend({
       'on_leave',
     ])
     .optional(), //z.string().optional(), //'terminated',
-  updatedAt: new Date(),
+  //updatedAt: new Date(),
 })
 
 export const terminateEmploymentSchema = z.object({

@@ -7,9 +7,8 @@ import {
   toPositionItemResponse,
 } from '../dto/positionItem.mapper'
 
-function assertExists<T>(value: T | undefined, msg: string): T {
-  if (!value) throw new AppError(msg, 400)
-
+function assertExists<T>(value: T | undefined, msg: string, status = 500): T {
+  if (!value) throw new AppError(msg, status)
   return value
 }
 
@@ -55,7 +54,8 @@ export const PositionItemRepository = {
     const positionItem = await db.query.positionItems.findFirst({
       where: eq(positionItems.id, id),
     })
-    return toPositionItemResponse(positionItem)
+    //return toPositionItemResponse(positionItem)
+    return positionItem ? toPositionItemResponse(positionItem) : undefined
   },
 
   getSummary: async () => {
