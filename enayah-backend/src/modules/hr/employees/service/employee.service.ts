@@ -9,29 +9,30 @@ import { EmployeeRepository } from '../repository/employee.repository'
 
 export const EmployeeService = {
   create: async (data: CreateEmployeeDto) => {
-    const employee = await EmployeeRepository.create(data)
-    return toEmployeeResponse(employee)
+    //const employee = await EmployeeRepository.create(data)
+    //return toEmployeeResponse(employee)
+    return EmployeeRepository.create(data)
   },
 
   findAll: async () => {
-    const employees = await EmployeeRepository.findAll()
-
-    return employees.map(toEmployeeResponse)
+    //const employees = await EmployeeRepository.findAll()
+    //return employees.map(toEmployeeResponse)
+    return EmployeeRepository.findAll()
   },
 
   findById: async (id: string) => {
-    const employee = await EmployeeRepository.findById(id)
+    /*const employee = await EmployeeRepository.findById(id)
 
     if (!employee) {
       throw new AppError('Employee not found', 404)
     }
 
-    //return employee
-    return toEmployeeResponse(employee)
+    return toEmployeeResponse(employee)*/
+    return EmployeeRepository.findById(id)
   },
 
   update: async (id: string, data: UpdateEmployeeDto) => {
-    const existing = await EmployeeRepository.findById(id)
+    /*const existing = await EmployeeRepository.findById(id)
 
     if (!existing) {
       throw new AppError('Employee not found', 404)
@@ -39,6 +40,7 @@ export const EmployeeService = {
 
     const updated = await EmployeeRepository.update(id, data)
 
-    return toEmployeeResponse(updated)
+    return toEmployeeResponse(updated)*/
+    return EmployeeRepository.update(id, data)
   },
 }

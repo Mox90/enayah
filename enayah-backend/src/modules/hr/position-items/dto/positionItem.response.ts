@@ -1,6 +1,6 @@
-export interface PositionItemReponseDTO {
+export interface PositionItemResponse {
   id: string
-  name: string
+  itemNumber: string
   departmentId: string
   positionId: string
   jobGrade?: {
@@ -10,5 +10,5 @@ export interface PositionItemReponseDTO {
   categoryCode?: number
   minSalary?: number
   maxSalary?: number
-  status: string
+  //status: string
 }

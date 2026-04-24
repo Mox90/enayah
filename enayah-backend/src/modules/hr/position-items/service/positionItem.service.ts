@@ -38,17 +38,19 @@ export const PositionItemService = {
       toPositionItemDB(data),
     )
     return toPositionItemResponse(positionItem)
+    //return PositionItemRepository.create(data)
   },
 
   findAll: async () => {
-    const positionItems = await PositionItemRepository.findAll()
-    return positionItems.map(toPositionItemResponse)
+    //const positionItems = await PositionItemRepository.findAll()
+    //return positionItems.map(toPositionItemResponse)
+    return PositionItemRepository.findAll()
   },
 
   findById: async (id: string) => {
     const positionItem = await PositionItemRepository.findById(id)
     if (!positionItem) throw new AppError('PositionItem not found', 404)
-    return toPositionItemResponse(positionItem)
+    return positionItem
   },
 
   update: async (id: string, data: any) => {

@@ -1,6 +1,16 @@
-import { and, eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray, sql } from 'drizzle-orm'
 import { db, positionItems } from '../../../../db'
 import { AppError } from '../../../../core/errors/AppError'
+import { CreatePositionItemDTO } from '../dto/positionItem.request'
+import {
+  toPositionItemDB,
+  toPositionItemResponse,
+} from '../dto/positionItem.mapper'
+
+function assertExists<T>(value: T | undefined, msg: string, status = 500): T {
+  if (!value) throw new AppError(msg, status)
+  return value
+}
 
 export const PositionItemRepository = {
   assignIfAvailable: async (id: string, tx = db) => {
@@ -22,19 +32,66 @@ export const PositionItemRepository = {
     return result[0]
   },
 
-  create: (data: any) => {
-    return db.insert(positionItems).values(data).returning()
+  create: (data: CreatePositionItemDTO) => {
+    //return db.insert(positionItems).values(data).returning()
+    return db.transaction(async (tx) => {
+      const [row] = await tx
+        .insert(positionItems)
+        .values(toPositionItemDB(data))
+        .returning()
+
+      return assertExists(row, 'Failed to create position item')
+    })
   },
 
-  findAll: () => {
-    return db.query.positionItems.findMany()
+  findAll: async () => {
+    const positionItems = await db.query.positionItems.findMany()
+    return positionItems.map(toPositionItemResponse)
   },
 
-  findById: (id: string) => {
+  findById: async (id: string) => {
     //return db.select().from(positionItems).where(eq(positionItems.id, id))
-    return db.query.positionItems.findFirst({
+    const positionItem = await db.query.positionItems.findFirst({
       where: eq(positionItems.id, id),
     })
+    //return toPositionItemResponse(positionItem)
+    return positionItem ? toPositionItemResponse(positionItem) : undefined
+  },
+
+  getSummary: async () => {
+    const result = await db
+      .select({
+        total: sql<number>`count(*)`,
+        filled: sql<number>`count(*) filter (where status = 'filled')`,
+        vacant: sql<number>`count(*) filter (where status = 'vacant')`,
+      })
+      .from(positionItems)
+
+    return result[0]
+  },
+
+  getByCategory: async () => {
+    return db
+      .select({
+        categoryCode: positionItems.categoryCode,
+        total: sql<number>`count(*)`,
+        filled: sql<number>`count(*) filter (where status = 'filled')`,
+        vacant: sql<number>`count(*) filter (where status = 'vacant')`,
+      })
+      .from(positionItems)
+      .groupBy(positionItems.categoryCode)
+  },
+
+  getByDepartment: async () => {
+    return db
+      .select({
+        departmentId: positionItems.departmentId,
+        total: sql<number>`count(*)`,
+        filled: sql<number>`count(*) filter (where status = 'filled')`,
+        vacant: sql<number>`count(*) filter (where status = 'vacant')`,
+      })
+      .from(positionItems)
+      .groupBy(positionItems.departmentId)
   },
 
   update: (id: string, data: any) => {
@@ -46,9 +103,10 @@ export const PositionItemRepository = {
       throw new AppError('Version is required for update', 409)
     }
 
+    const update = toPositionItemDB(data)
     return db
       .update(positionItems)
-      .set({ ...data, updatedAt: now, version: currentVersion + 1 }) // Update the fields along with updatedAt and version
+      .set({ ...update, updatedAt: now, version: currentVersion + 1 }) // Update the fields along with updatedAt and version
       .where(
         and(
           eq(positionItems.id, id),

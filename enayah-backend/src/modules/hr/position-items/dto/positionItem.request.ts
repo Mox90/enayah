@@ -5,10 +5,10 @@ export const createPositionItemSchema = z.object({
   departmentId: z.uuid(),
   positionId: z.uuid(),
   jobGradeId: z.uuid().optional(),
-  categoryCode: z.number().int().optional(),
-  minSalary: z.number().optional(),
-  maxSalary: z.number().optional(),
-  status: z.string().max(20).default('vacant'),
+  categoryCode: z.number().int().nonnegative().optional(),
+  minSalary: z.number().nonnegative().optional(),
+  maxSalary: z.number().nonnegative().optional(),
+  //status: z.string().max(20).default('vacant'),
 })
 
 export const updatePositionItemSchema = createPositionItemSchema.partial()

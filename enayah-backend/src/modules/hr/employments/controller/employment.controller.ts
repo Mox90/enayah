@@ -6,18 +6,22 @@ import {
   employmentIdSchema,
 } from '../dto/employment.request'
 import { toEmploymentResponse } from '../dto/employment.mapper'
+import { asyncHandler } from '../../../../core/utils/asyncHandler'
 
 export const EmploymentController = {
-  hire: async (req: Request, res: Response) => {
+  hire: asyncHandler(async (req: Request, res: Response) => {
     const dto = createEmploymentSchema.parse(req.body)
     const result = await EmploymentService.hire(dto)
     res.status(201).json(toEmploymentResponse(result))
-  },
+  }),
 
-  terminate: async (req: Request, res: Response) => {
+  terminate: asyncHandler(async (req: Request, res: Response) => {
     const { id } = employmentIdSchema.parse(req.params)
     const dto = terminateEmploymentSchema.parse(req.body)
-    const result = await EmploymentService.terminate(id, dto)
+    const result = await EmploymentService.terminate(id, {
+      ...dto,
+      status: 'terminated',
+    })
     res.json(toEmploymentResponse(result))
-  },
+  }),
 }
