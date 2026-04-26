@@ -47,8 +47,10 @@ export const audit =
             ...(options?.resource && { resource: options.resource }),
             ...(resourceId && { resourceId }),
 
-            before: res.locals.before,
-            after: res.locals.after,
+            //before: res.locals.before,
+            //after: res.locals.after,
+            ...(beforeSanitized !== undefined && { before: beforeSanitized }),
+            ...(afterSanitized !== undefined && { after: afterSanitized }),
 
             metadata: {
               method: req.method,

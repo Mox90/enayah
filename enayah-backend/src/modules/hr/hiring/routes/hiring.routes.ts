@@ -11,7 +11,12 @@ router.use(requireAuth)
 router.post(
   '/',
   requirePermission('employee.hire'),
-  audit('HIRE_EMPLOYEE', { resource: 'EMPLOYMENT' }),
+  audit('HIRE_EMPLOYEE', {
+    resource: 'EMPLOYMENT',
+    sanitize: {
+      allowList: ['id', 'employeeId', 'status', 'startDate'],
+    },
+  }),
   // ID comes AFTER creation
   // so we rely on controller:
   // res.locals.resourceId = employment.id

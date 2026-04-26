@@ -16,17 +16,23 @@ const DEFAULT_DENY_LIST = [
 ]
 
 function shouldRedact(key: string, options?: SanitizeOptions) {
+  const lowerKey = key.toLowerCase()
   if (options?.allowList) {
     return !options.allowList.includes(key)
   }
 
-  if (options?.redactFields?.includes(key)) {
+  /*if (options?.redactFields?.includes(key)) {
+    return true
+  }*/
+  if (
+    options?.redactFields?.some((field) =>
+      lowerKey.includes(field.toLowerCase()),
+    )
+  ) {
     return true
   }
 
-  return DEFAULT_DENY_LIST.some((k) =>
-    key.toLowerCase().includes(k.toLowerCase()),
-  )
+  return DEFAULT_DENY_LIST.some((k) => lowerKey.includes(k.toLowerCase()))
 }
 
 export function sanitizeObject(
@@ -45,8 +51,40 @@ export function sanitizeObject(
       continue
     }
 
-    if (value && typeof value === 'object') {
+    /*if (value && typeof value === 'object') {
       result[key] = sanitizeObject(value, options)
+    } else {
+      result[key] = value
+    }*/
+    /*if (value instanceof Date) {
+      result[key] = value.toISOString()
+    } else if (Array.isArray(value)) {
+      result[key] = value.map((item) =>
+        item && typeof item === 'object' && !(item instanceof Date)
+          ? sanitizeObject(item, options)
+          : item,
+      )
+    } else if (value && typeof value === 'object') {
+      result[key] = sanitizeObject(value, options)
+    } else {
+      result[key] = value
+    }*/
+    if (value instanceof Date) {
+      result[key] = value.toISOString()
+    } else if (Array.isArray(value)) {
+      const { allowList, ...rest } = options ?? {}
+      const childOptions = rest
+
+      result[key] = value.map((item) =>
+        item && typeof item === 'object' && !(item instanceof Date)
+          ? sanitizeObject(item, childOptions)
+          : item,
+      )
+    } else if (value && typeof value === 'object') {
+      const { allowList, ...rest } = options ?? {}
+      const childOptions = rest
+
+      result[key] = sanitizeObject(value, childOptions)
     } else {
       result[key] = value
     }

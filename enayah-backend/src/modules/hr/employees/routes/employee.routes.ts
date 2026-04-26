@@ -50,6 +50,9 @@ router.put(
   audit('EMPLOYEE_UPDATE', {
     resource: 'EMPLOYEE',
     getResourceId: (req) => getParam(req.params.id),
+    sanitize: {
+      redactFields: ['email', 'phone'],
+    },
   }),
   EmployeeController.update,
 )
@@ -60,6 +63,9 @@ router.delete(
   audit('DELETE_EMPLOYEE', {
     resource: 'EMPLOYEE',
     getResourceId: (req) => getParam(req.params.id),
+    sanitize: {
+      redactFields: ['email', 'phone'],
+    },
   }),
   EmployeeController.delete,
 )
