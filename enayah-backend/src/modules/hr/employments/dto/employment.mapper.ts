@@ -20,6 +20,7 @@ export const toEmploymentDb = (dto: CreateEmploymentDto): EmploymentInsert => ({
   startDate: dto.startDate,
   endDate: dto.endDate ?? undefined,
   employmentType: dto.employmentType ?? undefined,
+  status: 'active',
 })
 
 export const toEmploymentUpdateDb = (
@@ -51,6 +52,7 @@ export const toEmploymentResponse = (dto: any): EmploymentResponse => ({
   staffCategory: dto.staffCategory,
   positionItemId: dto.positionItemId ?? undefined,
   status: dto.status,
+  hireDate: dto.hireDate,
   startDate: dto.startDate,
   endDate: dto.endDate ?? undefined,
 })

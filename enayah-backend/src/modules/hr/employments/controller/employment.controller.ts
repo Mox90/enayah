@@ -11,8 +11,14 @@ import { asyncHandler } from '../../../../core/utils/asyncHandler'
 export const EmploymentController = {
   hire: asyncHandler(async (req: Request, res: Response) => {
     const dto = createEmploymentSchema.parse(req.body)
+    console.log('DTO>>>> ', dto)
     const result = await EmploymentService.hire(dto)
     res.status(201).json(toEmploymentResponse(result))
+  }),
+
+  findAll: asyncHandler(async (req: Request, res: Response) => {
+    const result = await EmploymentService.findAll()
+    res.status(200).json(result)
   }),
 
   terminate: asyncHandler(async (req: Request, res: Response) => {

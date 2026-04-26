@@ -43,6 +43,10 @@ export const EmploymentService = {
     return employment
   },
 
+  findAll: async () => {
+    return EmploymentRepository.findAll()
+  },
+
   terminate: async (id: string, dto: UpdateEmploymentDto) => {
     return EmploymentRepository.terminate(id, { ...dto, status: 'terminated' })
   },

@@ -9,13 +9,17 @@ const router = Router()
 
 router.use(requireAuth)
 
+router.get(
+  '/',
+  requirePermission('employment.view'),
+  EmploymentController.findAll,
+)
 router.post(
   '/',
   requirePermission('employment.create'),
   audit('HIRE_EMPLOYEE', 'EMPLOYMENT'),
   EmploymentController.hire,
 )
-
 router.post(
   '/:id/terminate',
   requirePermission('employment.terminate'),

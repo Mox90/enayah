@@ -72,6 +72,12 @@ export const EmploymentRepository = {
     })
   },
 
+  findAll: async () => {
+    return db.query.employments.findMany({
+      where: eq(employments.isDeleted, false),
+    })
+  },
+
   findPositionItemOrThrow: async (id: string) => {
     const result = await db.query.positionItems.findFirst({
       where: eq(positionItems.id, id),
