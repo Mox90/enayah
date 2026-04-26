@@ -11,9 +11,10 @@ router.use(requireAuth)
 router.post(
   '/',
   requirePermission('employee.hire'),
-  audit('EMPLOYMENT_HIRING', 'EMPLOYMENT', (req) =>
-    typeof req.params.id === 'string' ? req.params.id : undefined,
-  ),
+  audit('HIRE_EMPLOYEE', { resource: 'EMPLOYMENT' }),
+  // ID comes AFTER creation
+  // so we rely on controller:
+  // res.locals.resourceId = employment.id
   HiringController.hire,
 )
 

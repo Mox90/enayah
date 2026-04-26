@@ -44,9 +44,9 @@ export const JobAssignmentService = {
     return db.transaction(async (tx) => {
       const existing = await JobAssignmentRepository.findById(tx, id)
 
-      if (!existing) {
+      /*if (!existing) {
         throw new AppError('Job assignment not found', 404)
-      }
+      }*/
 
       if (existing.endDate) {
         throw new AppError('Assignment already ended', 400)

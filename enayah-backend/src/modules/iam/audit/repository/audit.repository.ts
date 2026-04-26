@@ -41,15 +41,15 @@ export const AuditRepository = {
 
   getLogs: async (filters: {
     resource?: string
-
     action?: string
-
     userId?: string
-
     from?: Date
-
     to?: Date
+    limit?: number
+    cursor?: Date
   }) => {
+    const MAX_LIMIT = 100
+    const safeLimit = Math.min(filters.limit ?? 50, MAX_LIMIT)
     return db.query.auditLogs.findMany({
       where: and(
         filters.resource ? eq(auditLogs.resource, filters.resource) : undefined,
@@ -57,9 +57,11 @@ export const AuditRepository = {
         filters.userId ? eq(auditLogs.userId, filters.userId) : undefined,
         filters.from ? gte(auditLogs.createdAt, filters.from) : undefined,
         filters.to ? lte(auditLogs.createdAt, filters.to) : undefined,
+        filters.cursor ? lte(auditLogs.createdAt, filters.cursor) : undefined,
       ),
 
       orderBy: (a, { desc }) => [desc(a.createdAt)],
+      limit: safeLimit,
     })
   },
   /*findAll: async ({ limit = 50, cursor }: FindAllAuditParams = {}) => {

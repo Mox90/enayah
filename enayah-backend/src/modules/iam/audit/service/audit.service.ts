@@ -1,5 +1,6 @@
 import { AuditRepository } from '../repository/audit.repository'
 import { AuditLogInput } from '../../../../core/types/audit.types'
+import { isDeepStrictEqual } from 'node:util'
 
 function computeDiff(before: any, after: any) {
   if (!before || !after) return { before, after }
@@ -9,10 +10,10 @@ function computeDiff(before: any, after: any) {
   const keys = new Set([...Object.keys(before), ...Object.keys(after)])
 
   for (const key of keys) {
-    if (before[key] !== after[key]) {
+    //if (before[key] !== after[key]) {
+    if (!isDeepStrictEqual(before[key], after[key])) {
       changes[key] = {
         before: before[key],
-
         after: after[key],
       }
     }

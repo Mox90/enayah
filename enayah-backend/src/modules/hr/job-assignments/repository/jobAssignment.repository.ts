@@ -74,17 +74,17 @@ export const JobAssignmentRepository = {
   },
 
   update: async (tx: DB, id: string, dto: UpdateJobAssignmentDto) => {
-    return tx.transaction(async (tx) => {
-      const [updated] = await tx
-        .update(jobAssignments)
-        .set(toJobAssignmentUpdateDb(dto))
-        .where(eq(jobAssignments.id, id))
-        .returning({ id: jobAssignments.id })
+    //return tx.transaction(async (tx) => {
+    const [updated] = await tx
+      .update(jobAssignments)
+      .set(toJobAssignmentUpdateDb(dto))
+      .where(eq(jobAssignments.id, id))
+      .returning({ id: jobAssignments.id })
 
-      const row = assertExists(updated, 'Update failed')
+    const row = assertExists(updated, 'Update failed')
 
-      return row
-    })
+    return row
+    //})
   },
 
   endAssignment: async (tx: DB, id: string, endDate: Date) => {
@@ -95,8 +95,8 @@ export const JobAssignmentRepository = {
   },
 
   softDelete: async (tx: DB, id: string, userId?: string) => {
-    const existing = await db.query.jobAssignments.findFirst({
-      where: eq(jobAssignments.id, id),
+    const existing = await tx.query.jobAssignments.findFirst({
+      where: and(eq(jobAssignments.id, id), isActive),
       with: {
         department: true,
         position: true,

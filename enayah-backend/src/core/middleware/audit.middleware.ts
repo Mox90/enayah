@@ -1,12 +1,18 @@
 import { Request, Response, NextFunction } from 'express'
 import { auditLogger } from '../logging/auditLogger'
+import { sanitizeObject } from '../utils/auditSanitizer'
+
+type AuditOptions = {
+  resource?: string
+  getResourceId?: (req: Request) => string | undefined
+  sanitize?: {
+    allowList?: string[]
+    redactFields?: string[]
+  }
+}
 
 export const audit =
-  (
-    action: string,
-    resource?: string,
-    getResourceId?: (req: Request) => string | undefined,
-  ) =>
+  (action: string, options?: AuditOptions) =>
   (req: Request, res: Response, next: NextFunction) => {
     const start = Date.now()
 
@@ -15,7 +21,7 @@ export const audit =
         try {
           const resourceId =
             res.locals?.resourceId ??
-            getResourceId?.(req) ??
+            options?.getResourceId?.(req) ??
             (typeof req.params?.id === 'string' ? req.params.id : undefined)
 
           if (!resourceId && process.env.NODE_ENV !== 'production') {
@@ -24,11 +30,21 @@ export const audit =
             )
           }
 
+          const beforeSanitized = sanitizeObject(
+            res.locals.before,
+            options?.sanitize,
+          )
+
+          const afterSanitized = sanitizeObject(
+            res.locals.after,
+            options?.sanitize,
+          )
+
           await auditLogger.log({
             action,
 
             ...(req.user?.id && { userId: req.user.id }),
-            ...(resource && { resource }),
+            ...(options?.resource && { resource: options.resource }),
             ...(resourceId && { resourceId }),
 
             before: res.locals.before,

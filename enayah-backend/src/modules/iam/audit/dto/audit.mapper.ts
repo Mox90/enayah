@@ -9,8 +9,12 @@ export const toAuditResponse = (data: any): AuditResponseDTO => ({
   ...(data.resource && { resource: data.resource }),
   ...(data.resourceId && { resourceId: data.resourceId }),
 
-  ...(data.before && { before: data.before }),
-  ...(data.after && { after: data.after }),
+  //...(data.before && { before: data.before }),
+  //...(data.after && { after: data.after }),
+  ...(data.before !== undefined && data.before !== null
+    ? { before: data.before }
+    : {}),
+  ...(data.after !== undefined ? { after: data.after } : {}),
 
   ...(data.metadata && { metadata: data.metadata }),
   ...(data.ip && { ip: data.ip }),
