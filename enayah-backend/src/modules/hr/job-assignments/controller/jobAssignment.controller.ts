@@ -12,9 +12,10 @@ import { toJobAssignmentResponse } from '../dto/jobAssignment.mapper'
 
 export const JobAssignmentController = {
   create: asyncHandler(async (req: Request, res: Response) => {
+    const { employmentId } = getPrimaryParamsSchema.parse(req.params)
     const dto = createJobAssignmentSchema.parse(req.body)
 
-    const result = await JobAssignmentService.assign(dto)
+    const result = await JobAssignmentService.assign(employmentId, dto)
 
     res.status(201).json(result)
   }),
@@ -34,5 +35,11 @@ export const JobAssignmentController = {
     const result = await JobAssignmentService.getPrimary(employmentId)
 
     res.json(result ? toJobAssignmentResponse(result) : null)
+  }),
+
+  endAssignment: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = jobAssignmentIdSchema.parse(req.params)
+    const result = await JobAssignmentService.endAssignment(id)
+    res.json(result)
   }),
 }

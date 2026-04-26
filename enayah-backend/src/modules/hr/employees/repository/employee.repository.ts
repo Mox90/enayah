@@ -4,9 +4,8 @@ import { DB, db } from '../../../../db'
 import { employees } from '../../../../db/schema/employees'
 import { and, eq, sql } from 'drizzle-orm'
 import { CreateEmployeeDto, UpdateEmployeeDto } from '../dto/employee.request'
-import { PgTransaction } from 'drizzle-orm/pg-core'
-import { DbOrTx, Executor, Tx } from '../../../../core/types/db.types'
 import { toEmployeeDb, toEmployeeUpdateDb } from '../dto/employee.mapper'
+import { Tx } from '../../../../core/types/db.types'
 
 //type DbOrTx = typeof db | PgTransaction<any, any, any>
 
@@ -15,7 +14,7 @@ const employeeWithRelations = {
   nationality: true,
 } as const
 
-function findByIdOrThrow(executor: DB, id: string): Promise<any>
+//function findByIdOrThrow(executor: DB, id: string): Promise<any>
 function findByIdOrThrow(executor: DB | Tx, id: string): Promise<any>
 async function findByIdOrThrow(executor: any, id: string) {
   const result = await executor.query.employees.findFirst({
@@ -43,49 +42,44 @@ function assertExists<T>(
 
 export const EmployeeRepository = {
   create: async (tx: DB, data: CreateEmployeeDto) => {
-    return db.transaction(async (tx) => {
-      const [createdRaw] = await tx
-        .insert(employees)
-        .values(toEmployeeDb(data))
-        .returning({ id: employees.id })
+    const [createdRaw] = await tx
+      .insert(employees)
+      .values(toEmployeeDb(data))
+      .returning({ id: employees.id })
 
-      const created = assertExists(createdRaw, 'Failed to create employee')
+    const created = assertExists(createdRaw, 'Failed to create employee')
 
-      return findByIdOrThrow(tx, created.id)
-    })
+    return findByIdOrThrow(tx, created.id)
   },
 
-  findAll: async () => {
-    return db.query.employees.findMany({
+  findAll: async (tx: DB) => {
+    return tx.query.employees.findMany({
       where: isActive,
       with: employeeWithRelations,
     })
   },
 
-  findById: async (id: string) => {
-    return findByIdOrThrow(db, id)
+  findById: async (tx: DB, id: string) => {
+    return findByIdOrThrow(tx, id)
   },
 
-  update: async (id: string, data: UpdateEmployeeDto & { version: number }) => {
-    return db.transaction(async (tx) => {
-      const [updatedRaw] = await tx
-        .update(employees)
-        .set({
-          ...toEmployeeUpdateDb(data),
-          updatedAt: new Date(),
-          version: sql`${employees.version} + 1`,
-        })
-        .where(and(eq(employees.id, id), eq(employees.version, data.version)))
-        //.where(eq(employees.id, id))
-        .returning({ id: employees.id })
+  update: async (
+    tx: DB,
+    id: string,
+    data: UpdateEmployeeDto & { version: number },
+  ) => {
+    const [updatedRaw] = await tx
+      .update(employees)
+      .set({
+        ...toEmployeeUpdateDb(data),
+        updatedAt: new Date(),
+        version: sql`${employees.version} + 1`,
+      })
+      .where(and(eq(employees.id, id), eq(employees.version, data.version)))
+      .returning({ id: employees.id })
 
-      const updated = assertExists(
-        updatedRaw,
-        'Update failed: Employee not found or version conflict',
-        409,
-      )
+    const updated = assertExists(updatedRaw, 'Update failed', 409)
 
-      return findByIdOrThrow(tx, updated.id)
-    })
+    return findByIdOrThrow(tx, updated.id)
   },
 }
