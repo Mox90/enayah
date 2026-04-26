@@ -1,11 +1,27 @@
 import { and, eq, inArray, sql } from 'drizzle-orm'
-import { db, positionItems } from '../../../../db'
+import { DB, db, positionItems } from '../../../../db'
 import { AppError } from '../../../../core/errors/AppError'
 import { CreatePositionItemDTO } from '../dto/positionItem.request'
 import {
   toPositionItemDB,
   toPositionItemResponse,
 } from '../dto/positionItem.mapper'
+import { Tx } from '../../../../core/types/db.types'
+
+const isActive = eq(positionItems.isDeleted, false)
+
+function findByIdOrThrow(executor: DB | Tx, id: string): Promise<any>
+async function findByIdOrThrow(executor: any, id: string) {
+  const result = await executor.query.positionItems.findFirst({
+    where: and(eq(positionItems.id, id), isActive),
+  })
+
+  if (!result) {
+    throw new AppError('Position item not found', 404)
+  }
+
+  return result
+}
 
 function assertExists<T>(value: T | undefined, msg: string, status = 500): T {
   if (!value) throw new AppError(msg, status)
@@ -26,7 +42,7 @@ export const PositionItemRepository = {
       .returning()
 
     if (result.length === 0) {
-      throw new AppError('Position not available', 400)
+      throw new AppError('Position item not available', 400)
     }
 
     return result[0]
@@ -40,7 +56,9 @@ export const PositionItemRepository = {
         .values(toPositionItemDB(data))
         .returning()
 
-      return assertExists(row, 'Failed to create position item')
+      const created = assertExists(row, 'Failed to create position item')
+
+      return findByIdOrThrow(tx, created.id)
     })
   },
 
@@ -51,11 +69,12 @@ export const PositionItemRepository = {
 
   findById: async (id: string) => {
     //return db.select().from(positionItems).where(eq(positionItems.id, id))
-    const positionItem = await db.query.positionItems.findFirst({
-      where: eq(positionItems.id, id),
-    })
+    //const positionItem = await db.query.positionItems.findFirst({
+    //  where: eq(positionItems.id, id),
+    //})
     //return toPositionItemResponse(positionItem)
-    return positionItem ? toPositionItemResponse(positionItem) : undefined
+    //return positionItem ? toPositionItemResponse(positionItem) : undefined
+    return findByIdOrThrow(db, id)
   },
 
   getSummary: async () => {

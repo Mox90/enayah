@@ -7,6 +7,7 @@ import {
 } from '../dto/positionItem.mapper'
 import { PositionItemRepository } from '../repository/positionItem.repository'
 import { validatePositionItemAssignment } from '../validators/positionItem.validator'
+import { EmployeeRepository } from '../../employees/repository/employee.repository'
 
 type EmploymentInsert = InferInsertModel<typeof employments>
 
@@ -34,11 +35,11 @@ export const PositionItemService = {
   },
 
   create: async (data: any) => {
-    const [positionItem] = await await PositionItemRepository.create(
+    /*const [positionItem] = await await PositionItemRepository.create(
       toPositionItemDB(data),
-    )
-    return toPositionItemResponse(positionItem)
-    //return PositionItemRepository.create(data)
+    )*/
+    //return toPositionItemResponse(positionItem)
+    return PositionItemRepository.create(data)
   },
 
   findAll: async () => {
@@ -48,19 +49,21 @@ export const PositionItemService = {
   },
 
   findById: async (id: string) => {
-    const positionItem = await PositionItemRepository.findById(id)
+    /*const positionItem = await PositionItemRepository.findById(id)
     if (!positionItem) throw new AppError('PositionItem not found', 404)
-    return positionItem
+    return positionItem*/
+    return PositionItemRepository.findById(id)
   },
 
   update: async (id: string, data: any) => {
-    const positionItem = await PositionItemRepository.findById(id)
+    /*const positionItem = await PositionItemRepository.findById(id)
     if (!positionItem) throw new AppError('PositionItem not found', 404)
     const [updatedPositionItem] = await PositionItemRepository.update(
       id,
       toPositionItemDB(data),
     )
-    return toPositionItemResponse(updatedPositionItem)
+    return toPositionItemResponse(updatedPositionItem)*/
+    return PositionItemRepository.update(id, data)
   },
 
   unassignedEmployee: async (positionItemId: string) => {
