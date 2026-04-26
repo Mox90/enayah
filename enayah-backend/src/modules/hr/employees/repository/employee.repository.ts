@@ -42,18 +42,13 @@ function assertExists<T>(
 }
 
 export const EmployeeRepository = {
-  create: async (data: CreateEmployeeDto) => {
-    //const [result] = await db.insert(employees).values(data).returning()
-    //return result
+  create: async (tx: DB, data: CreateEmployeeDto) => {
     return db.transaction(async (tx) => {
       const [createdRaw] = await tx
         .insert(employees)
         .values(toEmployeeDb(data))
         .returning({ id: employees.id })
 
-      /*if (!created) {
-        throw new AppError('Failed to create employee', 500)
-      }*/
       const created = assertExists(createdRaw, 'Failed to create employee')
 
       return findByIdOrThrow(tx, created.id)
@@ -61,45 +56,17 @@ export const EmployeeRepository = {
   },
 
   findAll: async () => {
-    //return db.select().from(employees)
     return db.query.employees.findMany({
       where: isActive,
       with: employeeWithRelations,
     })
   },
 
-  /*findByIds: async (id: string) => {
-    const [result] = await db
-      .select()
-      .from(employees)
-      .where(and(eq(employees.id, id), eq(employees.isDeleted, false)))
-
-    return result
-  },*/
-
   findById: async (id: string) => {
-    /*const result = await db.query.employees.findFirst({
-      where: and(eq(employees.id, id), isActive),
-      with: {
-        nationality: true,
-      },
-    })*/
-
     return findByIdOrThrow(db, id)
   },
 
   update: async (id: string, data: UpdateEmployeeDto & { version: number }) => {
-    /*const [updated] = await db
-      .update(employees)
-      .set({
-        ...data,
-        updatedAt: new Date(), // from baseColumns
-        version: sql`${employees.version} + 1`,
-      })
-      .where(eq(employees.id, id))
-      .returning()
-
-    return updated*/
     return db.transaction(async (tx) => {
       const [updatedRaw] = await tx
         .update(employees)

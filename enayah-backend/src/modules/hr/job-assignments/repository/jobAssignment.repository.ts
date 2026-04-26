@@ -1,4 +1,4 @@
-import { db } from '../../../../db'
+import { DB, db } from '../../../../db'
 import { jobAssignments } from '../../../../db/schema/jobAssignments'
 import { and, eq, isNull } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
@@ -11,6 +11,10 @@ import {
   toJobAssignmentUpdateDb,
 } from '../dto/jobAssignment.mapper'
 
+type CreateJobAssignmentInternal = CreateJobAssignmentDto & {
+  employmentId: string
+}
+
 const isActive = isNull(jobAssignments.deletedAt)
 
 function assertExists<T>(value: T | undefined, message: string): T {
@@ -19,7 +23,7 @@ function assertExists<T>(value: T | undefined, message: string): T {
 }
 
 export const JobAssignmentRepository = {
-  create: async (dto: CreateJobAssignmentDto) => {
+  create: async (tx: DB, dto: CreateJobAssignmentInternal) => {
     return db.transaction(async (tx) => {
       // 🔥 ensure only one primary
       if (dto.isPrimary ?? true) {

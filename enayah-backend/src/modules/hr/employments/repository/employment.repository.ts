@@ -37,7 +37,7 @@ function findByIdOrThrow(executor: any, id: string) {
 }
 
 export const EmploymentRepository = {
-  create: async (data: CreateEmploymentDto) => {
+  create: async (tx: DB, data: CreateEmploymentDto) => {
     return db.transaction(async (tx) => {
       if (data.positionItemId) {
         const [reservedPosition] = await tx
@@ -62,8 +62,8 @@ export const EmploymentRepository = {
     })
   },
 
-  findActiveByEmployee: async (employeeId: string) => {
-    return db.query.employments.findFirst({
+  findActiveByEmployee: async (tx: DB, employeeId: string) => {
+    return tx.query.employments.findFirst({
       where: and(
         eq(employments.employeeId, employeeId),
         eq(employments.status, 'active'),
