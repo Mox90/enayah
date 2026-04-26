@@ -8,9 +8,12 @@ import { JobAssignmentResponse } from './jobAssignment.response'
 
 type JobAssignmentInsert = InferInsertModel<typeof jobAssignments>
 type JobAssignmentSelect = InferSelectModel<typeof jobAssignments>
+type CreateJobAssignmentInternal = CreateJobAssignmentDto & {
+  employmentId: string
+}
 
 export const toJobAssignmentDb = (
-  dto: CreateJobAssignmentDto,
+  dto: CreateJobAssignmentInternal,
 ): JobAssignmentInsert => ({
   employmentId: dto.employmentId,
   departmentId: dto.departmentId,

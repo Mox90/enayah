@@ -1,15 +1,15 @@
 import { z } from 'zod'
 
 export const createJobAssignmentSchema = z.object({
-  employmentId: z.uuid(),
+  //employmentId: z.uuid(),
 
   departmentId: z.uuid(),
   positionId: z.uuid(),
 
   managerId: z.uuid().optional(),
 
-  startDate: z.iso.datetime(),
-  endDate: z.iso.datetime().optional(),
+  startDate: z.iso.date(),
+  endDate: z.iso.date().optional(),
 
   isPrimary: z.boolean().optional(),
 })

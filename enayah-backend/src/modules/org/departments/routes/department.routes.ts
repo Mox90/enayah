@@ -7,6 +7,7 @@ import {
   requirePermission,
 } from '../../../../core/middleware/permission.middleware'
 import { audit } from '../../../../core/middleware/audit.middleware'
+import { getParam } from '../../../../core/utils/request.utils'
 
 const router = Router()
 
@@ -19,7 +20,9 @@ router.get('/tree', DepartmentController.findTree) // Static route must always c
 router.post(
   '/',
   requirePermission('department.create'),
-  audit('ADD_DEPARTMENT', 'DEPARTMENT'),
+  audit('CREATE_DEPARTMENT', {
+    resource: 'DEPARTMENT',
+  }),
   DepartmentController.create,
 )
 
@@ -31,9 +34,10 @@ router.get('/:id', DepartmentController.findById)
 router.put(
   '/:id',
   requirePermission('department.update'),
-  audit('UPDATE_DEPARTMENT', 'DEPARTMENT', (req) =>
-    typeof req.params.id === 'string' ? req.params.id : undefined,
-  ),
+  audit('UPDATE_DEPARTMENT', {
+    resource: 'DEPARTMENT',
+    getResourceId: (req) => getParam(req.params.id),
+  }),
   DepartmentController.update,
 )
 
@@ -41,11 +45,10 @@ router.put(
 router.delete(
   '/:id',
   requirePermission('department.delete'),
-  audit('DELETE_DEPARTMENT', 'DEPARTMENT', (req) =>
-    typeof req.params.roleId === 'string'
-      ? `${req.params.roleId}:${req.params.permissionId}`
-      : undefined,
-  ),
+  audit('DELETE_DEPARTMENT', {
+    resource: 'DEPARTMENT',
+    getResourceId: (req) => getParam(req.params.id),
+  }),
   DepartmentController.delete,
 )
 

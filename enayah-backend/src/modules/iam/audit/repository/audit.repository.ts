@@ -1,5 +1,6 @@
 import { auditLogs, db } from '../../../../db'
 import { AuditLogInput } from '../../../../core/types/audit.types'
+import { and, eq, gte, lte } from 'drizzle-orm'
 
 type FindAllAuditParams = {
   limit?: number
@@ -16,13 +17,17 @@ export const AuditRepository = {
     return db.insert(auditLogs).values({
       ...(data.userId && { userId: data.userId }),
       action: data.action,
-      //...(data.resource && { resource: data.resource }),
-      //...(data.resourceId && { resourceId: data.resourceId }),
+
       ...(resource && { resource }),
       ...(resourceId && { resourceId }),
+
+      //...(data.before && { before: data.before }),
+      //...(data.after && { after: data.after }),
+      ...(data.before !== undefined ? { before: data.before } : {}),
+      ...(data.after !== undefined ? { after: data.after } : {}),
+
       ...(data.metadata && { metadata: data.metadata }),
-      //...(data.ip && { ip: data.ip }),
-      //...(data.userAgent && { userAgent: data.userAgent }),
+
       ...(ip && { ip }),
       ...(userAgent && { userAgent }),
     })
@@ -31,6 +36,32 @@ export const AuditRepository = {
   findAll: async () => {
     return db.query.auditLogs.findMany({
       orderBy: (auditLogs, { desc }) => [desc(auditLogs.createdAt)],
+    })
+  },
+
+  getLogs: async (filters: {
+    resource?: string
+    action?: string
+    userId?: string
+    from?: Date
+    to?: Date
+    limit?: number
+    cursor?: Date
+  }) => {
+    const MAX_LIMIT = 100
+    const safeLimit = Math.min(filters.limit ?? 50, MAX_LIMIT)
+    return db.query.auditLogs.findMany({
+      where: and(
+        filters.resource ? eq(auditLogs.resource, filters.resource) : undefined,
+        filters.action ? eq(auditLogs.action, filters.action) : undefined,
+        filters.userId ? eq(auditLogs.userId, filters.userId) : undefined,
+        filters.from ? gte(auditLogs.createdAt, filters.from) : undefined,
+        filters.to ? lte(auditLogs.createdAt, filters.to) : undefined,
+        filters.cursor ? lte(auditLogs.createdAt, filters.cursor) : undefined,
+      ),
+
+      orderBy: (a, { desc }) => [desc(a.createdAt)],
+      limit: safeLimit,
     })
   },
   /*findAll: async ({ limit = 50, cursor }: FindAllAuditParams = {}) => {

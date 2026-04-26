@@ -30,4 +30,16 @@ export const EmploymentController = {
     })
     res.json(toEmploymentResponse(result))
   }),
+
+  delete: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = employmentIdSchema.parse(req.params)
+
+    const existing = await EmploymentService.delete(id, req.user?.id)
+
+    res.locals.before = existing
+    res.locals.after = null
+    res.locals.resourceId = id
+
+    res.status(204).send()
+  }),
 }

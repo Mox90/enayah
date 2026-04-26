@@ -37,33 +37,31 @@ function findByIdOrThrow(executor: any, id: string) {
 }
 
 export const EmploymentRepository = {
-  create: async (data: CreateEmploymentDto) => {
-    return db.transaction(async (tx) => {
-      if (data.positionItemId) {
-        const [reservedPosition] = await tx
-          .update(positionItems)
-          .set({ status: 'filled' })
-          .where(
-            and(
-              eq(positionItems.id, data.positionItemId),
-              eq(positionItems.status, 'vacant'),
-            ),
-          )
-          .returning({ id: positionItems.id })
-        assertExists(reservedPosition, 'Position item not available', 400)
-      }
+  create: async (tx: DB, data: CreateEmploymentDto) => {
+    if (data.positionItemId) {
+      const [reservedPosition] = await tx
+        .update(positionItems)
+        .set({ status: 'filled' })
+        .where(
+          and(
+            eq(positionItems.id, data.positionItemId),
+            eq(positionItems.status, 'vacant'),
+          ),
+        )
+        .returning({ id: positionItems.id })
+      assertExists(reservedPosition, 'Position item not available', 400)
+    }
 
-      const [createdRaw] = await tx
-        .insert(employments)
-        .values(toEmploymentDb(data))
-        .returning({ id: employments.id })
-      const created = assertExists(createdRaw, 'Failed to create employment')
-      return findByIdOrThrow(tx, created.id)
-    })
+    const [createdRaw] = await tx
+      .insert(employments)
+      .values(toEmploymentDb(data))
+      .returning({ id: employments.id })
+    const created = assertExists(createdRaw, 'Failed to create employment')
+    return findByIdOrThrow(tx, created.id)
   },
 
-  findActiveByEmployee: async (employeeId: string) => {
-    return db.query.employments.findFirst({
+  findActiveByEmployee: async (tx: DB, employeeId: string) => {
+    return tx.query.employments.findFirst({
       where: and(
         eq(employments.employeeId, employeeId),
         eq(employments.status, 'active'),
@@ -72,8 +70,8 @@ export const EmploymentRepository = {
     })
   },
 
-  findAll: async () => {
-    return db.query.employments.findMany({
+  findAll: async (tx: DB) => {
+    return tx.query.employments.findMany({
       where: isActive,
       orderBy: (e, { desc }) => [desc(e.createdAt)],
       //limit,
@@ -81,8 +79,8 @@ export const EmploymentRepository = {
     })
   },
 
-  findPositionItemOrThrow: async (id: string) => {
-    const result = await db.query.positionItems.findFirst({
+  findPositionItemOrThrow: async (tx: DB, id: string) => {
+    const result = await tx.query.positionItems.findFirst({
       where: eq(positionItems.id, id),
     })
 
@@ -91,8 +89,8 @@ export const EmploymentRepository = {
     return result
   },
 
-  ensurePositionVacantOrThrow: async (id: string) => {
-    const row = await db.query.positionItems.findFirst({
+  ensurePositionVacantOrThrow: async (tx: DB, id: string) => {
+    const row = await tx.query.positionItems.findFirst({
       where: eq(positionItems.id, id),
     })
 
@@ -103,51 +101,51 @@ export const EmploymentRepository = {
     }
   },
 
-  update: async (id: string, dto: UpdateEmploymentDto) => {
-    return db.transaction(async (tx) => {
-      const existing = await findByIdOrThrow(tx, id)
+  update: async (tx: DB, id: string, dto: UpdateEmploymentDto) => {
+    //return db.transaction(async (tx) => {
+    const existing = await findByIdOrThrow(tx, id)
 
-      if (existing.status === 'terminated') {
-        throw new AppError('Cannot update terminated employment', 400)
+    if (existing.status === 'terminated') {
+      throw new AppError('Cannot update terminated employment', 400)
+    }
+
+    const newPositionId = dto.positionItemId
+    const oldPositionId = existing.positionItemId
+
+    if (newPositionId !== undefined && newPositionId !== oldPositionId) {
+      if (newPositionId) {
+        const [reserved] = await tx
+          .update(positionItems)
+          .set({ status: 'filled' })
+          .where(
+            and(
+              eq(positionItems.id, newPositionId),
+              eq(positionItems.status, 'vacant'),
+            ),
+          )
+          .returning({ id: positionItems.id })
+
+        assertExists(reserved, 'New position not available', 400)
       }
 
-      const newPositionId = dto.positionItemId
-      const oldPositionId = existing.positionItemId
-
-      if (newPositionId !== undefined && newPositionId !== oldPositionId) {
-        if (newPositionId) {
-          const [reserved] = await tx
-            .update(positionItems)
-            .set({ status: 'filled' })
-            .where(
-              and(
-                eq(positionItems.id, newPositionId),
-                eq(positionItems.status, 'vacant'),
-              ),
-            )
-            .returning({ id: positionItems.id })
-
-          assertExists(reserved, 'New position not available', 400)
-        }
-
-        if (oldPositionId) {
-          await tx
-            .update(positionItems)
-            .set({ status: 'vacant' })
-            .where(eq(positionItems.id, oldPositionId))
-        }
+      if (oldPositionId) {
+        await tx
+          .update(positionItems)
+          .set({ status: 'vacant' })
+          .where(eq(positionItems.id, oldPositionId))
       }
+    }
 
-      const [updated] = await tx
-        .update(employments)
-        .set(toEmploymentUpdateDb(dto))
-        .where(eq(employments.id, id))
-        .returning({ id: employments.id })
+    const [updated] = await tx
+      .update(employments)
+      .set(toEmploymentUpdateDb(dto))
+      .where(eq(employments.id, id))
+      .returning({ id: employments.id })
 
-      const row = assertExists(updated, 'Update failed')
+    const row = assertExists(updated, 'Update failed')
 
-      return findByIdOrThrow(tx, row.id)
-    })
+    return findByIdOrThrow(tx, row.id)
+    //})
   },
 
   markPositionFilled: async (tx: DB, id: string) => {
@@ -164,30 +162,52 @@ export const EmploymentRepository = {
       .where(eq(positionItems.id, id))
   },
 
-  terminate: async (id: string, data: UpdateEmploymentDto) => {
-    return db.transaction(async (tx) => {
-      const existing = await findByIdOrThrow(tx, id)
+  terminate: async (tx: DB, id: string, data: UpdateEmploymentDto) => {
+    //return db.transaction(async (tx) => {
+    const existing = await findByIdOrThrow(tx, id)
 
-      if (existing.status !== 'active') {
-        throw new AppError('Employment already terminated', 400)
-      }
+    if (existing.status !== 'active') {
+      throw new AppError('Employment already terminated', 400)
+    }
 
-      const [updatedRaw] = await tx
-        .update(employments)
-        .set(toEmploymentUpdateDb(data))
-        .where(eq(employments.id, id))
-        .returning({ id: employments.id })
+    const [updatedRaw] = await tx
+      .update(employments)
+      .set(toEmploymentUpdateDb(data))
+      .where(eq(employments.id, id))
+      .returning({ id: employments.id })
 
-      const updated = assertExists(updatedRaw, 'Termination failed')
+    const updated = assertExists(updatedRaw, 'Termination failed')
 
-      if (existing.positionItemId) {
-        await tx
-          .update(positionItems)
-          .set({ status: 'vacant' })
-          .where(eq(positionItems.id, existing.positionItemId))
-      }
+    if (existing.positionItemId) {
+      await tx
+        .update(positionItems)
+        .set({ status: 'vacant' })
+        .where(eq(positionItems.id, existing.positionItemId))
+    }
 
-      return findByIdOrThrow(tx, updated.id)
-    })
+    return findByIdOrThrow(tx, updated.id)
+    //})
+  },
+
+  softDelete: async (tx: DB, id: string, userId?: string) => {
+    const existing = await findByIdOrThrow(tx, id)
+
+    if (existing.positionItemId) {
+      await tx
+        .update(positionItems)
+        .set({ status: 'vacant' })
+        .where(eq(positionItems.id, existing.positionItemId))
+    }
+
+    await tx
+      .update(employments)
+      .set({
+        isDeleted: true,
+        deletedAt: new Date(),
+        ...(userId && { deletedBy: userId }),
+      })
+      .where(eq(employments.id, id))
+
+    return existing
   },
 }

@@ -6,18 +6,33 @@ import {
 } from '../../../../core/middleware/permission.middleware'
 import { audit } from '../../../../core/middleware/audit.middleware'
 import { EmployeeController } from '../controller/employee.controller'
+import { getParam } from '../../../../core/utils/request.utils'
 
 const router = Router()
 
 router.use(requireAuth)
 router.use(attachPermissions)
 
+/*
+
+audit('CREATE_EMPLOYEE', {
+  resource: 'EMPLOYEE',
+  sanitize: {
+    redactFields: ['email', 'phone'],
+  },
+})
+
+*/
+
 router.post(
   '/',
   requirePermission('employee.create'),
-  audit('CREATE_EMPLOYEE', 'EMPLOYEE', (req) =>
-    typeof req.params.id === 'string' ? req.params.id : undefined,
-  ),
+  audit('CREATE_EMPLOYEE', {
+    resource: 'EMPLOYEE',
+    sanitize: {
+      redactFields: ['email', 'phone'],
+    },
+  }),
   EmployeeController.create,
 )
 
@@ -32,10 +47,27 @@ router.get(
 router.put(
   '/:id',
   requirePermission('employee.update'),
-  audit('EMPLOYEE_UPDATE', 'EMPLOYEE', (req) =>
-    typeof req.params.id === 'string' ? req.params.id : undefined,
-  ),
+  audit('EMPLOYEE_UPDATE', {
+    resource: 'EMPLOYEE',
+    getResourceId: (req) => getParam(req.params.id),
+    sanitize: {
+      redactFields: ['email', 'phone'],
+    },
+  }),
   EmployeeController.update,
+)
+
+router.delete(
+  '/:id',
+  requirePermission('employee.delete'),
+  audit('DELETE_EMPLOYEE', {
+    resource: 'EMPLOYEE',
+    getResourceId: (req) => getParam(req.params.id),
+    sanitize: {
+      redactFields: ['email', 'phone'],
+    },
+  }),
+  EmployeeController.delete,
 )
 
 export default router

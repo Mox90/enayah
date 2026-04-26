@@ -1,4 +1,5 @@
 import { AppError } from '../../../../core/errors/AppError'
+import { db } from '../../../../db'
 import {
   toEmployeeDb,
   toEmployeeResponse,
@@ -9,38 +10,28 @@ import { EmployeeRepository } from '../repository/employee.repository'
 
 export const EmployeeService = {
   create: async (data: CreateEmployeeDto) => {
-    //const employee = await EmployeeRepository.create(data)
-    //return toEmployeeResponse(employee)
-    return EmployeeRepository.create(data)
+    return db.transaction(async (tx) => {
+      const employee = await EmployeeRepository.create(tx, data)
+      return employee
+    })
   },
 
   findAll: async () => {
-    //const employees = await EmployeeRepository.findAll()
-    //return employees.map(toEmployeeResponse)
-    return EmployeeRepository.findAll()
+    return db.transaction((tx) => EmployeeRepository.findAll(tx))
   },
 
   findById: async (id: string) => {
-    /*const employee = await EmployeeRepository.findById(id)
-
-    if (!employee) {
-      throw new AppError('Employee not found', 404)
-    }
-
-    return toEmployeeResponse(employee)*/
-    return EmployeeRepository.findById(id)
+    return db.transaction((tx) => EmployeeRepository.findById(tx, id))
   },
 
   update: async (id: string, data: UpdateEmployeeDto) => {
-    /*const existing = await EmployeeRepository.findById(id)
+    return db.transaction((tx) => EmployeeRepository.update(tx, id, data))
+  },
 
-    if (!existing) {
-      throw new AppError('Employee not found', 404)
-    }
-
-    const updated = await EmployeeRepository.update(id, data)
-
-    return toEmployeeResponse(updated)*/
-    return EmployeeRepository.update(id, data)
+  delete: async (id: string, userId?: string) => {
+    return db.transaction(async (tx) => {
+      const existing = await EmployeeRepository.softDelete(tx, id, userId)
+      return existing
+    })
   },
 }

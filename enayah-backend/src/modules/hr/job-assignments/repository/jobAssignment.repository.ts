@@ -1,4 +1,4 @@
-import { db } from '../../../../db'
+import { DB, db } from '../../../../db'
 import { jobAssignments } from '../../../../db/schema/jobAssignments'
 import { and, eq, isNull } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
@@ -11,6 +11,10 @@ import {
   toJobAssignmentUpdateDb,
 } from '../dto/jobAssignment.mapper'
 
+type CreateJobAssignmentInternal = CreateJobAssignmentDto & {
+  employmentId: string
+}
+
 const isActive = isNull(jobAssignments.deletedAt)
 
 function assertExists<T>(value: T | undefined, message: string): T {
@@ -19,32 +23,32 @@ function assertExists<T>(value: T | undefined, message: string): T {
 }
 
 export const JobAssignmentRepository = {
-  create: async (dto: CreateJobAssignmentDto) => {
-    return db.transaction(async (tx) => {
-      // 🔥 ensure only one primary
-      if (dto.isPrimary ?? true) {
-        await tx
-          .update(jobAssignments)
-          .set({ isPrimary: false })
-          .where(
-            and(
-              eq(jobAssignments.employmentId, dto.employmentId),
-              eq(jobAssignments.isPrimary, true),
-            ),
-          )
-      }
+  create: async (tx: DB, dto: CreateJobAssignmentInternal) => {
+    //return db.transaction(async (tx) => {
+    // 🔥 ensure only one primary
+    if (dto.isPrimary ?? true) {
+      await tx
+        .update(jobAssignments)
+        .set({ isPrimary: false })
+        .where(
+          and(
+            eq(jobAssignments.employmentId, dto.employmentId),
+            eq(jobAssignments.isPrimary, true),
+          ),
+        )
+    }
 
-      const [row] = await tx
-        .insert(jobAssignments)
-        .values(toJobAssignmentDb(dto))
-        .returning({ id: jobAssignments.id })
+    const [row] = await tx
+      .insert(jobAssignments)
+      .values(toJobAssignmentDb(dto))
+      .returning({ id: jobAssignments.id })
 
-      return assertExists(row, 'Failed to create job assignment')
-    })
+    return assertExists(row, 'Failed to create job assignment')
+    //})
   },
 
-  findActivePrimary: async (employmentId: string) => {
-    return db.query.jobAssignments.findFirst({
+  findActivePrimary: async (tx: DB, employmentId: string) => {
+    return tx.query.jobAssignments.findFirst({
       where: and(
         eq(jobAssignments.employmentId, employmentId),
         eq(jobAssignments.isPrimary, true),
@@ -57,8 +61,8 @@ export const JobAssignmentRepository = {
     })
   },
 
-  findById: async (id: string) => {
-    const row = await db.query.jobAssignments.findFirst({
+  findById: async (tx: DB, id: string) => {
+    const row = await tx.query.jobAssignments.findFirst({
       where: and(eq(jobAssignments.id, id), isActive),
       with: {
         department: true,
@@ -69,24 +73,70 @@ export const JobAssignmentRepository = {
     return assertExists(row, 'Job assignment not found')
   },
 
-  update: async (id: string, dto: UpdateJobAssignmentDto) => {
-    return db.transaction(async (tx) => {
-      const [updated] = await tx
-        .update(jobAssignments)
-        .set(toJobAssignmentUpdateDb(dto))
-        .where(eq(jobAssignments.id, id))
-        .returning({ id: jobAssignments.id })
+  update: async (tx: DB, id: string, dto: UpdateJobAssignmentDto) => {
+    //return tx.transaction(async (tx) => {
 
-      const row = assertExists(updated, 'Update failed')
+    if (dto.isPrimary === true) {
+      const current = await tx.query.jobAssignments.findFirst({
+        where: and(eq(jobAssignments.id, id), isActive),
+        columns: { employmentId: true },
+      })
+      if (current) {
+        await tx
+          .update(jobAssignments)
+          .set({ isPrimary: false })
+          .where(
+            and(
+              eq(jobAssignments.employmentId, current.employmentId),
+              eq(jobAssignments.isPrimary, true),
+            ),
+          )
+      }
+    }
 
-      return row
-    })
+    const [updated] = await tx
+      .update(jobAssignments)
+      .set(toJobAssignmentUpdateDb(dto))
+      .where(eq(jobAssignments.id, id))
+      //.where(and(eq(jobAssignments.id, id), isActive))
+      .returning({ id: jobAssignments.id })
+
+    const row = assertExists(updated, 'Update failed')
+
+    return row
+    //})
   },
 
-  endAssignment: async (id: string, endDate: Date) => {
-    return db
+  endAssignment: async (tx: DB, id: string, endDate: Date) => {
+    return (
+      tx
+        .update(jobAssignments)
+        .set({ endDate })
+        //.where(eq(jobAssignments.id, id))
+        .where(and(eq(jobAssignments.id, id), isActive))
+    )
+  },
+
+  softDelete: async (tx: DB, id: string, userId?: string) => {
+    const existing = await tx.query.jobAssignments.findFirst({
+      where: and(eq(jobAssignments.id, id), isActive),
+      with: {
+        department: true,
+        position: true,
+      },
+    })
+
+    if (!existing) throw new AppError('Job assignment not found', 404)
+
+    await tx
       .update(jobAssignments)
-      .set({ endDate })
+      .set({
+        isDeleted: true,
+        deletedAt: new Date(),
+        ...(userId && { deletedBy: userId }),
+      })
       .where(eq(jobAssignments.id, id))
+
+    return existing
   },
 }
