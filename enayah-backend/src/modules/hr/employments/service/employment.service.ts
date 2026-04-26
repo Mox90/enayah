@@ -57,4 +57,10 @@ export const EmploymentService = {
       EmploymentRepository.terminate(tx, id, { ...dto, status: 'terminated' }),
     )
   },
+  delete: async (id: string, userId?: string) => {
+    return db.transaction(async (tx) => {
+      const existing = await EmploymentRepository.softDelete(tx, id, userId)
+      return existing
+    })
+  },
 }

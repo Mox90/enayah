@@ -27,4 +27,11 @@ export const EmployeeService = {
   update: async (id: string, data: UpdateEmployeeDto) => {
     return db.transaction((tx) => EmployeeRepository.update(tx, id, data))
   },
+
+  delete: async (id: string, userId?: string) => {
+    return db.transaction(async (tx) => {
+      const existing = await EmployeeRepository.softDelete(tx, id, userId)
+      return existing
+    })
+  },
 }

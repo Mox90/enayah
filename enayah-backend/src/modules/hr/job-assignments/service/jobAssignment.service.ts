@@ -57,4 +57,10 @@ export const JobAssignmentService = {
       return { success: true }
     })
   },
+
+  delete: async (id: string, userId?: string) => {
+    return db.transaction(async (tx) => {
+      return JobAssignmentRepository.softDelete(tx, id, userId)
+    })
+  },
 }

@@ -23,10 +23,15 @@ router.post(
 router.post(
   '/:id/terminate',
   requirePermission('employment.terminate'),
-  audit('TERMINATE_EMPLOYMENT', 'EMPLOYMENT', (req) =>
-    typeof req.params.id === 'string' ? req.params.id : undefined,
-  ),
+  audit('TERMINATE_EMPLOYMENT', 'EMPLOYMENT'),
   EmploymentController.terminate,
+)
+
+router.delete(
+  '/:id',
+  requirePermission('employment.delete'),
+  audit('DELETE_EMPLOYMENT', 'EMPLOYMENT'),
+  EmploymentController.delete,
 )
 
 export default router

@@ -4,8 +4,8 @@ export const hiringEmploymentSchema = z.object({
   staffCategory: z.enum(['civilian', 'military', 'contractual']),
   positionItemId: z.uuid().optional(),
 
-  hireDate: z.string(),
-  startDate: z.string(),
+  hireDate: z.iso.date(),
+  startDate: z.iso.date(),
   endDate: z.string().optional(),
 
   employmentType: z

@@ -82,4 +82,19 @@ export const EmployeeRepository = {
 
     return findByIdOrThrow(tx, updated.id)
   },
+
+  softDelete: async (tx: DB, id: string, userId?: string) => {
+    const existing = await findByIdOrThrow(tx, id)
+
+    await tx
+      .update(employees)
+      .set({
+        isDeleted: true,
+        deletedAt: new Date(),
+        ...(userId && { deletedBy: userId }),
+      })
+      .where(eq(employees.id, id))
+
+    return existing
+  },
 }

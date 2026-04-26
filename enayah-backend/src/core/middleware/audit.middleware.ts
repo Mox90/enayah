@@ -13,19 +13,8 @@ export const audit =
     res.on('finish', () => {
       void (async () => {
         try {
-          // 🔥 dynamic + fallback
-          /*const resourceId =
-            getResourceId?.(req) ??
-            (typeof req.params?.id === 'string'
-              ? req.params.id
-              : typeof req.params?.userId === 'string'
-                ? req.params.userId
-                : typeof req.params?.roleId === 'string'
-                  ? req.params.roleId
-                  : typeof req.params?.permissionId === 'string'
-                    ? req.params.permissionId
-                    : undefined)*/
           const resourceId =
+            res.locals?.resourceId ??
             getResourceId?.(req) ??
             (typeof req.params?.id === 'string' ? req.params.id : undefined)
 
@@ -39,10 +28,11 @@ export const audit =
             action,
 
             ...(req.user?.id && { userId: req.user.id }),
-
             ...(resource && { resource }),
-
             ...(resourceId && { resourceId }),
+
+            before: res.locals.before,
+            after: res.locals.after,
 
             metadata: {
               method: req.method,
@@ -52,7 +42,6 @@ export const audit =
             },
 
             ...(req.requestContext?.ip && { ip: req.requestContext.ip }),
-
             ...(req.requestContext?.userAgent && {
               userAgent: req.requestContext.userAgent,
             }),

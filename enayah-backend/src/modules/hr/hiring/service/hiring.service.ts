@@ -11,10 +11,8 @@ import { JobAssignmentRepository } from '../../job-assignments/repository/jobAss
 export const HiringService = {
   hire: async (dto: HireEmployeeDto) => {
     return db.transaction(async (tx) => {
-      // ✅ 1. Employee
       const employee = await EmployeeRepository.create(tx, dto.employee)
-
-      // ✅ 2. Validate employment
+      /*
       const existing = await EmploymentRepository.findActiveByEmployee(
         tx,
         employee.id,
@@ -22,7 +20,7 @@ export const HiringService = {
 
       if (existing) {
         throw new AppError('Employee already has active employment', 400)
-      }
+      }*/
 
       if (
         (dto.employment.staffCategory === 'civilian' ||
@@ -32,13 +30,13 @@ export const HiringService = {
         throw new AppError('Position item required', 400)
       }
 
-      // ✅ 3. Employment (handles reservation internally)
+      // Employment (handles reservation internally)
       const employment = await EmploymentRepository.create(tx, {
         ...dto.employment,
         employeeId: employee.id,
       })
 
-      // ✅ 4. Assignment
+      // JOB Assignment
       if (dto.jobAssignment) {
         await JobAssignmentRepository.create(tx, {
           employmentId: employment.id,

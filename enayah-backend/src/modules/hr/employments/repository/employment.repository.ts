@@ -188,4 +188,26 @@ export const EmploymentRepository = {
     return findByIdOrThrow(tx, updated.id)
     //})
   },
+
+  softDelete: async (tx: DB, id: string, userId?: string) => {
+    const existing = await findByIdOrThrow(tx, id)
+
+    if (existing.positionItemId) {
+      await tx
+        .update(positionItems)
+        .set({ status: 'vacant' })
+        .where(eq(positionItems.id, existing.positionItemId))
+    }
+
+    await tx
+      .update(employments)
+      .set({
+        isDeleted: true,
+        deletedAt: new Date(),
+        ...(userId && { deletedBy: userId }),
+      })
+      .where(eq(employments.id, id))
+
+    return existing
+  },
 }

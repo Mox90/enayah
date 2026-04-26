@@ -14,6 +14,7 @@ export const PositionItemController = {
   create: asyncHandler(async (req: Request, res: Response) => {
     const body = createPositionItemSchema.parse(req.body)
     const result = await PositionItemService.create(body)
+    res.locals.resourceId = result.id
     res.status(201).json(result)
   }),
 

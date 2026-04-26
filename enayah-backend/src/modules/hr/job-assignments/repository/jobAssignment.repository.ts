@@ -93,4 +93,27 @@ export const JobAssignmentRepository = {
       .set({ endDate })
       .where(eq(jobAssignments.id, id))
   },
+
+  softDelete: async (tx: DB, id: string, userId?: string) => {
+    const existing = await db.query.jobAssignments.findFirst({
+      where: eq(jobAssignments.id, id),
+      with: {
+        department: true,
+        position: true,
+      },
+    })
+
+    if (!existing) throw new AppError('Job assignment not found', 404)
+
+    await tx
+      .update(jobAssignments)
+      .set({
+        isDeleted: true,
+        deletedAt: new Date(),
+        ...(userId && { deletedBy: userId }),
+      })
+      .where(eq(jobAssignments.id, id))
+
+    return existing
+  },
 }

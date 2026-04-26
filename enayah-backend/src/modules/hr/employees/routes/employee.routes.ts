@@ -15,9 +15,7 @@ router.use(attachPermissions)
 router.post(
   '/',
   requirePermission('employee.create'),
-  audit('CREATE_EMPLOYEE', 'EMPLOYEE', (req) =>
-    typeof req.params.id === 'string' ? req.params.id : undefined,
-  ),
+  audit('CREATE_EMPLOYEE', 'EMPLOYEE'),
   EmployeeController.create,
 )
 
@@ -32,10 +30,15 @@ router.get(
 router.put(
   '/:id',
   requirePermission('employee.update'),
-  audit('EMPLOYEE_UPDATE', 'EMPLOYEE', (req) =>
-    typeof req.params.id === 'string' ? req.params.id : undefined,
-  ),
+  audit('EMPLOYEE_UPDATE', 'EMPLOYEE'),
   EmployeeController.update,
+)
+
+router.delete(
+  '/:id',
+  requirePermission('employee.delete'),
+  audit('DELETE_EMPLOYEE', 'EMPLOYEE'),
+  EmployeeController.delete,
 )
 
 export default router

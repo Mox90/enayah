@@ -42,4 +42,16 @@ export const JobAssignmentController = {
     const result = await JobAssignmentService.endAssignment(id)
     res.json(result)
   }),
+
+  delete: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = jobAssignmentIdSchema.parse(req.params)
+
+    const existing = await JobAssignmentService.delete(id, req.user?.id)
+
+    res.locals.before = existing
+    res.locals.after = null
+    res.locals.resourceId = id
+
+    res.status(204).send()
+  }),
 }
