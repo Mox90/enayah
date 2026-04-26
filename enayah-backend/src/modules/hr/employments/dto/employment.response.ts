@@ -10,6 +10,7 @@ export interface EmploymentResponse {
     | 'eoc'
     | 'transferred'
     | 'on_leave'
+  hireDate: string
   startDate: string
   endDate?: string
 }

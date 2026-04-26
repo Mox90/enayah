@@ -72,6 +72,15 @@ export const EmploymentRepository = {
     })
   },
 
+  findAll: async () => {
+    return db.query.employments.findMany({
+      where: isActive,
+      orderBy: (e, { desc }) => [desc(e.createdAt)],
+      //limit,
+      //offset
+    })
+  },
+
   findPositionItemOrThrow: async (id: string) => {
     const result = await db.query.positionItems.findFirst({
       where: eq(positionItems.id, id),

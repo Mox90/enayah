@@ -21,8 +21,8 @@ export const jobAssignments = pgTable(
       .notNull()
       .references(() => employments.id, { onDelete: 'cascade' }),
 
-    departmentId: uuid('department_id').references(() => departments.id),
-    positionId: uuid('position_id').references(() => positions.id),
+    departmentId: uuid('department_id').references(() => departments.id), // point to the real/actual department of an employee
+    positionId: uuid('position_id').references(() => positions.id), // point to the real/actual role/position of an employee
 
     managerId: uuid('manager_id').references(() => employees.id, {
       onDelete: 'restrict',
