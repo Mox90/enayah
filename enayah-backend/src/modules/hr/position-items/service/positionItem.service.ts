@@ -63,7 +63,7 @@ export const PositionItemService = {
       toPositionItemDB(data),
     )
     return toPositionItemResponse(updatedPositionItem)*/
-    return EmployeeRepository.update(id, data)
+    return PositionItemRepository.update(id, data)
   },
 
   unassignedEmployee: async (positionItemId: string) => {

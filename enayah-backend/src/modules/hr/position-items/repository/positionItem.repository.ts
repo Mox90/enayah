@@ -17,7 +17,7 @@ async function findByIdOrThrow(executor: any, id: string) {
   })
 
   if (!result) {
-    throw new AppError('Employee not found', 404)
+    throw new AppError('Position item not found', 404)
   }
 
   return result
@@ -42,7 +42,7 @@ export const PositionItemRepository = {
       .returning()
 
     if (result.length === 0) {
-      throw new AppError('Position not available', 400)
+      throw new AppError('Position item not available', 400)
     }
 
     return result[0]
@@ -69,11 +69,12 @@ export const PositionItemRepository = {
 
   findById: async (id: string) => {
     //return db.select().from(positionItems).where(eq(positionItems.id, id))
-    const positionItem = await db.query.positionItems.findFirst({
-      where: eq(positionItems.id, id),
-    })
+    //const positionItem = await db.query.positionItems.findFirst({
+    //  where: eq(positionItems.id, id),
+    //})
     //return toPositionItemResponse(positionItem)
-    return positionItem ? toPositionItemResponse(positionItem) : undefined
+    //return positionItem ? toPositionItemResponse(positionItem) : undefined
+    return findByIdOrThrow(db, id)
   },
 
   getSummary: async () => {

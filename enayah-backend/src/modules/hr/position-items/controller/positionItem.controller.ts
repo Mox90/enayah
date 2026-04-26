@@ -28,7 +28,7 @@ export const PositionItemController = {
 
   findAll: asyncHandler(async (req: Request, res: Response) => {
     const result = await PositionItemRepository.findAll()
-    console.log('result>>> ', result)
+    //console.log('result>>> ', result)
     //return res.status(200).json(toPositionItemResponse(result))
     return res.status(200).json(result)
   }),
@@ -36,6 +36,6 @@ export const PositionItemController = {
   findById: asyncHandler(async (req: Request, res: Response) => {
     const { id } = positionItemIdSchema.parse(req.params)
     const positionItem = await PositionItemService.findById(id)
-    return res.status(201).json(toPositionItemResponse(positionItem))
+    return res.status(200).json(toPositionItemResponse(positionItem))
   }),
 }

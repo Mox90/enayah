@@ -66,8 +66,8 @@ export const toEmployeeResponse = (
       .filter(Boolean)
       .join(' '),
 
-    gender: employee.gender ?? 'undefined',
-    dateOfBirth: employee.dateOfBirth ?? undefined,
+    ...(employee.gender && { gender: employee.gender }), //gender: employee.gender,
+    ...(employee.dateOfBirth && { dateOfBirth: employee.dateOfBirth }), //dateOfBirth: employee.dateOfBirth ?? undefined,
     //countryId: employee.countryId,
     nationality: employee.nationality
       ? {
