@@ -1,11 +1,27 @@
 import { and, eq, inArray, sql } from 'drizzle-orm'
-import { db, positionItems } from '../../../../db'
+import { DB, db, positionItems } from '../../../../db'
 import { AppError } from '../../../../core/errors/AppError'
 import { CreatePositionItemDTO } from '../dto/positionItem.request'
 import {
   toPositionItemDB,
   toPositionItemResponse,
 } from '../dto/positionItem.mapper'
+import { Tx } from '../../../../core/types/db.types'
+
+const isActive = eq(positionItems.isDeleted, false)
+
+function findByIdOrThrow(executor: DB | Tx, id: string): Promise<any>
+async function findByIdOrThrow(executor: any, id: string) {
+  const result = await executor.query.positionItems.findFirst({
+    where: and(eq(positionItems.id, id), isActive),
+  })
+
+  if (!result) {
+    throw new AppError('Employee not found', 404)
+  }
+
+  return result
+}
 
 function assertExists<T>(value: T | undefined, msg: string, status = 500): T {
   if (!value) throw new AppError(msg, status)
@@ -40,7 +56,9 @@ export const PositionItemRepository = {
         .values(toPositionItemDB(data))
         .returning()
 
-      return assertExists(row, 'Failed to create position item')
+      const created = assertExists(row, 'Failed to create position item')
+
+      return findByIdOrThrow(tx, created.id)
     })
   },
 
