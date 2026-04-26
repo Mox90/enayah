@@ -3,15 +3,17 @@ import { z } from 'zod'
 export const headcountSchema = z.object({
   years: z.array(z.number().int().min(2000)).min(1),
 
-  groupBy: z.array(
-    z.enum([
-      'department',
-      'position',
-      'staffCategory',
-      'employmentType',
-      'workforceCategory',
-    ]),
-  ),
+  groupBy: z
+    .array(
+      z.enum([
+        'department',
+        'position',
+        'staffCategory',
+        'employmentType',
+        'workforceCategory',
+      ]),
+    )
+    .min(1),
 
   filters: z
     .object({

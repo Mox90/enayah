@@ -1,97 +1,104 @@
 import { db } from '../../../../db'
-import { sql } from 'drizzle-orm'
+import { sql, inArray, SQL } from 'drizzle-orm'
 import { HeadcountDto } from '../dto/headcount.request'
 
 export const HrAnalyticsRepository = {
   headcount: async (dto: HeadcountDto) => {
     const { years, groupBy, filters } = dto
 
-    const yearCases = years
-      .map(
-        (y) => `
-        COUNT(*) FILTER (
-          WHERE e.start_date <= '${y}-12-31'
-          AND (e.end_date IS NULL OR e.end_date >= '${y}-01-01')
-        ) AS "y${y}"
-      `,
-      )
-      .join(',')
+    // 🔥 YEAR CASES (SAFE)
+    const yearCases = sql.join(
+      years.map((y) => {
+        const end = `${y}-12-31`
+        const start = `${y}-01-01`
 
-    const groupSelect = groupBy
-      .map((g) => {
-        switch (g) {
-          case 'department':
-            return 'd.name_en AS department'
-          case 'position':
-            return 'p.title_en AS position'
-          case 'staffCategory':
-            return 'e.staff_category'
-          case 'employmentType':
-            return 'e.employment_type'
-          case 'workforceCategory':
-            return 'pi.workforce_category'
-        }
-      })
-      .join(',')
+        return sql`
+          COUNT(*) FILTER (
+            WHERE e.start_date <= ${end}
+            AND (e.end_date IS NULL OR e.end_date >= ${start})
+          ) AS ${sql.raw(`"y${y}"`)}
+        `
+      }),
+      sql`, `,
+    )
 
-    const groupClause = groupBy
-      .map((g) => {
-        switch (g) {
-          case 'department':
-            return 'd.name_en'
-          case 'position':
-            return 'p.title_en'
-          case 'staffCategory':
-            return 'e.staff_category'
-          case 'employmentType':
-            return 'e.employment_type'
-          case 'workforceCategory':
-            return 'pi.workforce_category'
-        }
-      })
-      .join(',')
+    // 🔥 GROUP SELECT (WITH ALIASES)
+    const groupSelectParts = groupBy.map((g) => {
+      switch (g) {
+        case 'department':
+          return sql`d.name_en AS "department"`
+        case 'position':
+          return sql`p.title_en AS "position"`
+        case 'staffCategory':
+          return sql`e.staff_category AS "staffCategory"`
+        case 'employmentType':
+          return sql`e.employment_type AS "employmentType"`
+        case 'workforceCategory':
+          return sql`pi.workforce_category AS "workforceCategory"`
+        default:
+          throw new Error(`Invalid groupBy: ${g}`)
+      }
+    })
 
-    // 🔥 FILTERS
-    const whereConditions: string[] = []
+    const groupSelect = sql.join(groupSelectParts, sql`, `)
+
+    // 🔥 GROUP BY (RAW SAFE — allowlist)
+    const groupClauseParts = groupBy.map((g) => {
+      switch (g) {
+        case 'department':
+          return sql.raw('d.name_en')
+        case 'position':
+          return sql.raw('p.title_en')
+        case 'staffCategory':
+          return sql.raw('e.staff_category')
+        case 'employmentType':
+          return sql.raw('e.employment_type')
+        case 'workforceCategory':
+          return sql.raw('pi.workforce_category')
+        default:
+          throw new Error(`Invalid groupBy: ${g}`)
+      }
+    })
+
+    const groupClause = sql.join(groupClauseParts, sql`, `)
+
+    // 🔥 WHERE CONDITIONS (SAFE)
+    const conditions: SQL[] = []
 
     if (filters?.departmentIds?.length) {
-      whereConditions.push(
-        `pi.department_id IN (${filters.departmentIds
-          .map((id) => `'${id}'`)
-          .join(',')})`,
+      conditions.push(
+        inArray(sql.raw('pi.department_id'), filters.departmentIds),
       )
     }
 
     if (filters?.excludeDepartments?.length) {
-      whereConditions.push(
-        `pi.department_id NOT IN (${filters.excludeDepartments
-          .map((id) => `'${id}'`)
-          .join(',')})`,
+      conditions.push(
+        sql`pi.department_id NOT IN (${sql.join(
+          filters.excludeDepartments.map((id) => sql`${id}`),
+          sql`, `,
+        )})`,
       )
     }
 
     if (filters?.positionIds?.length) {
-      whereConditions.push(
-        `pi.position_id IN (${filters.positionIds
-          .map((id) => `'${id}'`)
-          .join(',')})`,
-      )
+      conditions.push(inArray(sql.raw('pi.position_id'), filters.positionIds))
     }
 
     if (filters?.staffCategory) {
-      whereConditions.push(`e.staff_category = '${filters.staffCategory}'`)
+      conditions.push(sql`e.staff_category = ${filters.staffCategory}`)
     }
 
     if (filters?.workforceCategory) {
-      whereConditions.push(
-        `pi.workforce_category = '${filters.workforceCategory}'`,
-      )
+      conditions.push(sql`pi.workforce_category = ${filters.workforceCategory}`)
     }
 
     const whereClause =
-      whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : ''
+      conditions.length > 0
+        ? sql`WHERE ${sql.join(conditions, sql` AND `)}`
+        : sql``
 
-    const query = sql.raw(`
+    // 🔥 FINAL QUERY
+    const query = sql`
       SELECT ${groupSelect}, ${yearCases}
       FROM employments e
       LEFT JOIN position_items pi ON e.position_item_id = pi.id
@@ -100,7 +107,7 @@ export const HrAnalyticsRepository = {
       ${whereClause}
       GROUP BY ${groupClause}
       ORDER BY ${groupClause}
-    `)
+    `
 
     const result = await db.execute(query)
     return result.rows

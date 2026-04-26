@@ -20,7 +20,7 @@ export const employments = pgTable(
     positionItemId: uuid('position_item_id').references(
       () => positionItems.id,
       { onDelete: 'restrict' },
-    ), // WHERE they are budgeted (PCN)
+    ), // WHERE they are budgeted (PCN) or what PCN funds the employee
 
     hireDate: date('hire_date').notNull(),
     startDate: date('start_date').notNull(),

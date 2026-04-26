@@ -74,7 +74,10 @@ export const EmploymentRepository = {
 
   findAll: async () => {
     return db.query.employments.findMany({
-      where: eq(employments.isDeleted, false),
+      where: isActive,
+      orderBy: (e, { desc }) => [desc(e.createdAt)],
+      //limit,
+      //offset
     })
   },
 
