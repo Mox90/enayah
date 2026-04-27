@@ -23,8 +23,8 @@ export const toPositionItemUpdateDB = (dto: UpdatePositionItemDTO) => ({
   ...(dto.positionId !== undefined && { positionId: dto.positionId }),
   ...(dto.jobGradeId !== undefined && { jobGradeId: dto.jobGradeId }),
   ...(dto.categoryCode !== undefined && { categoryCode: dto.categoryCode }),
-  ...(dto.minSalary !== undefined && { minSalary: dto.minSalary }),
-  ...(dto.maxSalary !== undefined && { maxSalary: dto.maxSalary }),
+  ...(dto.minSalary !== undefined && { minSalary: dto.minSalary.toString() }),
+  ...(dto.maxSalary !== undefined && { maxSalary: dto.maxSalary.toString() }),
   //...(dto.status !== undefined && { status: dto.status }),
 })
 

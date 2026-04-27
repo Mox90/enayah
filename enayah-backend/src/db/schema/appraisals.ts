@@ -14,8 +14,8 @@ import {
 } from 'drizzle-orm/pg-core'
 import { baseColumns } from './base'
 import { appraisalRatingEnum, appraisalStatusEnum } from './enums'
-import { employees } from './employees'
 import { sql } from 'drizzle-orm'
+import { employees } from './hr'
 //import { appraisalCycles } from './appraisalCycles'
 
 export const appraisalCycles = pgTable(

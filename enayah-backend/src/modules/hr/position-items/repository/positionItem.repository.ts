@@ -1,10 +1,14 @@
 import { and, eq, inArray, sql } from 'drizzle-orm'
 import { DB, db, positionItems } from '../../../../db'
 import { AppError } from '../../../../core/errors/AppError'
-import { CreatePositionItemDTO } from '../dto/positionItem.request'
+import {
+  CreatePositionItemDTO,
+  UpdatePositionItemDTO,
+} from '../dto/positionItem.request'
 import {
   toPositionItemDB,
   toPositionItemResponse,
+  toPositionItemUpdateDB,
 } from '../dto/positionItem.mapper'
 import { Tx } from '../../../../core/types/db.types'
 
@@ -48,33 +52,50 @@ export const PositionItemRepository = {
     return result[0]
   },
 
-  create: (data: CreatePositionItemDTO) => {
-    //return db.insert(positionItems).values(data).returning()
-    return db.transaction(async (tx) => {
-      const [row] = await tx
-        .insert(positionItems)
-        .values(toPositionItemDB(data))
-        .returning()
+  /*create: async (tx: DB, data: CreatePositionItemDTO) => {
+    const insertPayload = {
+      ...toPositionItemDB(data),
+      workforceCategory: data.workforceCategory,
+    }
 
-      const created = assertExists(row, 'Failed to create position item')
+    const [row] = await tx
+      .insert(positionItems)
+      .values({
+        ...toPositionItemDB(data),
+        workforceCategory: data.workforceCategory,
+      })
+      .returning()
 
-      return findByIdOrThrow(tx, created.id)
-    })
+    const created = assertExists(row, 'Failed to create position item')
+
+    return findByIdOrThrow(tx, created.id)
+  },*/
+  create: async (tx: DB, data: CreatePositionItemDTO) => {
+    const [row] = await tx
+      .insert(positionItems)
+      .values(toPositionItemDB(data))
+      .returning()
+
+    const created = assertExists(row, 'Failed to create position item')
+    //return toPositionItemResponse(created)
+    return findByIdOrThrow(tx, created.id)
   },
 
-  findAll: async () => {
-    const positionItems = await db.query.positionItems.findMany()
+  findAll: async (tx: DB) => {
+    const positionItems = await tx.query.positionItems.findMany({
+      where: isActive,
+    })
     return positionItems.map(toPositionItemResponse)
   },
 
-  findById: async (id: string) => {
+  findById: async (tx: DB, id: string) => {
     //return db.select().from(positionItems).where(eq(positionItems.id, id))
     //const positionItem = await db.query.positionItems.findFirst({
     //  where: eq(positionItems.id, id),
     //})
     //return toPositionItemResponse(positionItem)
     //return positionItem ? toPositionItemResponse(positionItem) : undefined
-    return findByIdOrThrow(db, id)
+    return findByIdOrThrow(tx, id)
   },
 
   getSummary: async () => {
@@ -113,35 +134,68 @@ export const PositionItemRepository = {
       .groupBy(positionItems.departmentId)
   },
 
-  update: (id: string, data: any) => {
-    //    data.updatedAt = new Date() // Update the updatedAt field to the current date and time
-    //    data.version = (data.version || 0) + 1 // Increment the version number for optimistic locking
-    const now = new Date()
-    const currentVersion = data.version
-    if (typeof currentVersion !== 'number') {
-      throw new AppError('Version is required for update', 409)
-    }
-
-    const update = toPositionItemDB(data)
-    return db
+  update: async (
+    tx: DB,
+    id: string,
+    data: UpdatePositionItemDTO & { version: number },
+    userId?: string,
+  ) => {
+    const [updateRaw] = await tx
       .update(positionItems)
-      .set({ ...update, updatedAt: now, version: currentVersion + 1 }) // Update the fields along with updatedAt and version
+      .set({
+        ...toPositionItemUpdateDB(data),
+        updatedAt: new Date(),
+        version: sql`${positionItems.version} + 1`,
+        updatedBy: userId,
+      }) // Update the fields along with updatedAt and version
       .where(
-        and(
-          eq(positionItems.id, id),
-          eq(positionItems.version, currentVersion),
-        ),
+        and(eq(positionItems.id, id), eq(positionItems.version, data.version)),
       ) // Ensure the version matches for optimistic locking
+      .returning({ id: positionItems.id })
+
+    const updated = assertExists(
+      updateRaw,
+      'Update failed: record not found or version conflict',
+      409,
+    )
+
+    return findByIdOrThrow(tx, updated.id)
+  },
+
+  softDelete: async (tx: DB, id: string, userId?: string) => {
+    //return db.delete(positionItems).where(eq(positionItems.id, id)).returning()
+    /*const existing = await findByIdOrThrow(tx, id)
+
+    await tx
+      .update(positionItems)
+      .set({
+        isDeleted: true,
+        deletedAt: new Date(),
+        ...(userId && { deletedBy: userId }),
+      })
+      .where(eq(positionItems.id, id))
+
+    return existing*/
+    await findByIdOrThrow(tx, id) // ensures 404 if missing/already deleted
+
+    const [row] = await tx
+      .update(positionItems)
+      .set({
+        isDeleted: true,
+        deletedAt: new Date(),
+        updatedAt: new Date(),
+        ...(userId && { deletedBy: userId, updatedBy: userId }),
+        version: sql`${positionItems.version} + 1`,
+      })
+      .where(and(eq(positionItems.id, id), isActive))
       .returning()
+
+    return assertExists(row, 'Soft delete failed: record not found', 404)
   },
 
-  delete: (id: string) => {
-    return db.delete(positionItems).where(eq(positionItems.id, id)).returning()
-  },
-
-  updateStatus: (id: string, status: string) => {
+  updateStatus: (tx: DB, id: string, status: string) => {
     // Implementation for updating the status of a position item
-    return db
+    return tx
       .update(positionItems)
       .set({ status, updatedAt: new Date() }) // Update the status and the updatedAt field
       .where(eq(positionItems.id, id))

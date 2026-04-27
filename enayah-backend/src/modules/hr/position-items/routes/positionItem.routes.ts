@@ -28,5 +28,23 @@ router.post(
   }),
   PositionItemController.assign,
 )
+router.patch(
+  '/:id',
+  requirePermission('position.items.update'),
+  audit('UPDATE_POSITION_ITEM', {
+    resource: 'POSITION_ITEM',
+    getResourceId: (req) => getParam(req.params.id),
+  }),
+  PositionItemController.update,
+)
+router.delete(
+  '/:id',
+  requirePermission('position.items.delete'),
+  audit('DELETE_POSITION_ITEM', {
+    resource: 'POSITION_ITEM',
+    getResourceId: (req) => getParam(req.params.id),
+  }),
+  PositionItemController.delete,
+)
 
 export default router

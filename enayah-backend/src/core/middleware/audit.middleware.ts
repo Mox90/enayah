@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express'
 import { auditLogger } from '../logging/auditLogger'
-import { sanitizeObject } from '../utils/auditSanitizer'
+import { sanitizeObject } from '../utils/audit.sanitizer'
 
 type AuditOptions = {
   resource?: string
@@ -43,22 +43,36 @@ export const audit =
           await auditLogger.log({
             action,
 
+            // WHO did
             ...(req.user?.id && { userId: req.user.id }),
+
+            // WHERE it happened
             ...(options?.resource && { resource: options.resource }),
             ...(resourceId && { resourceId }),
 
-            //before: res.locals.before,
-            //after: res.locals.after,
+            // WHAT are the things that changed
             ...(beforeSanitized !== undefined && { before: beforeSanitized }),
             ...(afterSanitized !== undefined && { after: afterSanitized }),
 
+            // COMPLIANCE (top-level so the repository persists them)
+            //            success: res.statusCode < 400,
+            //            ...(req.requestContext?.requestId && {
+            //              requestId: req.requestContext.requestId,
+            //            }),
+            //            ...(options?.resource && { module: options.resource }),
+
+            // HOW it changed
             metadata: {
               method: req.method,
               url: req.originalUrl,
+              route: req.route?.path,
               statusCode: res.statusCode,
               durationMs: Date.now() - start,
+              success: res.statusCode < 400,
+              requestId: req.requestContext?.requestId,
             },
 
+            // CONTEXT
             ...(req.requestContext?.ip && { ip: req.requestContext.ip }),
             ...(req.requestContext?.userAgent && {
               userAgent: req.requestContext.userAgent,

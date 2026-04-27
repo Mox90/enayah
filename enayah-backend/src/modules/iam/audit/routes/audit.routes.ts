@@ -9,4 +9,10 @@ router.use(requireAuth)
 
 router.get('/', requirePermission('audit.view'), AuditController.getAll)
 
+router.post(
+  '/:id/review',
+  requirePermission('audit.review'),
+  AuditController.review,
+)
+
 export default router
