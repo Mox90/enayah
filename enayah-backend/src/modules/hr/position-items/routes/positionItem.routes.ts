@@ -44,6 +44,7 @@ router.delete(
     resource: 'POSITION_ITEM',
     getResourceId: (req) => getParam(req.params.id),
   }),
+  PositionItemController.delete,
 )
 
 export default router

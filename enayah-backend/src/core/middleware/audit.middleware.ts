@@ -54,6 +54,13 @@ export const audit =
             ...(beforeSanitized !== undefined && { before: beforeSanitized }),
             ...(afterSanitized !== undefined && { after: afterSanitized }),
 
+            // COMPLIANCE (top-level so the repository persists them)
+            //            success: res.statusCode < 400,
+            //            ...(req.requestContext?.requestId && {
+            //              requestId: req.requestContext.requestId,
+            //            }),
+            //            ...(options?.resource && { module: options.resource }),
+
             // HOW it changed
             metadata: {
               method: req.method,

@@ -50,8 +50,13 @@ export const PositionItemService = {
     return db.transaction((tx) => PositionItemRepository.findById(tx, id))
   },
 
-  update: async (id: string, data: UpdatePositionItemDTO) => {
+  /*update: async (id: string, data: UpdatePositionItemDTO) => {
     return db.transaction((tx) => PositionItemRepository.update(tx, id, data))
+  },*/
+  update: async (id: string, data: UpdatePositionItemDTO, userId?: string) => {
+    return db.transaction((tx) =>
+      PositionItemRepository.update(tx, id, data, userId),
+    )
   },
 
   unassignedEmployee: async (positionItemId: string) => {

@@ -80,7 +80,7 @@ export const AuditRepository = {
     })
   },
 
-  markReviewed: async (id: string, reviewerId: string) => {
+  /*markReviewed: async (id: string, reviewerId: string) => {
     return db
       .update(auditLogs)
       .set({
@@ -89,5 +89,17 @@ export const AuditRepository = {
         reviewedAt: new Date(),
       })
       .where(eq(auditLogs.id, id))
+  },*/
+  markReviewed: async (id: string, reviewerId: string) => {
+    const [row] = await db
+      .update(auditLogs)
+      .set({
+        reviewed: true,
+        reviewedBy: reviewerId,
+        reviewedAt: new Date(),
+      })
+      .where(and(eq(auditLogs.id, id), eq(auditLogs.reviewed, false)))
+      .returning()
+    return row // undefined → caller can 404 / 409
   },
 }

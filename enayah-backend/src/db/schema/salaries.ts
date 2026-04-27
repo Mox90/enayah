@@ -6,7 +6,7 @@ import {
   varchar,
   index,
 } from 'drizzle-orm/pg-core'
-import { employments } from './employments'
+import { employments } from './hr'
 import { baseColumns } from './base'
 
 export const salaries = pgTable(

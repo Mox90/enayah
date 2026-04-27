@@ -52,7 +52,7 @@ export const PositionItemRepository = {
     return result[0]
   },
 
-  create: async (tx: DB, data: CreatePositionItemDTO) => {
+  /*create: async (tx: DB, data: CreatePositionItemDTO) => {
     const insertPayload = {
       ...toPositionItemDB(data),
       workforceCategory: data.workforceCategory,
@@ -68,6 +68,16 @@ export const PositionItemRepository = {
 
     const created = assertExists(row, 'Failed to create position item')
 
+    return findByIdOrThrow(tx, created.id)
+  },*/
+  create: async (tx: DB, data: CreatePositionItemDTO) => {
+    const [row] = await tx
+      .insert(positionItems)
+      .values(toPositionItemDB(data))
+      .returning()
+
+    const created = assertExists(row, 'Failed to create position item')
+    //return toPositionItemResponse(created)
     return findByIdOrThrow(tx, created.id)
   },
 
@@ -128,6 +138,7 @@ export const PositionItemRepository = {
     tx: DB,
     id: string,
     data: UpdatePositionItemDTO & { version: number },
+    userId?: string,
   ) => {
     const [updateRaw] = await tx
       .update(positionItems)
@@ -135,6 +146,7 @@ export const PositionItemRepository = {
         ...toPositionItemUpdateDB(data),
         updatedAt: new Date(),
         version: sql`${positionItems.version} + 1`,
+        updatedBy: userId,
       }) // Update the fields along with updatedAt and version
       .where(
         and(eq(positionItems.id, id), eq(positionItems.version, data.version)),
@@ -152,7 +164,7 @@ export const PositionItemRepository = {
 
   softDelete: async (tx: DB, id: string, userId?: string) => {
     //return db.delete(positionItems).where(eq(positionItems.id, id)).returning()
-    const existing = await findByIdOrThrow(tx, id)
+    /*const existing = await findByIdOrThrow(tx, id)
 
     await tx
       .update(positionItems)
@@ -163,7 +175,22 @@ export const PositionItemRepository = {
       })
       .where(eq(positionItems.id, id))
 
-    return existing
+    return existing*/
+    await findByIdOrThrow(tx, id) // ensures 404 if missing/already deleted
+
+    const [row] = await tx
+      .update(positionItems)
+      .set({
+        isDeleted: true,
+        deletedAt: new Date(),
+        updatedAt: new Date(),
+        ...(userId && { deletedBy: userId, updatedBy: userId }),
+        version: sql`${positionItems.version} + 1`,
+      })
+      .where(and(eq(positionItems.id, id), isActive))
+      .returning()
+
+    return assertExists(row, 'Soft delete failed: record not found', 404)
   },
 
   updateStatus: (tx: DB, id: string, status: string) => {

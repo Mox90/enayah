@@ -12,8 +12,8 @@ import {
 } from 'drizzle-orm/pg-core'
 import { baseColumns } from './base'
 import { authProviderEnum } from './enums'
-import { employees } from './employees'
 import { sql } from 'drizzle-orm'
+import { employees } from './hr'
 //import { roleEnum, authProviderEnum } from './enums'
 
 export const users = pgTable(

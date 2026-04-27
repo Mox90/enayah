@@ -162,6 +162,13 @@
       "when": 1777277671644,
       "tag": "0022_furry_grey_gargoyle",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1777294665478,
+      "tag": "0023_glorious_baron_strucker",
+      "breakpoints": true
     }
   ]
 }
