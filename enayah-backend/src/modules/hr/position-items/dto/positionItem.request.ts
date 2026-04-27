@@ -5,13 +5,26 @@ export const createPositionItemSchema = z.object({
   departmentId: z.uuid(),
   positionId: z.uuid(),
   jobGradeId: z.uuid().optional(),
+  workforceCategory: z
+    .enum([
+      'physician',
+      'nurse',
+      'allied_health',
+      'administrative',
+      'support_service',
+    ])
+    .optional(),
   categoryCode: z.number().int().nonnegative().optional(),
   minSalary: z.number().nonnegative().optional(),
   maxSalary: z.number().nonnegative().optional(),
   //status: z.string().max(20).default('vacant'),
 })
 
-export const updatePositionItemSchema = createPositionItemSchema.partial()
+export const updatePositionItemSchema = createPositionItemSchema
+  .partial()
+  .extend({
+    version: z.number().int().positive(),
+  })
 
 export const assignEmployeeSchema = z.object({
   employeeId: z.uuid(),

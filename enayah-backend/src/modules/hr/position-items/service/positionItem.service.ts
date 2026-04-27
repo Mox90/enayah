@@ -8,6 +8,10 @@ import {
 import { PositionItemRepository } from '../repository/positionItem.repository'
 import { validatePositionItemAssignment } from '../validators/positionItem.validator'
 import { EmployeeRepository } from '../../employees/repository/employee.repository'
+import {
+  CreatePositionItemDTO,
+  UpdatePositionItemDTO,
+} from '../dto/positionItem.request'
 
 type EmploymentInsert = InferInsertModel<typeof employments>
 
@@ -34,41 +38,34 @@ export const PositionItemService = {
     })
   },
 
-  create: async (data: any) => {
-    /*const [positionItem] = await await PositionItemRepository.create(
-      toPositionItemDB(data),
-    )*/
-    //return toPositionItemResponse(positionItem)
-    return PositionItemRepository.create(data)
+  create: async (data: CreatePositionItemDTO) => {
+    return db.transaction((tx) => PositionItemRepository.create(tx, data))
   },
 
   findAll: async () => {
-    //const positionItems = await PositionItemRepository.findAll()
-    //return positionItems.map(toPositionItemResponse)
-    return PositionItemRepository.findAll()
+    return db.transaction((tx) => PositionItemRepository.findAll(tx))
   },
 
   findById: async (id: string) => {
-    /*const positionItem = await PositionItemRepository.findById(id)
-    if (!positionItem) throw new AppError('PositionItem not found', 404)
-    return positionItem*/
-    return PositionItemRepository.findById(id)
+    return db.transaction((tx) => PositionItemRepository.findById(tx, id))
   },
 
-  update: async (id: string, data: any) => {
-    /*const positionItem = await PositionItemRepository.findById(id)
-    if (!positionItem) throw new AppError('PositionItem not found', 404)
-    const [updatedPositionItem] = await PositionItemRepository.update(
-      id,
-      toPositionItemDB(data),
-    )
-    return toPositionItemResponse(updatedPositionItem)*/
-    return PositionItemRepository.update(id, data)
+  update: async (id: string, data: UpdatePositionItemDTO) => {
+    return db.transaction((tx) => PositionItemRepository.update(tx, id, data))
   },
 
   unassignedEmployee: async (positionItemId: string) => {
-    await PositionItemRepository.updateStatus(positionItemId, 'open')
+    await db.transaction((tx) =>
+      PositionItemRepository.updateStatus(tx, positionItemId, 'open'),
+    )
 
     return { message: 'Employee unassigned successfully' }
+  },
+
+  delete: async (id: string, userId?: string) => {
+    return db.transaction(async (tx) => {
+      const existing = await PositionItemRepository.softDelete(tx, id, userId)
+      return existing
+    })
   },
 }

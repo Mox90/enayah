@@ -39,16 +39,25 @@ export const AuditService = {
       )
     }
 
-    const payload: AuditLogInput = {
+    /*const payload: AuditLogInput = {
       ...data,
       ...(before !== undefined ? { before } : {}),
       ...(after !== undefined ? { after } : {}),
-    }
+    }*/
 
-    return AuditRepository.create(payload)
+    return AuditRepository.create({
+      ...data,
+      ...(before !== undefined ? { before } : {}),
+      ...(after !== undefined ? { after } : {}),
+    })
   },
 
   getAll: async () => {
     return AuditRepository.findAll()
   },
+
+  getLogs: async (filters: any) => AuditRepository.getLogs(filters),
+
+  review: async (id: string, reviewerId: string) =>
+    AuditRepository.markReviewed(id, reviewerId),
 }

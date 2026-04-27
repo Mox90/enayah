@@ -18,7 +18,7 @@ export const positionItems = pgTable('position_items', {
 
   jobGradeId: uuid('job_grade_id').references(() => jobGrades.id),
 
-  workforceCategory: workforceCategoryEnum('workforce_category'), //Physican, Nurse, Allied Health, Administrative, Support Service // workforce classification
+  workforceCategory: workforceCategoryEnum('workforce_category'), //Physician, Nurse, Allied Health, Administrative, Support Service // workforce classification
   categoryCode: integer('category_code'), // 1000, 2000, 3000, 4000, 5000 // workforce classification
 
   minSalary: numeric('min_salary'),

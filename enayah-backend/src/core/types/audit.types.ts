@@ -1,9 +1,9 @@
-export interface AuditLogInput {
+export type AuditLogInput = {
   action: string
-  resource?: string
-  resourceId?: string
 
   userId?: string
+  resource?: string
+  resourceId?: string
 
   before?: Record<string, any>
   after?: Record<string, any>
@@ -12,4 +12,14 @@ export interface AuditLogInput {
 
   ip?: string
   userAgent?: string
+
+  // 🔥 NEW (COMPLIANCE)
+  success?: boolean
+  requestId?: string
+  module?: string
+
+  // 🔥 GOVERNANCE
+  reviewed?: boolean
+  reviewedBy?: string
+  reviewedAt?: Date
 }

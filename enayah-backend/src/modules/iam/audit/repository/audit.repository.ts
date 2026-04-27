@@ -1,6 +1,7 @@
 import { auditLogs, db } from '../../../../db'
 import { AuditLogInput } from '../../../../core/types/audit.types'
 import { and, eq, gte, lte } from 'drizzle-orm'
+import { generateAuditHash } from '../../../../core/utils/audit.hash'
 
 type FindAllAuditParams = {
   limit?: number
@@ -14,6 +15,16 @@ export const AuditRepository = {
     const ip = data.ip?.slice(0, 45)
     const userAgent = data.userAgent?.slice(0, 255)
 
+    const hash = generateAuditHash({
+      action: data.action,
+      userId: data.userId,
+      resource: data.resource,
+      resourceId: data.resourceId,
+      before: data.before,
+      after: data.after,
+      metadata: data.metadata,
+    })
+
     return db.insert(auditLogs).values({
       ...(data.userId && { userId: data.userId }),
       action: data.action,
@@ -21,8 +32,6 @@ export const AuditRepository = {
       ...(resource && { resource }),
       ...(resourceId && { resourceId }),
 
-      //...(data.before && { before: data.before }),
-      //...(data.after && { after: data.after }),
       ...(data.before !== undefined ? { before: data.before } : {}),
       ...(data.after !== undefined ? { after: data.after } : {}),
 
@@ -30,6 +39,13 @@ export const AuditRepository = {
 
       ...(ip && { ip }),
       ...(userAgent && { userAgent }),
+
+      ...(data.success !== undefined && { success: data.success }),
+      ...(data.requestId && { requestId: data.requestId }),
+      ...(data.module && { module: data.module }),
+
+      // 🔒 integrity
+      hash,
     })
   },
 
@@ -59,24 +75,19 @@ export const AuditRepository = {
         filters.to ? lte(auditLogs.createdAt, filters.to) : undefined,
         filters.cursor ? lte(auditLogs.createdAt, filters.cursor) : undefined,
       ),
-
       orderBy: (a, { desc }) => [desc(a.createdAt)],
       limit: safeLimit,
     })
   },
-  /*findAll: async ({ limit = 50, cursor }: FindAllAuditParams = {}) => {
-    const MAX_LIMIT = 100
 
-    const safeLimit = Math.min(limit, MAX_LIMIT)
-
-    return db.query.auditLogs.findMany({
-      ...(cursor && {
-        where: (auditLogs, { lt }) => lt(auditLogs.createdAt, new Date(cursor)),
-      }),
-
-      orderBy: (auditLogs, { desc }) => [desc(auditLogs.createdAt)],
-
-      limit: safeLimit,
-    })
-  },*/
+  markReviewed: async (id: string, reviewerId: string) => {
+    return db
+      .update(auditLogs)
+      .set({
+        reviewed: true,
+        reviewedBy: reviewerId,
+        reviewedAt: new Date(),
+      })
+      .where(eq(auditLogs.id, id))
+  },
 }

@@ -4,6 +4,7 @@ import {
   createPositionItemSchema,
   assignEmployeeSchema,
   positionItemIdSchema,
+  updatePositionItemSchema,
 } from '../dto/positionItem.request'
 import { PositionItemService } from '../service/positionItem.service'
 import { PositionItemRepository } from '../repository/positionItem.repository'
@@ -15,6 +16,7 @@ export const PositionItemController = {
     const body = createPositionItemSchema.parse(req.body)
     const result = await PositionItemService.create(body)
     res.locals.resourceId = result.id
+    res.locals.after = result
     res.status(201).json(result)
   }),
 
@@ -28,9 +30,8 @@ export const PositionItemController = {
   }),
 
   findAll: asyncHandler(async (req: Request, res: Response) => {
-    const result = await PositionItemRepository.findAll()
-    //console.log('result>>> ', result)
-    //return res.status(200).json(toPositionItemResponse(result))
+    const result = await PositionItemService.findAll()
+
     return res.status(200).json(result)
   }),
 
@@ -38,5 +39,27 @@ export const PositionItemController = {
     const { id } = positionItemIdSchema.parse(req.params)
     const positionItem = await PositionItemService.findById(id)
     return res.status(200).json(toPositionItemResponse(positionItem))
+  }),
+
+  update: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = positionItemIdSchema.parse(req.params)
+    const body = updatePositionItemSchema.parse(req.body)
+    const before = await PositionItemService.findById(id)
+    const updated = await PositionItemService.update(id, body)
+    res.locals.resourceId = id
+    res.locals.before = before
+    res.locals.after = updated
+    res.status(200).json(toPositionItemResponse(updated))
+  }),
+
+  delete: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = positionItemIdSchema.parse(req.params)
+
+    const existing = await PositionItemService.delete(id, req.user?.id)
+
+    res.locals.before = existing
+    res.locals.after = null
+    res.locals.resourceId = id
+    res.status(204).send()
   }),
 }
