@@ -90,7 +90,9 @@ export const contracts = pgTable(
   'contracts',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-    employmentId: uuid('employment_id').notNull(),
+    employmentId: uuid('employment_id')
+      .notNull()
+      .references(() => employments.id),
     startDate: date('start_date').notNull(),
     endDate: date('end_date').notNull(),
     contractType: varchar('contract_type', { length: 50 }) // initial | renewal | amendment

@@ -1,12 +1,15 @@
 import { db, contracts, DB } from '../../../../db'
-import { eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
 import { CreateContractDto } from '../dto/contract.request'
 import { ContractRepository } from '../repository/contract.repository'
 
 const validateNoOverlap = async (tx: DB, dto: CreateContractDto) => {
   const existing = await tx.query.contracts.findMany({
-    where: eq(contracts.employmentId, dto.employmentId),
+    where: and(
+      eq(contracts.employmentId, dto.employmentId),
+      eq(contracts.isDeleted, false),
+    ),
   })
 
   for (const c of existing) {
@@ -26,20 +29,34 @@ const validateNoOverlap = async (tx: DB, dto: CreateContractDto) => {
 export const ContractService = {
   create: async (dto: CreateContractDto) => {
     return db.transaction(async (tx) => {
-      // 🔥 1. Prevent overlap
-      await validateNoOverlap(tx, dto)
+      // 🔒 1. LOCK (prevents race condition)
+      await tx.execute(sql`
+        SELECT id FROM contracts
+        WHERE employment_id = ${dto.employmentId}
+        FOR UPDATE
+      `)
 
-      // 🔥 2. Close current contract (if exists)
+      // 🔍 2. GET CURRENT CONTRACT
       const current = await ContractRepository.getCurrentByEmployment(
         tx,
         dto.employmentId,
       )
 
+      // 🧠 3. CLOSE ONLY IF OVERLAPPING OR ACTIVE
       if (current) {
-        await ContractRepository.closeContract(tx, current.id, dto.startDate)
+        const currentEnd = new Date(current.endDate)
+        const newStart = new Date(dto.startDate)
+        const isOverlapping = newStart <= currentEnd
+
+        if (isOverlapping) {
+          await ContractRepository.closeContract(tx, current.id, dto.startDate)
+        }
       }
 
-      // 🔥 3. Create new contract
+      // 🔥 4. VALIDATE (after closing potential overlap)
+      await validateNoOverlap(tx, dto)
+
+      // 🚀 5. CREATE NEW CONTRACT
       return ContractRepository.create(tx, dto)
     })
   },

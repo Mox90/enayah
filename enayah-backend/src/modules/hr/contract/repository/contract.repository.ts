@@ -41,6 +41,7 @@ export const ContractRepository = {
       where: and(
         eq(contracts.employmentId, employmentId),
         eq(contracts.status, 'active'),
+        eq(contracts.isDeleted, false),
       ),
       orderBy: (c, { desc }) => [desc(c.startDate)],
     })

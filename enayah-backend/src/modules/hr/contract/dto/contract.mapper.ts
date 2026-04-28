@@ -3,7 +3,7 @@
 import { contracts } from '../../../../db'
 import { InferInsertModel } from 'drizzle-orm'
 import { CreateContractDto } from './contract.request'
-import z from 'zod'
+import { ContractResponse } from './contract.response'
 
 type ContractInsert = InferInsertModel<typeof contracts>
 
@@ -16,13 +16,11 @@ export const toContractDb = (dto: CreateContractDto): ContractInsert => ({
   notes: dto.notes ?? null,
 })
 
-export const toContractResponse = (row: any) => ({
+export const toContractResponse = (row: ContractResponse) => ({
   id: row.id,
   employmentId: row.employmentId,
   startDate: row.startDate,
   endDate: row.endDate,
-  salary: row.salary,
-  increment: row.increment,
   contractType: row.contractType,
   status: row.status,
 })
