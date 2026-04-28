@@ -30,11 +30,16 @@ export const ContractService = {
   create: async (dto: CreateContractDto) => {
     return db.transaction(async (tx) => {
       // 🔒 1. LOCK (prevents race condition)
-      await tx.execute(sql`
+      /*await tx.execute(sql`
         SELECT id FROM contracts
         WHERE employment_id = ${dto.employmentId}
         FOR UPDATE
-      `)
+      `)*/
+      await tx.execute(sql`
+  SELECT id FROM employments
+  WHERE id = ${dto.employmentId}
+  FOR UPDATE
+`)
 
       // 🔍 2. GET CURRENT CONTRACT
       const current = await ContractRepository.getCurrentByEmployment(
