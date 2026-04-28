@@ -6,6 +6,7 @@ import {
   integer,
   numeric,
   pgTable,
+  text,
   timestamp,
   uuid,
   varchar,
@@ -92,15 +93,10 @@ export const contracts = pgTable(
     employmentId: uuid('employment_id').notNull(),
     startDate: date('start_date').notNull(),
     endDate: date('end_date').notNull(),
-    salary: numeric('salary').notNull(),
-    increment: numeric('increment'),
     contractType: varchar('contract_type', { length: 50 }) // initial | renewal | amendment
       .notNull(),
     status: varchar('status', { length: 20 }).default('active'),
-    /*isDeleted: boolean('is_deleted').default(false),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-  */
+    notes: text('notes'),
     ...baseColumns,
   },
   (table) => ({
