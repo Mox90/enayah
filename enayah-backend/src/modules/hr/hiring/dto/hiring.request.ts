@@ -2,7 +2,8 @@ import { z } from 'zod'
 import { createEmployeeSchema } from '../../employees/dto/employee.request'
 import { createEmploymentSchema } from '../../employments/dto/employment.request'
 import { createJobAssignmentSchema } from '../../job-assignments/dto/jobAssignment.request'
-import { hiringEmploymentSchema } from './hiringEmployment.request'
+import { createContractSchema } from '../../contracts/dto/contract.request'
+//import { hiringEmploymentSchema } from './hiringEmployment.request'
 
 export const hireEmployeeSchema = z.object({
   /*employee: z.object({
@@ -37,8 +38,11 @@ export const hireEmployeeSchema = z.object({
     })
     .optional(),*/
   employee: createEmployeeSchema,
-  employment: hiringEmploymentSchema, //createEmploymentSchema,
+  employment: createEmploymentSchema.omit({ employeeId: true }),
   jobAssignment: createJobAssignmentSchema.optional(),
+  contract: createContractSchema.omit({
+    employmentId: true,
+  }),
 })
 
 export type HireEmployeeDto = z.infer<typeof hireEmployeeSchema>
