@@ -144,7 +144,9 @@ export const jobAssignments = pgTable(
 export const compensations = pgTable('compensations', {
   id: uuid('id').defaultRandom().primaryKey(),
 
-  employmentId: uuid('employment_id').notNull(),
+  employmentId: uuid('employment_id')
+    .notNull()
+    .references(() => employments.id),
   effectiveDate: date('effective_date').notNull(),
 
   baseSalary: numeric('base_salary').notNull(),
@@ -161,7 +163,9 @@ export const compensations = pgTable('compensations', {
 
 export const compensationAllowances = pgTable('compensation_allowances', {
   id: uuid('id').defaultRandom().primaryKey(),
-  compensationId: uuid('compensation_id').notNull(),
+  compensationId: uuid('compensation_id')
+    .notNull()
+    .references(() => compensations.id),
   type: varchar('type', { length: 50 }).notNull(),
   amount: numeric('amount').notNull(),
 })

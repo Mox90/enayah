@@ -7,6 +7,8 @@ import { HireEmployeeDto } from '../dto/hiring.request'
 import { EmployeeRepository } from '../../employees/repository/employee.repository'
 import { EmploymentRepository } from '../../employments/repository/employment.repository'
 import { JobAssignmentRepository } from '../../job-assignments/repository/jobAssignment.repository'
+import { ContractRepository } from '../../contracts/repository/contract.repository'
+import { CompensationRepository } from '../../compensations/repository/compensation.repository'
 
 export const HiringService = {
   hire: async (dto: HireEmployeeDto) => {
@@ -36,6 +38,21 @@ export const HiringService = {
         employeeId: employee.id,
       })
 
+      let contract = null
+      if (dto.contract) {
+        if (dto.contract.startDate !== dto.employment.startDate) {
+          throw new AppError(
+            'Contract startDate must match employment startDat',
+            400,
+          )
+        }
+
+        contract = await ContractRepository.create(tx, {
+          ...dto.contract,
+          employmentId: employment.id,
+        })
+      }
+
       // JOB Assignment
       if (dto.jobAssignment) {
         await JobAssignmentRepository.create(tx, {
@@ -45,9 +62,31 @@ export const HiringService = {
         })
       }
 
+      if (dto.compensation) {
+        if (!dto.contract) {
+          throw new AppError(
+            'Compensation requires a legal contract basis',
+            400,
+          )
+        }
+
+        if (dto.compensation.effectiveDate !== dto.contract.startDate) {
+          throw new AppError(
+            'Compensation must align with contract startDate',
+            400,
+          )
+        }
+
+        await CompensationRepository.create(tx, {
+          ...dto.compensation,
+          employmentId: employment.id,
+        })
+      }
+
       return {
         employee,
         employment,
+        ...(contract && { contract }),
       }
     })
   },
