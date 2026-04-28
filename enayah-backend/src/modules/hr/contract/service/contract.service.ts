@@ -36,10 +36,10 @@ export const ContractService = {
         FOR UPDATE
       `)*/
       await tx.execute(sql`
-  SELECT id FROM employments
-  WHERE id = ${dto.employmentId}
-  FOR UPDATE
-`)
+        SELECT id FROM employments
+        WHERE id = ${dto.employmentId}
+        FOR UPDATE
+      `)
 
       // 🔍 2. GET CURRENT CONTRACT
       const current = await ContractRepository.getCurrentByEmployment(
