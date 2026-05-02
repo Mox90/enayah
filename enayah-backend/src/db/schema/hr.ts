@@ -126,8 +126,8 @@ export const jobAssignments = pgTable(
       onDelete: 'restrict',
     }),
 
-    startDate: timestamp('start_date').notNull(),
-    endDate: timestamp('end_date'),
+    startDate: date('start_date').notNull(),
+    endDate: date('end_date'),
 
     isPrimary: boolean('is_primary').default(true),
 
