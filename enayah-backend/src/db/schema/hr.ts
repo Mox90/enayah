@@ -103,6 +103,10 @@ export const contracts = pgTable(
   },
   (table) => ({
     employeeIdx: index('idx_contracts_employment_id').on(table.employmentId),
+    validDateRange: check(
+      'chk_contracts_valid_date_range',
+      sql`${table.endDate} IS NULL OR ${table.endDate} >= ${table.startDate}`,
+    ),
   }),
 )
 
