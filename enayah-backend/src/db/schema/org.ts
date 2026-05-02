@@ -51,7 +51,7 @@ export const positions = pgTable(
   {
     id: uuid('id').defaultRandom().primaryKey(),
     titleEn: varchar('title_en', { length: 150 }).notNull(),
-    titleAr: varchar('title_ar', { length: 150 }).notNull(),
+    titleAr: varchar('title_ar', { length: 150 }),
 
     gradeId: uuid('grade_id').references(() => jobGrades.id),
     ...baseColumns,

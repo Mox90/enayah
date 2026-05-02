@@ -103,6 +103,10 @@ export const contracts = pgTable(
   },
   (table) => ({
     employeeIdx: index('idx_contracts_employment_id').on(table.employmentId),
+    validDateRange: check(
+      'chk_contracts_valid_date_range',
+      sql`${table.endDate} IS NULL OR ${table.endDate} >= ${table.startDate}`,
+    ),
   }),
 )
 
@@ -174,6 +178,7 @@ export const compensationAllowances = pgTable('compensation_allowances', {
 export const positionItems = pgTable('position_items', {
   id: uuid('id').defaultRandom().primaryKey(),
 
+  oldItemNumber: varchar('old_item_number', { length: 50 }), // to store the original item number from the import file for reference
   itemNumber: varchar('item_number', { length: 50 }).notNull().unique(),
 
   departmentId: uuid('department_id')

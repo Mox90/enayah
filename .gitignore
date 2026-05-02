@@ -33,3 +33,13 @@ drizzle/meta
 
 # Misc
 coverage/
+
+# Excel import files
+
+data/*.xlsx
+*.xlsx
+
+# or specific file
+
+data/Database.xlsx
+Database.xlsx
