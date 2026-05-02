@@ -152,7 +152,8 @@ export const compensations = pgTable('compensations', {
   baseSalary: numeric('base_salary').notNull(),
   status: varchar('status', { length: 20 }) // draft, approved, applied
     .$type<'draft' | 'approved' | 'applied'>()
-    .default('draft'),
+    .default('draft')
+    .notNull(),
   reason: varchar('reason', { length: 50 }), // increment, promotion
 
   approvedBy: uuid('approved_by'),

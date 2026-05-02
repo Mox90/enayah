@@ -1,7 +1,9 @@
+import { Router } from 'express'
 import { audit } from '../../../../core/middleware/audit.middleware'
 import { requirePermission } from '../../../../core/middleware/permission.middleware'
-import router from '../../job-grade/routes/jobGrade.routes'
 import { LegalDocumentController } from '../controller/legalDocuments.controller'
+
+const router = Router()
 
 router.post(
   '/',
@@ -11,3 +13,5 @@ router.post(
   }),
   LegalDocumentController.create,
 )
+
+export default router
