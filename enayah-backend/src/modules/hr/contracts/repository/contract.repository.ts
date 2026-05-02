@@ -23,7 +23,7 @@ export const ContractRepository = {
 
   findById: async (tx: DB, id: string) => {
     const row = await tx.query.contracts.findFirst({
-      where: eq(contracts.id, id),
+      where: and(eq(contracts.id, id), eq(contracts.isDeleted, false)),
     })
 
     return assertExists(row, 'Contract not found')
@@ -31,7 +31,10 @@ export const ContractRepository = {
 
   findByEmployment: async (tx: DB, employmentId: string) => {
     return tx.query.contracts.findMany({
-      where: eq(contracts.employmentId, employmentId),
+      where: and(
+        eq(contracts.employmentId, employmentId),
+        eq(contracts.isDeleted, false),
+      ),
       orderBy: (c, { desc }) => [desc(c.startDate)],
     })
   },
@@ -52,9 +55,9 @@ export const ContractRepository = {
       .update(contracts)
       .set({
         //endDate: new Date(new Date(newStartDate).getTime() - 86400000), // -1 day
-        endDate: new Date(
-          new Date(newStartDate).getTime() - 86400000,
-        ).toISOString(), // -1 day
+        endDate: new Date(new Date(newStartDate).getTime() - 86400000)
+          .toISOString()
+          .split('T')[0], // -1 day
         status: 'inactive',
       })
       .where(eq(contracts.id, id))
@@ -67,7 +70,7 @@ export const ContractRepository = {
         isDeleted: true,
         deletedAt: new Date(),
       })
-      .where(eq(contracts.id, id))
+      .where(and(eq(contracts.id, id), eq(contracts.isDeleted, false)))
       .returning({ id: contracts.id })
 
     return assertExists(row, 'Delete failed')

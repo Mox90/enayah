@@ -6,5 +6,5 @@ export interface ContractResponse {
   endDate: string
 
   contractType: string
-  status: string
+  status: string | null
 }
