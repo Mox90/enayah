@@ -174,6 +174,7 @@ export const compensationAllowances = pgTable('compensation_allowances', {
 export const positionItems = pgTable('position_items', {
   id: uuid('id').defaultRandom().primaryKey(),
 
+  oldItemNumber: varchar('old_item_number', { length: 50 }), // to store the original item number from the import file for reference
   itemNumber: varchar('item_number', { length: 50 }).notNull().unique(),
 
   departmentId: uuid('department_id')
