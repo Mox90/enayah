@@ -9,7 +9,7 @@ import {
   jobAssignments,
   countries,
 } from '../../db/schema'
-import { eq, InferInsertModel } from 'drizzle-orm'
+import { and, eq, InferInsertModel } from 'drizzle-orm'
 import ExcelJS from 'exceljs'
 
 type EmploymentInsert = InferInsertModel<typeof employments>
@@ -31,43 +31,38 @@ function getCell(row: ExcelJS.Row, index: number): string | null {
   return val.toString().trim()
 }
 
+function formatDateOnlyLocal(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
 function parseDateOnly(value: any): string | null {
   if (!value) return null
 
   let date: Date | null = null
 
-  // ✅ ExcelJS may already give Date object
   if (value instanceof Date) {
     date = value
-  }
-
-  // ✅ Excel serial number
-  else if (typeof value === 'number') {
+  } else if (typeof value === 'number') {
     date = new Date(Math.round((value - 25569) * 86400 * 1000))
-  }
-
-  // ✅ ISO string (e.g. 1974-07-20T00:00:00.000Z)
-  else if (typeof value === 'string' && value.includes('T')) {
+  } else if (typeof value === 'string' && value.includes('T')) {
     date = new Date(value)
-  }
-
-  // ✅ dd/mm/yyyy
-  else if (typeof value === 'string' && value.includes('/')) {
+  } else if (typeof value === 'string' && value.includes('/')) {
     const [day, month, year] = value.split('/')
     date = new Date(`${year}-${month}-${day}`)
-  }
-
-  // ✅ yyyy-mm-dd
-  else if (typeof value === 'string' && value.includes('-')) {
+  } else if (typeof value === 'string' && value.includes('-')) {
     date = new Date(value)
   }
 
   if (!date || isNaN(date.getTime())) {
     console.warn('⚠️ Invalid date value:', value)
+
     return null
   }
 
-  return date.toISOString().slice(0, 10)
+  return formatDateOnlyLocal(date) // ✅ FIXED
 }
 
 function assertExists<T>(value: T | undefined | null, message: string): T {
@@ -227,14 +222,14 @@ export async function runImport() {
           })
 
           if (!employee) {
-            console.log(
+            /*console.log(
               row.code,
               row.deptNameEn,
               row.itemNumber,
               row.status,
               row.employeeNumber,
               row.status === 'filled' ? parseDateOnly(row.dateOfBirth) : null,
-            )
+            )*/
             const [created] = await tx
               .insert(employees)
               .values({
@@ -268,56 +263,66 @@ export async function runImport() {
           // 6. EMPLOYMENT
           // =========================
 
-          const data: EmploymentInsert = {
-            employeeId: employee.id,
-            positionItemId: positionItem.id,
-            hireDate: parseDateOnly(row.hireDate)!,
-            startDate: parseDateOnly(row.startDate)!,
-            employmentType: 'full_time',
-            staffCategory: 'contractual',
-            status: 'active',
+          const employmentExists = await tx.query.employments.findFirst({
+            where: and(
+              eq(employments.employeeId, employee.id),
+              eq(employments.hireDate, row.hireDate),
+              eq(employments.startDate, row.startDate),
+            ),
+          })
+
+          if (!employmentExists) {
+            const data: EmploymentInsert = {
+              employeeId: employee.id,
+              positionItemId: positionItem.id,
+              hireDate: parseDateOnly(row.hireDate)!,
+              startDate: parseDateOnly(row.startDate)!,
+              employmentType: 'full_time',
+              staffCategory: 'contractual',
+              status: 'active',
+            }
+
+            const [employment] = await tx
+              .insert(employments)
+              .values(data)
+              .returning()
+
+            const emp = assertExists(employment, 'Failed to create employment')
+
+            // =========================
+            // 7. CONTRACT
+            // =========================
+            const hireDate = parseDateOnly(row.hireDate)
+
+            const contractType =
+              hireDate && new Date(hireDate) >= new Date('2025-05-01')
+                ? 'initial'
+                : 'renewal'
+
+            const contractData: ContractInsert = {
+              employmentId: emp.id,
+              startDate: parseDateOnly(row.startDate)!,
+              endDate: parseDateOnly(row.endDate),
+              contractType,
+            } as any
+
+            await tx.insert(contracts).values(contractData)
+
+            // =========================
+            // 8. JOB ASSIGNMENT
+            // =========================
+            const jobAssignmentData: JobAssignmentInsert = {
+              employmentId: emp.id,
+              departmentId: department.id,
+              positionId: position.id,
+              startDate: parseDateOnly(row.startDate),
+              isPrimary: true,
+            } as any
+
+            await tx.insert(jobAssignments).values(jobAssignmentData)
+
+            console.log(`✅ Imported: ${row.employeeNumber}`)
           }
-
-          const [employment] = await tx
-            .insert(employments)
-            .values(data)
-            .returning()
-
-          const emp = assertExists(employment, 'Failed to create employment')
-
-          // =========================
-          // 7. CONTRACT
-          // =========================
-          const hireDate = parseDateOnly(row.hireDate)
-
-          const contractType =
-            hireDate && new Date(hireDate) >= new Date('2025-05-01')
-              ? 'initial'
-              : 'renewal'
-
-          const contractData: ContractInsert = {
-            employmentId: emp.id,
-            startDate: parseDateOnly(row.startDate)!,
-            endDate: parseDateOnly(row.endDate),
-            contractType,
-          } as any
-
-          await tx.insert(contracts).values(contractData)
-
-          // =========================
-          // 8. JOB ASSIGNMENT
-          // =========================
-          const jobAssignmentData: JobAssignmentInsert = {
-            employmentId: emp.id,
-            departmentId: department.id,
-            positionId: position.id,
-            startDate: parseDateOnly(row.startDate),
-            isPrimary: true,
-          } as any
-
-          await tx.insert(jobAssignments).values(jobAssignmentData)
-
-          console.log(`✅ Imported: ${row.employeeNumber}`)
         }
       } catch (err) {
         console.error(`❌ Failed row: ${row.employeeNumber}`, err)
