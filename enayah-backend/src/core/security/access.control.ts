@@ -1,4 +1,4 @@
-import { isSubordinate } from './hierarchy'
+/*import { isSubordinate } from './hierarchy'
 import { CurrentUser, EmployeeWithDept } from '../types/auth'
 
 export const canAccessEmployee = async ({
@@ -30,4 +30,4 @@ export const canAccessEmployee = async ({
 
   // HIERARCHY
   return await isSubordinate(currentUser.employeeId, targetEmployee)
-}
+}*/

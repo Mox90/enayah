@@ -1,7 +1,6 @@
 // employee.repository.ts
 import { AppError } from '../../../../core/errors/AppError'
-import { DB, db } from '../../../../db'
-import { employees } from '../../../../db/schema/employees'
+import { DB, db, employees } from '../../../../db'
 import { and, eq, sql } from 'drizzle-orm'
 import { CreateEmployeeDto, UpdateEmployeeDto } from '../dto/employee.request'
 import { toEmployeeDb, toEmployeeUpdateDb } from '../dto/employee.mapper'

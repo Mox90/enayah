@@ -1,5 +1,4 @@
-import { DB, db } from '../../../../db'
-import { jobAssignments } from '../../../../db/schema/jobAssignments'
+import { DB, db, jobAssignments } from '../../../../db'
 import { and, eq, isNull } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
 import {
