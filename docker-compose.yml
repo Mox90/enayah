@@ -52,6 +52,21 @@ services:
       - /app/node_modules
     command: npm run dev
 
+  frontend:
+    build: ./enayah-frontend
+    container_name: enayah-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - '3000:3000'
+    env_file:
+      - ./enayah-frontend/.env
+    volumes:
+      - ./enayah-frontend:/app
+      - /app/node_modules
+    command: npm run dev
+
 volumes:
   postgres_data:
   redis_data:
