@@ -13,6 +13,7 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+/*
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
@@ -29,6 +30,45 @@ api.interceptors.response.use(
       originalRequest.headers['Authorization'] =
         `Bearer ${response.data.accessToken}`
       return api(originalRequest)
+    }
+    return Promise.reject(error)
+  },
+)*/
+
+let refreshPromise: Promise<string> | null = null
+
+api.interceptors.response.use(
+  (res) => res,
+  async (error) => {
+    const originalRequest = error.config
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true
+
+      if (!refreshPromise) {
+        refreshPromise = axios
+          .post(
+            `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh`,
+            {},
+            { withCredentials: true },
+          )
+          .then((res) => {
+            const newToken = res.data.accessToken
+            localStorage.setItem('accessToken', newToken)
+            return newToken
+          })
+          .finally(() => {
+            refreshPromise = null
+          })
+      }
+
+      try {
+        const newToken = await refreshPromise
+        originalRequest.headers['Authorization'] = `Bearer ${newToken}`
+        return api(originalRequest)
+      } catch (refreshError) {
+        localStorage.removeItem('accessToken')
+        return Promise.reject(refreshError)
+      }
     }
     return Promise.reject(error)
   },
