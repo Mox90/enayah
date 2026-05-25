@@ -10,7 +10,7 @@ import {
 import { users } from './users'
 import { roles } from './roles'
 import { departments } from './org'
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 
 export const userRoles = pgTable(
   'user_roles',
@@ -53,3 +53,15 @@ export const userRoles = pgTable(
       .where(sql`${table.departmentId} IS NULL`),
   }),
 )
+
+export const RolesRelations = relations(userRoles, ({ one }) => ({
+  user: one(users, {
+    fields: [userRoles.userId],
+    references: [users.id],
+  }),
+
+  role: one(roles, {
+    fields: [userRoles.roleId],
+    references: [roles.id],
+  }),
+}))

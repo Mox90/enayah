@@ -1,61 +1,51 @@
+'use client'
+
+import { useAuthStore } from '@/modules/iam/stores/auth.store'
 import axios from 'axios'
 
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
 })
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken')
+  const token = useAuthStore.getState().accessToken
+
   if (token) {
-    config.headers['Authorization'] = `Bearer ${token}`
+    config.headers.Authorization = `Bearer ${token}`
   }
+
   return config
 })
-
-/*
-api.interceptors.response.use(
-  (res) => res,
-  async (error) => {
-    const originalRequest = error.config
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true
-
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh`,
-        {},
-        { withCredentials: true },
-      )
-      localStorage.setItem('accessToken', response.data.accessToken)
-      originalRequest.headers['Authorization'] =
-        `Bearer ${response.data.accessToken}`
-      return api(originalRequest)
-    }
-    return Promise.reject(error)
-  },
-)*/
 
 let refreshPromise: Promise<string> | null = null
 
 api.interceptors.response.use(
   (res) => res,
+
   async (error) => {
     const originalRequest = error.config
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
 
       if (!refreshPromise) {
         refreshPromise = axios
           .post(
-            `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh`,
+            `${process.env.NEXT_PUBLIC_API_URL}/iam/auth/refresh`,
             {},
-            { withCredentials: true },
+            {
+              withCredentials: true,
+            },
           )
           .then((res) => {
             const newToken = res.data.accessToken
-            localStorage.setItem('accessToken', newToken)
+
+            useAuthStore.getState().setAccessToken(newToken)
+
             return newToken
           })
+
           .finally(() => {
             refreshPromise = null
           })
@@ -63,13 +53,19 @@ api.interceptors.response.use(
 
       try {
         const newToken = await refreshPromise
-        originalRequest.headers['Authorization'] = `Bearer ${newToken}`
+
+        originalRequest.headers.Authorization = `Bearer ${newToken}`
+
         return api(originalRequest)
       } catch (refreshError) {
-        localStorage.removeItem('accessToken')
+        useAuthStore.getState().logout()
+
+        window.location.href = '/login'
+
         return Promise.reject(refreshError)
       }
     }
+
     return Promise.reject(error)
   },
 )

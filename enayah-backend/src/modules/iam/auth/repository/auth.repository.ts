@@ -36,6 +36,23 @@ export const findUserByEmailOrUsername = async (
 export const findUserByUsername = async (username: string) => {
   return db.query.users.findFirst({
     where: eq(users.username, username),
+    with: {
+      employee: true,
+      userRoles: {
+        where: eq(userRoles.isActive, true),
+        with: {
+          role: {
+            with: {
+              rolePermissions: {
+                with: {
+                  permission: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   })
 }
 
@@ -87,12 +104,12 @@ export const getPermissionsByRoleIds = async (roleIds: string[]) => {
   if (roleIds.length === 0) return []
 
   const result = await db
-    .select({ name: permissions.name })
+    .select({ code: permissions.code })
     .from(rolePermissions)
     .innerJoin(permissions, eq(rolePermissions.permissionId, permissions.id))
     .where(inArray(rolePermissions.roleId, roleIds))
 
-  return result.map((row) => row.name)
+  return result.map((row) => row.code)
 }
 
 export const getRoles = async (userId: string) => {

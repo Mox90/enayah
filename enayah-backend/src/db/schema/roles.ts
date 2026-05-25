@@ -8,6 +8,8 @@ import {
 } from 'drizzle-orm/pg-core'
 import { baseColumns } from './base'
 import { positions } from './org'
+import { relations } from 'drizzle-orm'
+import { rolePermissions } from './rolePermissions'
 
 export const roles = pgTable('roles', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -38,6 +40,10 @@ export const positionRoles = pgTable(
     ),
   }),
 )
+
+export const rolesRelations = relations(roles, ({ many }) => ({
+  rolePermissions: many(rolePermissions),
+}))
 
 export const roleLevels = pgTable('role_levels', {
   id: uuid('id').defaultRandom().primaryKey(),

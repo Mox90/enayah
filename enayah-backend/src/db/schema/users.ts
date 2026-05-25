@@ -12,8 +12,9 @@ import {
 } from 'drizzle-orm/pg-core'
 import { baseColumns } from './base'
 import { authProviderEnum } from './enums'
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import { employees } from './hr'
+import { userRoles } from './userRoles'
 //import { roleEnum, authProviderEnum } from './enums'
 
 export const users = pgTable(
@@ -75,6 +76,18 @@ export const users = pgTable(
     }
   },
 )
+
+/*export const usersRelations = relations(users, ({ many }) => ({
+  userRoles: many(userRoles),
+}))*/
+export const usersRelations = relations(users, ({ many, one }) => ({
+  employee: one(employees, {
+    fields: [users.employeeId],
+    references: [employees.id],
+  }),
+
+  userRoles: many(userRoles),
+}))
 
 export const passwordHistory = pgTable(
   'password_history',
