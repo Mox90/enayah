@@ -10,6 +10,7 @@ const router = Router()
 //router.post('/signup', rateLimitLogin, AuthController.signup)
 router.post('/signup', AuthController.signup)
 router.post('/login', rateLimitLogin, AuthController.login)
+router.get('/me', requireAuth, AuthController.me)
 
 router.post('/mfa/verify', rateLimitLogin, AuthController.verifyMfa)
 

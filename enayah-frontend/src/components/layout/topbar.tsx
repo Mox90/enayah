@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 import { Bell, Globe, Moon, Sun, User, LogOut, Settings } from 'lucide-react'
+import LanguageSwitcher from './language-switcher'
 
 const Topbar = () => {
   const user = useAuthStore((state) => state.user)
@@ -53,9 +54,7 @@ const Topbar = () => {
         </Button>
 
         {/* Language */}
-        <Button variant='ghost' size='icon'>
-          <Globe className='h-5 w-5' />
-        </Button>
+        <LanguageSwitcher />
 
         {/* Theme */}
         <Button

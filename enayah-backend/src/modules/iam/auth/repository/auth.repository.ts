@@ -56,6 +56,32 @@ export const findUserByUsername = async (username: string) => {
   })
 }
 
+export const findAuthenticatedUserById = async (id: string) => {
+  return db.query.users.findFirst({
+    where: eq(users.id, id),
+
+    with: {
+      employee: true,
+
+      userRoles: {
+        where: eq(userRoles.isActive, true),
+
+        with: {
+          role: {
+            with: {
+              rolePermissions: {
+                with: {
+                  permission: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
 export const createUserWithRole = async (data: {
   email: string
   username: string
@@ -121,19 +147,6 @@ export const getRoles = async (userId: string) => {
     return roles
   })
 }
-
-/*export const getCurrentPosition = async (employeeId: string) => {
-  return db
-    .select({
-      positionId: jobAssignments.positionId,
-      departmentId: jobAssignments.departmentId,
-    })
-    .from(employees)
-    .innerJoin(employments, eq(employments.employeeId, employees.id))
-    .innerJoin(jobAssignments, eq(jobAssignments.employmentId, employments.id))
-    .where(and(eq(employees.id, employeeId), isNull(jobAssignments.endDate)))
-    .limit(1)
-}*/
 
 export interface PositionResult {
   positionId: string | null

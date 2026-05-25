@@ -53,7 +53,7 @@ const Login = () => {
       // ✅ redirect
       router.push('/dashboard')
     } catch (error) {
-      console.error('Login failed:', error)
+      //console.error('Login failed:', error)
       if (axios.isAxiosError(error)) {
         setError(
           error.response?.data?.message || 'Invalid username or password',

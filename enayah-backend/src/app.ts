@@ -4,9 +4,12 @@ import cors from 'cors'
 import routes from './routes'
 import { globalErrorHandler } from './core/errors/error.middleware'
 import { requestLogger } from './core/logging/request.logger'
+import cookieParser from 'cookie-parser'
 //import { requestLogger } from './core/logging/'
 
 const app = express()
+
+app.use(cookieParser())
 
 const allowedOrigins =
   process.env.CORS_ORIGINS?.split(',')
