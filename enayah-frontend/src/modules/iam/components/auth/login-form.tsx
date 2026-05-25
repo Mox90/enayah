@@ -12,8 +12,10 @@ import { useAuthStore } from '../../stores/auth.store'
 import { usePermissionStore } from '../../stores/permission.store'
 import { Button } from '@/components/ui/button'
 import axios from 'axios'
+import { useTranslations } from 'next-intl'
 
 const Login = () => {
+  const t = useTranslations('auth')
   const router = useRouter()
 
   const login = useAuthStore((state) => state.login)
@@ -70,10 +72,12 @@ const Login = () => {
         <form className='space-y-4 p-6' onSubmit={handleLogin}>
           <div className='space-y-1'>
             <h1 className='text-center text-2xl font-bold'>
-              Login to Your Account
+              {t('loginTitle')}
             </h1>
 
-            <p className='text-sm text-muted-foreground'>Sign in to continue</p>
+            <p className='text-sm text-muted-foreground'>
+              {t('loginSubtitle')}
+            </p>
           </div>
 
           {error && (
@@ -83,21 +87,21 @@ const Login = () => {
           )}
 
           <Input
-            placeholder='Username'
+            placeholder={t('username')}
             type='text'
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
 
           <Input
-            placeholder='Password'
+            placeholder={t('password')}
             type='password'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
 
           <Button className='w-full' type='submit' disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? `${t('loggingIn')}` : `${t('login')}`}
           </Button>
         </form>
       </CardContent>

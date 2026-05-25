@@ -4,5 +4,22 @@
     "logout": "Logout",
     "profile": "Profile",
     "settings": "Settings"
-  }
+  },
+  "auth": {
+    "loginTitle": "Login to Your Account",
+    "loginSubtitle": "Sign in to continue",
+    "username": "Username",
+    "password": "Password",
+    "login": "Login",
+    "loggingIn": "Logging in...",
+    "invalidCredentials": "Invalid username or password",
+    "somethingWentWrong": "Something went wrong"
+  },
+  "employees": {},
+  "departments": {},
+  "contracts": {},
+  "payroll": {},
+  "attendance": {},
+  "recruitment": {},
+  "auditLogs": {}
 }

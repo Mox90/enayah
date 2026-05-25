@@ -1,7 +1,5 @@
 'use client'
 
-//import { useAuthStore } from '@/stores/auth.store'
-//import { usePermissionStore } from '@/stores/permission.store'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { useAuthStore } from '../../stores/auth.store'
@@ -32,9 +30,15 @@ export default function ProtectedRoute({
       requiredPermissions.length > 0 &&
       !requiredPermissions.every((p) => permissions.includes(p))
     ) {
-      router.push('/unauthorized')
+      router.push('/forbidden')
     }
   }, [isAuthenticated, permissions, requiredPermissions, router])
 
+  if (!isAuthenticated) return null
+  if (
+    requiredPermissions.length > 0 &&
+    !requiredPermissions.every((p) => permissions.includes(p))
+  )
+    return null
   return <>{children}</>
 }
