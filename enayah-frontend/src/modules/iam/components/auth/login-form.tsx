@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
@@ -24,7 +24,8 @@ const Login = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     try {
       setLoading(true)
 
@@ -65,38 +66,40 @@ const Login = () => {
 
   return (
     <Card className='w-full max-w-md rounded-2xl shadow-lg'>
-      <CardContent className='space-y-4 p-6'>
-        <div className='space-y-1'>
-          <h1 className='text-center text-2xl font-bold'>
-            Login to Your Account
-          </h1>
+      <CardContent className='p-6'>
+        <form className='space-y-4 p-6' onSubmit={handleLogin}>
+          <div className='space-y-1'>
+            <h1 className='text-center text-2xl font-bold'>
+              Login to Your Account
+            </h1>
 
-          <p className='text-sm text-muted-foreground'>Sign in to continue</p>
-        </div>
-
-        {error && (
-          <div className='rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-600 dark:border-red-900 dark:bg-red-950 dark:text-red-400'>
-            {error}
+            <p className='text-sm text-muted-foreground'>Sign in to continue</p>
           </div>
-        )}
 
-        <Input
-          placeholder='Username'
-          type='text'
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
+          {error && (
+            <div className='rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-600 dark:border-red-900 dark:bg-red-950 dark:text-red-400'>
+              {error}
+            </div>
+          )}
 
-        <Input
-          placeholder='Password'
-          type='password'
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <Input
+            placeholder='Username'
+            type='text'
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
 
-        <Button className='w-full' onClick={handleLogin} disabled={loading}>
-          {loading ? 'Logging in...' : 'Login'}
-        </Button>
+          <Input
+            placeholder='Password'
+            type='password'
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+
+          <Button className='w-full' type='submit' disabled={loading}>
+            {loading ? 'Logging in...' : 'Login'}
+          </Button>
+        </form>
       </CardContent>
     </Card>
   )

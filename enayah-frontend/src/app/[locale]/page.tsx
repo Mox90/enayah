@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { useLocale } from 'next-intl'
-import { useRouter } from '@/i18n/navigation'
+import { useRouter } from '../../../i18n/navigation'
 import { useAuthStore } from '@/modules/iam/stores/auth.store'
 
 export default function HomePage() {

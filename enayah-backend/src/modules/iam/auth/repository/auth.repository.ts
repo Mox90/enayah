@@ -39,6 +39,7 @@ export const findUserByUsername = async (username: string) => {
     with: {
       employee: true,
       userRoles: {
+        where: eq(userRoles.isActive, true),
         with: {
           role: {
             with: {
@@ -103,12 +104,12 @@ export const getPermissionsByRoleIds = async (roleIds: string[]) => {
   if (roleIds.length === 0) return []
 
   const result = await db
-    .select({ name: permissions.name })
+    .select({ code: permissions.code })
     .from(rolePermissions)
     .innerJoin(permissions, eq(rolePermissions.permissionId, permissions.id))
     .where(inArray(rolePermissions.roleId, roleIds))
 
-  return result.map((row) => row.name)
+  return result.map((row) => row.code)
 }
 
 export const getRoles = async (userId: string) => {

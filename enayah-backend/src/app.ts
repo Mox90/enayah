@@ -8,9 +8,25 @@ import { requestLogger } from './core/logging/request.logger'
 
 const app = express()
 
+const allowedOrigins =
+  process.env.CORS_ORIGINS?.split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean) ?? []
+
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'http://192.168.149.6:3000'],
+    origin: (origin, callback) => {
+      // Allow non-browser requests (Postman, mobile apps, server-to-server)
+      if (!origin) {
+        return callback(null, true)
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true)
+      }
+
+      return callback(new Error('Not allowed by CORS'))
+    },
 
     credentials: true,
   }),
