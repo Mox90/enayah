@@ -36,6 +36,22 @@ export const findUserByEmailOrUsername = async (
 export const findUserByUsername = async (username: string) => {
   return db.query.users.findFirst({
     where: eq(users.username, username),
+    with: {
+      employee: true,
+      userRoles: {
+        with: {
+          role: {
+            with: {
+              rolePermissions: {
+                with: {
+                  permission: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   })
 }
 

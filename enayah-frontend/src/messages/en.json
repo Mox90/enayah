@@ -1,0 +1,8 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "logout": "Logout",
+    "profile": "Profile",
+    "settings": "Settings"
+  }
+}
