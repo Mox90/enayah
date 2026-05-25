@@ -10,6 +10,14 @@ import {
   findUserById,
 } from '../repository/auth.repository'
 import { toAuthResponse } from '../dto/auth.mapper'
+const isProd = process.env.NODE_ENV === 'production'
+const refreshCookieOptions = {
+  httpOnly: true,
+  secure: isProd,
+  sameSite: isProd ? 'none' : 'lax',
+  path: '/',
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+} as const
 
 export const AuthController = {
   signup: asyncHandler(async (req: Request, res: Response) => {
@@ -34,13 +42,14 @@ export const AuthController = {
       return res.status(200).json(result)
     }
 
-    res.cookie('refreshToken', result.refreshToken, {
+    /*res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
       secure: false, //process.env.NODE_ENV === 'production',
       sameSite: 'lax', //process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    })
+    })*/
+    res.cookie('refreshToken', result.refreshToken, refreshCookieOptions)
     res.status(200).json({
       accessToken: result.accessToken,
       user: result.user,
@@ -57,13 +66,14 @@ export const AuthController = {
     const result = await SessionService.refreshSession(refreshToken)
 
     // optionally rotate cookie
-    res.cookie('refreshToken', result.refreshToken, {
+    /*res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
       secure: false, //process.env.NODE_ENV === 'production',
       sameSite: 'lax', //process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000,
-    })
+    })*/
+    res.cookie('refreshToken', result.refreshToken, refreshCookieOptions)
 
     return res.json({
       accessToken: result.accessToken,
@@ -100,7 +110,13 @@ export const AuthController = {
 
     await SessionService.logout(refreshToken)
 
-    res.clearCookie('refreshToken')
+    //res.clearCookie('refreshToken')
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      path: '/',
+    })
 
     res.json({ message: 'Logged out successfully' })
   }),
@@ -125,6 +141,14 @@ export const AuthController = {
       req.headers['user-agent'] ?? 'unknown',
     )
 
-    res.json(result)
+    if ('refreshToken' in result) {
+      res.cookie('refreshToken', result.refreshToken, refreshCookieOptions)
+      return res.json({
+        accessToken: result.accessToken,
+        user: result.user,
+      })
+    }
+
+    return res.json(result)
   }),
 }

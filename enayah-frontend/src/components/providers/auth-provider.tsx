@@ -12,12 +12,18 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = useAuthStore((state) => state.login)
   const logout = useAuthStore((state) => state.logout)
   const accessToken = useAuthStore((state) => state.accessToken)
-  const [loading, setLoading] = useState(!accessToken)
+  const isHydrated = useAuthStore((state) => state.isHydrated)
+  //const [loading, setLoading] = useState(true)
+  const [isRestoring, setIsRestoring] = useState(false)
 
   useEffect(() => {
-    if (accessToken) {
+    if (!isHydrated || accessToken) {
       return
     }
+    /*if (accessToken) {
+      setLoading(false)
+      return
+    }*/
     const restoreSession = async () => {
       try {
         const refreshResponse = await axios.post(
@@ -50,14 +56,14 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           console.error('Session restore failed:', error)
         }
       } finally {
-        setLoading(false)
+        setIsRestoring(false)
       }
     }
 
     restoreSession()
-  }, [accessToken, login, logout])
+  }, [isHydrated, accessToken, login, logout])
 
-  if (loading) {
+  if (!isHydrated || isRestoring) {
     return (
       <div className='flex h-screen items-center justify-center'>
         Loading...
