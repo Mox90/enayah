@@ -47,7 +47,7 @@ const MobileSidebar = () => {
               locale === 'ar' ? 'pr-2.5' : 'pl-2.5'
             }`}
           >
-            ENYH
+            NAFH
           </h1>
         </div>
 

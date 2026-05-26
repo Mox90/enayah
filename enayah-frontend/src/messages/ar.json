@@ -59,6 +59,10 @@
     "auditReports": "تقارير التدقيق",
     "settings": "الإعدادات"
   },
+  "metadata": {
+    "title": "مستشفي القوات المسلحة بنجران | NAFH",
+    "description": "نظام إدارة رأس المال البشري للمؤسسات"
+  },
   "employees": {},
   "departments": {},
   "contracts": {},

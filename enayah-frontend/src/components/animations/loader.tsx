@@ -2,7 +2,11 @@
 
 import { useEffect, useRef } from 'react'
 
-const Loader = () => {
+const Loader = ({
+  message = 'Initializing Najran Armed Forces Hospital...',
+}: {
+  message?: string
+}) => {
   const prefersReducedMotion =
     typeof window !== 'undefined' &&
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -18,8 +22,8 @@ const Loader = () => {
     const W = 340
     const H = 120
 
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
+    const ctx = canvas.getContext('2d')!
+    //if (!ctx) return
 
     const waypoints: [number, number][] = [
       [0, 60],
@@ -184,7 +188,8 @@ const Loader = () => {
       animRef.current = requestAnimationFrame(render)
     }
 
-    animRef.current = requestAnimationFrame(render)
+    //animRef.current = requestAnimationFrame(render)
+    render()
 
     return () => {
       cancelAnimationFrame(animRef.current)
@@ -257,8 +262,8 @@ const Loader = () => {
         <div className='flex items-center gap-3'>
           <div className='h-2 w-2 animate-pulse rounded-full bg-emerald-400' />
 
-          <p className='animate-pulse font-mono text-xs uppercase tracking-[0.2em] text-emerald-400/60'>
-            Initializing Enayah HCM...
+          <p className='animate-pulse font-mono text-xs tracking-[0.2em] text-emerald-400/60'>
+            {message}
           </p>
         </div>
       </div>

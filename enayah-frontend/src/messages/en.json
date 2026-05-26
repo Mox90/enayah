@@ -58,6 +58,10 @@
     "auditReports": "Audit Reports",
     "settings": "Settings"
   },
+  "metadata": {
+    "title": "NAFH | Najran Armed Forces Hospital",
+    "description": "Enterprise Human Capital Management System"
+  },
   "employees": {},
   "departments": {},
   "contracts": {},

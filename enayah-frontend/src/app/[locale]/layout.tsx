@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+//import type { Metadata } from 'next'
 
 import '@/app/globals.css'
 
@@ -9,7 +9,7 @@ import { ThemeProvider } from '@/components/providers/theme-provider'
 
 import { NextIntlClientProvider } from 'next-intl'
 
-import { getMessages } from 'next-intl/server'
+import { getMessages, getTranslations } from 'next-intl/server'
 import AuthProvider from '@/components/providers/auth-provider'
 
 /*const inter = Inter({
@@ -32,9 +32,21 @@ const cairo = Cairo({
   variable: '--font-cairo',
 })
 
-export const metadata: Metadata = {
-  title: 'Enayah HCM',
-  description: 'Enterprise Human Capital Management System',
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>
+}) {
+  const { locale } = await params
+  const t = await getTranslations({
+    locale,
+    namespace: 'metadata',
+  })
+
+  return {
+    title: t('title'),
+    description: t('description'),
+  }
 }
 
 export default async function LocaleLayout({
@@ -46,7 +58,7 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>
 }>) {
   const { locale } = await params
-  const messages = await getMessages()
+  const messages = await getMessages({ locale })
 
   return (
     <html
@@ -64,7 +76,7 @@ export default async function LocaleLayout({
           ${locale === 'ar' ? 'font-[var(--font-cairo)]' : 'font-sans'}
         `}
       >
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider>
             <AuthProvider>{children}</AuthProvider>
           </ThemeProvider>

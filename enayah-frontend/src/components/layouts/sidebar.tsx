@@ -32,7 +32,7 @@ const Sidebar = () => {
         <h1
           className={`truncate text-3xl ${locale === 'ar' ? 'pr-2.5' : 'pl-2.5'} font-bold`}
         >
-          ENYH
+          NAFH
         </h1>
       </div>
 

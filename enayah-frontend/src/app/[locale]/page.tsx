@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useLocale } from 'next-intl'
 import { useRouter } from '../../../i18n/navigation'
 import { useAuthStore } from '@/modules/iam/stores/auth.store'
+import Loader from '@/components/animations/loader'
 
 export default function HomePage() {
   const router = useRouter()
@@ -20,9 +21,5 @@ export default function HomePage() {
     }
   }, [isAuthenticated, router, locale])
 
-  return (
-    <div className='flex h-screen items-center justify-center'>
-      <p className='text-sm text-muted-foreground'>Redirecting...</p>
-    </div>
-  )
+  return <Loader message='Redirecting...' />
 }

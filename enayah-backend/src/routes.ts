@@ -18,13 +18,13 @@ router.use('/hr', hrModule.routes)
 //router.use('/access-control', AccessControlModule.routes)
 
 router.get('/', (_req, res) => {
-  res.send('Enayah Backend API')
+  res.send('NAFH Backend API')
 })
 
 router.get('/health', (req, res) => {
   res.json({
     status: 'ok',
-    message: 'Enayah backend running...',
+    message: 'NAFH backend running...',
   })
 })
 
