@@ -1,13 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-
 import axios from 'axios'
-
 import { useAuthStore } from '@/modules/iam/stores/auth.store'
-
 import { api } from '@/lib/api/client'
+//import dynamic from 'next/dynamic'
+import Loader from '../animations/loader'
 
+//const Loader = dynamic(() => import('../ui/loader'), { ssr: false })
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const login = useAuthStore((state) => state.login)
   const logout = useAuthStore((state) => state.logout)
@@ -65,9 +65,10 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   if (!isHydrated || isRestoring) {
     return (
-      <div className='flex h-screen items-center justify-center'>
-        Loading...
-      </div>
+      // <div className='flex h-screen items-center justify-center'>
+      //   Loading...
+      // </div>
+      <Loader />
     )
   }
 

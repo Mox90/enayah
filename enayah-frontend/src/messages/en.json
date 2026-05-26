@@ -15,6 +15,49 @@
     "invalidCredentials": "Invalid username or password",
     "somethingWentWrong": "Something went wrong"
   },
+  "navigation": {
+    "dashboard": "Dashboard",
+
+    "employees": "Employees",
+    "departments": "Departments",
+    "hiring": "Hiring",
+    "employments": "Employments",
+    "contracts": "Contracts",
+    "positions": "Positions",
+    "positionItems": "Position Items",
+    "jobAssignments": "Job Assignments",
+
+    "attendance": "Attendance",
+    "leaves": "Leaves",
+    "payroll": "Payroll",
+    "training": "Training",
+    "performance": "Performance",
+    "documents": "Documents",
+    "analytics": "Analytics",
+
+    "auditLogs": "Audit Logs",
+
+    "myTeam": "My Team",
+    "tasks": "Tasks",
+
+    "myProfile": "My Profile",
+    "myAttendance": "My Attendance",
+    "myLeave": "My Leave",
+    "myPayroll": "My Payroll",
+    "myDocuments": "My Documents",
+
+    "systemMonitoring": "System Monitoring",
+    "rolesPermissions": "Roles & Permissions",
+    "database": "Database",
+    "security": "Security",
+
+    "organizationAnalytics": "Organization Analytics",
+    "financialAnalytics": "Financial Analytics",
+    "performanceOverview": "Performance Overview",
+    "strategicReports": "Strategic Reports",
+    "auditReports": "Audit Reports",
+    "settings": "Settings"
+  },
   "employees": {},
   "departments": {},
   "contracts": {},

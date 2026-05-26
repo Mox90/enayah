@@ -4,6 +4,7 @@ import { useTheme } from 'next-themes'
 import { useAuthStore } from '@/modules/iam/stores/auth.store'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import Image from 'next/image'
 
 import {
   DropdownMenu,
@@ -16,6 +17,8 @@ import {
 import { Bell, Globe, Moon, Sun, User, LogOut, Settings } from 'lucide-react'
 import LanguageSwitcher from './language-switcher'
 import { useLocale, useTranslations } from 'next-intl'
+import MobileSidebar from './mobile-sidebar'
+import { api } from '@/lib/api/client'
 
 const Topbar = () => {
   const t = useTranslations('common')
@@ -24,10 +27,15 @@ const Topbar = () => {
   const logout = useAuthStore((state) => state.logout)
   const { resolvedTheme, setTheme } = useTheme()
 
-  const handleLogout = () => {
-    logout()
-
-    window.location.href = '/login'
+  const handleLogout = async () => {
+    try {
+      await api.post('/iam/auth/logout')
+    } catch (error) {
+      console.error(error)
+    } finally {
+      logout()
+      window.location.href = `/${locale}/login`
+    }
   }
 
   const fullName =
@@ -47,8 +55,34 @@ const Topbar = () => {
   return (
     <header className='flex h-16 items-center justify-between border-b bg-background px-6'>
       {/* LEFT */}
-      <div>
-        <h1 className='text-lg font-semibold'>Dashboard</h1>
+      <div className='flex items-center gap-3'>
+        {/* MOBILE SIDEBAR */}
+
+        <MobileSidebar />
+
+        {/* MOBILE LOGO */}
+
+        <div className='flex items-center lg:hidden'>
+          <Image
+            src='/MODHS3.png'
+            alt='MODHS Logo'
+            width={36}
+            height={36}
+            className='h-auto w-auto rounded-full object-contain'
+            priority
+          />
+
+          <h1
+            className={`hidden min-[370px]:block truncate text-2xl font-bold ${
+              locale === 'ar' ? 'pr-2' : 'pl-2'
+            }`}
+          >
+            ENYH
+          </h1>
+        </div>
+
+        {/* DESKTOP PAGE TITLE */}
+        <h1 className='hidden text-lg font-semibold lg:block'>Dashboard</h1>
       </div>
 
       {/* RIGHT */}
