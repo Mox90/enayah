@@ -60,8 +60,13 @@
     "settings": "الإعدادات"
   },
   "metadata": {
-    "title": "مستشفي القوات المسلحة بنجران | NAFH",
+    "title": "مستشفى القوات المسلحة بنجران | NAFH",
     "description": "نظام إدارة رأس المال البشري للمؤسسات"
+  },
+  "loading": {
+    "preparingWorkspace": "جارٍ تجهيز بيئة العمل...",
+    "redirecting": "جارٍ إعادة التوجيه...",
+    "restoringSession": "جارٍ استعادة الجلسة الآمنة..."
   },
   "employees": {},
   "departments": {},

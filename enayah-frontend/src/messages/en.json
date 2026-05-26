@@ -62,6 +62,11 @@
     "title": "NAFH | Najran Armed Forces Hospital",
     "description": "Enterprise Human Capital Management System"
   },
+  "loading": {
+    "preparingWorkspace": "Preparing Workspace...",
+    "redirecting": "Redirecting...",
+    "restoringSession": "Restoring Secure Session..."
+  },
   "employees": {},
   "departments": {},
   "contracts": {},
