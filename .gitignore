@@ -43,3 +43,9 @@ data/*.xlsx
 
 data/Database.xlsx
 Database.xlsx
+
+*.sql
+*.sql.gz
+*.tar.gz
+
+backups/
