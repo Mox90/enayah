@@ -44,7 +44,7 @@ export const AuthService = {
     const authenticatedUser = await findAuthenticatedUserById(user.id)
 
     if (!authenticatedUser) {
-      throw new AppError('Failed to load created user creation failed', 500)
+      throw new AppError('Failed to load created user', 500)
     }
 
     //return user

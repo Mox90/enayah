@@ -7,6 +7,7 @@ import ManagerDashboard from './manager-dashboard'
 import HRAdminDashboard from './hr-admin-dashboard'
 import DirectorDashboard from './director-dashboard'
 import SystemAdminDashboard from './system-admin-dashboard'
+import { PERMISSIONS } from '@/constants/permissions'
 
 export default function DashboardResolver() {
   const user = useAuthStore((state) => state.user)
@@ -17,22 +18,22 @@ export default function DashboardResolver() {
     ) ?? []
 
   // SYSTEM ADMIN
-  if (permissions.includes('system.monitor')) {
+  if (permissions.includes(PERMISSIONS.SYSTEM_MONITOR)) {
     return <SystemAdminDashboard />
   }
 
   // DIRECTOR
-  if (permissions.includes('analytics.view')) {
+  if (permissions.includes(PERMISSIONS.ANALYTICS_VIEW)) {
     return <DirectorDashboard />
   }
 
   // HR ADMIN
-  if (permissions.includes('employee.view')) {
+  if (permissions.includes(PERMISSIONS.EMPLOYEE_VIEW)) {
     return <HRAdminDashboard />
   }
 
   // MANAGER
-  if (permissions.includes('team.manage')) {
+  if (permissions.includes(PERMISSIONS.TEAM_MANAGE)) {
     return <ManagerDashboard />
   }
 
