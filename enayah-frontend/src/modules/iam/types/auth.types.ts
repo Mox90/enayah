@@ -24,6 +24,8 @@ export interface User {
     secondNameAr?: string | null
     thirdNameAr?: string | null
     familyNameAr: string
+    fullNameEn?: string
+    fullNameAr?: string
   } | null
   roles: Role[]
 }
