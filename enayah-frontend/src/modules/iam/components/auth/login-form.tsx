@@ -12,10 +12,11 @@ import { useAuthStore } from '../../stores/auth.store'
 import { usePermissionStore } from '../../stores/permission.store'
 import { Button } from '@/components/ui/button'
 import axios from 'axios'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 const Login = () => {
   const t = useTranslations('auth')
+  const locale = useLocale()
   const router = useRouter()
 
   const login = useAuthStore((state) => state.login)
@@ -51,7 +52,7 @@ const Login = () => {
       setPermissions(permissions)
 
       // ✅ redirect
-      router.push('/dashboard')
+      router.push(`/${locale}/dashboard`)
     } catch (error) {
       //console.error('Login failed:', error)
       if (axios.isAxiosError(error)) {

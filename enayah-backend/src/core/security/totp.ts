@@ -4,7 +4,7 @@ import QRCode from 'qrcode'
 export const TOTP = {
   generateSecret(email: string) {
     return speakeasy.generateSecret({
-      name: `Enayah (${email})`,
+      name: `NAFH (${email})`,
     })
   },
 

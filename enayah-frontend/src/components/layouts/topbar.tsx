@@ -19,9 +19,12 @@ import LanguageSwitcher from './language-switcher'
 import { useLocale, useTranslations } from 'next-intl'
 import MobileSidebar from './mobile-sidebar'
 import { api } from '@/lib/api/client'
+import { useRouter } from '../../../i18n/navigation'
+//import { router } from 'next/client'
 
 const Topbar = () => {
   const t = useTranslations('common')
+  const router = useRouter()
   const locale = useLocale()
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
@@ -35,6 +38,7 @@ const Topbar = () => {
     } finally {
       logout()
       window.location.href = `/${locale}/login`
+      //router.replace('/login')
     }
   }
 
