@@ -33,8 +33,8 @@ export const findUserByEmailOrUsername = async (
   })
 }
 
-export const findUserByUsername = async (username: string) => {
-  return db.query.users.findFirst({
+export const findUserCredentialsByUsername = async (username: string) => {
+  /*return db.query.users.findFirst({
     where: eq(users.username, username),
     with: {
       employee: true,
@@ -53,6 +53,9 @@ export const findUserByUsername = async (username: string) => {
         },
       },
     },
+  })*/
+  return db.query.users.findFirst({
+    where: eq(users.username, username),
   })
 }
 
@@ -91,12 +94,11 @@ export const createUserWithRole = async (data: {
   return db.transaction(async (tx) => {
     try {
       console.log('🔥 Creating user with:', data)
-
       const [user] = await tx.insert(users).values(data).returning({
         id: users.id,
-        email: users.email,
-        username: users.username,
-        employeeId: users.employeeId,
+        //email: users.email,
+        //username: users.username,
+        //employeeId: users.employeeId,
       })
 
       console.log('✅ User created:', user)
@@ -116,7 +118,35 @@ export const createUserWithRole = async (data: {
         roleId: defaultRole.id,
       })
 
-      console.log('✅ Role assigned')
+      /*const fullUser = await tx.query.users.findFirst({
+        where: eq(users.id, user.id),
+
+        with: {
+          employee: true,
+
+          userRoles: {
+            where: eq(userRoles.isActive, true),
+
+            with: {
+              role: {
+                with: {
+                  rolePermissions: {
+                    with: {
+                      permission: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      })
+
+      if (!fullUser) {
+        throw new Error('Failed to load created user')
+      }
+
+      console.log('✅ Role assigned')*/
 
       return user
     } catch (error) {
