@@ -20,14 +20,13 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!isHydrated || accessToken) {
       return
     }
-    /*if (accessToken) {
-      setLoading(false)
-      return
-    }*/
+
     const restoreSession = async () => {
+      setIsRestoring(true)
       try {
         const refreshResponse = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/iam/auth/refresh`,
+          //`${process.env.NEXT_PUBLIC_API_URL}/iam/auth/refresh`,
+          '/api/iam/auth/refresh',
           {},
           {
             withCredentials: true,
@@ -36,7 +35,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         const newAccessToken = refreshResponse.data.accessToken
 
-        const meResponse = await api.get('/iam/auth/me', {
+        //const meResponse = await api.get('/iam/auth/me', {
+        const meResponse = await api.get('/api/iam/auth/me', {
           headers: {
             Authorization: `Bearer ${newAccessToken}`,
           },

@@ -70,7 +70,7 @@ const Topbar = () => {
         </Button>
 
         {/* Notifications */}
-        <Button variant='ghost' size='icon'>
+        <Button variant='ghost' size='icon' aria-label='Notifications'>
           <Bell className='h-5 w-5' />
         </Button>
 
