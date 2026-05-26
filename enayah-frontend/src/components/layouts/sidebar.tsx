@@ -6,6 +6,7 @@ import { navigation } from '@/lib/navigation/navigation.config'
 import { hasPermission } from '@/lib/permissions/hasPermission'
 import NavigationItem from '../navigation/navigation-item'
 import { useAuthStore } from '@/modules/iam/stores/auth.store'
+import { Link } from '../../../i18n/navigation'
 
 const Sidebar = () => {
   const locale = useLocale()
@@ -20,7 +21,7 @@ const Sidebar = () => {
   //const canViewAuditLogs = usePermission('audit_logs.view')
   return (
     <aside className='hidden w-64 border-r bg-background lg:block'>
-      <div className='flex h-16 items-center border-b px-6'>
+      <Link href='/dashboard' className='flex h-16 items-center border-b px-6'>
         <Image
           src='/MODHS3.png'
           alt='MODHS Logo'
@@ -34,7 +35,7 @@ const Sidebar = () => {
         >
           NAFH
         </h1>
-      </div>
+      </Link>
 
       <nav className='space-y-2 p-4'>
         {navigation.map((item) => {
