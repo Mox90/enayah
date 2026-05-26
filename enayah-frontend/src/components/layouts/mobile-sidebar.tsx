@@ -1,20 +1,23 @@
 'use client'
 
 import Image from 'next/image'
-
 import { Menu } from 'lucide-react'
-
-import { Button } from '@/components/ui/button'
-
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
-
-import { useLocale } from 'next-intl'
-import { Link } from '../../../i18n/navigation'
-
-//import { Link } from '@/i18n/navigation'
+import { useLocale, useTranslations } from 'next-intl'
+import { navigation } from '@/lib/navigation/navigation.config'
+import { hasPermission } from '@/lib/permissions/hasPermission'
+import NavigationItem from '../navigation/navigation-item'
+import { useAuthStore } from '@/modules/iam/stores/auth.store'
 
 const MobileSidebar = () => {
   const locale = useLocale()
+  const t = useTranslations('navigation')
+
+  const user = useAuthStore((state) => state.user)
+  const permissions =
+    user?.roles.flatMap((role) =>
+      role.permissions.map((permission) => permission.code),
+    ) ?? []
 
   return (
     <Sheet>
@@ -50,10 +53,23 @@ const MobileSidebar = () => {
 
         {/* NAVIGATION */}
         <nav className='space-y-2 p-4'>
-          <Link href='/dashboard'>Dashboard</Link>
-          <Link href='/employees'>Employees</Link>
-          <Link href='/departments'>Departments</Link>
-          <Link href='/audit-logs'>Audit Logs</Link>
+          {navigation.map((item) => {
+            if (
+              item.permission &&
+              !hasPermission(permissions, item.permission)
+            ) {
+              return null
+            }
+
+            return (
+              <NavigationItem
+                key={item.href}
+                href={item.href}
+                label={t(item.label)}
+                icon={item.icon}
+              />
+            )
+          })}
         </nav>
       </SheetContent>
     </Sheet>

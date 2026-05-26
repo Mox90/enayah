@@ -73,7 +73,7 @@ const Topbar = () => {
           />
 
           <h1
-            className={`truncate text-2xl font-bold ${
+            className={`hidden min-[370px]:block truncate text-2xl font-bold ${
               locale === 'ar' ? 'pr-2' : 'pl-2'
             }`}
           >

@@ -1,13 +1,22 @@
 'use client'
 
-import { usePermission } from '@/hooks/usePermission'
-//import { Link } from '@/i18n/navigation'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import Image from 'next/image'
-import { Link } from '../../../i18n/navigation'
+import { navigation } from '@/lib/navigation/navigation.config'
+import { hasPermission } from '@/lib/permissions/hasPermission'
+import NavigationItem from '../navigation/navigation-item'
+import { useAuthStore } from '@/modules/iam/stores/auth.store'
 
 const Sidebar = () => {
   const locale = useLocale()
+  const t = useTranslations('navigation')
+
+  const user = useAuthStore((state) => state.user)
+  const permissions =
+    user?.roles.flatMap((role) =>
+      role.permissions.map((permission) => permission.code),
+    ) ?? []
+
   //const canViewAuditLogs = usePermission('audit_logs.view')
   return (
     <aside className='hidden w-64 border-r bg-background lg:block'>
@@ -28,10 +37,20 @@ const Sidebar = () => {
       </div>
 
       <nav className='space-y-2 p-4'>
-        <Link href='/dashboard'>Dashboard</Link>
-        <Link href='/employees'>Employees</Link>
-        <Link href='/departments'>Departments</Link>
-        <Link href='/audit-logs'>Audit Logs</Link>
+        {navigation.map((item) => {
+          if (item.permission && !hasPermission(permissions, item.permission)) {
+            return null
+          }
+
+          return (
+            <NavigationItem
+              key={item.href}
+              href={item.href}
+              label={t(item.label)}
+              icon={item.icon}
+            />
+          )
+        })}
       </nav>
     </aside>
   )

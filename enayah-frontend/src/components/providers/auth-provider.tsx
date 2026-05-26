@@ -5,7 +5,7 @@ import axios from 'axios'
 import { useAuthStore } from '@/modules/iam/stores/auth.store'
 import { api } from '@/lib/api/client'
 //import dynamic from 'next/dynamic'
-import Loader from '../ui/loader'
+import Loader from '../animations/loader'
 
 //const Loader = dynamic(() => import('../ui/loader'), { ssr: false })
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {

@@ -16,6 +16,49 @@
     "invalidCredentials": "اسم المستخدم أو كلمة المرور غير صحيحة",
     "somethingWentWrong": "حدث خطأ ما"
   },
+  "navigation": {
+    "dashboard": "لوحة التحكم",
+
+    "employees": "الموظفون",
+    "departments": "الأقسام",
+    "hiring": "التوظيف",
+    "employments": "التوظيفات",
+    "contracts": "العقود",
+    "positions": "الوظائف",
+    "positionItems": "عناصر الوظائف",
+    "jobAssignments": "التكليفات الوظيفية",
+
+    "attendance": "الحضور",
+    "leaves": "الإجازات",
+    "payroll": "الرواتب",
+    "training": "التدريب",
+    "performance": "الأداء",
+    "documents": "المستندات",
+    "analytics": "التحليلات",
+
+    "auditLogs": "سجلات التدقيق",
+
+    "myTeam": "فريقي",
+    "tasks": "المهام",
+
+    "myProfile": "ملفي الشخصي",
+    "myAttendance": "حضوري",
+    "myLeave": "إجازاتي",
+    "myPayroll": "راتبي",
+    "myDocuments": "مستنداتي",
+
+    "systemMonitoring": "مراقبة النظام",
+    "rolesPermissions": "الأدوار والصلاحيات",
+    "database": "قاعدة البيانات",
+    "security": "الأمان",
+
+    "organizationAnalytics": "تحليلات المؤسسة",
+    "financialAnalytics": "التحليلات المالية",
+    "performanceOverview": "نظرة عامة على الأداء",
+    "strategicReports": "التقارير الاستراتيجية",
+    "auditReports": "تقارير التدقيق",
+    "settings": "الإعدادات"
+  },
   "employees": {},
   "departments": {},
   "contracts": {},
