@@ -1,22 +1,22 @@
 'use client'
 
-//import { User } from '@/types/auth.types'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+
 import { User } from '../types/auth.types'
 
 interface AuthState {
   user: User | null
   accessToken: string | null
   isAuthenticated: boolean
+  isHydrated: boolean
 
   setUser: (user: User | null) => void
-
   setAccessToken: (token: string | null) => void
-
   login: (token: string, user: User) => void
-
   logout: () => void
+
+  setHydrated: (value: boolean) => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -28,7 +28,17 @@ export const useAuthStore = create<AuthState>()(
 
       isAuthenticated: false,
 
-      setUser: (user) => set({ user }),
+      isHydrated: false,
+
+      setHydrated: (value) =>
+        set({
+          isHydrated: value,
+        }),
+
+      setUser: (user) =>
+        set({
+          user,
+        }),
 
       setAccessToken: (token) =>
         set({
@@ -55,6 +65,10 @@ export const useAuthStore = create<AuthState>()(
 
     {
       name: 'auth-storage',
+
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated(true)
+      },
     },
   ),
 )

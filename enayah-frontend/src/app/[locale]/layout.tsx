@@ -9,6 +9,7 @@ import { ThemeProvider } from '@/components/providers/theme-provider'
 import { NextIntlClientProvider } from 'next-intl'
 
 import { getMessages } from 'next-intl/server'
+import AuthProvider from '@/components/providers/auth-provider'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -71,7 +72,9 @@ export default async function LocaleLayout({
         `}
       >
         <NextIntlClientProvider messages={messages}>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>
