@@ -18,7 +18,9 @@ const MobileSidebar = () => {
 
   return (
     <Sheet>
-      <SheetTrigger className='lg:hidden'>
+      {/* <SheetTrigger className='lg:hidden'> */}
+      <SheetTrigger className='lg:hidden' aria-label='Open navigation menu'>
+        <span className='sr-only'>Open navigation menu</span>
         <Menu className='h-6 w-6' />
       </SheetTrigger>
 

@@ -15,7 +15,7 @@ router.get('/me', requireAuth, AuthController.me)
 router.post('/mfa/verify', rateLimitLogin, AuthController.verifyMfa)
 
 router.post('/refresh', AuthController.refresh)
-router.post('/logout', AuthController.logout)
-router.post('/logout-all', AuthController.logoutAll)
+router.post('/logout', requireAuth, AuthController.logout)
+router.post('/logout-all', requireAuth, AuthController.logoutAll)
 
 export default router

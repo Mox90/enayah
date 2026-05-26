@@ -46,7 +46,6 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>
 }>) {
   const { locale } = await params
-
   const messages = await getMessages()
 
   return (
@@ -62,7 +61,7 @@ export default async function LocaleLayout({
           text-foreground
           antialiased
           ${cairo.variable}
-          ${locale === 'ar' ? 'font-[var(--font-cairo)]' : 'font-sans]'}
+          ${locale === 'ar' ? 'font-[var(--font-cairo)]' : 'font-sans'}
         `}
       >
         <NextIntlClientProvider messages={messages}>

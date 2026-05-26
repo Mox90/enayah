@@ -3,10 +3,15 @@
 import { useEffect, useRef } from 'react'
 
 const Loader = () => {
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const animRef = useRef<number>(0)
 
   useEffect(() => {
+    if (prefersReducedMotion) return
+
     const canvas = canvasRef.current
     if (!canvas) return
 
@@ -185,10 +190,16 @@ const Loader = () => {
       cancelAnimationFrame(animRef.current)
       animRef.current = 0
     }
-  }, [])
+  }, [prefersReducedMotion])
 
   return (
-    <div className='flex h-screen items-center justify-center bg-black overflow-hidden'>
+    // <div className='flex h-screen items-center justify-center bg-black overflow-hidden'>
+    <div
+      className='flex h-screen items-center justify-center bg-black overflow-hidden'
+      role='status'
+      aria-live='polite'
+      aria-label='Loading application'
+    >
       <div className='flex flex-col items-center gap-6'>
         <div
           style={{
@@ -235,6 +246,7 @@ const Loader = () => {
 
           {/* Fix 1: explicit width/height attributes on the canvas element */}
           <canvas
+            aria-hidden='true'
             ref={canvasRef}
             width={340}
             height={120}

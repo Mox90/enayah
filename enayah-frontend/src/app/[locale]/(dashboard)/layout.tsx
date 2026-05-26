@@ -1,7 +1,4 @@
-//import { ProtectedRoute } from '@/components/auth/protected-route'
-//import ProtectedRoute from '@/components/auth/protected-route'
-import AppShell from '@/components/layout/app-shell'
-//import DashboardShell from '@/components/layout/dashboard-shell'
+import AppShell from '@/components/layouts/app-shell'
 import ProtectedRoute from '@/modules/iam/components/auth/protected-route'
 import React from 'react'
 

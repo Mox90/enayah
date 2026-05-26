@@ -34,8 +34,7 @@ const Topbar = () => {
       console.error(error)
     } finally {
       logout()
-
-      window.location.href = '/login'
+      window.location.href = `/${locale}/login`
     }
   }
 

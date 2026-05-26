@@ -1,13 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-
 import axios from 'axios'
-
 import { useAuthStore } from '@/modules/iam/stores/auth.store'
-
 import { api } from '@/lib/api/client'
-import dynamic from 'next/dynamic'
+//import dynamic from 'next/dynamic'
 import Loader from '../ui/loader'
 
 //const Loader = dynamic(() => import('../ui/loader'), { ssr: false })

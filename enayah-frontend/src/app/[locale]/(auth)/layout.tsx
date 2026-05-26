@@ -1,7 +1,14 @@
 import React from 'react'
 
-const layout = () => {
-  return <div>layout</div>
+type AuthLayoutPage = {
+  children: React.ReactNode
 }
 
-export default layout
+const AuthLayout = ({ children }: AuthLayoutPage) => {
+  return (
+    //<div className='flex min-h-screen items-center justify-center bg-muted/20'>
+    <div>{children}</div>
+  )
+}
+
+export default AuthLayout
