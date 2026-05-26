@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { useAuthStore } from '../../stores/auth.store'
 import { usePermissionStore } from '../../stores/permission.store'
+import { useLocale } from 'next-intl'
 
 interface Props {
   children: React.ReactNode
@@ -15,6 +16,7 @@ export default function ProtectedRoute({
   requiredPermissions = [],
 }: Props) {
   const router = useRouter()
+  const locale = useLocale()
 
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
 
@@ -22,7 +24,7 @@ export default function ProtectedRoute({
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login')
+      router.push(`/${locale}/login`)
       return
     }
 
@@ -32,7 +34,7 @@ export default function ProtectedRoute({
     ) {
       router.push('/forbidden')
     }
-  }, [isAuthenticated, permissions, requiredPermissions, router])
+  }, [locale, isAuthenticated, permissions, requiredPermissions, router])
 
   if (!isAuthenticated) return null
   if (

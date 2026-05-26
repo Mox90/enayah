@@ -8,6 +8,7 @@ import { navigation } from '@/lib/navigation/navigation.config'
 import { hasPermission } from '@/lib/permissions/hasPermission'
 import NavigationItem from '../navigation/navigation-item'
 import { useAuthStore } from '@/modules/iam/stores/auth.store'
+import { Link } from '../../../i18n/navigation'
 
 const MobileSidebar = () => {
   const locale = useLocale()
@@ -20,7 +21,7 @@ const MobileSidebar = () => {
     ) ?? []
 
   return (
-    <Sheet>
+    <Sheet key={locale}>
       {/* <SheetTrigger className='lg:hidden'> */}
       <SheetTrigger className='lg:hidden' aria-label='Open navigation menu'>
         <span className='sr-only'>Open navigation menu</span>
@@ -32,7 +33,10 @@ const MobileSidebar = () => {
         className='w-64 p-0'
       >
         {/* HEADER */}
-        <div className='flex h-16 items-center border-b px-6'>
+        <Link
+          href='/dashboard'
+          className='flex h-16 items-center border-b px-6'
+        >
           <Image
             src='/MODHS3.png'
             alt='MODHS Logo'
@@ -49,7 +53,7 @@ const MobileSidebar = () => {
           >
             NAFH
           </h1>
-        </div>
+        </Link>
 
         {/* NAVIGATION */}
         <nav className='space-y-2 p-4'>

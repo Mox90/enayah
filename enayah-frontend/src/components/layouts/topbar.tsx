@@ -19,7 +19,7 @@ import LanguageSwitcher from './language-switcher'
 import { useLocale, useTranslations } from 'next-intl'
 import MobileSidebar from './mobile-sidebar'
 import { api } from '@/lib/api/client'
-import { useRouter } from '../../../i18n/navigation'
+import { Link, useRouter } from '../../../i18n/navigation'
 //import { router } from 'next/client'
 
 const Topbar = () => {
@@ -37,8 +37,8 @@ const Topbar = () => {
       console.error(error)
     } finally {
       logout()
-      window.location.href = `/${locale}/login`
-      //router.replace('/login')
+      //window.location.href = `/${locale}/login`
+      router.replace(`/${locale}/login`)
     }
   }
 
@@ -66,7 +66,7 @@ const Topbar = () => {
 
         {/* MOBILE LOGO */}
 
-        <div className='flex items-center lg:hidden'>
+        <Link href='/dashboard' className='flex items-center lg:hidden'>
           <Image
             src='/MODHS3.png'
             alt='MODHS Logo'
@@ -81,9 +81,9 @@ const Topbar = () => {
               locale === 'ar' ? 'pr-2' : 'pl-2'
             }`}
           >
-            ENYH
+            NAFH
           </h1>
-        </div>
+        </Link>
 
         {/* DESKTOP PAGE TITLE */}
         <h1 className='hidden text-lg font-semibold lg:block'>Dashboard</h1>
