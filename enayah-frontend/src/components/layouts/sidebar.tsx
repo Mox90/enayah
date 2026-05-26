@@ -13,7 +13,7 @@ const Sidebar = () => {
 
   const user = useAuthStore((state) => state.user)
   const permissions =
-    user?.roles.flatMap((role) =>
+    user?.roles?.flatMap((role) =>
       role.permissions.map((permission) => permission.code),
     ) ?? []
 
