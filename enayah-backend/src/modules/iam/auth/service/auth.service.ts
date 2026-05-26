@@ -1,16 +1,12 @@
-import { eq, or } from 'drizzle-orm'
 import {
   comparePassword,
-  generateToken,
   hashPassword,
 } from '../../../../core/utils/auth.utils'
 import {
   findUserByEmailOrUsername,
   createUserWithRole,
-  findUserByUsername,
-  getRoles,
-  getPermissionsByRoleIds,
-  findUserById,
+  findAuthenticatedUserById,
+  findUserCredentialsByUsername,
 } from '../repository/auth.repository'
 import { AppError } from '../../../../core/errors/AppError'
 import { toAuthResponse } from '../dto/auth.mapper'
@@ -45,12 +41,14 @@ export const AuthService = {
       })
     }*/
 
-    if (!user) {
-      throw new AppError('User creation failed', 500)
+    const authenticatedUser = await findAuthenticatedUserById(user.id)
+
+    if (!authenticatedUser) {
+      throw new AppError('Failed to load created user', 500)
     }
 
     //return user
-    return toAuthResponse(user)
+    return toAuthResponse(authenticatedUser)
   },
 
   login: async (
@@ -59,7 +57,7 @@ export const AuthService = {
     ip: string,
     userAgent?: string,
   ) => {
-    const user = await findUserByUsername(username)
+    const user = await findUserCredentialsByUsername(username)
 
     if (!user || !user.passwordHash) {
       //await loginLimiter.consume(ip) // Consume a point for this username
@@ -191,8 +189,14 @@ export const AuthService = {
       ...(userAgent && { userAgent }),
     })
 
+    const authenticatedUser = await findAuthenticatedUserById(user.id)
+
+    if (!authenticatedUser) {
+      throw new AppError('User not found', 404)
+    }
+
     return {
-      user: toAuthResponse(user),
+      user: toAuthResponse(authenticatedUser),
       ...session,
     }
   },
@@ -203,7 +207,7 @@ export const AuthService = {
     ip: string,
     userAgent: string,
   ) => {
-    const user = await UserRepository.findUserById(userId) //findUserById(userId)
+    const user = await findAuthenticatedUserById(userId) //await UserRepository.findUserById(userId) //findUserById(userId)
 
     if (!user) throw new AppError('User not found', 404)
 

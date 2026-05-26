@@ -107,7 +107,7 @@ export const navigation: NavigationItem[] = [
     label: 'auditLogs',
     href: '/audit-logs',
     icon: ClipboardList,
-    permission: 'audit_logs.view',
+    permission: 'audit.logs.view',
   },
 
   {
