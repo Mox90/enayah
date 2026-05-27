@@ -24,9 +24,10 @@ type FormFieldContextValue<
   name: TName
 }
 
-const FormFieldContext = React.createContext<FormFieldContextValue>(
+/*const FormFieldContext = React.createContext<FormFieldContextValue>(
   {} as FormFieldContextValue,
-)
+)*/
+const FormFieldContext = React.createContext<FormFieldContextValue | null>(null)
 
 const FormField = <
   TFieldValues extends FieldValues = FieldValues,
@@ -46,11 +47,17 @@ const useFormField = () => {
   const itemContext = React.useContext(FormItemContext)
   const { getFieldState, formState } = useFormContext()
 
-  const fieldState = getFieldState(fieldContext.name, formState)
+  //const fieldState = getFieldState(fieldContext.name, formState)
 
-  if (!fieldContext) {
+  if (!fieldContext?.name) {
     throw new Error('useFormField should be used within <FormField>')
   }
+
+  if (!itemContext?.id) {
+    throw new Error('useFormField should be used within <FormItem>')
+  }
+
+  const fieldState = getFieldState(fieldContext.name, formState)
 
   const { id } = itemContext
 
