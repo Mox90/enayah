@@ -26,6 +26,7 @@ export function DataTablePagination<TData>({
         <Button
           variant='outline'
           size='icon'
+          aria-label='Previous Page'
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
@@ -35,10 +36,11 @@ export function DataTablePagination<TData>({
         <Button
           variant='outline'
           size='icon'
+          aria-label='Next Page'
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
-          <ChevronRight className='h-4 w-4' />
+          <ChevronRight aria-hidden='true' className='h-4 w-4' />
         </Button>
       </div>
     </div>

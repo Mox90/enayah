@@ -6,6 +6,9 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
   useReactTable,
   SortingState,
   VisibilityState,
@@ -64,7 +67,7 @@ export function DataTable<TData, TValue>({
     data,
     columns,
 
-    pageCount,
+    //pageCount,
 
     state: {
       sorting,
@@ -76,19 +79,18 @@ export function DataTable<TData, TValue>({
 
     enableRowSelection: true,
 
-    manualPagination: true,
+    //manualPagination: true,
 
     onPaginationChange: setPagination,
-
     onSortingChange: setSorting,
-
     onColumnFiltersChange: setColumnFilters,
-
     onColumnVisibilityChange: setColumnVisibility,
-
     onRowSelectionChange: setRowSelection,
-
     getCoreRowModel: getCoreRowModel(),
+
+    getFilteredRowModel: getFilteredRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   })
 
   return (
