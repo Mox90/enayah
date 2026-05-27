@@ -15,16 +15,7 @@ router.get(
   requirePermission('employment.view'),
   EmploymentController.findAll,
 )
-/*
 
-audit('EMPLOYMENT_CREATE', {
-  resource: 'EMPLOYMENT',
-  sanitize: {
-    allowList: ['id', 'employeeId', 'status', 'startDate'],
-  },
-})
-
-*/
 router.post(
   '/',
   requirePermission('employment.create'),

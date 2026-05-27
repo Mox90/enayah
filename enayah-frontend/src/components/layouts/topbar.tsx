@@ -38,7 +38,8 @@ const Topbar = () => {
     } finally {
       logout()
       //window.location.href = `/${locale}/login`
-      router.replace(`/${locale}/login`)
+      //router.replace(`/${locale}/login`)
+      router.replace(`/login`)
     }
   }
 
