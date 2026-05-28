@@ -8,6 +8,8 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core'
 import { baseColumns } from './base'
+import { relations } from 'drizzle-orm'
+import { userRoles } from './userRoles'
 
 export const departments = pgTable(
   'departments',
@@ -63,3 +65,17 @@ export const positions = pgTable(
     ),
   }),
 )
+
+export const departmentsRelations = relations(departments, ({ one, many }) => ({
+  parentDepartment: one(departments, {
+    fields: [departments.parentDepartmentId],
+    references: [departments.id],
+    relationName: 'department_hierarchy',
+  }),
+
+  childDepartments: many(departments, {
+    relationName: 'department_hierarchy',
+  }),
+
+  userRoles: many(userRoles),
+}))

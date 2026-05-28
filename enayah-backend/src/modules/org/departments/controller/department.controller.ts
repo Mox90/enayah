@@ -16,6 +16,7 @@ export const DepartmentController = {
 
   findAll: asyncHandler(async (req: Request, res: Response) => {
     const result = await DepartmentService.findAll()
+    //console.log('Testing.... ' + result)
     res.status(200).json(result)
   }),
 

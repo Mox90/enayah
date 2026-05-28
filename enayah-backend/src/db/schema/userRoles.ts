@@ -54,7 +54,7 @@ export const userRoles = pgTable(
   }),
 )
 
-export const RolesRelations = relations(userRoles, ({ one }) => ({
+export const userRolesRelations = relations(userRoles, ({ one }) => ({
   user: one(users, {
     fields: [userRoles.userId],
     references: [users.id],
@@ -63,5 +63,10 @@ export const RolesRelations = relations(userRoles, ({ one }) => ({
   role: one(roles, {
     fields: [userRoles.roleId],
     references: [roles.id],
+  }),
+
+  department: one(departments, {
+    fields: [userRoles.departmentId],
+    references: [departments.id],
   }),
 }))

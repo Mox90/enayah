@@ -37,6 +37,8 @@ interface DataTableProps<TData, TValue> {
   pageCount?: number
   isLoading?: boolean
   searchPlaceholder?: string
+
+  searchColumnId?: string
 }
 
 export function DataTable<TData, TValue>({
@@ -46,6 +48,7 @@ export function DataTable<TData, TValue>({
   pageCount,
   isLoading,
   searchPlaceholder,
+  searchColumnId,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
 
@@ -95,7 +98,11 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className='space-y-4'>
-      <DataTableToolbar table={table} searchPlaceholder={searchPlaceholder} />
+      <DataTableToolbar
+        table={table}
+        searchPlaceholder={searchPlaceholder}
+        searchColumnId={searchColumnId}
+      />
 
       <div className='rounded-xl border'>
         <Table>
