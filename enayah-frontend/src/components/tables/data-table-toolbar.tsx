@@ -13,9 +13,11 @@ interface DataTableToolbarProps<TData> {
 export function DataTableToolbar<TData>({
   table,
   searchPlaceholder,
-  searchColumnId = 'name',
+  searchColumnId, //searchColumnId = 'name',
 }: DataTableToolbarProps<TData>) {
-  const searchColumn = table.getColumn(searchColumnId)
+  const searchColumn = searchColumnId
+    ? table.getColumn(searchColumnId)
+    : undefined
   return (
     <div className='flex items-center justify-between gap-4'>
       {/* <Input

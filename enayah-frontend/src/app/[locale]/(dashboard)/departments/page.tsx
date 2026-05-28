@@ -1,7 +1,8 @@
+import DepartmentsPage from '@/modules/hr/departments/components/departments-page'
 import React from 'react'
 
 const Departments = () => {
-  return <div>Departments</div>
+  return <DepartmentsPage />
 }
 
 export default Departments

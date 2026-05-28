@@ -68,7 +68,20 @@
     "restoringSession": "Restoring Secure Session..."
   },
   "employees": {},
-  "departments": {},
+  "departments": {
+    "departmentName": "Departments",
+    "subTitle": "Manage hospital departments.",
+    "createDepartment": "Create Department",
+    "code": "Code",
+    "englishName": "English Name",
+    "arabicName": "Arabic Name",
+    "parentDepartment": "Parent Department",
+    "selectParentDepartment": "Select parent department",
+    "searchDepartment": "Search department...",
+    "noDepartmentFound": "No department found.",
+    "create": "Create",
+    "creating": "Creating..."
+  },
   "contracts": {},
   "payroll": {},
   "attendance": {},

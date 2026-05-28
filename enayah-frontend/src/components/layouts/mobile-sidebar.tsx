@@ -2,7 +2,14 @@
 
 import Image from 'next/image'
 import { Menu } from 'lucide-react'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { useLocale, useTranslations } from 'next-intl'
 import { navigation } from '@/lib/navigation/navigation.config'
 import { hasPermission } from '@/lib/permissions/hasPermission'
@@ -32,6 +39,12 @@ const MobileSidebar = () => {
         side={locale === 'ar' ? 'right' : 'left'}
         className='w-64 p-0'
       >
+        <SheetHeader className='sr-only'>
+          <SheetTitle>Navigation Menu</SheetTitle>
+          <SheetDescription>
+            Main application navigation links.
+          </SheetDescription>
+        </SheetHeader>
         {/* HEADER */}
         <Link
           href='/dashboard'

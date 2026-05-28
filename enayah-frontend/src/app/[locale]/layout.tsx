@@ -11,6 +11,7 @@ import { NextIntlClientProvider } from 'next-intl'
 
 import { getMessages, getTranslations } from 'next-intl/server'
 import AuthProvider from '@/components/providers/auth-provider'
+import QueryProvider from '@/components/providers/query-provider'
 
 /*const inter = Inter({
   subsets: ['latin'],
@@ -77,9 +78,11 @@ export default async function LocaleLayout({
         `}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeProvider>
-            <AuthProvider>{children}</AuthProvider>
-          </ThemeProvider>
+          <QueryProvider>
+            <ThemeProvider>
+              <AuthProvider>{children}</AuthProvider>
+            </ThemeProvider>
+          </QueryProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -31,7 +31,11 @@ export function FormDialog({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
 
-          {description && <DialogDescription>{description}</DialogDescription>}
+          {description && (
+            <DialogDescription className='sr-only'>
+              {description}
+            </DialogDescription>
+          )}
         </DialogHeader>
 
         {children}

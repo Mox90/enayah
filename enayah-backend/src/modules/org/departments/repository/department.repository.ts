@@ -8,8 +8,15 @@ export const DepartmentRepository = {
         eq(departments.isDeleted, false),
         isNull(departments.deletedAt),
       ),
-      orderBy: (departments, { asc, desc }) => asc(departments.createdAt),
+      orderBy: asc(departments.createdAt), //(departments, { asc, desc }) => asc(departments.createdAt),
     })
+
+    // return db
+    //   .select({
+    //     id: departments.id,
+    //     nameEn: departments.nameEn,
+    //   })
+    //   .from(departments)
   },
 
   findAllRaw: () => {
