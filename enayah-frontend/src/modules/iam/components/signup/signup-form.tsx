@@ -9,56 +9,52 @@ import axios from 'axios'
 import { Eye, EyeOff } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 
-import { loginRequest } from '@/modules/iam/services/auth.services'
-
-import { useAuthStore } from '../../stores/auth.store'
-import { usePermissionStore } from '../../stores/permission.store'
-
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 
-const Login = () => {
+import { signupRequest } from '@/modules/iam/services/auth.services'
+
+const Signup = () => {
   const t = useTranslations('auth')
+
   const locale = useLocale()
   const router = useRouter()
 
-  const login = useAuthStore((state) => state.login)
-  const setPermissions = usePermissionStore((state) => state.setPermissions)
-
+  const [employeeNumber, setEmployeeNumber] = useState('')
+  const [email, setEmail] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     try {
       setLoading(true)
+
       setError('')
 
-      const response = await loginRequest({
+      if (password !== confirmPassword) {
+        setError('Passwords do not match')
+        return
+      }
+
+      await signupRequest({
+        employeeNumber,
+        email,
         username,
         password,
       })
 
-      login(response.accessToken, response.user)
-
-      const permissions =
-        response.user?.roles?.flatMap(
-          (role: any) => role.permissions?.map((perm: any) => perm.code) || [],
-        ) || []
-
-      setPermissions(permissions)
-
-      router.push(`/${locale}/dashboard`)
+      router.push(`/${locale}/login`)
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setError(
-          error.response?.data?.message || 'Invalid username or password',
-        )
+        setError(error.response?.data?.message || 'Signup failed')
       } else {
         setError('Something went wrong')
       }
@@ -70,14 +66,12 @@ const Login = () => {
   return (
     <Card className='w-full max-w-md rounded-2xl shadow-lg'>
       <CardContent className='p-6'>
-        <form className='space-y-4 p-6' onSubmit={handleLogin}>
-          <div className='space-y-1'>
-            <h1 className='text-center text-2xl font-bold'>
-              {t('loginTitle')}
-            </h1>
+        <form className='space-y-4' onSubmit={handleSignup}>
+          <div className='space-y-1 text-center'>
+            <h1 className='text-2xl font-bold'>{t('signupTitle')}</h1>
 
             <p className='text-sm text-muted-foreground'>
-              {t('loginSubtitle')}
+              {t('signupSubtitle')}
             </p>
           </div>
 
@@ -88,8 +82,20 @@ const Login = () => {
           )}
 
           <Input
+            placeholder={t('employeeNumber')}
+            value={employeeNumber}
+            onChange={(e) => setEmployeeNumber(e.target.value)}
+          />
+
+          <Input
+            placeholder={t('email')}
+            type='email'
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          <Input
             placeholder={t('username')}
-            type='text'
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
@@ -116,17 +122,39 @@ const Login = () => {
             </button>
           </div>
 
+          <div className='relative'>
+            <Input
+              placeholder={t('confirmPassword')}
+              type={showConfirmPassword ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className='pr-10'
+            />
+
+            <button
+              type='button'
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className='absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground'
+            >
+              {showConfirmPassword ? (
+                <EyeOff className='h-4 w-4' />
+              ) : (
+                <Eye className='h-4 w-4' />
+              )}
+            </button>
+          </div>
+
           <Button className='w-full' type='submit' disabled={loading}>
-            {loading ? t('loggingIn') : t('login')}
+            {loading ? t('creatingAccount') : t('signup')}
           </Button>
 
           <div className='text-center text-sm text-muted-foreground'>
-            {t('noAccount')}{' '}
+            {t('alreadyHaveAccount')}{' '}
             <Link
-              href={`/${locale}/signup`}
+              href={`/${locale}/login`}
               className='font-medium text-primary hover:underline'
             >
-              {t('signupHere')}
+              {t('login')}
             </Link>
           </div>
         </form>
@@ -135,4 +163,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default Signup

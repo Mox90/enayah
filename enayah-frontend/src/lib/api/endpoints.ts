@@ -13,5 +13,8 @@ export const API_ENDPOINTS = {
 
   iam: {
     login: '/iam/auth/login',
+    signup: 'iam/auth/signup',
+    me: '/iam/auth/me',
+    logout: '/iam/auth/logout',
   },
 }

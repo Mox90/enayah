@@ -14,7 +14,16 @@
     "login": "تسجيل الدخول",
     "loggingIn": "جاري تسجيل الدخول...",
     "invalidCredentials": "اسم المستخدم أو كلمة المرور غير صحيحة",
-    "somethingWentWrong": "حدث خطأ ما"
+    "somethingWentWrong": "حدث خطأ ما",
+    "noAccount": "ليس لديك حساب؟",
+    "signupHere": "إنشاء حساب",
+    "signupTitle": "نموذج الاشتراك",
+    "signupSubtitle": "إنشاء حساب",
+    "employeeNumber": "رقم الموظف",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "email": "بريد إلكتروني",
+    "alreadyHaveAccount": "هل لديك حساب بالفعل؟",
+    "signup": "اشتراك"
   },
   "navigation": {
     "dashboard": "لوحة التحكم",

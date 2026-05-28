@@ -13,7 +13,16 @@
     "login": "Login",
     "loggingIn": "Logging in...",
     "invalidCredentials": "Invalid username or password",
-    "somethingWentWrong": "Something went wrong"
+    "somethingWentWrong": "Something went wrong",
+    "noAccount": "Don't have an account?",
+    "signupHere": "Sign up here",
+    "signupTitle": "Signup Form",
+    "signupSubtitle": "Signup here",
+    "employeeNumber": "Employee Number",
+    "confirmPassword": "Confirm Password",
+    "email": "Email",
+    "alreadyHaveAccount": "Already have an account?",
+    "signup": "Signup"
   },
   "navigation": {
     "dashboard": "Dashboard",
