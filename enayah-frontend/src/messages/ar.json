@@ -98,6 +98,19 @@
     "create": "إنشاء",
     "creating": "جارٍ الإنشاء..."
   },
+  "positions": {
+    "positionName": "المناصب الوظيفية",
+    "subTitle": "إدارة الوظائف الشاغرة في المستشفى.",
+    "createPosition": "إنشاء منصب وظيفي",
+    "englishTitle": "المسمى الوظيفي الإنجليزية",
+    "arabicTitle": "المسمى الوظيفي عربي",
+    "gradeId": "درجة",
+    "selectGrade": "حدد الصف",
+    "searchGrade": "البحث عن وظيفة...",
+    "noPositionFound": "لم يتم العثور على وظيفة شاغرة.",
+    "create": "إنشاء",
+    "creating": "جارٍ الإنشاء..."
+  },
   "contracts": {},
   "payroll": {},
   "attendance": {},

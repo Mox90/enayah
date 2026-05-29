@@ -12,5 +12,15 @@ export const positionIdSchema = z.object({
   id: z.uuid(),
 })
 
+export const positionQuerySchema = z.object({
+  page: z.coerce.number().min(1).default(1),
+  limit: z.coerce.number().min(1).max(100).default(10),
+  search: z.string().optional(),
+  sortBy: z.enum(['titleEn', 'titleAr', 'createdAt']).default('titleEn'),
+  sortOrder: z.enum(['asc', 'desc']).default('asc'),
+})
+
+export type PositionQueryDTO = z.infer<typeof positionQuerySchema>
+
 export type CreatePositionDTO = z.infer<typeof createPositionSchema>
 export type UpdatePositionDTO = z.infer<typeof updatePositionSchema>

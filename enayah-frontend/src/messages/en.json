@@ -97,6 +97,19 @@
     "create": "Create",
     "creating": "Creating..."
   },
+  "positions": {
+    "positionName": "Job Positions",
+    "subTitle": "Manage hospital job positions.",
+    "createPosition": "Create Job Position",
+    "englishTitle": "English Title",
+    "arabicTitle": "Arabic Title",
+    "gradeId": "Grade",
+    "selectGrade": "Select grade",
+    "searchGrade": "Search job position...",
+    "noPositionFound": "No position found.",
+    "create": "Creating",
+    "creating": "Creating..."
+  },
   "contracts": {},
   "payroll": {},
   "attendance": {},

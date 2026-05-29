@@ -4,6 +4,7 @@ import { asyncHandler } from '../../../../core/utils/asyncHandler'
 import {
   createPositionSchema,
   positionIdSchema,
+  positionQuerySchema,
   updatePositionSchema,
 } from '../dto/position.request'
 
@@ -23,6 +24,12 @@ export const PositionController = {
     const { id } = positionIdSchema.parse(req.params)
     const position = await PositionService.findById(id)
     res.status(200).json(position)
+  }),
+
+  findPaginated: asyncHandler(async (req: Request, res: Response) => {
+    const query = positionQuerySchema.parse(req.query)
+    const result = await PositionService.findPaginated(query)
+    res.status(200).json(result)
   }),
 
   update: asyncHandler(async (req: Request, res: Response) => {

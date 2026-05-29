@@ -1,51 +1,37 @@
 'use client'
 
 import { ColumnDef } from '@tanstack/react-table'
-import { Department } from '../types/department.types'
+import { Position } from '../types/position.types'
 import { DataTableColumnHeader } from '@/components/tables'
-import { DepartmentActions } from './department-actions'
+import { PositionActions } from './position-actions'
 
-export const getDepartmentColumns = (
+export const getPositionColumns = (
   sortBy: string,
   sortOrder: 'asc' | 'desc',
-): ColumnDef<Department>[] => [
+): ColumnDef<Position>[] => [
   {
-    accessorKey: 'code',
+    accessorKey: 'titleEn',
     meta: {
-      label: 'Code',
+      label: 'English Title',
     },
     header: ({ column }) => (
       <DataTableColumnHeader
         column={column}
-        title='Code'
+        title='English Title'
         sortBy={sortBy}
         sortOrder={sortOrder}
       />
     ),
   },
   {
-    accessorKey: 'nameEn',
+    accessorKey: 'titleAr',
     meta: {
-      label: 'English Name',
+      label: 'Arabic Title',
     },
     header: ({ column }) => (
       <DataTableColumnHeader
         column={column}
-        title='English Name'
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-      />
-    ),
-  },
-  {
-    accessorKey: 'nameAr',
-    meta: {
-      label: 'Arabic Name',
-    },
-    header: ({ column }) => (
-      <DataTableColumnHeader
-        column={column}
-        title='Arabic Name'
+        title='Arabic Title'
         sortBy={sortBy}
         sortOrder={sortOrder}
       />
@@ -58,9 +44,9 @@ export const getDepartmentColumns = (
     },
     header: () => <div className='text-center'>Actions</div>,
     cell: ({ row }) => {
-      const department = row.original
+      const position = row.original
 
-      return <DepartmentActions department={department} />
+      return <PositionActions position={position} />
     },
   },
 ]

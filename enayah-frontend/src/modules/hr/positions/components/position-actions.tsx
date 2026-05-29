@@ -2,22 +2,22 @@
 
 import { MoreHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import { Position } from '../types/position.types'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Department } from '../types/department.types'
-import { useState } from 'react'
-import { DeleteDepartmentDialog } from './delete-department-dialog'
-import { EditDepartmentDialog } from './edit-department-dialog'
+import EditPositionDialog from './edit-position-dialogs'
+import DeletePositionDialog from './delete-position-dialog'
 
-interface DepartmentActionsProps {
-  department: Department
+interface PositionActionProps {
+  position: Position
 }
 
-export function DepartmentActions({ department }: DepartmentActionsProps) {
+export function PositionActions({ position }: PositionActionProps) {
   const [editOpen, setEditOpen] = useState(false)
 
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -45,17 +45,17 @@ export function DepartmentActions({ department }: DepartmentActionsProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <EditDepartmentDialog
-        department={department}
+      {/* <EditPositionDialog
+        position={position}
         open={editOpen}
         onOpenChange={setEditOpen}
       />
 
-      <DeleteDepartmentDialog
-        department={department}
+      <DeletePositionDialog
+        position={position}
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-      />
+      /> */}
     </>
   )
 }

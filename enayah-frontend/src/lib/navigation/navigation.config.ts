@@ -41,6 +41,13 @@ export const navigation: NavigationItem[] = [
   },
 
   {
+    label: 'positions',
+    href: '/job-positions',
+    icon: Users,
+    permission: 'position.view',
+  },
+
+  {
     label: 'departments',
     href: '/departments',
     icon: Building2,
