@@ -3,6 +3,18 @@ export interface Department {
   code: string
   nameEn: string
   nameAr: string
+  logo?: string | null
   parentDepartmentId?: string | null
   createdAt: string
+}
+
+export interface PaginatedDepartments {
+  data: Department[]
+
+  meta: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
 }

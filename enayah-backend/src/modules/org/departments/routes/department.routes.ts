@@ -26,7 +26,7 @@ router.post(
   DepartmentController.create,
 )
 
-router.get('/', DepartmentController.findAll)
+router.get('/', DepartmentController.findPaginated)
 
 router.get('/:id', DepartmentController.findById)
 

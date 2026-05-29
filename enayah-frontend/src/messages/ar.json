@@ -77,6 +77,12 @@
     "redirecting": "جارٍ إعادة التوجيه...",
     "restoringSession": "جارٍ استعادة الجلسة الآمنة..."
   },
+  "table": {
+    "rows": "الصفوف",
+    "records": "سجل",
+    "page": "الصفحة",
+    "of": "من"
+  },
   "employees": {},
   "departments": {
     "departmentName": "الأقسام",

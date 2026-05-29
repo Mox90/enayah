@@ -30,15 +30,25 @@ export function DataTableViewOptions<TData>({ table }: Props<TData>) {
       <DropdownMenuContent align='end'>
         {table
           .getAllColumns()
-          .filter((column) => column.getCanHide())
+          .filter(
+            (column) =>
+              typeof column.accessorFn !== 'undefined' && column.getCanHide(),
+          )
           .map((column) => {
+            const label =
+              (
+                column.columnDef.meta as {
+                  label?: string
+                }
+              )?.label ?? column.id
+
             return (
               <DropdownMenuCheckboxItem
                 key={column.id}
                 checked={column.getIsVisible()}
                 onCheckedChange={(value) => column.toggleVisibility(!!value)}
               >
-                {column.id}
+                {label}
               </DropdownMenuCheckboxItem>
             )
           })}

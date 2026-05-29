@@ -4,6 +4,7 @@ import { asyncHandler } from '../../../../core/utils/asyncHandler'
 import {
   createDepartmentSchema,
   departmentIdSchema,
+  departmentQuerySchema,
   updateDepartmentSchema,
 } from '../dto/department.request'
 
@@ -16,13 +17,20 @@ export const DepartmentController = {
 
   findAll: asyncHandler(async (req: Request, res: Response) => {
     const result = await DepartmentService.findAll()
-    //console.log('Testing.... ' + result)
+
+    res.status(200).json(result)
+  }),
+
+  findPaginated: asyncHandler(async (req: Request, res: Response) => {
+    const query = departmentQuerySchema.parse(req.query)
+    const result = await DepartmentService.findPaginated(query)
     res.status(200).json(result)
   }),
 
   findById: asyncHandler(async (req: Request, res: Response) => {
     const { id } = departmentIdSchema.parse(req.params)
     const result = await DepartmentService.findById(id)
+
     res.status(200).json(result)
   }),
 

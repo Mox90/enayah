@@ -9,3 +9,11 @@ export const addMinutes = (date: Date, minutes: number) => {
   result.setMinutes(result.getMinutes() + minutes)
   return result
 }
+
+export const addHours = (date: Date, hours: number) => {
+  const result = new Date(date)
+
+  result.setHours(result.getHours() + hours)
+
+  return result
+}

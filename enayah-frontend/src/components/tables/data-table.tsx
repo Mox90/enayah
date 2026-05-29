@@ -6,14 +6,9 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   useReactTable,
   SortingState,
   VisibilityState,
-  ColumnFiltersState,
-  PaginationState,
 } from '@tanstack/react-table'
 
 import {
@@ -33,75 +28,116 @@ import { DataTableSkeleton } from './data-table-skeleton'
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
+
   total?: number
   pageCount?: number
   isLoading?: boolean
+
   searchPlaceholder?: string
 
-  searchColumnId?: string
+  page: number
+  limit: number
+  search: string
+
+  sortBy: string
+  sortOrder: 'asc' | 'desc'
+
+  onPageChange: (page: number) => void
+  onLimitChange: (limit: number) => void
+  onSearchChange: (value: string) => void
+
+  onSortChange: (sortBy: string, sortOrder: 'asc' | 'desc') => void
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-  total,
-  pageCount,
-  isLoading,
+
+  total = 0,
+  pageCount = 0,
+  isLoading = false,
+
   searchPlaceholder,
-  searchColumnId,
+
+  page,
+  limit,
+  search,
+
+  sortBy,
+  sortOrder,
+
+  onPageChange,
+  onLimitChange,
+  onSearchChange,
+
+  onSortChange,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  )
-
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
 
   const [rowSelection, setRowSelection] = React.useState({})
 
-  const [pagination, setPagination] = React.useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: 10,
-  })
+  // const [sorting, setSorting] = React.useState<SortingState>([
+  //   {
+  //     id: sortBy,
+  //     desc: sortOrder === 'desc',
+  //   },
+  // ])
+
+  // React.useEffect(() => {
+  //   setSorting([
+  //     {
+  //       id: sortBy,
+  //       desc: sortOrder === 'desc',
+  //     },
+  //   ])
+  // }, [sortBy, sortOrder])
+
+  const sorting: SortingState = [
+    {
+      id: sortBy,
+      desc: sortOrder === 'desc',
+    },
+  ]
 
   const table = useReactTable({
     data,
     columns,
-
-    //pageCount,
-
     state: {
       sorting,
-      columnFilters,
       columnVisibility,
       rowSelection,
-      pagination,
     },
-
     enableRowSelection: true,
+    enableSortingRemoval: false,
+    manualPagination: true,
+    manualSorting: true,
+    manualFiltering: true,
+    pageCount,
+    onSortingChange: (updater) => {
+      const newSorting =
+        typeof updater === 'function' ? updater(sorting) : updater
 
-    //manualPagination: true,
+      //console.log('TABLE', newSorting)
 
-    onPaginationChange: setPagination,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
+      //setSorting(newSorting)
+      if (newSorting.length > 0) {
+        //console.log('NEW SORTING', newSorting)
+        onSortChange(newSorting[0].id, newSorting[0].desc ? 'desc' : 'asc')
+      }
+    },
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
-
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
   })
-
+  //console.log('TABLE SORTING', table.getState().sorting)
   return (
     <div className='space-y-4'>
       <DataTableToolbar
         table={table}
         searchPlaceholder={searchPlaceholder}
-        searchColumnId={searchColumnId}
+        search={search}
+        onSearchChange={onSearchChange}
       />
 
       <div className='rounded-xl border'>
@@ -109,18 +145,16 @@ export function DataTable<TData, TValue>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  )
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -128,7 +162,7 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {isLoading ? (
               <DataTableSkeleton columns={columns.length} />
-            ) : table.getRowModel().rows.length ? (
+            ) : data.length > 0 ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -151,7 +185,14 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
 
-      <DataTablePagination table={table} total={total} />
+      <DataTablePagination
+        page={page}
+        pageCount={pageCount}
+        limit={limit}
+        total={total}
+        onPageChange={onPageChange}
+        onLimitChange={onLimitChange}
+      />
     </div>
   )
 }

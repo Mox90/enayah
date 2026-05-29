@@ -76,6 +76,12 @@
     "redirecting": "Redirecting...",
     "restoringSession": "Restoring Secure Session..."
   },
+  "table": {
+    "rows": "Rows",
+    "records": "records",
+    "page": "Page",
+    "of": "of"
+  },
   "employees": {},
   "departments": {
     "departmentName": "Departments",

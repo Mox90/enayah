@@ -14,17 +14,13 @@ export interface LoginDTO {
 }
 
 export const jwtPayloadSchema = z.object({
+  sid: z.uuid(),
   sub: z.string(),
   employeeId: z.string().optional(),
   roles: z.array(z.string()).optional(),
   permissions: z.array(z.string()).optional(),
+  iat: z.number().optional(),
+  exp: z.number().optional(),
 })
-
-/*export interface AppJwtPayload {
-  sub: string
-  employeeId?: string
-  roles: string[]
-  permissions: string[]
-}*/
 
 export type AppJwtPayload = z.infer<typeof jwtPayloadSchema>

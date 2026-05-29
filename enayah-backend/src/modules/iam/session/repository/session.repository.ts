@@ -1,4 +1,4 @@
-import { addDays } from '../../../../core/utils/date'
+import { addDays, addHours } from '../../../../core/utils/date'
 import {
   generateRefreshToken,
   hashToken,
@@ -9,6 +9,9 @@ import { eq, and } from 'drizzle-orm'
 export const SessionRepository = {
   create: async (data: any) => {
     const [session] = await db.insert(sessions).values(data).returning()
+    if (!session) {
+      throw new Error('Failed to create session')
+    }
     return session
   },
 
@@ -50,6 +53,8 @@ export const SessionRepository = {
       const refreshToken = generateRefreshToken()
       const refreshTokenHash = hashToken(refreshToken)
 
+      const newExpiresAt = addHours(new Date(), 8)
+
       const [newSession] = await tx
         .insert(sessions)
         .values({
@@ -57,14 +62,36 @@ export const SessionRepository = {
           refreshTokenHash,
           ip: session.ip,
           userAgent: session.userAgent,
-          expiresAt: addDays(new Date(), 30),
+          expiresAt: newExpiresAt, //session.expiresAt,
+          absoluteExpiresAt: session.absoluteExpiresAt,
+          lastActivityAt: new Date(),
         })
         .returning()
+
+      if (!newSession) {
+        throw new Error('Failed to rotate session')
+      }
 
       return {
         refreshToken,
         userId: session.userId,
+        sessionId: newSession.id,
       }
+    })
+  },
+
+  touch: async (id: string) => {
+    await db
+      .update(sessions)
+      .set({
+        lastActivityAt: new Date(),
+      })
+      .where(eq(sessions.id, id))
+  },
+
+  findById: async (id: string) => {
+    return db.query.sessions.findFirst({
+      where: eq(sessions.id, id),
     })
   },
 }

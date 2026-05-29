@@ -11,9 +11,15 @@ interface NavigationItemProps {
   href: string
   label: string
   icon: LucideIcon
+  onClick?: () => void
 }
 
-const NavigationItem = ({ href, label, icon: Icon }: NavigationItemProps) => {
+const NavigationItem = ({
+  href,
+  label,
+  icon: Icon,
+  onClick,
+}: NavigationItemProps) => {
   const pathname = usePathname()
 
   const isActive = pathname === href
@@ -27,6 +33,7 @@ const NavigationItem = ({ href, label, icon: Icon }: NavigationItemProps) => {
           ? 'bg-primary text-primary-foreground shadow-sm'
           : 'text-muted-foreground hover:bg-muted hover:text-foreground',
       )}
+      onClick={onClick}
     >
       <Icon className='h-5 w-5 shrink-0' />
 

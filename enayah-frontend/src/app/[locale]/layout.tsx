@@ -12,6 +12,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, getTranslations } from 'next-intl/server'
 import AuthProvider from '@/components/providers/auth-provider'
 import QueryProvider from '@/components/providers/query-provider'
+import { Toaster } from '@/components/ui/sonner'
 
 /*const inter = Inter({
   subsets: ['latin'],
@@ -81,6 +82,7 @@ export default async function LocaleLayout({
           <QueryProvider>
             <ThemeProvider>
               <AuthProvider>{children}</AuthProvider>
+              <Toaster richColors />
             </ThemeProvider>
           </QueryProvider>
         </NextIntlClientProvider>

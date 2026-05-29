@@ -2,10 +2,17 @@ import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
 import { env } from '../../config/env'
 
-export const generateAccessToken = (userId: string) => {
-  return jwt.sign({ sub: userId }, env.JWT_SECRET, {
-    expiresIn: '15m',
-  })
+export const generateAccessToken = (userId: string, sessionId: string) => {
+  return jwt.sign(
+    {
+      sub: userId,
+      sid: sessionId,
+    },
+    env.JWT_SECRET,
+    {
+      expiresIn: '15m',
+    },
+  )
 }
 
 export const generateRefreshToken = () => {
