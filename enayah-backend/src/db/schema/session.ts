@@ -26,6 +26,13 @@ export const sessions = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true })
       .defaultNow()
       .notNull(),
+
+    absoluteExpiresAt: timestamp('absolute_expires_at', {
+      withTimezone: true,
+    }).notNull(),
+    lastActivityAt: timestamp('last_activity_at', { withTimezone: true })
+      .defaultNow()
+      .notNull(),
   },
   (table) => ({
     // ✅ UNIQUE index (for security)

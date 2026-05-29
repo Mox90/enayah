@@ -7,50 +7,33 @@ import {
   hashToken,
 } from '../../../../core/utils/token.utils'
 import { SessionContext } from '../../../../core/types/session.types'
-import { addDays } from '../../../../core/utils/date'
+import { addHours } from '../../../../core/utils/date'
 
 export const SessionService = {
   createSession: async (userId: string, context: SessionContext) => {
     const refreshToken = generateRefreshToken()
     const refreshTokenHash = hashToken(refreshToken)
+    const now = new Date()
+    const absoluteExpiresAt = addHours(now, 8)
+    const expiresAt = addHours(now, 8)
 
     const session = await SessionRepository.create({
       userId,
       refreshTokenHash,
       userAgent: context.userAgent,
       ip: context.ip,
-      expiresAt: addDays(new Date(), 30),
+      expiresAt,
+      absoluteExpiresAt,
+      lastActivityAt: now,
     })
 
-    const accessToken = generateAccessToken(userId)
+    const accessToken = generateAccessToken(userId, session.id)
 
     return {
       accessToken,
       refreshToken,
     }
   },
-
-  /*refreshSession: async (refreshToken: string) => {
-    const hash = hashToken(refreshToken)
-
-    const session = await SessionRepository.findByTokenHash(hash)
-
-    if (!session || session.isRevoked) {
-      throw new AppError('Invalid session', 401)
-    }
-
-    if (new Date(session.expiresAt) < new Date()) {
-      throw new AppError('Session expired', 401)
-    }
-
-    // 🔥 TOKEN ROTATION
-    await SessionRepository.revoke(session.id)
-
-    return await SessionService.createSession(session.userId, {
-      ip: session.ip ?? '',
-      userAgent: session.userAgent ?? '',
-    })
-  },*/
 
   refreshSession: async (refreshToken: string) => {
     const hash = hashToken(refreshToken)
@@ -61,15 +44,37 @@ export const SessionService = {
       throw new AppError('Invalid session', 401)
     }
 
-    if (new Date(session.expiresAt) < new Date()) {
+    const now = new Date()
+
+    const idleMinutes = Math.floor(
+      (now.getTime() - session.lastActivityAt.getTime()) / 1000 / 60,
+    )
+
+    if (idleMinutes > 15) {
+      await SessionRepository.revoke(session.id)
+
+      throw new AppError('Session expired due to inactivity', 401)
+    }
+
+    //await SessionRepository.touch(session.id)
+
+    if (session.isRevoked) {
+      throw new AppError('Invalid session', 401)
+    }
+
+    if (new Date(session.expiresAt) < now) {
       throw new AppError('Session expired', 401)
+    }
+
+    if (new Date(session.absoluteExpiresAt) < now) {
+      throw new AppError('Maximum session lifetime reached', 401)
     }
 
     try {
       const result = await SessionRepository.rotate(session)
 
       return {
-        accessToken: generateAccessToken(result.userId),
+        accessToken: generateAccessToken(result.userId, result.sessionId),
         refreshToken: result.refreshToken,
       }
     } catch (err: any) {

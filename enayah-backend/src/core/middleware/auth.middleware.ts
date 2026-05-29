@@ -5,8 +5,9 @@ import { env } from '../../config/env'
 import { AppJwtPayload, jwtPayloadSchema } from '../types/auth.types'
 import { loginLimiter } from '../security/rateLimiter'
 import crypto from 'node:crypto'
+import { SessionRepository } from '../../modules/iam/session/repository/session.repository'
 
-export const requireAuth = (
+export const requireAuth = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -45,6 +46,26 @@ export const requireAuth = (
 
     // 🔐 3. Validate payload (ZERO TRUST)
     const payload: AppJwtPayload = jwtPayloadSchema.parse(decoded)
+
+    const session = await SessionRepository.findById(payload.sid)
+
+    if (!session) {
+      throw new AppError('Session not found', 401)
+    }
+
+    if (session.isRevoked) {
+      throw new AppError('Session revoked', 401)
+    }
+
+    if (new Date(session.expiresAt) < new Date()) {
+      throw new AppError('Session expired', 401)
+    }
+
+    if (new Date(session.absoluteExpiresAt) < new Date()) {
+      throw new AppError('Maximum session lifetime reached', 401)
+    }
+
+    await SessionRepository.touch(payload.sid)
 
     // 🔐 4. Attach user (minimal identity only)
     req.user = {

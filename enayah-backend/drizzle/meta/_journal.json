@@ -29,6 +29,20 @@
       "when": 1779631185703,
       "tag": "0003_sticky_the_enforcers",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1780044539812,
+      "tag": "0004_milky_fat_cobra",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1780044855478,
+      "tag": "0005_unknown_echo",
+      "breakpoints": true
     }
   ]
 }

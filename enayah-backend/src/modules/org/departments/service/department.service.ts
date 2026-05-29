@@ -2,6 +2,7 @@ import { AppError } from '../../../../core/errors/AppError'
 import { DepartmentRepository } from '../repository/department.repository'
 import {
   CreateDepartmentDTO,
+  DepartmentQueryDTO,
   UpdateDepartmentDTO,
 } from '../dto/department.request'
 import {
@@ -32,6 +33,15 @@ export const DepartmentService = {
   findAll: async () => {
     const departments = await DepartmentRepository.findAll()
     return departments.map(toDepartmentResponse)
+  },
+
+  findPaginated: async (query: DepartmentQueryDTO) => {
+    const result = await DepartmentRepository.findPaginated(query)
+
+    return {
+      data: result.data.map(toDepartmentResponse),
+      meta: result.meta,
+    }
   },
 
   findById: async (id: string) => {

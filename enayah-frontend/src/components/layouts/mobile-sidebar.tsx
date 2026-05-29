@@ -16,10 +16,12 @@ import { hasPermission } from '@/lib/permissions/hasPermission'
 import NavigationItem from '../navigation/navigation-item'
 import { useAuthStore } from '@/modules/iam/stores/auth.store'
 import { Link } from '../../../i18n/navigation'
+import { useState } from 'react'
 
 const MobileSidebar = () => {
   const locale = useLocale()
   const t = useTranslations('navigation')
+  const [open, setOpen] = useState(false)
 
   const user = useAuthStore((state) => state.user)
   const permissions =
@@ -28,7 +30,7 @@ const MobileSidebar = () => {
     ) ?? []
 
   return (
-    <Sheet key={locale}>
+    <Sheet key={locale} open={open} onOpenChange={setOpen}>
       {/* <SheetTrigger className='lg:hidden'> */}
       <SheetTrigger className='lg:hidden' aria-label='Open navigation menu'>
         <span className='sr-only'>Open navigation menu</span>
@@ -84,6 +86,7 @@ const MobileSidebar = () => {
                 href={item.href}
                 label={t(item.label)}
                 icon={item.icon}
+                onClick={() => setOpen(false)}
               />
             )
           })}

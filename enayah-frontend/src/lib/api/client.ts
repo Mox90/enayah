@@ -20,58 +20,6 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-//const refreshPromise: Promise<string> | null = null
-
-/*api.interceptors.response.use(
-  (res) => res,
-
-  async (error) => {
-    const originalRequest = error.config
-
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true
-
-      if (!refreshPromise) {
-        refreshPromise = axios
-          .post(
-            `${process.env.NEXT_PUBLIC_API_URL}/iam/auth/refresh`,
-            {},
-            {
-              withCredentials: true,
-            },
-          )
-          .then((res) => {
-            const newToken = res.data.accessToken
-
-            useAuthStore.getState().setAccessToken(newToken)
-
-            return newToken
-          })
-
-          .finally(() => {
-            refreshPromise = null
-          })
-      }
-
-      try {
-        const newToken = await refreshPromise
-
-        originalRequest.headers.Authorization = `Bearer ${newToken}`
-
-        return api(originalRequest)
-      } catch (refreshError) {
-        useAuthStore.getState().logout()
-
-        window.location.href = '/login'
-
-        return Promise.reject(refreshError)
-      }
-    }
-
-    return Promise.reject(error)
-  },
-)*/
-
 api.interceptors.response.use(
   (response) => response,
 
@@ -79,7 +27,11 @@ api.interceptors.response.use(
     const originalRequest = error.config
     const isUnauthorized = error.response?.status === 401
     const isRefreshRequest = originalRequest?.url?.includes('/iam/auth/refresh')
-    const locale = useLocale()
+    //const locale = useLocale()
+    const locale =
+      typeof window !== 'undefined'
+        ? window.location.pathname.split('/')[1]
+        : 'en'
 
     if (isUnauthorized && !originalRequest._retry && !isRefreshRequest) {
       originalRequest._retry = true
