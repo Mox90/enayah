@@ -36,6 +36,11 @@ export const PositionService = {
     }
   },
 
+  findLookup: async () => {
+    const result = await PositionRepository.findLookup()
+    return result
+  },
+
   update: async (id: string, data: UpdatePositionDTO) => {
     const position = await PositionRepository.findById(id)
     if (!position) throw new AppError('Position not found', 404)

@@ -5,7 +5,10 @@
     "profile": "الملف الشخصي",
     "settings": "الإعدادات",
     "edit": "تحديث",
-    "delete": "حذف"
+    "delete": "حذف",
+    "cancel": "إلغاء",
+    "confirmDelete": "هل أنت متأكد من رغبتك في حذف <strong>{name}</strong>؟",
+    "none": "لا أحد"
   },
 
   "auth": {
@@ -35,8 +38,8 @@
     "hiring": "التوظيف",
     "employments": "التوظيفات",
     "contracts": "العقود",
-    "positions": "الوظائف",
-    "positionItems": "عناصر الوظائف",
+    "positions": "المسميات الوظيفية",
+    "positionItems": "رقم عنصر الوظيفة",
     "jobAssignments": "التكليفات الوظيفية",
 
     "attendance": "الحضور",
@@ -110,7 +113,8 @@
     "editDepartmentSub": "تحديث تفاصيل القسم",
     "update": "تحديث",
     "updating": "جارٍ التحديث...",
-    "departmentActions": "إجراءات القسم"
+    "departmentActions": "إجراءات القسم",
+    "deleteDepartment": "حذف القسم"
   },
   "positions": {
     "positionName": "المناصب الوظيفية",
@@ -130,7 +134,13 @@
     "updateSuccess": "تم تحديث الوظيفة بنجاح",
     "updateError": "تعذر تحديث المسمى الوظيفي",
     "deleteSuccess": "تم حذف المنصب الوظيفي بنجاح",
-    "deleteError": "تعذر حذف الوظيفة"
+    "deleteError": "تعذر حذف الوظيفة",
+    "editPosition": "تحديث المسمى الوظيفي",
+    "editPositionSub": "تحديث تفاصيل المسمى الوظيفي",
+    "update": "تحديث",
+    "updating": "جارٍ التحديث...",
+    "positionActions": "إجراءات المسمى الوظيفي",
+    "deletePosition": "حذف المسمى الوظيفي"
   },
   "contracts": {},
   "payroll": {},

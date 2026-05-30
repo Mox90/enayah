@@ -1,6 +1,6 @@
 'use client'
 
-import { MoreHorizontal } from 'lucide-react'
+import { MoreVerticalIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { Position } from '../types/position.types'
@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import EditPositionDialog from './edit-position-dialogs'
+import EditPositionDialog from './edit-position-dialog'
 import DeletePositionDialog from './delete-position-dialog'
 import { useTranslations } from 'next-intl'
 
@@ -29,7 +29,7 @@ export function PositionActions({ position }: PositionActionProps) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant='ghost' size='icon' aria-label='Position Action'>
-            <MoreHorizontal className='h-4 w-4' />
+            <MoreVerticalIcon className='h-4 w-4' />
           </Button>
         </DropdownMenuTrigger>
 
@@ -47,7 +47,7 @@ export function PositionActions({ position }: PositionActionProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* <EditPositionDialog
+      <EditPositionDialog
         position={position}
         open={editOpen}
         onOpenChange={setEditOpen}
@@ -57,7 +57,7 @@ export function PositionActions({ position }: PositionActionProps) {
         position={position}
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-      /> */}
+      />
     </>
   )
 }

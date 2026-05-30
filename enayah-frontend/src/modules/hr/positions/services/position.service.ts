@@ -18,4 +18,13 @@ export const positionService = {
     const response = await api.post(API_ENDPOINTS.org.positions, data)
     return response.data
   },
+
+  update: async (id: string, data: CreatePositionFormValues) => {
+    const response = await api.put(`${API_ENDPOINTS.org.positions}/${id}`, data)
+    return response.data
+  },
+
+  delete: async (id: string) => {
+    await api.delete(`${API_ENDPOINTS.org.positions}/${id}`)
+  },
 }

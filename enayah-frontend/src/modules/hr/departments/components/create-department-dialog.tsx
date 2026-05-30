@@ -14,20 +14,22 @@ import { Button } from '@/components/ui/button'
 import { useCreateDepartment } from '../hooks/use-create-department'
 import { useDepartments } from '../hooks/use-departments'
 import { useLocale, useTranslations } from 'next-intl'
-import { toast } from 'sonner'
+import { useDepartmentLookup } from '../hooks/use-department-lookup'
 
 export function CreateDepartmentDialog() {
   const [open, setOpen] = useState(false)
 
   const createDepartment = useCreateDepartment()
 
-  const { data: departmentsResponse } = useDepartments({
-    page: 1,
-    limit: 100,
-    search: '',
-    sortBy: 'nameEn',
-    sortOrder: 'asc',
-  })
+  // const { data: departmentsResponse } = useDepartments({
+  //   page: 1,
+  //   limit: 100,
+  //   search: '',
+  //   sortBy: 'nameEn',
+  //   sortOrder: 'asc',
+  // })
+
+  const { data: departmentsLookup = [] } = useDepartmentLookup()
 
   const t = useTranslations('departments')
   const locale = useLocale()
@@ -48,14 +50,12 @@ export function CreateDepartmentDialog() {
     setOpen(false)
   }
 
-  const departments = departmentsResponse?.data ?? []
+  //const departments = departmentsResponse?.data ?? []
 
-  const departmentOptions = departments.map(
-    (department: { id: string; nameEn: string; nameAr: string }) => ({
-      label: locale === 'ar' ? department.nameAr : department.nameEn,
-      value: department.id,
-    }),
-  )
+  const departmentOptions = departmentsLookup.map((department) => ({
+    label: locale === 'ar' ? department.nameAr : department.nameEn,
+    value: department.id,
+  }))
 
   return (
     <>

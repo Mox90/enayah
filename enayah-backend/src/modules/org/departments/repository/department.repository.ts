@@ -29,6 +29,20 @@ export const DepartmentRepository = {
     })
   },
 
+  findLookup: () => {
+    return db
+      .select({
+        id: departments.id,
+        nameEn: departments.nameEn,
+        nameAr: departments.nameAr,
+      })
+      .from(departments)
+      .where(
+        and(eq(departments.isDeleted, false), isNull(departments.deletedAt)),
+      )
+      .orderBy(asc(departments.nameEn))
+  },
+
   findPaginated: async ({
     page,
     limit,

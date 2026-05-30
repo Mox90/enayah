@@ -17,6 +17,9 @@ import {
   Wallet,
   CheckSquare,
   UserCheck,
+  PickaxeIcon,
+  Waypoints,
+  TrafficCone,
 } from 'lucide-react'
 
 export interface NavigationItem {
@@ -41,17 +44,24 @@ export const navigation: NavigationItem[] = [
   },
 
   {
-    label: 'positions',
-    href: '/job-positions',
-    icon: Users,
-    permission: 'position.view',
-  },
-
-  {
     label: 'departments',
     href: '/departments',
     icon: Building2,
     permission: 'department.view',
+  },
+
+  {
+    label: 'positions',
+    href: '/job-positions',
+    icon: Waypoints,
+    permission: 'position.view',
+  },
+
+  {
+    label: 'positionItems',
+    href: '/job-position-items',
+    icon: TrafficCone,
+    permission: 'position.items.view',
   },
 
   {

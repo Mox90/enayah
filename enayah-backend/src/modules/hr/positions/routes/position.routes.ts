@@ -9,6 +9,7 @@ const router = Router()
 router.use(requireAuth) // Apply authentication middleware to all routes in this router
 router.use(attachPermissions)
 
+router.get('/lookup', PositionController.findLookup)
 router.post('/', requireRole('HR_ADMIN'), PositionController.create)
 router.get('/', PositionController.findPaginated)
 router.get('/:id', PositionController.findById)

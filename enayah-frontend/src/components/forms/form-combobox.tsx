@@ -32,6 +32,7 @@ import {
 import { Control, FieldPath, FieldValues } from 'react-hook-form'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 interface Option {
   label: string
@@ -46,6 +47,8 @@ interface FormComboboxProps<TFieldValues extends FieldValues> {
   placeholder?: string
   searchPlaceholder?: string
   emptyMessage?: string
+  clearable?: boolean
+  clearLabel?: string
 }
 
 export function FormCombobox<TFieldValues extends FieldValues>({
@@ -56,8 +59,11 @@ export function FormCombobox<TFieldValues extends FieldValues>({
   placeholder,
   searchPlaceholder,
   emptyMessage,
+  clearLabel,
+  clearable,
 }: FormComboboxProps<TFieldValues>) {
   const [open, setOpen] = useState(false)
+  const t = useTranslations('common')
 
   return (
     <FormField
@@ -98,6 +104,18 @@ export function FormCombobox<TFieldValues extends FieldValues>({
                   </CommandEmpty>
 
                   <CommandGroup>
+                    {clearable && (
+                      <CommandItem
+                        value='__clear__'
+                        onSelect={() => {
+                          field.onChange(undefined)
+
+                          setOpen(false)
+                        }}
+                      >
+                        {clearLabel ?? t('none')}
+                      </CommandItem>
+                    )}
                     {options.map((option) => (
                       <CommandItem
                         value={option.label}

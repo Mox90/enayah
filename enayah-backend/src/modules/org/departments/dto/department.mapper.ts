@@ -25,3 +25,9 @@ export const toDepartmentResponse = (db: any) => ({
   parentDepartmentId: db.parentDepartmentId,
   createdAt: db.createdAt,
 })
+
+export const toDepartmentLookupResponse = (db: any) => ({
+  id: db.id,
+  nameEn: db.nameEn,
+  nameAr: db.nameAr,
+})
