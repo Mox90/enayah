@@ -28,7 +28,7 @@ export const PositionRepository = {
     sortBy,
     sortOrder,
   }: PositionQueryDTO) => {
-    const offset = page * limit
+    const offset = (page - 1) * limit
 
     const conditions = [
       eq(positions.isDeleted, false),

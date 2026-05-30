@@ -12,6 +12,7 @@ import {
 } from '../schemas/department.schema'
 import { useUpdateDepartment } from '../hooks/use-update-department'
 import { useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 
 interface Props {
   department: Department
@@ -24,6 +25,7 @@ export function EditDepartmentDialog({
   open,
   onOpenChange,
 }: Props) {
+  const t = useTranslations('departments')
   const updateDepartment = useUpdateDepartment()
 
   const form = useForm<CreateDepartmentFormValues>({
@@ -59,25 +61,29 @@ export function EditDepartmentDialog({
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title='Edit Department'
-      description='Update department details'
+      title={t('editDepartment')}
+      description={t('editDepartmentSub')}
     >
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-          <FormInput control={form.control} name='code' label='Code' />
+          <FormInput control={form.control} name='code' label={t('code')} />
 
           <FormInput
             control={form.control}
             name='nameEn'
-            label='English Name'
+            label={t('englishName')}
           />
 
-          <FormInput control={form.control} name='nameAr' label='Arabic Name' />
+          <FormInput
+            control={form.control}
+            name='nameAr'
+            label={t('arabicName')}
+          />
 
           <FormSubmitButton
             isLoading={updateDepartment.isPending}
-            label='Update'
-            loadingLabel='Updating...'
+            label={t('update')}
+            loadingLabel={t('updating')}
           />
         </form>
       </Form>

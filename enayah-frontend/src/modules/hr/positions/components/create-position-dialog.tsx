@@ -24,7 +24,7 @@ export function CreatePositionDialog() {
     page: 1,
     limit: 100,
     search: '',
-    sortBy: 'nameEn',
+    sortBy: 'titleEn',
     sortOrder: 'asc',
   })
 

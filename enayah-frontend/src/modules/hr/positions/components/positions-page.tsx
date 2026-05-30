@@ -1,3 +1,5 @@
+'use client'
+
 import { useTranslations } from 'next-intl'
 import { PositionsTable } from './positions-table'
 import { CreatePositionDialog } from './create-position-dialog'

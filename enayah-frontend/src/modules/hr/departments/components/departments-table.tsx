@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { DataTable } from '@/components/tables'
 import { useDepartments } from '../hooks/use-departments'
 import { getDepartmentColumns } from './department-columns'
+import { useTranslations } from 'next-intl'
 
 export function DepartmentsTable() {
   const [page, setPage] = useState(1)
@@ -11,6 +12,7 @@ export function DepartmentsTable() {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState('code')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const t = useTranslations('departments')
 
   const { data, isLoading } = useDepartments({
     page,
@@ -20,7 +22,12 @@ export function DepartmentsTable() {
     sortOrder,
   })
 
-  const columns = getDepartmentColumns(sortBy, sortOrder)
+  const columns = getDepartmentColumns(sortBy, sortOrder, {
+    code: t('code'),
+    nameEn: t('englishName'),
+    nameAr: t('arabicName'),
+    actions: t('actions'),
+  })
 
   return (
     <DataTable
@@ -29,7 +36,7 @@ export function DepartmentsTable() {
       total={data?.meta.total ?? 0}
       pageCount={data?.meta.totalPages ?? 0}
       isLoading={isLoading}
-      searchPlaceholder='Search departments...'
+      searchPlaceholder={t('searchDepartment')}
       page={page}
       limit={limit}
       search={search}

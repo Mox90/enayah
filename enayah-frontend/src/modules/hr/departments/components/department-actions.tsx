@@ -12,6 +12,7 @@ import { Department } from '../types/department.types'
 import { useState } from 'react'
 import { DeleteDepartmentDialog } from './delete-department-dialog'
 import { EditDepartmentDialog } from './edit-department-dialog'
+import { useLocale, useTranslations } from 'next-intl'
 
 interface DepartmentActionsProps {
   department: Department
@@ -19,28 +20,28 @@ interface DepartmentActionsProps {
 
 export function DepartmentActions({ department }: DepartmentActionsProps) {
   const [editOpen, setEditOpen] = useState(false)
-
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const t = useTranslations('common')
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant='ghost' size='icon'>
+          <Button variant='ghost' size='icon' aria-label='Department actions'>
             <MoreHorizontal className='h-4 w-4' />
           </Button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align='end'>
           <DropdownMenuItem onClick={() => setEditOpen(true)}>
-            Edit
+            {t('edit')}
           </DropdownMenuItem>
 
           <DropdownMenuItem
             className='text-destructive'
             onClick={() => setDeleteOpen(true)}
           >
-            Delete
+            {t('delete')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

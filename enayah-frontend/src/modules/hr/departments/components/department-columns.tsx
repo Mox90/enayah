@@ -5,19 +5,27 @@ import { Department } from '../types/department.types'
 import { DataTableColumnHeader } from '@/components/tables'
 import { DepartmentActions } from './department-actions'
 
+type DepartmentColumns = {
+  code: string
+  nameEn: string
+  nameAr: string
+  actions: string
+}
+
 export const getDepartmentColumns = (
   sortBy: string,
   sortOrder: 'asc' | 'desc',
+  labels: DepartmentColumns,
 ): ColumnDef<Department>[] => [
   {
     accessorKey: 'code',
     meta: {
-      label: 'Code',
+      label: labels.code,
     },
     header: ({ column }) => (
       <DataTableColumnHeader
         column={column}
-        title='Code'
+        title={labels.code}
         sortBy={sortBy}
         sortOrder={sortOrder}
       />
@@ -26,12 +34,12 @@ export const getDepartmentColumns = (
   {
     accessorKey: 'nameEn',
     meta: {
-      label: 'English Name',
+      label: labels.nameEn,
     },
     header: ({ column }) => (
       <DataTableColumnHeader
         column={column}
-        title='English Name'
+        title={labels.nameEn}
         sortBy={sortBy}
         sortOrder={sortOrder}
       />
@@ -40,12 +48,12 @@ export const getDepartmentColumns = (
   {
     accessorKey: 'nameAr',
     meta: {
-      label: 'Arabic Name',
+      label: labels.nameAr,
     },
     header: ({ column }) => (
       <DataTableColumnHeader
         column={column}
-        title='Arabic Name'
+        title={labels.nameAr}
         sortBy={sortBy}
         sortOrder={sortOrder}
       />
@@ -54,9 +62,9 @@ export const getDepartmentColumns = (
   {
     id: 'actions',
     meta: {
-      label: 'Actions',
+      label: labels.actions,
     },
-    header: () => <div className='text-center'>Actions</div>,
+    header: () => <div className='text-center'>{labels.actions}</div>,
     cell: ({ row }) => {
       const department = row.original
 

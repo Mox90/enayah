@@ -2,9 +2,11 @@ import { useMutation } from '@tanstack/react-query'
 import { useQueryClient } from '@tanstack/react-query'
 import { departmentService } from '../services/department.service'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 export function useCreateDepartment() {
   const queryClient = useQueryClient()
+  const t = useTranslations('departments')
 
   return useMutation({
     mutationFn: departmentService.create,
@@ -14,11 +16,11 @@ export function useCreateDepartment() {
         queryKey: ['departments'],
       })
 
-      toast.success('Department created successfully')
+      toast.success(t('createSuccess'))
     },
 
     onError: () => {
-      toast.error('Unable to create department')
+      toast.error(t('createError'))
     },
   })
 }

@@ -1,9 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { positionService } from '../services/position.service'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 export function useCreatePosition() {
   const queryClient = useQueryClient()
+  const t = useTranslations('positions')
 
   return useMutation({
     mutationFn: positionService.create,
@@ -13,11 +15,11 @@ export function useCreatePosition() {
         queryKey: ['positions'],
       })
 
-      toast.success('Job Position created successfully')
+      toast.success(t('createSuccess'))
     },
 
     onError: () => {
-      toast.error('Unable to create job position')
+      toast.error(t('createError'))
     },
   })
 }

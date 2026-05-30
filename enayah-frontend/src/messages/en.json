@@ -3,7 +3,9 @@
     "dashboard": "Dashboard",
     "logout": "Logout",
     "profile": "Profile",
-    "settings": "Settings"
+    "settings": "Settings",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "auth": {
     "loginTitle": "Login to Your Account",
@@ -92,10 +94,21 @@
     "arabicName": "Arabic Name",
     "parentDepartment": "Parent Department",
     "selectParentDepartment": "Select parent department",
-    "searchDepartment": "Search department...",
+    "searchDepartment": "Search departments...",
     "noDepartmentFound": "No department found.",
     "create": "Create",
-    "creating": "Creating..."
+    "creating": "Creating...",
+    "actions": "Actions",
+    "createSuccess": "Department created successfully",
+    "createError": "Unable to create department",
+    "updateSuccess": "Department updated successfully",
+    "updateError": "Unable to update department",
+    "deleteSuccess": "Department deleted successfully",
+    "deleteError": "Unable to delete department",
+    "editDepartment": "Edit Department",
+    "editDepartmentSub": "Update department details",
+    "update": "Update",
+    "updating": "Updating..."
   },
   "positions": {
     "positionName": "Job Positions",
@@ -103,12 +116,20 @@
     "createPosition": "Create Job Position",
     "englishTitle": "English Title",
     "arabicTitle": "Arabic Title",
+    "searchPosition": "Search job positions...",
     "gradeId": "Grade",
     "selectGrade": "Select grade",
-    "searchGrade": "Search job position...",
+    "searchGrade": "Search grade...",
     "noPositionFound": "No position found.",
-    "create": "Creating",
-    "creating": "Creating..."
+    "create": "Create",
+    "creating": "Creating...",
+    "actions": "Actions",
+    "createSuccess": "Job Position created successfully",
+    "createError": "Unable to create job position",
+    "updateSuccess": "Job position updated successfully",
+    "updateError": "Unable to update job position",
+    "deleteSuccess": "Job position deleted successfully",
+    "deleteError": "Unable to delete job position"
   },
   "contracts": {},
   "payroll": {},

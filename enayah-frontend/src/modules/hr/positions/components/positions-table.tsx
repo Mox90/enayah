@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { usePositions } from '../hooks/use-positions'
 import { getPositionColumns } from './position-columns'
 import { DataTable } from '@/components/tables'
+import { useTranslations } from 'next-intl'
 
 export function PositionsTable() {
   const [page, setPage] = useState(1)
@@ -11,6 +12,7 @@ export function PositionsTable() {
   const [search, setSearch] = useState('')
   const [sortBy, setSortBy] = useState('titleEn')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const t = useTranslations('positions')
 
   const { data, isLoading } = usePositions({
     page,
@@ -20,7 +22,11 @@ export function PositionsTable() {
     sortOrder,
   })
 
-  const columns = getPositionColumns(sortBy, sortOrder)
+  const columns = getPositionColumns(sortBy, sortOrder, {
+    titleEn: t('englishTitle'),
+    titleAr: t('arabicTitle'),
+    actions: t('actions'),
+  })
 
   return (
     <DataTable
@@ -29,7 +35,7 @@ export function PositionsTable() {
       total={data?.meta.total ?? 0}
       pageCount={data?.meta.totalPages ?? 0}
       isLoading={isLoading}
-      searchPlaceholder='Search departments...'
+      searchPlaceholder={t('searchPosition')}
       page={page}
       limit={limit}
       search={search}

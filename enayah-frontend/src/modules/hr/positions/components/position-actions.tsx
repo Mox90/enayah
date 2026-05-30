@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import EditPositionDialog from './edit-position-dialogs'
 import DeletePositionDialog from './delete-position-dialog'
+import { useTranslations } from 'next-intl'
 
 interface PositionActionProps {
   position: Position
@@ -21,26 +22,27 @@ export function PositionActions({ position }: PositionActionProps) {
   const [editOpen, setEditOpen] = useState(false)
 
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const t = useTranslations('common')
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant='ghost' size='icon'>
+          <Button variant='ghost' size='icon' aria-label='Position Action'>
             <MoreHorizontal className='h-4 w-4' />
           </Button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align='end'>
           <DropdownMenuItem onClick={() => setEditOpen(true)}>
-            Edit
+            {t('edit')}
           </DropdownMenuItem>
 
           <DropdownMenuItem
             className='text-destructive'
             onClick={() => setDeleteOpen(true)}
           >
-            Delete
+            {t('delete')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
