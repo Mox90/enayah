@@ -33,6 +33,11 @@ export const PositionController = {
     res.status(200).json(result)
   }),
 
+  findLookup: asyncHandler(async (req: Request, res: Response) => {
+    const positions = await PositionService.findLookup()
+    res.status(200).json(positions)
+  }),
+
   update: asyncHandler(async (req: Request, res: Response) => {
     const { id } = positionIdSchema.parse(req.params)
     const body = updatePositionSchema.parse(req.body)

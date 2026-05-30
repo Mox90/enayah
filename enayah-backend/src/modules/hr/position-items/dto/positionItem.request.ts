@@ -1,7 +1,7 @@
 import z from 'zod'
 
 export const createPositionItemSchema = z.object({
-  itemNumber: z.string().min(5).max(10),
+  itemNumber: z.string().min(5).max(50),
   departmentId: z.uuid(),
   positionId: z.uuid(),
   jobGradeId: z.uuid().optional(),

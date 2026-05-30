@@ -14,6 +14,18 @@ export const PositionRepository = {
     })
   },
 
+  findLookup: () => {
+    return db
+      .select({
+        id: positions.id,
+        titleEn: positions.titleEn,
+        titleAr: positions.titleAr,
+      })
+      .from(positions)
+      .where(and(eq(positions.isDeleted, false), isNull(positions.deletedAt)))
+      .orderBy(asc(positions.titleEn))
+  },
+
   findAll: () => {
     //return db.select().from(positions)
     return db.query.positions.findMany({

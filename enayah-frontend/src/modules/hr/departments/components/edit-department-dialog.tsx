@@ -11,7 +11,7 @@ import {
   CreateDepartmentFormValues,
 } from '../schemas/department.schema'
 import { useUpdateDepartment } from '../hooks/use-update-department'
-import { useEffect } from 'react'
+import { useEffect, useTransition } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { FormCombobox } from '@/components/forms/form-combobox'
 import { useDepartments } from '../hooks/use-departments'
@@ -29,6 +29,7 @@ export function EditDepartmentDialog({
   onOpenChange,
 }: Props) {
   const t = useTranslations('departments')
+  const c = useTranslations('common')
   const locale = useLocale()
 
   const updateDepartment = useUpdateDepartment()
@@ -114,7 +115,7 @@ export function EditDepartmentDialog({
             searchPlaceholder={t('searchDepartment')}
             emptyMessage={t('noDepartmentFound')}
             clearable
-            clearLabel='None'
+            clearLabel={c('none')}
           />
 
           <FormSubmitButton

@@ -32,6 +32,7 @@ import {
 import { Control, FieldPath, FieldValues } from 'react-hook-form'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 
 interface Option {
   label: string
@@ -62,6 +63,7 @@ export function FormCombobox<TFieldValues extends FieldValues>({
   clearable,
 }: FormComboboxProps<TFieldValues>) {
   const [open, setOpen] = useState(false)
+  const t = useTranslations('common')
 
   return (
     <FormField
@@ -111,7 +113,7 @@ export function FormCombobox<TFieldValues extends FieldValues>({
                           setOpen(false)
                         }}
                       >
-                        {clearLabel ?? 'None'}
+                        {clearLabel ?? t('none')}
                       </CommandItem>
                     )}
                     {options.map((option) => (

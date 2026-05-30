@@ -8,7 +8,7 @@
     "delete": "Delete",
     "cancel": "Cancel",
     "confirmDelete": "Are you sure you want to delete <strong>{name}</strong>?",
-    "questionMark": "?"
+    "none": "None"
   },
   "auth": {
     "loginTitle": "Login to Your Account",

@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNull, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, ilike, inArray, isNull, sql } from 'drizzle-orm'
 import { DB, db, positionItems } from '../../../../db'
 import { AppError } from '../../../../core/errors/AppError'
 import {
@@ -112,6 +112,41 @@ export const PositionItemRepository = {
       eq(positionItems.isDeleted, false),
       isNull(positionItems.isDeleted),
     ]
+
+    if (search) {
+      conditions.push(ilike(positionItems.itemNumber, `%${search}%`))
+    }
+
+    const sortableColumns = {
+      itemNumber: positionItems.itemNumber,
+      createdAt: positionItems.createdAt,
+    }
+
+    const sortColumn = sortableColumns[sortBy] ?? positionItems.itemNumber
+
+    const [totalResult] = await db
+      .select({
+        count: sql<number>`count(*)`,
+      })
+      .from(positionItems)
+      .where(and(...conditions))
+
+    const data = await db.query.positions.findMany({
+      where: and(...conditions),
+      orderBy: sortOrder === 'asc' ? asc(sortColumn) : desc(sortColumn),
+      limit,
+      offset,
+    })
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total: Number(totalResult?.count),
+        totalPages: Math.ceil(Number(totalResult?.count) / limit),
+      },
+    }
   },
 
   getSummary: async () => {

@@ -2,8 +2,8 @@ import { z } from 'zod'
 
 export const createPositionItemSchema = z.object({
   itemNumber: z.string().min(5).max(50),
-  departmentId: z.string(),
-  positionId: z.string(),
+  departmentId: z.uuid(),
+  positionId: z.uuid(),
   workforceCategory: z.enum([
     'physician',
     'nurse',
