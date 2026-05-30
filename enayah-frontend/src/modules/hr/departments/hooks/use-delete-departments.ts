@@ -4,9 +4,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { departmentService } from '../services/department.service'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 export function useDeleteDepartment() {
   const queryClient = useQueryClient()
+  const t = useTranslations('departments')
 
   return useMutation({
     mutationFn: (id: string) => departmentService.delete(id),
@@ -16,11 +18,11 @@ export function useDeleteDepartment() {
         queryKey: ['departments'],
       })
 
-      toast.success('Department deleted successfully')
+      toast.success(t('deleteSuccess'))
     },
 
     onError: () => {
-      toast.error('Unable to delete department')
+      toast.error(t('deleteError'))
     },
   })
 }

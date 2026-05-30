@@ -2,37 +2,33 @@
 
 import { MoreHorizontal } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+import { Position } from '../types/position.types'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Department } from '../types/department.types'
-import { useState } from 'react'
-import { DeleteDepartmentDialog } from './delete-department-dialog'
-import { EditDepartmentDialog } from './edit-department-dialog'
-import { useLocale, useTranslations } from 'next-intl'
+import EditPositionDialog from './edit-position-dialogs'
+import DeletePositionDialog from './delete-position-dialog'
+import { useTranslations } from 'next-intl'
 
-interface DepartmentActionsProps {
-  department: Department
+interface PositionActionProps {
+  position: Position
 }
 
-export function DepartmentActions({ department }: DepartmentActionsProps) {
+export function PositionActions({ position }: PositionActionProps) {
   const [editOpen, setEditOpen] = useState(false)
+
   const [deleteOpen, setDeleteOpen] = useState(false)
   const t = useTranslations('common')
-  const dT = useTranslations('departments')
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant='ghost'
-            size='icon'
-            aria-label={dT('departmentActions')}
-          >
+          <Button variant='ghost' size='icon' aria-label='Position Action'>
             <MoreHorizontal className='h-4 w-4' />
           </Button>
         </DropdownMenuTrigger>
@@ -51,17 +47,17 @@ export function DepartmentActions({ department }: DepartmentActionsProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <EditDepartmentDialog
-        department={department}
+      {/* <EditPositionDialog
+        position={position}
         open={editOpen}
         onOpenChange={setEditOpen}
       />
 
-      <DeleteDepartmentDialog
-        department={department}
+      <DeletePositionDialog
+        position={position}
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-      />
+      /> */}
     </>
   )
 }

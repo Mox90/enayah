@@ -4,9 +4,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { departmentService } from '../services/department.service'
 import { toast } from 'sonner'
+import { useTranslations } from 'next-intl'
 
 export function useUpdateDepartment() {
   const queryClient = useQueryClient()
+  const t = useTranslations('departments')
 
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) =>
@@ -17,11 +19,11 @@ export function useUpdateDepartment() {
         queryKey: ['departments'],
       })
 
-      toast.success('Department updated successfully')
+      toast.success(t('updateSuccess'))
     },
 
     onError: () => {
-      toast.error('Unable to update department')
+      toast.error(t('updateError'))
     },
   })
 }

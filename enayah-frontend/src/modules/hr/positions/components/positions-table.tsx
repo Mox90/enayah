@@ -1,20 +1,20 @@
 'use client'
 
 import { useState } from 'react'
+import { usePositions } from '../hooks/use-positions'
+import { getPositionColumns } from './position-columns'
 import { DataTable } from '@/components/tables'
-import { useDepartments } from '../hooks/use-departments'
-import { getDepartmentColumns } from './department-columns'
 import { useTranslations } from 'next-intl'
 
-export function DepartmentsTable() {
+export function PositionsTable() {
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
   const [search, setSearch] = useState('')
-  const [sortBy, setSortBy] = useState('code')
+  const [sortBy, setSortBy] = useState('titleEn')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
-  const t = useTranslations('departments')
+  const t = useTranslations('positions')
 
-  const { data, isLoading } = useDepartments({
+  const { data, isLoading } = usePositions({
     page,
     limit,
     search,
@@ -22,10 +22,9 @@ export function DepartmentsTable() {
     sortOrder,
   })
 
-  const columns = getDepartmentColumns(sortBy, sortOrder, {
-    code: t('code'),
-    nameEn: t('englishName'),
-    nameAr: t('arabicName'),
+  const columns = getPositionColumns(sortBy, sortOrder, {
+    titleEn: t('englishTitle'),
+    titleAr: t('arabicTitle'),
     actions: t('actions'),
   })
 
@@ -36,7 +35,7 @@ export function DepartmentsTable() {
       total={data?.meta.total ?? 0}
       pageCount={data?.meta.totalPages ?? 0}
       isLoading={isLoading}
-      searchPlaceholder={t('searchDepartment')}
+      searchPlaceholder={t('searchPosition')}
       page={page}
       limit={limit}
       search={search}

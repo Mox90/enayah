@@ -37,13 +37,13 @@ export const DepartmentRepository = {
     sortOrder,
   }: DepartmentQueryDTO) => {
     const offset = (page - 1) * limit
-    console.log({
-      page,
-      limit,
-      search,
-      sortBy,
-      sortOrder,
-    })
+    // console.log({
+    //   page,
+    //   limit,
+    //   search,
+    //   sortBy,
+    //   sortOrder,
+    // })
     const conditions = [
       eq(departments.isDeleted, false),
       isNull(departments.deletedAt),

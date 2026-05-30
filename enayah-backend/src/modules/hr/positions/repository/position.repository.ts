@@ -1,6 +1,6 @@
-import { id } from 'zod/locales'
 import { db, positions } from '../../../../db'
-import { and, eq, isNull } from 'drizzle-orm'
+import { and, or, eq, isNull, ilike, sql, desc, asc } from 'drizzle-orm'
+import { PositionQueryDTO } from '../dto/position.request'
 
 export const PositionRepository = {
   create: (data: any) => {
@@ -19,6 +19,62 @@ export const PositionRepository = {
     return db.query.positions.findMany({
       where: and(eq(positions.isDeleted, false), isNull(positions.deletedAt)),
     })
+  },
+
+  findPaginated: async ({
+    page,
+    limit,
+    search,
+    sortBy,
+    sortOrder,
+  }: PositionQueryDTO) => {
+    const offset = (page - 1) * limit
+
+    const conditions = [
+      eq(positions.isDeleted, false),
+      isNull(positions.deletedAt),
+    ]
+
+    if (search) {
+      conditions.push(
+        or(
+          ilike(positions.titleEn, `%${search}%`),
+          ilike(positions.titleAr, `%${search}%`),
+        )!,
+      )
+    }
+
+    const sortableColumns = {
+      titleEn: positions.titleEn,
+      titleAr: positions.titleAr,
+      createdAt: positions.createdAt,
+    }
+
+    const sortColumn = sortableColumns[sortBy] ?? positions.titleEn
+
+    const [totalResult] = await db
+      .select({
+        count: sql<number>`count(*)`,
+      })
+      .from(positions)
+      .where(and(...conditions))
+
+    const data = await db.query.positions.findMany({
+      where: and(...conditions),
+      orderBy: sortOrder === 'asc' ? asc(sortColumn) : desc(sortColumn),
+      limit,
+      offset,
+    })
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total: Number(totalResult?.count),
+        totalPages: Math.ceil(Number(totalResult?.count) / limit),
+      },
+    }
   },
 
   update: (id: string, data: any) => {
