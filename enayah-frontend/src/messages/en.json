@@ -108,7 +108,8 @@
     "editDepartment": "Edit Department",
     "editDepartmentSub": "Update department details",
     "update": "Update",
-    "updating": "Updating..."
+    "updating": "Updating...",
+    "departmentActions": "Department actions"
   },
   "positions": {
     "positionName": "Job Positions",
@@ -119,7 +120,7 @@
     "searchPosition": "Search job positions...",
     "gradeId": "Grade",
     "selectGrade": "Select grade",
-    "searchGrade": "Search grade...",
+    "searchGrade": "Search grades...",
     "noPositionFound": "No position found.",
     "create": "Create",
     "creating": "Creating...",

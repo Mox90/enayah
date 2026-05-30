@@ -109,7 +109,8 @@
     "editDepartment": "قسم التحديث",
     "editDepartmentSub": "تحديث تفاصيل القسم",
     "update": "تحديث",
-    "updating": "جارٍ التحديث..."
+    "updating": "جارٍ التحديث...",
+    "departmentActions": "إجراءات القسم"
   },
   "positions": {
     "positionName": "المناصب الوظيفية",

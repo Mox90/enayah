@@ -22,12 +22,17 @@ export function DepartmentActions({ department }: DepartmentActionsProps) {
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
   const t = useTranslations('common')
+  const dT = useTranslations('departments')
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant='ghost' size='icon' aria-label='Department actions'>
+          <Button
+            variant='ghost'
+            size='icon'
+            aria-label={dT('departmentActions')}
+          >
             <MoreHorizontal className='h-4 w-4' />
           </Button>
         </DropdownMenuTrigger>
