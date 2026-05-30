@@ -15,6 +15,7 @@ import { useEffect } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { FormCombobox } from '@/components/forms/form-combobox'
 import { useDepartments } from '../hooks/use-departments'
+import { useDepartmentLookup } from '../hooks/use-department-lookup'
 
 interface Props {
   department: Department
@@ -32,17 +33,18 @@ export function EditDepartmentDialog({
 
   const updateDepartment = useUpdateDepartment()
 
-  const { data: departmentsResponse } = useDepartments({
-    page: 1,
-    limit: 100,
-    search: '',
-    sortBy: 'nameEn',
-    sortOrder: 'asc',
-  })
+  // const { data: departmentsResponse } = useDepartments({
+  //   page: 1,
+  //   limit: 100,
+  //   search: '',
+  //   sortBy: 'nameEn',
+  //   sortOrder: 'asc',
+  // })
 
-  const departments = departmentsResponse?.data ?? []
+  //const departments = departmentsResponse?.data ?? []
+  const { data: departmentLookup = [] } = useDepartmentLookup()
 
-  const departmentOptions = departments
+  const departmentOptions = departmentLookup
     .filter((d: { id: string }) => d.id !== department.id)
     .map((department: { id: string; nameEn: string; nameAr: string }) => ({
       label: locale === 'ar' ? department.nameAr : department.nameEn,
@@ -69,12 +71,15 @@ export function EditDepartmentDialog({
   }, [department, form])
 
   const onSubmit = async (values: CreateDepartmentFormValues) => {
-    await updateDepartment.mutateAsync({
-      id: department.id,
-      data: values,
-    })
-
-    onOpenChange(false)
+    try {
+      await updateDepartment.mutateAsync({
+        id: department.id,
+        data: values,
+      })
+      onOpenChange(false)
+    } catch {
+      // error toast handled in useUpdatePosition onError
+    }
   }
 
   return (
@@ -108,6 +113,8 @@ export function EditDepartmentDialog({
             placeholder={t('selectParentDepartment')}
             searchPlaceholder={t('searchDepartment')}
             emptyMessage={t('noDepartmentFound')}
+            clearable
+            clearLabel='None'
           />
 
           <FormSubmitButton

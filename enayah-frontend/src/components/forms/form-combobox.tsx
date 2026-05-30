@@ -46,6 +46,8 @@ interface FormComboboxProps<TFieldValues extends FieldValues> {
   placeholder?: string
   searchPlaceholder?: string
   emptyMessage?: string
+  clearable?: boolean
+  clearLabel?: string
 }
 
 export function FormCombobox<TFieldValues extends FieldValues>({
@@ -56,6 +58,8 @@ export function FormCombobox<TFieldValues extends FieldValues>({
   placeholder,
   searchPlaceholder,
   emptyMessage,
+  clearLabel,
+  clearable,
 }: FormComboboxProps<TFieldValues>) {
   const [open, setOpen] = useState(false)
 
@@ -98,6 +102,18 @@ export function FormCombobox<TFieldValues extends FieldValues>({
                   </CommandEmpty>
 
                   <CommandGroup>
+                    {clearable && (
+                      <CommandItem
+                        value='__clear__'
+                        onSelect={() => {
+                          field.onChange(undefined)
+
+                          setOpen(false)
+                        }}
+                      >
+                        {clearLabel ?? 'None'}
+                      </CommandItem>
+                    )}
                     {options.map((option) => (
                       <CommandItem
                         value={option.label}

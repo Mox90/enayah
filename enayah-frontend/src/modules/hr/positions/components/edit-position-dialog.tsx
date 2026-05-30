@@ -61,12 +61,15 @@ const EditPositionDialog = ({ position, open, onOpenChange }: Props) => {
   }, [position, form])
 
   const onSubmit = async (values: CreatePositionFormValues) => {
-    await updatePosition.mutateAsync({
-      id: position.id,
-      data: values,
-    })
-
-    onOpenChange(false)
+    try {
+      await updatePosition.mutateAsync({
+        id: position.id,
+        data: values,
+      })
+      onOpenChange(false)
+    } catch {
+      // error toast handled in useUpdatePosition onError
+    }
   }
 
   return (

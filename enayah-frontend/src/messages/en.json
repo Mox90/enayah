@@ -7,7 +7,7 @@
     "edit": "Edit",
     "delete": "Delete",
     "cancel": "Cancel",
-    "confirmDelete": "Are you sure you want to delete",
+    "confirmDelete": "Are you sure you want to delete <strong>{name}</strong>?",
     "questionMark": "?"
   },
   "auth": {

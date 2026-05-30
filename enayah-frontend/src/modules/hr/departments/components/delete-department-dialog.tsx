@@ -32,9 +32,12 @@ export function DeleteDepartmentDialog({
   const deleteDepartment = useDeleteDepartment()
 
   const handleDelete = async () => {
-    await deleteDepartment.mutateAsync(department.id)
-
-    onOpenChange(false)
+    try {
+      await deleteDepartment.mutateAsync(department.id)
+      onOpenChange(false)
+    } catch {
+      // Error already handled by useDeleteDepartment.onError
+    }
   }
 
   return (
@@ -44,18 +47,20 @@ export function DeleteDepartmentDialog({
           <AlertDialogTitle>{dt('deleteDepartment')}</AlertDialogTitle>
 
           <AlertDialogDescription>
-            {t('confirmDelete')}{' '}
-            <strong>
-              {locale === 'ar' ? department.nameAr : department.nameEn}
-            </strong>
-            {t('questionMark')}
+            {t.rich('confirmDelete', {
+              name: locale === 'ar' ? department.nameAr : department.nameEn,
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <AlertDialogFooter>
           <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
 
-          <AlertDialogAction onClick={handleDelete}>
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={deleteDepartment.isPending}
+          >
             {t('delete')}
           </AlertDialogAction>
         </AlertDialogFooter>

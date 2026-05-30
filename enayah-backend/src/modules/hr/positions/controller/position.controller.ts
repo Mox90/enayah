@@ -28,7 +28,7 @@ export const PositionController = {
 
   findPaginated: asyncHandler(async (req: Request, res: Response) => {
     const query = positionQuerySchema.parse(req.query)
-    console.log('QUERY:', query)
+    //console.log('QUERY:', query)
     const result = await PositionService.findPaginated(query)
     res.status(200).json(result)
   }),

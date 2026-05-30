@@ -1,8 +1,9 @@
-import { and, eq, inArray, sql } from 'drizzle-orm'
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm'
 import { DB, db, positionItems } from '../../../../db'
 import { AppError } from '../../../../core/errors/AppError'
 import {
   CreatePositionItemDTO,
+  JobPositionItemQueryDTO,
   UpdatePositionItemDTO,
 } from '../dto/positionItem.request'
 import {
@@ -96,6 +97,21 @@ export const PositionItemRepository = {
     //return toPositionItemResponse(positionItem)
     //return positionItem ? toPositionItemResponse(positionItem) : undefined
     return findByIdOrThrow(tx, id)
+  },
+
+  findPaginated: async ({
+    page,
+    limit,
+    search,
+    sortBy,
+    sortOrder,
+  }: JobPositionItemQueryDTO) => {
+    const offset = (page - 1) * limit
+
+    const conditions = [
+      eq(positionItems.isDeleted, false),
+      isNull(positionItems.isDeleted),
+    ]
   },
 
   getSummary: async () => {

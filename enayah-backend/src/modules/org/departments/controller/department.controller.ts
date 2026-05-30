@@ -21,6 +21,13 @@ export const DepartmentController = {
     res.status(200).json(result)
   }),
 
+  findLookup: asyncHandler(async (req: Request, res: Response) => {
+    console.log('LOOKUP ROUTE HIT')
+    const result = await DepartmentService.findLookup()
+
+    res.status(200).json(result)
+  }),
+
   findPaginated: asyncHandler(async (req: Request, res: Response) => {
     const query = departmentQuerySchema.parse(req.query)
     const result = await DepartmentService.findPaginated(query)

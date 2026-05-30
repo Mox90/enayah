@@ -22,6 +22,13 @@ export const departmentService = {
     return response.data
   },
 
+  findLookup: async () => {
+    const response = await api.get<Department[]>(
+      `${API_ENDPOINTS.org.departments}/lookup`,
+    )
+    return response.data
+  },
+
   create: async (data: CreateDepartmentFormValues) => {
     const response = await api.post(API_ENDPOINTS.org.departments, data)
     return response.data

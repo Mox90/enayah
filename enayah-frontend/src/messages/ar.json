@@ -7,7 +7,7 @@
     "edit": "تحديث",
     "delete": "حذف",
     "cancel": "إلغاء",
-    "confirmDelete": "هل أنت متأكد من رغبتك في حذف",
+    "confirmDelete": "هل أنت متأكد من رغبتك في حذف <strong>{name}</strong>؟",
     "questionMark": "؟"
   },
 
@@ -39,7 +39,7 @@
     "employments": "التوظيفات",
     "contracts": "العقود",
     "positions": "المسميات الوظيفية",
-    "positionItems": "عناصر الوظائف",
+    "positionItems": "رقم عنصر الوظيفة",
     "jobAssignments": "التكليفات الوظيفية",
 
     "attendance": "الحضور",

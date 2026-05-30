@@ -7,6 +7,7 @@ import {
 } from '../dto/department.request'
 import {
   toDepartmentDB,
+  toDepartmentLookupResponse,
   toDepartmentResponse,
   toDepartmentUpdateDB,
 } from '../dto/department.mapper'
@@ -50,6 +51,11 @@ export const DepartmentService = {
       throw new AppError('Department not found', 404)
     }
     return toDepartmentResponse(department)
+  },
+
+  findLookup: async () => {
+    const departments = await DepartmentRepository.findLookup()
+    return departments.map(toDepartmentLookupResponse)
   },
 
   findTree: async () => {

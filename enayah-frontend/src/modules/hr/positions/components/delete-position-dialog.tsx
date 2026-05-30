@@ -28,8 +28,12 @@ const DeletePositionDialog = ({ position, open, onOpenChange }: Props) => {
   const deletePosition = useDeletePosition()
 
   const handleDelete = async () => {
-    await deletePosition.mutateAsync(position.id)
-    onOpenChange(false)
+    try {
+      await deletePosition.mutateAsync(position.id)
+      onOpenChange(false)
+    } catch {
+      // Error already handled by useDeletePosition.onError
+    }
   }
 
   return (
@@ -39,18 +43,20 @@ const DeletePositionDialog = ({ position, open, onOpenChange }: Props) => {
           <AlertDialogTitle>{dt('deletePosition')}</AlertDialogTitle>
 
           <AlertDialogDescription>
-            {t('confirmDelete')}{' '}
-            <strong>
-              {locale === 'ar' ? position.titleAr : position.titleEn}
-            </strong>
-            {t('questionMark')}
+            {t.rich('confirmDelete', {
+              name: locale === 'ar' ? position.titleAr : position.titleEn,
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
         <AlertDialogFooter>
           <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
 
-          <AlertDialogAction onClick={handleDelete}>
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={deletePosition.isPending}
+          >
             {t('delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
