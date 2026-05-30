@@ -14,7 +14,6 @@ import { Button } from '@/components/ui/button'
 import { useCreateDepartment } from '../hooks/use-create-department'
 import { useDepartments } from '../hooks/use-departments'
 import { useLocale, useTranslations } from 'next-intl'
-import { toast } from 'sonner'
 
 export function CreateDepartmentDialog() {
   const [open, setOpen] = useState(false)

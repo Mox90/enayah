@@ -34,6 +34,7 @@ export const departmentService = {
     )
     return response.data
   },
+
   delete: async (id: string) => {
     await api.delete(`${API_ENDPOINTS.org.departments}/${id}`)
   },

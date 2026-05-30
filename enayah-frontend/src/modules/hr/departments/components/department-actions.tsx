@@ -1,6 +1,6 @@
 'use client'
 
-import { MoreHorizontal } from 'lucide-react'
+import { MoreVerticalIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -33,7 +33,7 @@ export function DepartmentActions({ department }: DepartmentActionsProps) {
             size='icon'
             aria-label={dT('departmentActions')}
           >
-            <MoreHorizontal className='h-4 w-4' />
+            <MoreVerticalIcon className='h-4 w-4' />
           </Button>
         </DropdownMenuTrigger>
 

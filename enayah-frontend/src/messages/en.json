@@ -5,7 +5,10 @@
     "profile": "Profile",
     "settings": "Settings",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "confirmDelete": "Are you sure you want to delete",
+    "questionMark": "?"
   },
   "auth": {
     "loginTitle": "Login to Your Account",
@@ -109,7 +112,8 @@
     "editDepartmentSub": "Update department details",
     "update": "Update",
     "updating": "Updating...",
-    "departmentActions": "Department actions"
+    "departmentActions": "Department actions",
+    "deleteDepartment": "Delete Department"
   },
   "positions": {
     "positionName": "Job Positions",
@@ -130,7 +134,13 @@
     "updateSuccess": "Job position updated successfully",
     "updateError": "Unable to update job position",
     "deleteSuccess": "Job position deleted successfully",
-    "deleteError": "Unable to delete job position"
+    "deleteError": "Unable to delete job position",
+    "editPosition": "Edit Position",
+    "editPositionSub": "Update job position details",
+    "update": "Update",
+    "updating": "Updating...",
+    "positionActions": "Job Position actions",
+    "deletePosition": "Delete Job Position"
   },
   "contracts": {},
   "payroll": {},

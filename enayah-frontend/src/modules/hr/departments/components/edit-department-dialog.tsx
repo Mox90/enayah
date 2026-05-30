@@ -12,7 +12,9 @@ import {
 } from '../schemas/department.schema'
 import { useUpdateDepartment } from '../hooks/use-update-department'
 import { useEffect } from 'react'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
+import { FormCombobox } from '@/components/forms/form-combobox'
+import { useDepartments } from '../hooks/use-departments'
 
 interface Props {
   department: Department
@@ -26,11 +28,29 @@ export function EditDepartmentDialog({
   onOpenChange,
 }: Props) {
   const t = useTranslations('departments')
+  const locale = useLocale()
+
   const updateDepartment = useUpdateDepartment()
+
+  const { data: departmentsResponse } = useDepartments({
+    page: 1,
+    limit: 100,
+    search: '',
+    sortBy: 'nameEn',
+    sortOrder: 'asc',
+  })
+
+  const departments = departmentsResponse?.data ?? []
+
+  const departmentOptions = departments
+    .filter((d: { id: string }) => d.id !== department.id)
+    .map((department: { id: string; nameEn: string; nameAr: string }) => ({
+      label: locale === 'ar' ? department.nameAr : department.nameEn,
+      value: department.id,
+    }))
 
   const form = useForm<CreateDepartmentFormValues>({
     resolver: zodResolver(createDepartmentSchema),
-
     defaultValues: {
       code: department.code,
       nameEn: department.nameEn,
@@ -78,6 +98,16 @@ export function EditDepartmentDialog({
             control={form.control}
             name='nameAr'
             label={t('arabicName')}
+          />
+
+          <FormCombobox
+            control={form.control}
+            name='parentDepartmentId'
+            label={t('parentDepartment')}
+            options={departmentOptions}
+            placeholder={t('selectParentDepartment')}
+            searchPlaceholder={t('searchDepartment')}
+            emptyMessage={t('noDepartmentFound')}
           />
 
           <FormSubmitButton
