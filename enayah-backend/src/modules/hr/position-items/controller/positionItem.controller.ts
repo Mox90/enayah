@@ -5,6 +5,7 @@ import {
   assignEmployeeSchema,
   positionItemIdSchema,
   updatePositionItemSchema,
+  positionItemQuerySchema,
 } from '../dto/positionItem.request'
 import { PositionItemService } from '../service/positionItem.service'
 import { PositionItemRepository } from '../repository/positionItem.repository'
@@ -39,6 +40,13 @@ export const PositionItemController = {
     const { id } = positionItemIdSchema.parse(req.params)
     const positionItem = await PositionItemService.findById(id)
     return res.status(200).json(toPositionItemResponse(positionItem))
+  }),
+
+  findPaginated: asyncHandler(async (req: Request, res: Response) => {
+    const query = positionItemQuerySchema.parse(req.query)
+    //console.log('QUERY:', query)
+    const result = await PositionItemService.findPaginated(query)
+    res.status(200).json(result)
   }),
 
   update: asyncHandler(async (req: Request, res: Response) => {

@@ -10,6 +10,7 @@ import { validatePositionItemAssignment } from '../validators/positionItem.valid
 import { EmployeeRepository } from '../../employees/repository/employee.repository'
 import {
   CreatePositionItemDTO,
+  JobPositionItemQueryDTO,
   UpdatePositionItemDTO,
 } from '../dto/positionItem.request'
 
@@ -48,6 +49,14 @@ export const PositionItemService = {
 
   findById: async (id: string) => {
     return db.transaction((tx) => PositionItemRepository.findById(tx, id))
+  },
+
+  findPaginated: async (query: JobPositionItemQueryDTO) => {
+    const result = await PositionItemRepository.findPaginated(query)
+    return {
+      data: result.data.map(toPositionItemResponse),
+      meta: result.meta,
+    }
   },
 
   /*update: async (id: string, data: UpdatePositionItemDTO) => {
