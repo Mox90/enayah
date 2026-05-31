@@ -40,6 +40,7 @@ export const toPositionItemResponse = (dbRecord: any) => ({
       }
     : null,
   categoryCode: dbRecord.categoryCode ?? undefined,
+  workforceCategory: dbRecord.workforceCategory,
   minSalary: dbRecord.minSalary,
   maxSalary: dbRecord.maxSalary,
   status: dbRecord.status,

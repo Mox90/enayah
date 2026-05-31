@@ -89,6 +89,26 @@ export const PositionItemRepository = {
     return positionItems.map(toPositionItemResponse)
   },
 
+  findLookup: async () => {
+    return db
+      .select({
+        id: positionItems.id,
+        itemNumber: positionItems.itemNumber,
+        departmentId: positionItems.departmentId,
+        positionId: positionItems.positionId,
+        status: positionItems.status,
+      })
+      .from(positionItems)
+      .where(
+        and(
+          eq(positionItems.isDeleted, false),
+          isNull(positionItems.deletedAt),
+          eq(positionItems.status, 'vacant'),
+        ),
+      )
+      .orderBy(asc(positionItems.itemNumber))
+  },
+
   findById: async (tx: DB, id: string) => {
     //return db.select().from(positionItems).where(eq(positionItems.id, id))
     //const positionItem = await db.query.positionItems.findFirst({

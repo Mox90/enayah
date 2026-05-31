@@ -13,8 +13,8 @@ const router = Router()
 router.use(requireAuth)
 router.use(attachPermissions)
 
-router.get('/lookup', PositionItemController.findPaginated)
-router.get('/', PositionItemController.findAll)
+router.get('/lookup', PositionItemController.findLookup)
+router.get('/', PositionItemController.findPaginated)
 router.get('/:id', PositionItemController.findById)
 router.post(
   '/',
