@@ -3,12 +3,13 @@
 export const API_ENDPOINTS = {
   org: {
     departments: '/org/departments',
-    positions: '/hr/positions',
   },
 
   hr: {
     employees: '/hr/employees',
     employments: '/hr/employments',
+    positionItems: '/hr/position-items',
+    positions: '/hr/positions',
   },
 
   iam: {

@@ -12,9 +12,11 @@ export const createPositionItemSchema = z.object({
     'support_service',
   ]),
   categoryCode: z.number().int().nonnegative().optional(),
+  minSalary: z.number().nonnegative().optional(),
+  maxSalary: z.number().nonnegative().optional(),
   status: z.string().max(20).default('vacant'),
 })
 
-export type CreateJobPositionFormValues = z.infer<
+export type CreateJobPositionItemFormValues = z.infer<
   typeof createPositionItemSchema
 >

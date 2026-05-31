@@ -32,7 +32,25 @@ export const toPositionItemResponse = (dbRecord: any) => ({
   id: dbRecord.id,
   itemNumber: dbRecord.itemNumber,
   departmentId: dbRecord.departmentId,
+  departmentNameEn: dbRecord.departmentNameEn,
+  departmentNameAr: dbRecord.departmentNameAr,
+  // department: dbRecord.departmentId
+  //   ? {
+  //       id: dbRecord.department.id,
+  //       nameEn: dbRecord.department.nameEn,
+  //       nameAr: dbRecord.department.nameAr,
+  //     }
+  //   : null,
   positionId: dbRecord.positionId,
+  // position: dbRecord.positionId
+  //   ? {
+  //       id: dbRecord.position.id,
+  //       titleEn: dbRecord.position.titleEn,
+  //       titleAr: dbRecord.position.titleAr,
+  //     }
+  //   : null,
+  positionTitleEn: dbRecord.positionTitleEn,
+  positionTitleAr: dbRecord.positionTitleAr,
   jobGrade: dbRecord.jobGrade
     ? {
         id: dbRecord.jobGrade.id,
