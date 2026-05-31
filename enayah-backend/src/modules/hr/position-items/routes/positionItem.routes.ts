@@ -1,14 +1,19 @@
 import { Router } from 'express'
 import { PositionItemController } from '../controller/positionItem.controller'
 import { audit } from '../../../../core/middleware/audit.middleware'
-import { requirePermission } from '../../../../core/middleware/permission.middleware'
+import {
+  attachPermissions,
+  requirePermission,
+} from '../../../../core/middleware/permission.middleware'
 import { requireAuth } from '../../../../core/middleware/auth.middleware'
 import { getParam } from '../../../../core/utils/request.utils'
 
 const router = Router()
 
 router.use(requireAuth)
+router.use(attachPermissions)
 
+router.get('/lookup', PositionItemController.findPaginated)
 router.get('/', PositionItemController.findAll)
 router.get('/:id', PositionItemController.findById)
 router.post(
