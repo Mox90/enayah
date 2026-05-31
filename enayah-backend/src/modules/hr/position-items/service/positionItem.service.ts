@@ -59,6 +59,11 @@ export const PositionItemService = {
     }
   },
 
+  findLookup: async () => {
+    const result = await PositionItemRepository.findLookup()
+    return result
+  },
+
   /*update: async (id: string, data: UpdatePositionItemDTO) => {
     return db.transaction((tx) => PositionItemRepository.update(tx, id, data))
   },*/

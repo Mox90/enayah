@@ -49,6 +49,11 @@ export const PositionItemController = {
     res.status(200).json(result)
   }),
 
+  findLookup: asyncHandler(async (req: Request, res: Response) => {
+    const positionItems = await PositionItemService.findLookup()
+    res.status(200).json(positionItems)
+  }),
+
   update: asyncHandler(async (req: Request, res: Response) => {
     const { id } = positionItemIdSchema.parse(req.params)
     const body = updatePositionItemSchema.parse(req.body)

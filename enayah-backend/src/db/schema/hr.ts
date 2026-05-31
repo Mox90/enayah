@@ -202,4 +202,21 @@ export const positionItems = pgTable('position_items', {
   ...baseColumns,
 })
 
+export const positionItemsRelations = relations(positionItems, ({ one }) => ({
+  department: one(departments, {
+    fields: [positionItems.departmentId],
+    references: [departments.id],
+  }),
+
+  position: one(positions, {
+    fields: [positionItems.positionId],
+    references: [positions.id],
+  }),
+
+  jobGrade: one(jobGrades, {
+    fields: [positionItems.jobGradeId],
+    references: [jobGrades.id],
+  }),
+}))
+
 //CREATE INDEX idx_job_assignments_employment_id ON job_assignments(employment_id);

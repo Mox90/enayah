@@ -1,7 +1,7 @@
-import React from 'react'
+import PositionItemPage from '@/modules/hr/positions-items/components/position-item-page'
 
 const JobPositionItems = () => {
-  return <div>JobPositionItems</div>
+  return <PositionItemPage />
 }
 
 export default JobPositionItems

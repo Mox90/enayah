@@ -32,7 +32,25 @@ export const toPositionItemResponse = (dbRecord: any) => ({
   id: dbRecord.id,
   itemNumber: dbRecord.itemNumber,
   departmentId: dbRecord.departmentId,
+  departmentNameEn: dbRecord.departmentNameEn ?? dbRecord.department?.nameEn,
+  departmentNameAr: dbRecord.departmentNameAr ?? dbRecord.department?.nameAr,
+  // department: dbRecord.departmentId
+  //   ? {
+  //       id: dbRecord.department.id,
+  //       nameEn: dbRecord.department.nameEn,
+  //       nameAr: dbRecord.department.nameAr,
+  //     }
+  //   : null,
   positionId: dbRecord.positionId,
+  // position: dbRecord.positionId
+  //   ? {
+  //       id: dbRecord.position.id,
+  //       titleEn: dbRecord.position.titleEn,
+  //       titleAr: dbRecord.position.titleAr,
+  //     }
+  //   : null,
+  positionTitleEn: dbRecord.positionTitleEn ?? dbRecord.position?.titleEn,
+  positionTitleAr: dbRecord.positionTitleAr ?? dbRecord.position?.titleAr,
   jobGrade: dbRecord.jobGrade
     ? {
         id: dbRecord.jobGrade.id,
@@ -40,6 +58,7 @@ export const toPositionItemResponse = (dbRecord: any) => ({
       }
     : null,
   categoryCode: dbRecord.categoryCode ?? undefined,
+  workforceCategory: dbRecord.workforceCategory,
   minSalary: dbRecord.minSalary,
   maxSalary: dbRecord.maxSalary,
   status: dbRecord.status,

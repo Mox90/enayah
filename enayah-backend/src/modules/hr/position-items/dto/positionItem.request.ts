@@ -30,7 +30,18 @@ export const positionItemQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(100).default(10),
   search: z.string().optional(),
-  sortBy: z.enum(['itemNumber', 'createdAt']).default('itemNumber'),
+  sortBy: z
+    .enum([
+      'itemNumber',
+      'departmentNameEn',
+      'departmentNameAr',
+      'positionTitleEn',
+      'positionTitleAr',
+      'categoryCode',
+      'status',
+      'createdAt',
+    ])
+    .default('itemNumber'),
   sortOrder: z.enum(['asc', 'desc']).default('asc'),
 })
 

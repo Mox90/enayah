@@ -1,5 +1,16 @@
-import { and, asc, desc, eq, ilike, inArray, isNull, sql } from 'drizzle-orm'
-import { DB, db, positionItems } from '../../../../db'
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  isNull,
+  ne,
+  or,
+  sql,
+} from 'drizzle-orm'
+import { DB, db, departments, positionItems, positions } from '../../../../db'
 import { AppError } from '../../../../core/errors/AppError'
 import {
   CreatePositionItemDTO,
@@ -89,6 +100,26 @@ export const PositionItemRepository = {
     return positionItems.map(toPositionItemResponse)
   },
 
+  findLookup: async () => {
+    return db
+      .select({
+        id: positionItems.id,
+        itemNumber: positionItems.itemNumber,
+        departmentId: positionItems.departmentId,
+        positionId: positionItems.positionId,
+        status: positionItems.status,
+      })
+      .from(positionItems)
+      .where(
+        and(
+          eq(positionItems.isDeleted, false),
+          isNull(positionItems.deletedAt),
+          eq(positionItems.status, 'vacant'),
+        ),
+      )
+      .orderBy(asc(positionItems.itemNumber))
+  },
+
   findById: async (tx: DB, id: string) => {
     //return db.select().from(positionItems).where(eq(positionItems.id, id))
     //const positionItem = await db.query.positionItems.findFirst({
@@ -110,33 +141,89 @@ export const PositionItemRepository = {
 
     const conditions = [
       eq(positionItems.isDeleted, false),
-      isNull(positionItems.isDeleted),
+      isNull(positionItems.deletedAt),
+      ne(positionItems.status, 'frozen'),
     ]
 
     if (search) {
-      conditions.push(ilike(positionItems.itemNumber, `%${search}%`))
+      conditions.push(
+        or(
+          ilike(positionItems.itemNumber, `%${search}%`),
+          ilike(departments.nameEn, `%${search}%`),
+          ilike(departments.nameAr, `%${search}%`),
+          ilike(positions.titleEn, `%${search}%`),
+          ilike(positions.titleAr, `%${search}%`),
+          ilike(positionItems.status, `%${search}%`),
+          ilike(sql`${positionItems.categoryCode}::text`, `%${search}%`),
+        )!,
+      )
     }
 
     const sortableColumns = {
       itemNumber: positionItems.itemNumber,
+      departmentNameEn: departments.nameEn,
+      departmentNameAr: departments.nameAr,
+      positionTitleEn: positions.titleEn,
+      positionTitleAr: positions.titleAr,
+      categoryCode: positionItems.categoryCode,
+      status: positionItems.status,
       createdAt: positionItems.createdAt,
     }
 
     const sortColumn = sortableColumns[sortBy] ?? positionItems.itemNumber
+
+    // const [totalResult] = await db
+    //   .select({
+    //     count: sql<number>`count(*)`,
+    //   })
+    //   .from(positionItems)
+    //   .where(and(...conditions))
+
+    // const data = await db.query.positionItems.findMany({
+    //   where: and(...conditions),
+    //   orderBy: sortOrder === 'asc' ? asc(sortColumn) : desc(sortColumn),
+    //   limit,
+    //   offset,
+    //   with: {
+    //     department: true,
+    //     position: true,
+    //     jobGrade: true,
+    //   },
+    // })
 
     const [totalResult] = await db
       .select({
         count: sql<number>`count(*)`,
       })
       .from(positionItems)
+      .leftJoin(departments, eq(positionItems.departmentId, departments.id))
+      .leftJoin(positions, eq(positionItems.positionId, positions.id))
       .where(and(...conditions))
 
-    const data = await db.query.positions.findMany({
-      where: and(...conditions),
-      orderBy: sortOrder === 'asc' ? asc(sortColumn) : desc(sortColumn),
-      limit,
-      offset,
-    })
+    const data = await db
+      .select({
+        id: positionItems.id,
+        itemNumber: positionItems.itemNumber,
+        departmentId: positionItems.departmentId,
+        departmentNameEn: departments.nameEn,
+        departmentNameAr: departments.nameAr,
+        positionId: positionItems.positionId,
+        positionTitleEn: positions.titleEn,
+        positionTitleAr: positions.titleAr,
+        categoryCode: positionItems.categoryCode,
+        workforceCategory: positionItems.workforceCategory,
+        status: positionItems.status,
+        minSalary: positionItems.minSalary,
+        maxSalary: positionItems.maxSalary,
+        createdAt: positionItems.createdAt,
+      })
+      .from(positionItems)
+      .leftJoin(departments, eq(positionItems.departmentId, departments.id))
+      .leftJoin(positions, eq(positionItems.positionId, positions.id))
+      .where(and(...conditions))
+      .orderBy(sortOrder === 'asc' ? asc(sortColumn) : desc(sortColumn))
+      .limit(limit)
+      .offset(offset)
 
     return {
       data,
