@@ -79,6 +79,7 @@ export const EmployeeRepository = {
     const [items, totalResult] = await Promise.all([
       tx.query.employees.findMany({
         where: whereClause,
+        orderBy: (e, { asc }) => [asc(e.employeeNumber)],
         with: employeeWithRelations,
         offset,
         limit,

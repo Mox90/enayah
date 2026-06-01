@@ -14,8 +14,16 @@ const router = Router()
 router.use(requireAuth)
 router.use(attachPermissions)
 
-router.get('/org-view', PositionItemController.findOrganizationHierarchyView)
-router.get('/manpower-view', PositionItemController.findManpowerView)
+router.get(
+  '/org-view',
+  requirePermission('position.items.view'),
+  PositionItemController.findOrganizationHierarchyView,
+)
+router.get(
+  '/manpower-view',
+  requirePermission('position.items.view'),
+  PositionItemController.findManpowerView,
+)
 router.get('/lookup', PositionItemController.findLookup)
 router.get('/', PositionItemController.findPaginated)
 router.get('/:id', PositionItemController.findById)

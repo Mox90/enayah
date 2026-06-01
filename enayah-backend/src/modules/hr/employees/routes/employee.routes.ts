@@ -25,7 +25,11 @@ audit('CREATE_EMPLOYEE', {
 
 */
 
-router.get('/', EmployeeController.getEmployees)
+router.get(
+  '/',
+  requirePermission('employee.view'),
+  EmployeeController.getEmployees,
+)
 
 router.post(
   '/',
@@ -39,7 +43,11 @@ router.post(
   EmployeeController.create,
 )
 
-router.get('/', requirePermission('employee.view'), EmployeeController.findAll)
+router.get(
+  '/find-all',
+  requirePermission('employee.view'),
+  EmployeeController.findAll,
+)
 
 router.get(
   '/:id',
