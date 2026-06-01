@@ -7,6 +7,7 @@ import {
 import { audit } from '../../../../core/middleware/audit.middleware'
 import { EmployeeController } from '../controller/employee.controller'
 import { getParam } from '../../../../core/utils/request.utils'
+import { EmploymentController } from '../../employments/controller/employment.controller'
 
 const router = Router()
 
@@ -23,6 +24,8 @@ audit('CREATE_EMPLOYEE', {
 })
 
 */
+
+router.get('/', EmployeeController.getEmployees)
 
 router.post(
   '/',

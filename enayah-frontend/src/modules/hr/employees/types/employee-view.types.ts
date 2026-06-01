@@ -32,3 +32,10 @@ export interface Employee {
   createdAt: string
   updatedAt: string
 }
+
+export interface EmployeeListResponse {
+  items: Employee[]
+  total: number
+  offset: number
+  limit: number
+}

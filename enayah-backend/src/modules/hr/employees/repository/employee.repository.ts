@@ -1,6 +1,6 @@
 // employee.repository.ts
 import { AppError } from '../../../../core/errors/AppError'
-import { DB, db, employees } from '../../../../db'
+import { DB, db, departments, employees, employments } from '../../../../db'
 import { and, eq, sql } from 'drizzle-orm'
 import { CreateEmployeeDto, UpdateEmployeeDto } from '../dto/employee.request'
 import { toEmployeeDb, toEmployeeUpdateDb } from '../dto/employee.mapper'
@@ -62,6 +62,44 @@ export const EmployeeRepository = {
     return findByIdOrThrow(tx, id)
   },
 
+  findRange: async (
+    tx: DB,
+    params: {
+      offset: number
+      limit: number
+      search?: string
+      sortBy?: string
+      sortOrder?: 'asc' | 'desc'
+    },
+  ) => {
+    const { offset, limit } = params
+
+    const whereClause = isActive
+
+    const [items, totalResult] = await Promise.all([
+      tx.query.employees.findMany({
+        where: whereClause,
+        with: employeeWithRelations,
+        offset,
+        limit,
+      }),
+
+      tx
+        .select({
+          count: sql<number>`count(*)`,
+        })
+        .from(employees)
+        .where(whereClause),
+    ])
+
+    return {
+      items,
+      total: Number(totalResult[0]?.count ?? 0),
+      offset,
+      limit,
+    }
+  },
+
   update: async (
     tx: DB,
     id: string,
@@ -96,4 +134,26 @@ export const EmployeeRepository = {
 
     return existing
   },
+
+  // findHierarchy: async (tx: DB) => {
+  //   return tx.query.departments.findMany({
+  //     where: eq(departments.isDeleted, false),
+
+  //     with: {
+  //       positionItems: {
+  //         with: {
+  //           position: true,
+
+  //           employments: {
+  //             where: eq(employments.status, 'active'),
+
+  //             with: {
+  //               employee: true,
+  //             },
+  //           },
+  //         },
+  //       },
+  //     },
+  //   })
+  // },
 }

@@ -29,6 +29,19 @@ export const EmployeeController = {
     res.status(200).json(toEmployeeResponse(employee))
   }),
 
+  getEmployees: asyncHandler(async (req: Request, res: Response) => {
+    const offset = Number(req.query.offset ?? 0)
+
+    const limit = Number(req.query.limit ?? 10)
+
+    const result = await EmployeeService.getEmployees({
+      offset,
+      limit,
+    })
+
+    return res.json(result)
+  }),
+
   update: asyncHandler(async (req: Request, res: Response) => {
     const { id } = employeeIdSchema.parse(req.params)
     //console.log('ID: ', req.params.id)

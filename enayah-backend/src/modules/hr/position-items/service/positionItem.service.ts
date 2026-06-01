@@ -2,6 +2,9 @@ import { InferInsertModel } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
 import { db, employments } from '../../../../db'
 import {
+  toDepartmentHierarchyResponse,
+  toHierarchyResponse,
+  toOrganizationHierarchyResponse,
   toPositionItemDB,
   toPositionItemResponse,
 } from '../dto/positionItem.mapper'
@@ -86,5 +89,18 @@ export const PositionItemService = {
       const existing = await PositionItemRepository.softDelete(tx, id, userId)
       return existing
     })
+  },
+
+  // employee.service.ts
+
+  findManpowerView: async () => {
+    const items = await PositionItemRepository.findHierarchyData(db)
+    //return toHierarchyResponse(items)
+    return toDepartmentHierarchyResponse(items)
+  },
+
+  findOrganizationHierarchyView: async () => {
+    const items = await PositionItemRepository.findHierarchyData(db)
+    return toOrganizationHierarchyResponse(items)
   },
 }

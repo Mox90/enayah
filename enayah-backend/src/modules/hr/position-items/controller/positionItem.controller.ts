@@ -54,6 +54,18 @@ export const PositionItemController = {
     res.status(200).json(positionItems)
   }),
 
+  findManpowerView: asyncHandler(async (req: Request, res: Response) => {
+    const result = await PositionItemService.findManpowerView()
+    res.status(200).json(result)
+  }),
+
+  findOrganizationHierarchyView: asyncHandler(
+    async (req: Request, res: Response) => {
+      const result = await PositionItemService.findOrganizationHierarchyView()
+      res.status(200).json(result)
+    },
+  ),
+
   update: asyncHandler(async (req: Request, res: Response) => {
     const { id } = positionItemIdSchema.parse(req.params)
     const body = updatePositionItemSchema.parse(req.body)
