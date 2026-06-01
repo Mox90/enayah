@@ -7,6 +7,7 @@ import {
 import { audit } from '../../../../core/middleware/audit.middleware'
 import { EmployeeController } from '../controller/employee.controller'
 import { getParam } from '../../../../core/utils/request.utils'
+import { EmploymentController } from '../../employments/controller/employment.controller'
 
 const router = Router()
 
@@ -24,6 +25,12 @@ audit('CREATE_EMPLOYEE', {
 
 */
 
+router.get(
+  '/',
+  requirePermission('employee.view'),
+  EmployeeController.getEmployees,
+)
+
 router.post(
   '/',
   requirePermission('employee.create'),
@@ -36,7 +43,11 @@ router.post(
   EmployeeController.create,
 )
 
-router.get('/', requirePermission('employee.view'), EmployeeController.findAll)
+router.get(
+  '/find-all',
+  requirePermission('employee.view'),
+  EmployeeController.findAll,
+)
 
 router.get(
   '/:id',

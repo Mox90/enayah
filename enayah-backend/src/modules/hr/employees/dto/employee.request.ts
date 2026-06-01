@@ -28,6 +28,15 @@ export const employeeIdSchema = z.object({
   id: z.uuid().describe('The unique identifier of the employee'),
 })
 
+export interface EmployeeListQueryDto {
+  offset: number
+  limit: number
+
+  search?: string
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+}
+
 export type CreateEmployeeDto = z.infer<typeof createEmployeeSchema>
 export type UpdateEmployeeDto = z.infer<typeof updateEmployeeSchema>
 export type EmployeeIdParam = z.infer<typeof employeeIdSchema>

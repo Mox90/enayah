@@ -10,7 +10,14 @@ import {
   or,
   sql,
 } from 'drizzle-orm'
-import { DB, db, departments, positionItems, positions } from '../../../../db'
+import {
+  DB,
+  db,
+  departments,
+  employments,
+  positionItems,
+  positions,
+} from '../../../../db'
 import { AppError } from '../../../../core/errors/AppError'
 import {
   CreatePositionItemDTO,
@@ -23,6 +30,7 @@ import {
   toPositionItemUpdateDB,
 } from '../dto/positionItem.mapper'
 import { Tx } from '../../../../core/types/db.types'
+import { PositionItemHierarchy } from '../dto/positionItem.response'
 
 const isActive = eq(positionItems.isDeleted, false)
 
@@ -338,5 +346,45 @@ export const PositionItemRepository = {
       .set({ status, updatedAt: new Date() }) // Update the status and the updatedAt field
       .where(eq(positionItems.id, id))
       .returning()
+  },
+
+  // findHierarchyData: async (tx: DB) => {
+  //   return tx.query.positionItems.findMany({
+  //     where: and(
+  //       eq(positionItems.isDeleted, false),
+  //       isNull(positionItems.deletedAt),
+  //       ne(positionItems.status, 'frozen'),
+  //     ),
+  //     with: {
+  //       department: true,
+  //       position: true,
+  //       employments: {
+  //         where: eq(employments.status, 'active'),
+  //         with: {
+  //           employee: true,
+  //         },
+  //       },
+  //     },
+  //     orderBy: [asc(positionItems.departmentId), asc(positionItems.itemNumber)],
+  //   })
+  // },
+  findHierarchyData: async (tx: DB): Promise<PositionItemHierarchy[]> => {
+    return tx.query.positionItems.findMany({
+      where: and(
+        eq(positionItems.isDeleted, false),
+        isNull(positionItems.deletedAt),
+        ne(positionItems.status, 'frozen'),
+      ),
+      with: {
+        department: true,
+        position: true,
+        employments: {
+          where: eq(employments.status, 'active'),
+          with: {
+            employee: true,
+          },
+        },
+      },
+    }) as Promise<PositionItemHierarchy[]>
   },
 }

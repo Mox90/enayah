@@ -5,7 +5,11 @@ import {
   toEmployeeResponse,
   toEmployeeUpdateDb,
 } from '../dto/employee.mapper'
-import { CreateEmployeeDto, UpdateEmployeeDto } from '../dto/employee.request'
+import {
+  CreateEmployeeDto,
+  EmployeeListQueryDto,
+  UpdateEmployeeDto,
+} from '../dto/employee.request'
 import { EmployeeRepository } from '../repository/employee.repository'
 
 export const EmployeeService = {
@@ -22,6 +26,10 @@ export const EmployeeService = {
 
   findById: async (id: string) => {
     return db.transaction((tx) => EmployeeRepository.findById(tx, id))
+  },
+
+  getEmployees: async (params: EmployeeListQueryDto) => {
+    return EmployeeRepository.findRange(db, params)
   },
 
   update: async (id: string, data: UpdateEmployeeDto) => {

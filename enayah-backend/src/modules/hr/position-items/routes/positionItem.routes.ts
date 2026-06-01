@@ -7,12 +7,23 @@ import {
 } from '../../../../core/middleware/permission.middleware'
 import { requireAuth } from '../../../../core/middleware/auth.middleware'
 import { getParam } from '../../../../core/utils/request.utils'
+import { PositionController } from '../../positions/controller/position.controller'
 
 const router = Router()
 
 router.use(requireAuth)
 router.use(attachPermissions)
 
+router.get(
+  '/org-view',
+  requirePermission('position.items.view'),
+  PositionItemController.findOrganizationHierarchyView,
+)
+router.get(
+  '/manpower-view',
+  requirePermission('position.items.view'),
+  PositionItemController.findManpowerView,
+)
 router.get('/lookup', PositionItemController.findLookup)
 router.get('/', PositionItemController.findPaginated)
 router.get('/:id', PositionItemController.findById)

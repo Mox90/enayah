@@ -17,3 +17,24 @@ export interface EmployeeResponse {
 
   version: number
 }
+
+export interface EmployeeHierarchyDepartmentDto {
+  id: string
+  nameEn: string
+  nameAr: string
+  items: EmployeeHierarchyItemDto[]
+}
+
+export interface EmployeeHierarchyItemDto {
+  id: string
+  itemNumber: string
+  positionTitleEn: string
+  positionTitleAr: string
+  status: string
+  employee?: {
+    id: string
+    employeeNumber: string
+    fullNameEn: string
+    fullNameAr: string
+  }
+}

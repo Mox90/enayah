@@ -10,6 +10,7 @@ import {
 import { baseColumns } from './base'
 import { relations } from 'drizzle-orm'
 import { userRoles } from './userRoles'
+import { positionItems } from './hr'
 
 export const departments = pgTable(
   'departments',
@@ -78,4 +79,6 @@ export const departmentsRelations = relations(departments, ({ one, many }) => ({
   }),
 
   userRoles: many(userRoles),
+
+  positionItems: many(positionItems),
 }))

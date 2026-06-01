@@ -202,20 +202,37 @@ export const positionItems = pgTable('position_items', {
   ...baseColumns,
 })
 
-export const positionItemsRelations = relations(positionItems, ({ one }) => ({
-  department: one(departments, {
-    fields: [positionItems.departmentId],
-    references: [departments.id],
+export const positionItemsRelations = relations(
+  positionItems,
+  ({ one, many }) => ({
+    department: one(departments, {
+      fields: [positionItems.departmentId],
+      references: [departments.id],
+    }),
+
+    position: one(positions, {
+      fields: [positionItems.positionId],
+      references: [positions.id],
+    }),
+
+    jobGrade: one(jobGrades, {
+      fields: [positionItems.jobGradeId],
+      references: [jobGrades.id],
+    }),
+
+    employments: many(employments),
+  }),
+)
+
+export const employmentsRelations = relations(employments, ({ one }) => ({
+  employee: one(employees, {
+    fields: [employments.employeeId],
+    references: [employees.id],
   }),
 
-  position: one(positions, {
-    fields: [positionItems.positionId],
-    references: [positions.id],
-  }),
-
-  jobGrade: one(jobGrades, {
-    fields: [positionItems.jobGradeId],
-    references: [jobGrades.id],
+  positionItem: one(positionItems, {
+    fields: [employments.positionItemId],
+    references: [positionItems.id],
   }),
 }))
 
