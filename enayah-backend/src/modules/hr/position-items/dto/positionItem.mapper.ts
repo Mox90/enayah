@@ -234,6 +234,22 @@ export function toOrganizationHierarchyResponse(
     }
   }
 
+  // SORT EVERYTHING
+  const sortDepartmentTree = (nodes: DepartmentNode[]) => {
+    // Sort departments alphabetically
+    nodes.sort((a, b) => a.nameEn.localeCompare(b.nameEn))
+
+    for (const node of nodes) {
+      // Sort position items
+      node.items.sort((a, b) => a.itemNumber.localeCompare(b.itemNumber))
+
+      // Sort child departments recursively
+      sortDepartmentTree(node.children)
+    }
+  }
+
+  sortDepartmentTree(roots)
+
   const stripInternalFields = (
     node: DepartmentNode,
   ): OrganizationHierarchyResponse => ({

@@ -42,7 +42,7 @@ export const DepartmentController = {
   }),
 
   findTree: asyncHandler(async (req: Request, res: Response) => {
-    const tree = await DepartmentService.findTree()
+    const tree = await DepartmentService.findDepartmentTree()
     res.status(200).json(tree)
     //res
     //  .status(200)

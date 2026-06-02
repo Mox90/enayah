@@ -1,5 +1,5 @@
-import { and, asc, desc, eq, ilike, isNull, or, sql } from 'drizzle-orm'
-import { db, departments } from '../../../../db'
+import { and, asc, desc, eq, ilike, isNull, or, sql, ne } from 'drizzle-orm'
+import { DB, db, departments, employments, positionItems } from '../../../../db'
 import { DepartmentQueryDTO } from '../dto/department.request'
 
 export const DepartmentRepository = {
@@ -130,5 +130,33 @@ export const DepartmentRepository = {
       .set({ deletedAt: new Date(), isDeleted: true, deletedBy: userId })
       .where(eq(departments.id, id))
       .returning()
+  },
+
+  findDepartmentTree: async (tx: DB) => {
+    return tx.query.departments.findMany({
+      where: and(
+        eq(departments.isDeleted, false),
+        isNull(departments.deletedAt),
+      ),
+
+      with: {
+        positionItems: {
+          where: and(
+            eq(positionItems.isDeleted, false),
+            isNull(positionItems.deletedAt),
+            ne(positionItems.status, 'frozen'),
+          ),
+          with: {
+            position: true,
+            employments: {
+              where: eq(employments.status, 'active'),
+              with: {
+                employee: true,
+              },
+            },
+          },
+        },
+      },
+    })
   },
 }

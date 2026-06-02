@@ -14,7 +14,11 @@ const router = Router()
 router.use(requireAuth) // Apply authentication middleware to all routes in this router
 router.use(attachPermissions)
 
-router.get('/tree', DepartmentController.findTree) // Static route must always come before dynamic routes
+router.get(
+  '/tree',
+  requirePermission('department.view'),
+  DepartmentController.findTree,
+) // Static route must always come before dynamic routes
 router.get('/lookup', DepartmentController.findLookup)
 //router.post('/', requireRole('HR_ADMIN'), DepartmentController.create)
 router.post(
