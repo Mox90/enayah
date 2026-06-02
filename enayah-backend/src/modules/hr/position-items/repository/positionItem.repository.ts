@@ -387,4 +387,24 @@ export const PositionItemRepository = {
       },
     }) as Promise<PositionItemHierarchy[]>
   },
+
+  findOrganizationHierarchy: async (tx: DB) => {
+    return tx.query.departments.findMany({
+      where: eq(departments.isDeleted, false),
+
+      with: {
+        positionItems: {
+          with: {
+            position: true,
+            employments: {
+              where: eq(employments.status, 'active'),
+              with: {
+                employee: true,
+              },
+            },
+          },
+        },
+      },
+    })
+  },
 }

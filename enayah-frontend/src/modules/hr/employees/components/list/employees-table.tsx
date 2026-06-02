@@ -16,7 +16,7 @@ export function EmployeesTable({ employees, isLoading }: Props) {
     //<div>Loading...</div>
   }
 
-  console.log(employees)
+  //console.log(employees)
 
   return (
     <div className='rounded-lg border'>

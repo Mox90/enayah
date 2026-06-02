@@ -9,10 +9,12 @@ import {
   toDepartmentDB,
   toDepartmentLookupResponse,
   toDepartmentResponse,
+  toDepartmentTreeResponse,
   toDepartmentUpdateDB,
 } from '../dto/department.mapper'
 import { validateDepartmentHierarchy } from '../validators/departmentHierarch.validator'
 import { buildDepartmentTree } from './helpers/buildDepartmentTree'
+import { db } from '../../../../db'
 
 export const DepartmentService = {
   create: async (data: CreateDepartmentDTO) => {
@@ -61,6 +63,13 @@ export const DepartmentService = {
   findTree: async () => {
     const rows = await DepartmentRepository.findAllRaw()
     return buildDepartmentTree(rows)
+  },
+
+  findDepartmentTree: async () => {
+    return db.transaction(async (tx) => {
+      const departments = await DepartmentRepository.findDepartmentTree(tx)
+      return toDepartmentTreeResponse(departments)
+    })
   },
 
   update: async (id: string, data: UpdateDepartmentDTO) => {

@@ -15,6 +15,8 @@ import { useEmployeesByRange } from '../hooks/use-employees'
 export function EmployeeWorkspace() {
   const [view, setView] = useState<EmployeeView>('list')
   const [selectedEmployees, setSelectedEmployees] = useState<string[]>([])
+  const [search, setSearch] = useState('')
+
   const [range, setRange] = useState({
     start: 1,
     end: 10,
@@ -27,7 +29,7 @@ export function EmployeeWorkspace() {
     limit,
   })
 
-  console.log(data)
+  //console.log(data)
 
   return (
     <div className='space-y-4'>
