@@ -20,6 +20,8 @@ export function DepartmentNode({ node }: Props) {
   return (
     <div className={isRTL ? 'mr-4' : 'ml-4'}>
       <button
+        type='button'
+        aria-expanded={open}
         onClick={() => setOpen(!open)}
         className='flex items-center gap-2 font-semibold'
       >

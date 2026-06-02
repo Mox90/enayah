@@ -1,5 +1,5 @@
-import { and, asc, desc, eq, ilike, isNull, or, sql } from 'drizzle-orm'
-import { DB, db, departments, employments } from '../../../../db'
+import { and, asc, desc, eq, ilike, isNull, or, sql, ne } from 'drizzle-orm'
+import { DB, db, departments, employments, positionItems } from '../../../../db'
 import { DepartmentQueryDTO } from '../dto/department.request'
 
 export const DepartmentRepository = {
@@ -141,6 +141,11 @@ export const DepartmentRepository = {
 
       with: {
         positionItems: {
+          where: and(
+            eq(positionItems.isDeleted, false),
+            isNull(positionItems.deletedAt),
+            ne(positionItems.status, 'frozen'),
+          ),
           with: {
             position: true,
             employments: {
