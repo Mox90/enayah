@@ -42,11 +42,13 @@ export const employees = pgTable('employees', {
   ...baseColumns,
 })
 
-export const employeesRelations = relations(employees, ({ one }) => ({
+export const employeesRelations = relations(employees, ({ one, many }) => ({
   nationality: one(countries, {
     fields: [employees.countryId],
     references: [countries.id],
   }),
+
+  employments: many(employments),
 }))
 
 export const employments = pgTable(

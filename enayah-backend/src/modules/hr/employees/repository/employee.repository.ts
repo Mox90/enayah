@@ -134,10 +134,12 @@ export const EmployeeRepository = {
     return existing
   },
 
-  findDirectory: async (tx: DB) => {
-    return tx.query.employees.findMany({
-      where: isActive,
-      with: {},
+  findProfileBase: async (tx: DB, id: string) => {
+    return tx.query.employees.findFirst({
+      where: and(eq(employees.id, id), eq(employees.isDeleted, false)),
+      with: {
+        nationality: true,
+      },
     })
   },
 

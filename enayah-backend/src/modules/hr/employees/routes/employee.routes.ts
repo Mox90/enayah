@@ -26,6 +26,12 @@ audit('CREATE_EMPLOYEE', {
 */
 
 router.get(
+  '/:id/profile',
+  requirePermission('employee.view'),
+  EmployeeController.getProfile,
+)
+
+router.get(
   '/',
   requirePermission('employee.view'),
   EmployeeController.getEmployees,
