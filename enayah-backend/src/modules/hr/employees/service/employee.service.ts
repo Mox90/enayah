@@ -66,6 +66,7 @@ export const EmployeeService = {
           TrainingRepository.findByEmployeeId(tx, employeeId),
 
           CpdRepository.findByEmployeeId(tx, employeeId),
+          //TODO: requires documents as well especially that EmployeeProfileResponse requires it, but we can add that later when we have the documents module ready
         ])
 
       return {

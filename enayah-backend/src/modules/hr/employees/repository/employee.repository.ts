@@ -135,12 +135,13 @@ export const EmployeeRepository = {
   },
 
   findProfileBase: async (tx: DB, id: string) => {
-    return tx.query.employees.findFirst({
-      where: and(eq(employees.id, id), eq(employees.isDeleted, false)),
+    const result = tx.query.employees.findFirst({
+      where: and(eq(employees.id, id), isActive),
       with: {
         nationality: true,
       },
     })
+    return assertExists(result, 'Employee not found', 404)
   },
 
   // findHierarchy: async (tx: DB) => {

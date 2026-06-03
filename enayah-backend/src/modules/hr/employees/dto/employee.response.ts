@@ -70,6 +70,7 @@ export interface EmployeeProfileResponse {
   training: EmployeeTrainingInfo
   cpd: EmployeeCPDInfo
   documents: EmployeeDocumentInfo
+  //TODO: add docuements, performance evaluations, etc. as needed
 }
 
 /*

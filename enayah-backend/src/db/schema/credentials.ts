@@ -322,19 +322,14 @@ export const employeeDocuments = pgTable('employee_documents', {
   title: varchar('title', {
     length: 255,
   }),
-
   documentNumber: varchar('document_number', {
     length: 100,
   }),
-
   issueDate: date('issue_date'),
-
   expiryDate: date('expiry_date'),
-
   remarks: varchar('remarks', {
     length: 1000,
   }),
-
   ...verificationColumns,
   ...baseColumns,
 })
@@ -343,32 +338,25 @@ export const employeePrimarySourceVerifications = pgTable(
   'employee_primary_source_verifications',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-
     employeeId: uuid('employee_id')
       .notNull()
       .references(() => employees.id, {
         onDelete: 'cascade',
       }),
-
     vendor: varchar('vendor', {
       length: 255,
     }).notNull(),
-
     verificationReferenceNumber: varchar('verification_reference_number', {
       length: 100,
     }),
-
     verificationDate: date('verification_date').notNull(),
-
     status: varchar('status', {
       length: 50,
     })
       .$type<'verified' | 'failed' | 'pending'>()
       .default('pending')
       .notNull(),
-
     documentFileId: uuid('document_file_id').references(() => files.id),
-
     ...verificationColumns,
     ...baseColumns,
   },
@@ -385,29 +373,22 @@ export const employeeMedicalExaminations = pgTable(
   'employee_medical_examinations',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-
     employeeId: uuid('employee_id')
       .notNull()
       .references(() => employees.id, {
         onDelete: 'cascade',
       }),
-
     examinationType: varchar('examination_type', {
       length: 100,
     }).notNull(),
-
     examinationDate: date('examination_date').notNull(),
-
     result: varchar('result', {
       length: 100,
     }),
-
     facilityName: varchar('facility_name', {
       length: 255,
     }),
-
     documentFileId: uuid('document_file_id').references(() => files.id),
-
     ...verificationColumns,
     ...baseColumns,
   },
@@ -415,25 +396,18 @@ export const employeeMedicalExaminations = pgTable(
 
 export const employeeVaccinations = pgTable('employee_vaccinations', {
   id: uuid('id').defaultRandom().primaryKey(),
-
   employeeId: uuid('employee_id')
     .notNull()
     .references(() => employees.id, {
       onDelete: 'cascade',
     }),
-
   vaccineName: varchar('vaccine_name', {
     length: 255,
   }).notNull(),
-
   doseNumber: integer('dose_number'),
-
   vaccinationDate: date('vaccination_date'),
-
   expiryDate: date('expiry_date'),
-
   documentFileId: uuid('document_file_id').references(() => files.id),
-
   ...verificationColumns,
   ...baseColumns,
 })
@@ -442,23 +416,17 @@ export const employeeDisciplinaryActions = pgTable(
   'employee_disciplinary_actions',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-
     employeeId: uuid('employee_id')
       .notNull()
-      .references(() => employees.id),
-
+      .references(() => employees.id, { onDelete: 'cascade' }),
     actionType: varchar('action_type', {
       length: 100,
     }).notNull(),
-
     actionDate: date('action_date').notNull(),
-
     description: varchar('description', {
       length: 1000,
     }),
-
     documentFileId: uuid('document_file_id').references(() => files.id),
-
     ...baseColumns,
   },
 )
