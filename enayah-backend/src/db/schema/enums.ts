@@ -60,3 +60,37 @@ export const appraisalStatusEnum = pgEnum('appraisal_status', [
   'calibrated',
   'closed',
 ])
+
+export const degreeTypeEnum = pgEnum('degree_type', [
+  'diploma',
+  'associate',
+  'bachelor',
+  'master',
+  'doctorate',
+  'other',
+])
+
+export const licenseStatusEnum = pgEnum('license_status', [
+  'active',
+  'expired',
+  'suspended',
+  'revoked',
+])
+
+export const lifeSupportTypeEnum = pgEnum('life_support_type', [
+  'bls', // Basic Life Support
+  'acls', // Advanced Cardiovascular Life Support
+  'pals', // Pediatric Advanced Life Support
+  'atls', // Advanced Trauma Life Support
+  'nrp', // Neonatal Resuscitation Program
+  'itls', // International Trauma Life Support
+  'blso', // Basic Life Support in Obstetrics
+  'atcn', // Advanced Trauma Care for Nurses
+  'also', // Advanced Life Support in Obstetrics
+  'tncc', // Trauma Nursing Core Course
+  'enpc', // Emergency Nursing Pediatric Course
+  'asls', // Advanced Stroke Life Support
+  'esls', // Essential Stroke Life Support
+  'pfccs', // Pediatric Fundamental Critical Care Support
+  'other',
+])

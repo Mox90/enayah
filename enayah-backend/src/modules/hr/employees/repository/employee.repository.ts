@@ -73,9 +73,7 @@ export const EmployeeRepository = {
     },
   ) => {
     const { offset, limit } = params
-
     const whereClause = isActive
-
     const [items, totalResult] = await Promise.all([
       tx.query.employees.findMany({
         where: whereClause,
@@ -134,6 +132,13 @@ export const EmployeeRepository = {
       .where(eq(employees.id, id))
 
     return existing
+  },
+
+  findDirectory: async (tx: DB) => {
+    return tx.query.employees.findMany({
+      where: isActive,
+      with: {},
+    })
   },
 
   // findHierarchy: async (tx: DB) => {

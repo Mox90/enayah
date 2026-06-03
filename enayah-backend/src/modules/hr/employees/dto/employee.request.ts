@@ -20,6 +20,18 @@ export const createEmployeeSchema = z.object({
   countryId: z.uuid().optional(),
 })
 
+export const employeeDirectorySchema = z.object({
+  offset: z.coerce.number().default(0),
+  limit: z.coerce.number().default(50),
+  search: z.string().optional(),
+  departmentIds: z.array(z.uuid()).optional(),
+  positionIds: z.array(z.uuid()).optional(),
+  categoryCodes: z.array(z.coerce.number()).optional(),
+  statuses: z.array(z.string()).optional(),
+  nationalities: z.array(z.string()).optional(),
+  genders: z.array(z.string()).optional(),
+})
+
 export const updateEmployeeSchema = createEmployeeSchema.partial().extend({
   version: z.number().int().positive(),
 })
@@ -37,6 +49,7 @@ export interface EmployeeListQueryDto {
   sortOrder?: 'asc' | 'desc'
 }
 
+export type employeeDirectoryDto = z.infer<typeof employeeDirectorySchema>
 export type CreateEmployeeDto = z.infer<typeof createEmployeeSchema>
 export type UpdateEmployeeDto = z.infer<typeof updateEmployeeSchema>
 export type EmployeeIdParam = z.infer<typeof employeeIdSchema>
