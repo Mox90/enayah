@@ -235,5 +235,3 @@ export const employmentsRelations = relations(employments, ({ one }) => ({
     references: [positionItems.id],
   }),
 }))
-
-//CREATE INDEX idx_job_assignments_employment_id ON job_assignments(employment_id);

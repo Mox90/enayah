@@ -38,3 +38,25 @@ export interface EmployeeHierarchyItemDto {
     fullNameAr: string
   }
 }
+
+export interface EmployeeDirectoryRow {
+  employeeId: string
+  employeeNumber: string
+  fullNameEn: string
+  fullNameAr: string
+  pcn: string
+  departmentId: string
+  departmentNameEn: string
+  departmentNameAr: string
+  positionId: string
+  positionTitleEn: string
+  positionTitleAr: string
+  categoryCode: number | null
+  hireDate: string
+  nationality: string
+  gender: string
+  phoneNumber: string | null
+  email: string | null
+  highestQualification: string | null
+  status: string
+}
