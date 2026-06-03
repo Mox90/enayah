@@ -52,7 +52,7 @@ export const employeeBoards = pgTable('employee_boards', {
   issuingBody: varchar('issuing_body', { length: 255 }).notNull(),
   issueDate: date('issue_date'),
   expiryDate: date('expiry_date'),
-  isLifetime: boolean('is_lifetime').default(false),
+  isLifetime: boolean('is_lifetime').default(false).notNull(),
   documentFileId: uuid('document_file_id').references(() => files.id),
   ...verificationColumns,
   ...baseColumns,
@@ -101,7 +101,7 @@ export const employeeLicenses = pgTable('employee_licenses', {
   issueDate: date('issue_date'),
   expiryDate: date('expiry_date').notNull(),
   status: licenseStatusEnum('status').default('active').notNull(),
-  isPrimary: boolean('is_primary').default(false),
+  isPrimary: boolean('is_primary').default(false).notNull(),
   documentFileId: uuid('document_file_id').references(() => files.id),
   ...verificationColumns,
   ...baseColumns,
@@ -166,7 +166,7 @@ export const trainingCourses = pgTable('training_courses', {
   nameEn: varchar('name_en', { length: 255 }).notNull(),
   nameAr: varchar('name_ar', { length: 255 }),
   validityMonths: integer('validity_months'),
-  isMandatory: boolean('is_mandatory').default(false),
+  isMandatory: boolean('is_mandatory').default(false).notNull(),
   ...baseColumns,
 })
 

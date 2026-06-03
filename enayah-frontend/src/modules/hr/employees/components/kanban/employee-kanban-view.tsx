@@ -54,7 +54,10 @@ export function EmployeeKanbanView({ employees, isLoading }: Props) {
               Date of Birth: {employee.dateOfBirth}
             </div>
             <div className='font-medium'>
-              Nationality: {employee.nationality?.nationalityEn}
+              Nationality:
+              {locale === 'en'
+                ? employee.nationality?.nationalityEn
+                : employee.nationality?.nationalityAr}
             </div>
           </div>
         </div>
