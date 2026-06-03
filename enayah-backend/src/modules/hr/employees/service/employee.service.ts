@@ -1,5 +1,9 @@
 import { AppError } from '../../../../core/errors/AppError'
 import { db } from '../../../../db'
+import { CpdRepository } from '../../cpd/repository/cpd.repository'
+import { CredentialRepository } from '../../credentials/repository/credential.repository'
+import { EmploymentRepository } from '../../employments/repository/employment.repository'
+import { TrainingRepository } from '../../training/repository/training.repository'
 import {
   toEmployeeDb,
   toEmployeeResponse,
@@ -40,6 +44,38 @@ export const EmployeeService = {
     return db.transaction(async (tx) => {
       const existing = await EmployeeRepository.softDelete(tx, id, userId)
       return existing
+    })
+  },
+
+  // employee.service.ts
+
+  getProfile: async (employeeId: string) => {
+    return db.transaction(async (tx) => {
+      //const [personal, employment, credentials, training, cpd] =
+      const [personal, employment, credentials, training, cpd] =
+        await Promise.all([
+          EmployeeRepository.findProfileBase(tx, employeeId),
+
+          EmploymentRepository.findCurrentEmploymentByEmployeeId(
+            tx,
+            employeeId,
+          ),
+
+          CredentialRepository.findByEmployeeId(tx, employeeId),
+
+          TrainingRepository.findByEmployeeId(tx, employeeId),
+
+          CpdRepository.findByEmployeeId(tx, employeeId),
+          //TODO: requires documents as well especially that EmployeeProfileResponse requires it, but we can add that later when we have the documents module ready
+        ])
+
+      return {
+        personal,
+        employment,
+        credentials,
+        training,
+        cpd,
+      }
     })
   },
 }

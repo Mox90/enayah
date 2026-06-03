@@ -63,4 +63,12 @@ export const EmployeeController = {
     res.locals.resourceId = id
     res.status(204).send()
   }),
+
+  getProfile: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = employeeIdSchema.parse(req.params)
+
+    const profile = await EmployeeService.getProfile(id)
+
+    res.status(200).json(profile)
+  }),
 }

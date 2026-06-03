@@ -94,3 +94,43 @@ export const lifeSupportTypeEnum = pgEnum('life_support_type', [
   'pfccs', // Pediatric Fundamental Critical Care Support
   'other',
 ])
+
+export const employeeDocumentTypeEnum = pgEnum(
+  'employee_document_type',
+
+  [
+    // Recruitment
+    'cv',
+    'job_application',
+    'interview_evaluation',
+
+    // Employment
+    'job_offer_acceptance',
+    'letter_of_appointment',
+    'employment_contract',
+    'job_description',
+    'non_disclosure_agreement',
+
+    // Verification
+    'primary_source_verification',
+    'background_check',
+    'reference_check',
+
+    // Occupational Health
+    'pre_employment_medical',
+    'fit_to_work_certificate',
+    'vaccination_record',
+
+    // Leave
+    'sick_leave_certificate',
+    'maternity_leave_document',
+
+    // Identity
+    'national_id',
+    'iqama',
+    'passport',
+
+    // Other
+    'other',
+  ],
+)

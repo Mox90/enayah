@@ -210,4 +210,22 @@ export const EmploymentRepository = {
 
     return existing
   },
+
+  findCurrentEmploymentByEmployeeId: async (tx: DB, employeeId: string) => {
+    return tx.query.employments.findFirst({
+      where: and(
+        eq(employments.employeeId, employeeId),
+        eq(employments.status, 'active'),
+        isActive,
+      ),
+      with: {
+        positionItem: {
+          with: {
+            position: true,
+            department: true,
+          },
+        },
+      },
+    })
+  },
 }

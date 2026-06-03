@@ -9,9 +9,48 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core'
 import { baseColumns, verificationColumns } from './base'
-import { degreeTypeEnum, licenseStatusEnum, lifeSupportTypeEnum } from './enums'
+import {
+  degreeTypeEnum,
+  employeeDocumentTypeEnum,
+  licenseStatusEnum,
+  lifeSupportTypeEnum,
+} from './enums'
 import { employees } from './hr'
 import { countries } from './countries'
+import { relations } from 'drizzle-orm'
+
+/** Sample  */
+
+/**
+{
+  "personal": {},
+  "employment": {},
+  "credentials": {
+    "degrees": [],
+    "boards": [],
+    "fellowships": [],
+    "memberships": [],
+    "licenses": [],
+    "lifeSupport": [],
+    "malpracticeInsurance": []
+  },
+
+  "verification": {
+    "primarySourceVerification": []
+  },
+
+  "occupationalHealth": {
+    "medicalExaminations": [],
+    "vaccinations": []
+  },
+
+  "training": [],
+  "cpd": [],
+  "documents": [],
+  "leaveDocuments": []
+}
+ * 
+ */
 
 export const files = pgTable('files', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -211,3 +250,183 @@ export const employeeCpdRecords = pgTable('employee_cpd_records', {
   documentFileId: uuid('document_file_id').references(() => files.id),
   ...baseColumns,
 })
+
+export const employeeTrainingRecordsRelations = relations(
+  employeeTrainingRecords,
+  ({ one }) => ({
+    employee: one(employees, {
+      fields: [employeeTrainingRecords.employeeId],
+      references: [employees.id],
+    }),
+
+    course: one(trainingCourses, {
+      fields: [employeeTrainingRecords.courseId],
+      references: [trainingCourses.id],
+    }),
+  }),
+)
+
+export const trainingCoursesRelations = relations(
+  trainingCourses,
+  ({ one, many }) => ({
+    category: one(trainingCategories, {
+      fields: [trainingCourses.categoryId],
+      references: [trainingCategories.id],
+    }),
+
+    records: many(employeeTrainingRecords),
+  }),
+)
+
+export const trainingCategoriesRelations = relations(
+  trainingCategories,
+  ({ many }) => ({
+    courses: many(trainingCourses),
+  }),
+)
+
+export const employeeCpdRecordsRelations = relations(
+  employeeCpdRecords,
+  ({ one }) => ({
+    employee: one(employees, {
+      fields: [employeeCpdRecords.employeeId],
+      references: [employees.id],
+    }),
+
+    category: one(cpdCategories, {
+      fields: [employeeCpdRecords.categoryId],
+      references: [cpdCategories.id],
+    }),
+  }),
+)
+
+export const cpdCategoriesRelations = relations(cpdCategories, ({ many }) => ({
+  records: many(employeeCpdRecords),
+}))
+
+export const employeeDocuments = pgTable('employee_documents', {
+  id: uuid('id').defaultRandom().primaryKey(),
+
+  employeeId: uuid('employee_id')
+    .notNull()
+    .references(() => employees.id, {
+      onDelete: 'cascade',
+    }),
+
+  documentType: employeeDocumentTypeEnum('document_type').notNull(),
+
+  fileId: uuid('file_id')
+    .notNull()
+    .references(() => files.id),
+
+  title: varchar('title', {
+    length: 255,
+  }),
+  documentNumber: varchar('document_number', {
+    length: 100,
+  }),
+  issueDate: date('issue_date'),
+  expiryDate: date('expiry_date'),
+  remarks: varchar('remarks', {
+    length: 1000,
+  }),
+  ...verificationColumns,
+  ...baseColumns,
+})
+
+export const employeePrimarySourceVerifications = pgTable(
+  'employee_primary_source_verifications',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    employeeId: uuid('employee_id')
+      .notNull()
+      .references(() => employees.id, {
+        onDelete: 'cascade',
+      }),
+    vendor: varchar('vendor', {
+      length: 255,
+    }).notNull(),
+    verificationReferenceNumber: varchar('verification_reference_number', {
+      length: 100,
+    }),
+    verificationDate: date('verification_date').notNull(),
+    status: varchar('status', {
+      length: 50,
+    })
+      .$type<'verified' | 'failed' | 'pending'>()
+      .default('pending')
+      .notNull(),
+    documentFileId: uuid('document_file_id').references(() => files.id),
+    ...verificationColumns,
+    ...baseColumns,
+  },
+)
+
+/*
+Source:
+Pre-employment Medical
+Annual Medical
+Fit To Work
+Return To Work
+*/
+export const employeeMedicalExaminations = pgTable(
+  'employee_medical_examinations',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    employeeId: uuid('employee_id')
+      .notNull()
+      .references(() => employees.id, {
+        onDelete: 'cascade',
+      }),
+    examinationType: varchar('examination_type', {
+      length: 100,
+    }).notNull(),
+    examinationDate: date('examination_date').notNull(),
+    result: varchar('result', {
+      length: 100,
+    }),
+    facilityName: varchar('facility_name', {
+      length: 255,
+    }),
+    documentFileId: uuid('document_file_id').references(() => files.id),
+    ...verificationColumns,
+    ...baseColumns,
+  },
+)
+
+export const employeeVaccinations = pgTable('employee_vaccinations', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  employeeId: uuid('employee_id')
+    .notNull()
+    .references(() => employees.id, {
+      onDelete: 'cascade',
+    }),
+  vaccineName: varchar('vaccine_name', {
+    length: 255,
+  }).notNull(),
+  doseNumber: integer('dose_number'),
+  vaccinationDate: date('vaccination_date'),
+  expiryDate: date('expiry_date'),
+  documentFileId: uuid('document_file_id').references(() => files.id),
+  ...verificationColumns,
+  ...baseColumns,
+})
+
+export const employeeDisciplinaryActions = pgTable(
+  'employee_disciplinary_actions',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    employeeId: uuid('employee_id')
+      .notNull()
+      .references(() => employees.id, { onDelete: 'cascade' }),
+    actionType: varchar('action_type', {
+      length: 100,
+    }).notNull(),
+    actionDate: date('action_date').notNull(),
+    description: varchar('description', {
+      length: 1000,
+    }),
+    documentFileId: uuid('document_file_id').references(() => files.id),
+    ...baseColumns,
+  },
+)
