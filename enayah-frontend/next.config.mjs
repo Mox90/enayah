@@ -7,11 +7,10 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts')
 const nextConfig = {
   reactCompiler: true,
   allowedDevOrigins: [
-    '192.168.7.6',
     'localhost',
     '127.0.0.1',
-    '192.168.*.*',
     '*.local',
+    process.env.DEV_HOST,
   ],
   devIndicators: false,
   // async rewrites() {
