@@ -1,4 +1,19 @@
 services:
+  nginx:
+    image: nginx:alpine
+    container_name: enayah-nginx
+    restart: always
+
+    ports:
+      - '80:80'
+
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+
+    depends_on:
+      - frontend
+      - backend
+
   db:
     image: postgres:15
     container_name: enayah-postgres
@@ -43,13 +58,13 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    ports:
-      - '4000:4000'
+    expose:
+      - '4000'
     env_file:
       - ./enayah-backend/.env
     volumes:
-      - ./enayah-backend:/app
-      - /app/node_modules
+      - ./enayah-backend:/app:cached
+      - backend_node_modules:/app/node_modules
     command: npm run dev
 
   frontend:
@@ -58,15 +73,17 @@ services:
     restart: always
     depends_on:
       - backend
-    ports:
-      - '3000:3000'
+    expose:
+      - '3000'
     env_file:
       - ./enayah-frontend/.env
     volumes:
-      - ./enayah-frontend:/app
-      - /app/node_modules
+      - ./enayah-frontend:/app:cached
+      - frontend_node_modules:/app/node_modules
     command: npm run dev
 
 volumes:
   postgres_data:
   redis_data:
+  backend_node_modules:
+  frontend_node_modules:
