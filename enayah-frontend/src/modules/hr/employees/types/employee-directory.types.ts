@@ -31,3 +31,17 @@ export interface EmployeeDirectoryResponse {
   offset: number
   limit: number
 }
+
+export interface EmployeeDirectoryParams {
+  offset?: number
+  limit?: number
+  search?: string
+  departmentIds?: string[]
+  positionIds?: string[]
+  categoryCodes?: number[]
+  genders?: string[]
+  nationalities?: string[]
+  employmentStatuses?: string[]
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+}

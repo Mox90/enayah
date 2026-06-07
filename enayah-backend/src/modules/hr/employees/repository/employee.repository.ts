@@ -178,6 +178,7 @@ export const EmployeeRepository = {
 
     if (genders?.length) {
       conditions.push(inArray(employees.gender, genders as any[]))
+      //conditions.push(inArray(employees.gender, genders))
     }
 
     // -----------------------------
@@ -210,6 +211,7 @@ export const EmployeeRepository = {
 
     if (employmentStatuses?.length) {
       conditions.push(inArray(employments.status, employmentStatuses as any[]))
+      //conditions.push(inArray(employments.status, employmentStatuses))
     }
 
     // -----------------------------
@@ -279,7 +281,7 @@ export const EmployeeRepository = {
         .leftJoin(departments, eq(positionItems.departmentId, departments.id))
         .leftJoin(positions, eq(positionItems.positionId, positions.id))
         .where(and(...conditions))
-        .orderBy(sortOrder == 'desc' ? desc(sortColumn) : asc(sortColumn))
+        .orderBy(sortOrder === 'desc' ? desc(sortColumn) : asc(sortColumn))
         .offset(offset)
         .limit(limit),
       tx

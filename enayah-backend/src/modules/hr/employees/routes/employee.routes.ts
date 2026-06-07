@@ -40,7 +40,12 @@ router.get(
 router.get(
   '/',
   requirePermission('employee.view'),
-  //EmployeeController.getEmployees,
+  EmployeeController.getEmployees,
+)
+
+router.get(
+  '/directory',
+  requirePermission('employee.view'),
   EmployeeController.findEmployeeDirectory,
 )
 

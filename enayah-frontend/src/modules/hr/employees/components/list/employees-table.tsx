@@ -44,7 +44,7 @@ export function EmployeesTable({
       columns={employeeColumns(sortBy, sortOrder)}
       data={data?.items ?? []}
       total={data?.total ?? 0}
-      pageCount={Math.ceil((data?.total ?? 0) / limit)}
+      pageCount={limit > 0 ? Math.ceil((data?.total ?? 0) / limit) : 0}
       isLoading={isLoading}
       page={page}
       limit={limit}

@@ -86,11 +86,35 @@ export const toEmployeeResponse = (
 }
 
 export function toEmployeeDirectoryResponse(
-  employee: any,
+  //employee: any,
+  employee: {
+    id: string
+    employeeNumber: string
+    firstNameEn: string
+    secondNameEn: string | null
+    thirdNameEn: string | null
+    familyNameEn: string
+    firstNameAr: string
+    secondNameAr: string | null
+    thirdNameAr: string | null
+    familyNameAr: string
+    gender: string | null
+    nationalityEn: string | null
+    hireDate: string | null
+    employmentStatus: string | null
+    pcn: string | null
+    categoryCode: number | null
+    departmentId: string | null
+    departmentNameEn: string | null
+    departmentNameAr: string | null
+    positionId: string | null
+    positionTitleEn: string | null
+    positionTitleAr: string | null
+  },
 ): EmployeeDirectoryResponse {
-  const employment = employee.employments?.[0]
+  //const employment = employee.employments?.[0]
 
-  const item = employment?.positionItem
+  //const item = employment?.positionItem
 
   return {
     id: employee.id,
@@ -104,24 +128,24 @@ export function toEmployeeDirectoryResponse(
         .replace(/\s+/g, ' ')
         .trim(),
     gender: employee.gender,
-    nationality: employee.nationality?.nationalityEn ?? null,
-    department: item?.department
+    nationality: employee.nationalityEn ?? null, //employee.nationality?.nationalityEn ?? null,
+    department: employee.departmentId //item?.department
       ? {
-          id: item.department.id,
-          nameEn: item.department.nameEn,
-          nameAr: item.department.nameAr,
+          id: employee.departmentId, //item.department.id,
+          nameEn: employee.departmentNameEn!, //item.department.nameEn,
+          nameAr: employee.departmentNameAr!,
         }
       : null,
-    position: item?.position
+    position: employee.positionId //item?.position
       ? {
-          id: item.position.id,
-          titleEn: item.position.titleEn,
-          titleAr: item.position.titleAr,
+          id: employee.positionId,
+          titleEn: employee.positionTitleEn!,
+          titleAr: employee.positionTitleAr ?? null,
         }
       : null,
-    pcn: item?.itemNumber ?? null,
-    categoryCode: item?.categoryCode ?? null,
-    hireDate: employment?.hireDate ?? null,
-    employmentStatus: employment?.status ?? null,
+    pcn: employee.pcn ?? null, //item?.itemNumber ?? null,
+    categoryCode: employee.categoryCode ?? null,
+    hireDate: employee.hireDate ?? null,
+    employmentStatus: employee.employmentStatus ?? null,
   }
 }

@@ -99,7 +99,7 @@ export const EmployeeController = {
         ? String(req.query.employmentStatuses).split(',')
         : undefined,
     })
-    console.log('Query: ', req.query)
+    //console.log('Query: ', req.query)
     const result = await EmployeeService.findEmployeeDirectoryRange(query)
     return res.status(200).json(result)
   }),

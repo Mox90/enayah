@@ -26,11 +26,11 @@ export function EnterpriseFilterGroup({
     <div className='space-y-3'>
       <h3 className='font-semibold'>{config.label}</h3>
 
-      {config.type == 'lookup' ? (
+      {config.type === 'lookup' ? (
         <EnterpriseFilterLookup
-          endpoint={config.endpoint!}
-          valueField={config.valueField!}
-          labelField={config.labelField!}
+          endpoint={config.endpoint ?? ''}
+          valueField={config.valueField ?? 'id'}
+          labelField={config.labelField ?? 'name'}
           value={values}
           onChange={onChange}
         />
