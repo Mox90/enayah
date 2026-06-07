@@ -1,5 +1,8 @@
 // employee.mapper.ts
-import { EmployeeResponse } from './employee.response'
+import {
+  EmployeeDirectoryResponse,
+  EmployeeResponse,
+} from './employee.response'
 import { CreateEmployeeDto, UpdateEmployeeDto } from './employee.request'
 import { InferSelectModel } from 'drizzle-orm'
 import { employees } from '../../../../db'
@@ -79,5 +82,46 @@ export const toEmployeeResponse = (
         }
       : null,
     version: employee.version,
+  }
+}
+
+export function toEmployeeDirectoryResponse(
+  employee: any,
+): EmployeeDirectoryResponse {
+  const employment = employee.employments?.[0]
+
+  const item = employment?.positionItem
+
+  return {
+    id: employee.id,
+    employeeNumber: employee.employeeNumber,
+    fullNameEn:
+      `${employee.firstNameEn} ${employee.secondNameEn ?? ''} ${employee.thirdNameEn ?? ''} ${employee.familyNameEn}`
+        .replace(/\s+/g, ' ')
+        .trim(),
+    fullNameAr:
+      `${employee.firstNameAr} ${employee.secondNameAr ?? ''} ${employee.thirdNameAr ?? ''} ${employee.familyNameAr}`
+        .replace(/\s+/g, ' ')
+        .trim(),
+    gender: employee.gender,
+    nationality: employee.nationality?.nationalityEn ?? null,
+    department: item?.department
+      ? {
+          id: item.department.id,
+          nameEn: item.department.nameEn,
+          nameAr: item.department.nameAr,
+        }
+      : null,
+    position: item?.position
+      ? {
+          id: item.position.id,
+          titleEn: item.position.titleEn,
+          titleAr: item.position.titleAr,
+        }
+      : null,
+    pcn: item?.itemNumber ?? null,
+    categoryCode: item?.categoryCode ?? null,
+    hireDate: employment?.hireDate ?? null,
+    employmentStatus: employment?.status ?? null,
   }
 }

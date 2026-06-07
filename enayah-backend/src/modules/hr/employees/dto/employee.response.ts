@@ -291,3 +291,33 @@ export interface EmployeeDocument {
     | 'training'
     | 'cpd'
 }
+
+export interface EmployeeDirectoryResponse {
+  id: string
+  employeeNumber: string
+  fullNameEn: string
+  fullNameAr: string
+  gender: string | null
+  nationality: string | null
+  department: {
+    id: string
+    nameEn: string
+    nameAr: string
+  } | null
+  position: {
+    id: string
+    titleEn: string
+    titleAr: string | null
+  } | null
+  pcn: string | null
+  categoryCode: number | null
+  hireDate: string | null
+  employmentStatus: string | null
+}
+
+export interface EmployeeDirectoryListResponse {
+  items: EmployeeDirectoryResponse[]
+  total: number
+  offset: number
+  limit: number
+}

@@ -2,6 +2,8 @@ import { Request, Response } from 'express'
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
 import {
   createEmployeeSchema,
+  employeeDirectoryQuerySchema,
+  employeeDirectorySchema,
   employeeIdSchema,
   updateEmployeeSchema,
 } from '../dto/employee.request'
@@ -70,5 +72,35 @@ export const EmployeeController = {
     const profile = await EmployeeService.getProfile(id)
 
     res.status(200).json(profile)
+  }),
+
+  findEmployeeDirectory: asyncHandler(async (req: Request, res: Response) => {
+    const query = employeeDirectoryQuerySchema.parse({
+      ...req.query,
+      departmentIds: req.query.departmentIds
+        ? String(req.query.departmentIds).split(',')
+        : undefined,
+      positionIds: req.query.positionIds
+        ? String(req.query.positionIds).split(',')
+        : undefined,
+      categoryCodes: req.query.categoryCodes
+        ? String(req.query.categoryCodes)
+            .split(',')
+
+            .map(Number)
+        : undefined,
+      genders: req.query.genders
+        ? String(req.query.genders).split(',')
+        : undefined,
+      nationalities: req.query.nationalities
+        ? String(req.query.nationalities).split(',')
+        : undefined,
+      employmentStatuses: req.query.employmentStatuses
+        ? String(req.query.employmentStatuses).split(',')
+        : undefined,
+    })
+    console.log('Query: ', req.query)
+    const result = await EmployeeService.findEmployeeDirectoryRange(query)
+    return res.status(200).json(result)
   }),
 }

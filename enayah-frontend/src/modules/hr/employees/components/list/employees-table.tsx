@@ -1,34 +1,63 @@
 'use client'
 
-import { getEmployeeFullName } from '@/utils/utilities'
-import { useLocale } from 'next-intl'
+import { RowSelectionState, OnChangeFn } from '@tanstack/react-table'
+
+import { DataTable } from '@/components/tables'
+
+import { EmployeeDirectoryResponse } from '../../types/employee-directory.types'
+
+import { employeeColumns } from './employee-columns'
 
 interface Props {
-  employees: any[]
+  data?: EmployeeDirectoryResponse
   isLoading: boolean
+  page: number
+  limit: number
+  search: string
+  sortBy: string
+  sortOrder: 'asc' | 'desc'
+  rowSelection: RowSelectionState
+  onRowSelectionChange: OnChangeFn<RowSelectionState>
+  onPageChange: (page: number) => void
+  onLimitChange: (limit: number) => void
+  onSearchChange: (value: string) => void
+  onSortChange: (sortBy: string, sortOrder: 'asc' | 'desc') => void
 }
 
-export function EmployeesTable({ employees, isLoading }: Props) {
-  const locale = useLocale() as 'en' | 'ar'
-
-  if (isLoading) {
-    return
-    //<div>Loading...</div>
-  }
-
-  //console.log(employees)
-
+export function EmployeesTable({
+  data,
+  isLoading,
+  page,
+  limit,
+  search,
+  sortBy,
+  sortOrder,
+  rowSelection,
+  onRowSelectionChange,
+  onPageChange,
+  onLimitChange,
+  onSearchChange,
+  onSortChange,
+}: Props) {
   return (
-    <div className='rounded-lg border'>
-      {employees.map((employee) => (
-        <div key={employee.id} className='border-b p-4 last:border-b-0'>
-          <div className='font-medium'>{employee.employeeNumber}</div>
-
-          <div className='font-medium'>
-            {getEmployeeFullName(employee, locale)}
-          </div>
-        </div>
-      ))}
-    </div>
+    <DataTable
+      columns={employeeColumns(sortBy, sortOrder)}
+      data={data?.items ?? []}
+      total={data?.total ?? 0}
+      pageCount={Math.ceil((data?.total ?? 0) / limit)}
+      isLoading={isLoading}
+      page={page}
+      limit={limit}
+      search={search}
+      sortBy={sortBy}
+      sortOrder={sortOrder}
+      rowSelection={rowSelection}
+      onRowSelectionChange={onRowSelectionChange}
+      searchPlaceholder='Search employee...'
+      onPageChange={onPageChange}
+      onLimitChange={onLimitChange}
+      onSearchChange={onSearchChange}
+      onSortChange={onSortChange}
+    />
   )
 }
