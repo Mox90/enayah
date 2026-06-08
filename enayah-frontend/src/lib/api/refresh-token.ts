@@ -8,7 +8,7 @@ export const refreshAccessToken = async (): Promise<string> => {
   if (!refreshPromise) {
     refreshPromise = api
       .post(
-        `${process.env.NEXT_PUBLIC_API_URL}/iam/auth/refresh`,
+        `/iam/auth/refresh`,
         {},
         {
           withCredentials: true,

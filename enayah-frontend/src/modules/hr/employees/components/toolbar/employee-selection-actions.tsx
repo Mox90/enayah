@@ -20,16 +20,24 @@ import {
   UserRoundCog,
   UserMinus,
   UserX,
+  Eye,
+  FilePenLine,
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useLocale } from 'next-intl'
 
 interface Props {
   selectedIds: string[]
 }
 
 export function EmployeeSelectionActions({ selectedIds }: Props) {
+  const router = useRouter()
+  const locale = useLocale()
   if (selectedIds.length === 0) {
     return null
   }
+
+  const singleSelected = selectedIds.length === 1
 
   return (
     <div className='flex items-center gap-3'>
@@ -104,6 +112,30 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align='end'>
+          {singleSelected && (
+            <>
+              <DropdownMenuItem
+                onClick={() =>
+                  router.push(`/${locale}/employees/${selectedIds[0]}/profile`)
+                }
+              >
+                <Eye className='mr-2 h-4 w-4' />
+                Profile
+              </DropdownMenuItem>
+
+              <DropdownMenuItem
+                onClick={() =>
+                  router.push(
+                    `/${locale}/contracts/new?employeeId=${selectedIds[0]}`,
+                  )
+                }
+              >
+                <FilePenLine className='mr-2 h-4 w-4' />
+                Amend Contract
+              </DropdownMenuItem>
+            </>
+          )}
+
           <DropdownMenuItem
             onClick={() => {
               console.log('Assign Training', selectedIds)

@@ -15,6 +15,7 @@ interface AuthState {
   setAccessToken: (token: string | null) => void
   login: (token: string, user: User) => void
   logout: () => void
+  restore: (token: string, user: User) => void
 
   setHydrated: (value: boolean) => void
 }
@@ -107,6 +108,14 @@ export const useAuthStore = create<AuthState>((set) => ({
       user: null,
       accessToken: null,
       isAuthenticated: false,
+    })
+  },
+
+  restore: (token: string, user: User) => {
+    set({
+      user,
+      accessToken: token,
+      isAuthenticated: true,
     })
   },
 }))

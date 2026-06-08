@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button'
 
 import { EnterpriseFilterCheckboxGroup } from '@/components/filter/enterprise-filter-checkbox-group'
 import { DepartmentLookup } from '@/modules/hr/departments/components/department-lookup'
+import { PositionLookup } from '@/modules/hr/positions/components/position-lookup'
 
 interface EmployeeFilters {
   departmentIds: string[]
@@ -59,12 +60,12 @@ export function EmployeeFilterSheet({
         onOpenChange(o)
       }}
     >
-      <SheetContent className='w-[450px] overflow-y-auto'>
+      <SheetContent className=' w-[450px] overflow-y-auto'>
         <SheetHeader>
           <SheetTitle>Employee Filters</SheetTitle>
         </SheetHeader>
 
-        <div className='space-y-8 mt-6'>
+        <div className='space-y-8 mt-6 mx-4'>
           <DepartmentLookup
             value={local.departmentIds}
             onChange={(departmentIds) =>
@@ -76,9 +77,19 @@ export function EmployeeFilterSheet({
           />
 
           {/* PositionLookup */}
+          <PositionLookup
+            value={local.positionIds}
+            onChange={(positionIds) =>
+              setLocal({
+                ...local,
+                positionIds,
+              })
+            }
+          />
 
           {/* CountryLookup */}
 
+          <div className='text-lg font-medium'>Gender</div>
           <EnterpriseFilterCheckboxGroup
             values={local.genders}
             options={[
@@ -99,6 +110,7 @@ export function EmployeeFilterSheet({
             }
           />
 
+          <div className='text-lg font-medium'>Status</div>
           <EnterpriseFilterCheckboxGroup
             values={local.employmentStatuses}
             options={[
@@ -124,7 +136,7 @@ export function EmployeeFilterSheet({
           />
         </div>
 
-        <div className='flex gap-3 mt-8'>
+        <div className='flex gap-3 m-4 '>
           <Button variant='outline' onClick={onReset}>
             Reset
           </Button>

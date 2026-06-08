@@ -53,7 +53,8 @@ const Login = () => {
 
       setPermissions(permissions)
 
-      router.push(`/${locale}/dashboard`)
+      //router.push(`/${locale}/dashboard`)
+      router.replace(`/${locale}/dashboard`)
     } catch (error) {
       if (axios.isAxiosError(error)) {
         setError(
