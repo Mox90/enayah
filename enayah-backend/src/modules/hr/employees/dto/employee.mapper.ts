@@ -1,5 +1,8 @@
 // employee.mapper.ts
-import { EmployeeResponse } from './employee.response'
+import {
+  EmployeeDirectoryResponse,
+  EmployeeResponse,
+} from './employee.response'
 import { CreateEmployeeDto, UpdateEmployeeDto } from './employee.request'
 import { InferSelectModel } from 'drizzle-orm'
 import { employees } from '../../../../db'
@@ -79,5 +82,70 @@ export const toEmployeeResponse = (
         }
       : null,
     version: employee.version,
+  }
+}
+
+export function toEmployeeDirectoryResponse(
+  //employee: any,
+  employee: {
+    id: string
+    employeeNumber: string
+    firstNameEn: string
+    secondNameEn: string | null
+    thirdNameEn: string | null
+    familyNameEn: string
+    firstNameAr: string
+    secondNameAr: string | null
+    thirdNameAr: string | null
+    familyNameAr: string
+    gender: string | null
+    nationalityEn: string | null
+    hireDate: string | null
+    employmentStatus: string | null
+    pcn: string | null
+    categoryCode: number | null
+    departmentId: string | null
+    departmentNameEn: string | null
+    departmentNameAr: string | null
+    positionId: string | null
+    positionTitleEn: string | null
+    positionTitleAr: string | null
+  },
+): EmployeeDirectoryResponse {
+  //const employment = employee.employments?.[0]
+
+  //const item = employment?.positionItem
+
+  return {
+    id: employee.id,
+    employeeNumber: employee.employeeNumber,
+    fullNameEn:
+      `${employee.firstNameEn} ${employee.secondNameEn ?? ''} ${employee.thirdNameEn ?? ''} ${employee.familyNameEn}`
+        .replace(/\s+/g, ' ')
+        .trim(),
+    fullNameAr:
+      `${employee.firstNameAr} ${employee.secondNameAr ?? ''} ${employee.thirdNameAr ?? ''} ${employee.familyNameAr}`
+        .replace(/\s+/g, ' ')
+        .trim(),
+    gender: employee.gender,
+    nationality: employee.nationalityEn ?? null, //employee.nationality?.nationalityEn ?? null,
+    department: employee.departmentId //item?.department
+      ? {
+          id: employee.departmentId, //item.department.id,
+          nameEn: employee.departmentNameEn!, //item.department.nameEn,
+          nameAr: employee.departmentNameAr!,
+        }
+      : null,
+    position: employee.positionId //item?.position
+      ? {
+          id: employee.positionId,
+          titleEn: employee.positionTitleEn!,
+          titleAr: employee.positionTitleAr ?? null,
+        }
+      : null,
+    pcn: employee.pcn ?? null, //item?.itemNumber ?? null,
+    categoryCode: employee.categoryCode ?? null,
+    hireDate: employee.hireDate ?? null,
+    employmentStatus: employee.employmentStatus ?? null,
   }
 }

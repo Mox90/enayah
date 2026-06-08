@@ -49,6 +49,24 @@ export interface EmployeeListQueryDto {
   sortOrder?: 'asc' | 'desc'
 }
 
+export const employeeDirectoryQuerySchema = z.object({
+  offset: z.coerce.number().default(0),
+  limit: z.coerce.number().default(25),
+  search: z.string().optional(),
+  departmentIds: z.array(z.uuid()).optional(),
+  positionIds: z.array(z.uuid()).optional(),
+  categoryCodes: z.array(z.coerce.number()).optional(),
+  genders: z.array(z.string()).optional(),
+  nationalities: z.array(z.string()).optional(),
+  employmentStatuses: z.array(z.string()).optional(),
+  sortBy: z.string().optional(),
+  sortOrder: z.enum(['asc', 'desc']).default('asc'),
+})
+
+export type EmployeeDirectoryQueryDto = z.infer<
+  typeof employeeDirectoryQuerySchema
+>
+
 export type employeeDirectoryDto = z.infer<typeof employeeDirectorySchema>
 export type CreateEmployeeDto = z.infer<typeof createEmployeeSchema>
 export type UpdateEmployeeDto = z.infer<typeof updateEmployeeSchema>

@@ -4,6 +4,10 @@ import { api } from '@/lib/api/client'
 import { Employee, EmployeeListResponse } from '../types/employee-view.types'
 import { API_ENDPOINTS } from '@/lib/api/endpoints'
 import { DepartmentHierarchyNode } from '../types/employee-hierarchy.types'
+import {
+  EmployeeDirectoryParams,
+  EmployeeDirectoryResponse,
+} from '../types/employee-directory.types'
 
 //import { Employee } from '../types/employee.types'
 
@@ -54,6 +58,16 @@ export const employeeService = {
   getManpowerView: async () => {
     const response = await api.get(
       `${API_ENDPOINTS.hr.positionItems}/manpower-view`,
+    )
+    return response.data
+  },
+
+  getEmployeeDirectory: async (params: EmployeeDirectoryParams) => {
+    const response = await api.get<EmployeeDirectoryResponse>(
+      `${API_ENDPOINTS.hr.employees}/directory`,
+      {
+        params,
+      },
     )
     return response.data
   },

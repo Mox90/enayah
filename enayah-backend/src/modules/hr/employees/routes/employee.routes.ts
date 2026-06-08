@@ -31,10 +31,22 @@ router.get(
   EmployeeController.getProfile,
 )
 
+// router.get(
+//   '/employee-directory',
+//   requirePermission('employee.view'),
+//   EmployeeController.findEmployeeDirectory,
+// )
+
 router.get(
   '/',
   requirePermission('employee.view'),
   EmployeeController.getEmployees,
+)
+
+router.get(
+  '/directory',
+  requirePermission('employee.view'),
+  EmployeeController.findEmployeeDirectory,
 )
 
 router.post(

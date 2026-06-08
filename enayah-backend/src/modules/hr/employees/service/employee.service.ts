@@ -11,6 +11,7 @@ import {
 } from '../dto/employee.mapper'
 import {
   CreateEmployeeDto,
+  EmployeeDirectoryQueryDto,
   EmployeeListQueryDto,
   UpdateEmployeeDto,
 } from '../dto/employee.request'
@@ -77,5 +78,11 @@ export const EmployeeService = {
         cpd,
       }
     })
+  },
+
+  findEmployeeDirectoryRange: async (params: EmployeeDirectoryQueryDto) => {
+    return db.transaction((tx) =>
+      EmployeeRepository.findEmployeeDirectoryRange(tx, params),
+    )
   },
 }

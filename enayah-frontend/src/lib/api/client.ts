@@ -4,10 +4,15 @@ import { useAuthStore } from '@/modules/iam/stores/auth.store'
 import axios from 'axios'
 import { refreshAccessToken } from './refresh-token'
 import { useLocale } from 'next-intl'
+//import qs from 'qs'
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
+
+  paramsSerializer: {
+    indexes: null,
+  },
 })
 
 api.interceptors.request.use((config) => {

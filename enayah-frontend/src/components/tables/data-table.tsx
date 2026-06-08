@@ -9,6 +9,8 @@ import {
   useReactTable,
   SortingState,
   VisibilityState,
+  RowSelectionState,
+  OnChangeFn,
 } from '@tanstack/react-table'
 
 import {
@@ -47,51 +49,34 @@ interface DataTableProps<TData, TValue> {
   onSearchChange: (value: string) => void
 
   onSortChange: (sortBy: string, sortOrder: 'asc' | 'desc') => void
+  rowSelection: RowSelectionState
+
+  onRowSelectionChange: OnChangeFn<RowSelectionState>
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
-
   total = 0,
   pageCount = 0,
   isLoading = false,
-
   searchPlaceholder,
-
   page,
   limit,
   search,
-
   sortBy,
   sortOrder,
-
   onPageChange,
   onLimitChange,
   onSearchChange,
-
   onSortChange,
+  rowSelection,
+  onRowSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
 
-  const [rowSelection, setRowSelection] = React.useState({})
-
-  // const [sorting, setSorting] = React.useState<SortingState>([
-  //   {
-  //     id: sortBy,
-  //     desc: sortOrder === 'desc',
-  //   },
-  // ])
-
-  // React.useEffect(() => {
-  //   setSorting([
-  //     {
-  //       id: sortBy,
-  //       desc: sortOrder === 'desc',
-  //     },
-  //   ])
-  // }, [sortBy, sortOrder])
+  //const [rowSelection, setRowSelection] = React.useState({})
 
   const sorting: SortingState = [
     {
@@ -103,10 +88,11 @@ export function DataTable<TData, TValue>({
   const table = useReactTable({
     data,
     columns,
+    getRowId: (row: any) => row.id,
     state: {
       sorting,
       columnVisibility,
-      rowSelection,
+      rowSelection: rowSelection ?? {},
     },
     enableRowSelection: true,
     enableSortingRemoval: false,
@@ -118,16 +104,13 @@ export function DataTable<TData, TValue>({
       const newSorting =
         typeof updater === 'function' ? updater(sorting) : updater
 
-      //console.log('TABLE', newSorting)
-
-      //setSorting(newSorting)
       if (newSorting.length > 0) {
-        //console.log('NEW SORTING', newSorting)
         onSortChange(newSorting[0].id, newSorting[0].desc ? 'desc' : 'asc')
       }
     },
+
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange,
     getCoreRowModel: getCoreRowModel(),
   })
   //console.log('TABLE SORTING', table.getState().sorting)
