@@ -1,6 +1,6 @@
 import { api } from '@/lib/api/client'
 import { CreateDepartmentFormValues } from '../schemas/department.schema'
-import { Department } from '../types/department.types'
+import { Department, DepartmentListResponse } from '../types/department.types'
 import { API_ENDPOINTS } from '@/lib/api/endpoints'
 import { number } from 'zod'
 
@@ -16,7 +16,7 @@ export const departmentService = {
     search?: string
     sortBy?: string
     sortOrder?: 'asc' | 'desc'
-  }) => {
+  }): Promise<DepartmentListResponse> => {
     //console.log('API PARAMS', params)
     const response = await api.get(API_ENDPOINTS.org.departments, { params })
     return response.data

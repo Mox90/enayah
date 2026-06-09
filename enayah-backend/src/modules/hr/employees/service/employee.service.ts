@@ -80,6 +80,70 @@ export const EmployeeService = {
     })
   },
 
+  getProfileSummary: async (employeeId: string) => {
+    return db.transaction(async (tx) => {
+      //const [personal, employment, credentials, training, cpd] =
+      const [personal, employment] = await Promise.all([
+        EmployeeRepository.findProfileBase(tx, employeeId),
+
+        EmploymentRepository.findCurrentEmploymentByEmployeeId(tx, employeeId),
+
+        //CredentialRepository.findByEmployeeId(tx, employeeId),
+
+        //TrainingRepository.findByEmployeeId(tx, employeeId),
+
+        //CpdRepository.findByEmployeeId(tx, employeeId),
+      ])
+
+      return {
+        personal,
+        employment,
+      }
+    })
+  },
+
+  getEmployeeTraining: async (employeeId: string) => {
+    return db.transaction(async (tx) => {
+      //const [personal, employment, credentials, training, cpd] =
+      const [training] = await Promise.all([
+        //EmployeeRepository.findProfileBase(tx, employeeId),
+
+        //EmploymentRepository.findCurrentEmploymentByEmployeeId(tx, employeeId),
+
+        //CredentialRepository.findByEmployeeId(tx, employeeId),
+
+        TrainingRepository.findByEmployeeId(tx, employeeId),
+
+        //CpdRepository.findByEmployeeId(tx, employeeId),
+      ])
+
+      return {
+        training,
+      }
+    })
+  },
+
+  getEmployeeCpd: async (employeeId: string) => {
+    return db.transaction(async (tx) => {
+      //const [personal, employment, credentials, training, cpd] =
+      const [cpd] = await Promise.all([
+        //EmployeeRepository.findProfileBase(tx, employeeId),
+
+        //EmploymentRepository.findCurrentEmploymentByEmployeeId(tx, employeeId),
+
+        //CredentialRepository.findByEmployeeId(tx, employeeId),
+
+        //TrainingRepository.findByEmployeeId(tx, employeeId),
+
+        CpdRepository.findByEmployeeId(tx, employeeId),
+      ])
+
+      return {
+        cpd,
+      }
+    })
+  },
+
   findEmployeeDirectoryRange: async (params: EmployeeDirectoryQueryDto) => {
     return db.transaction((tx) =>
       EmployeeRepository.findEmployeeDirectoryRange(tx, params),

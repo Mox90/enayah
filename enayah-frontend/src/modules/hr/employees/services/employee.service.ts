@@ -7,6 +7,7 @@ import { DepartmentHierarchyNode } from '../types/employee-hierarchy.types'
 import {
   EmployeeDirectoryParams,
   EmployeeDirectoryResponse,
+  EmployeeProfile,
 } from '../types/employee-directory.types'
 
 //import { Employee } from '../types/employee.types'
@@ -68,6 +69,13 @@ export const employeeService = {
       {
         params,
       },
+    )
+    return response.data
+  },
+
+  getEmployeeProfile: async (id: string): Promise<EmployeeProfile> => {
+    const response = await api.get(
+      `${API_ENDPOINTS.hr.employees}/${id}/profile`,
     )
     return response.data
   },

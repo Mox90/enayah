@@ -22,7 +22,7 @@ export const createEmployeeSchema = z.object({
 
 export const employeeDirectorySchema = z.object({
   offset: z.coerce.number().default(0),
-  limit: z.coerce.number().default(50),
+  limit: z.coerce.number().min(1).max(500).default(50),
   search: z.string().optional(),
   departmentIds: z.array(z.uuid()).optional(),
   positionIds: z.array(z.uuid()).optional(),
@@ -51,7 +51,7 @@ export interface EmployeeListQueryDto {
 
 export const employeeDirectoryQuerySchema = z.object({
   offset: z.coerce.number().default(0),
-  limit: z.coerce.number().default(25),
+  limit: z.coerce.number().min(1).max(500).default(25),
   search: z.string().optional(),
   departmentIds: z.array(z.uuid()).optional(),
   positionIds: z.array(z.uuid()).optional(),

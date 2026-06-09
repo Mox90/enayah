@@ -1,7 +1,7 @@
 import { api } from '@/lib/api/client'
 import { API_ENDPOINTS } from '@/lib/api/endpoints'
 import { CreatePositionFormValues } from '../schemas/position.schema'
-import { Position } from '../types/position.types'
+import { Position, PositionListResponse } from '../types/position.types'
 
 export const positionService = {
   getPositions: async (params: {
@@ -10,7 +10,7 @@ export const positionService = {
     search?: string
     sortBy?: string
     sortOrder?: 'asc' | 'desc'
-  }) => {
+  }): Promise<PositionListResponse> => {
     const response = await api.get(API_ENDPOINTS.hr.positions, { params })
     return response.data
   },

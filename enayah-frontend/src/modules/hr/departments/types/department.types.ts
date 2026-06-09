@@ -18,3 +18,7 @@ export interface PaginatedDepartments {
     totalPages: number
   }
 }
+
+export interface DepartmentListResponse {
+  data: Department[]
+}

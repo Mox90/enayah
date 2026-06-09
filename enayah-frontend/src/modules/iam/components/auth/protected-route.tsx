@@ -22,9 +22,14 @@ export default function ProtectedRoute({
 
   const permissions = usePermissionStore((state) => state.permissions)
 
+  const isHydrated = useAuthStore((s) => s.isHydrated)
+
   useEffect(() => {
+    if (!isHydrated) return
+
     if (!isAuthenticated) {
-      router.push(`/${locale}/login`)
+      //router.push(`/${locale}/login`)
+      router.replace(`/${locale}/login`)
       return
     }
 
@@ -34,9 +39,19 @@ export default function ProtectedRoute({
     ) {
       router.push('/forbidden')
     }
-  }, [locale, isAuthenticated, permissions, requiredPermissions, router])
+  }, [
+    locale,
+    isAuthenticated,
+    permissions,
+    requiredPermissions,
+    router,
+    isHydrated,
+  ])
+
+  if (!isHydrated) return null
 
   if (!isAuthenticated) return null
+
   if (
     requiredPermissions.length > 0 &&
     !requiredPermissions.every((p) => permissions.includes(p))
