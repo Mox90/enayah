@@ -45,11 +45,11 @@ export function EmployeeProfileTabs({ employeeId, profile }: Props) {
       </TabsContent>
 
       <TabsContent value='training'>
-        <TrainingTab training={profile.training} />
+        <TrainingTab training={employeeId} />
       </TabsContent>
 
       <TabsContent value='cpd'>
-        <CPDTab cpd={profile.cpd} />
+        <CPDTab cpd={employeeId} />
       </TabsContent>
     </Tabs>
   )
