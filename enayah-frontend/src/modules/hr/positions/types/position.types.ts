@@ -14,3 +14,7 @@ export interface PaginatedPositions {
     totalPages: number
   }
 }
+
+export interface PositionListResponse {
+  data: Position[]
+}

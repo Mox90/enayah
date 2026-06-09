@@ -10,13 +10,6 @@ export function useDepartments(params: {
   sortOrder?: 'asc' | 'desc'
 }) {
   const { page, limit, search, sortBy, sortOrder } = params
-  // console.log({
-  //   page,
-  //   limit,
-  //   search,
-  //   sortBy,
-  //   sortOrder,
-  // })
   return useQuery({
     queryKey: ['departments', page, limit, search, sortBy, sortOrder],
     queryFn: () =>

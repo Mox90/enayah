@@ -14,11 +14,19 @@ interface Props {
 }
 
 const CredentialsTab = ({ employeeId }: Props) => {
-  const { data, isLoading } = useEmployeeCredentials(employeeId)
+  const { data, isLoading, error, isError } = useEmployeeCredentials(employeeId)
 
-  //console.log('employeeId=', employeeId)
-  //const query = useEmployeeCredentials(employeeId)
-  //console.log(query)
+  if (isLoading) {
+    return <div className='p-8 text-center'>Loading credentials...</div>
+  }
+
+  if (error) {
+    return (
+      <div className='p-8 text-center text-red-600'>
+        Failed to load credentials
+      </div>
+    )
+  }
   const c = data?.credentials
 
   return (

@@ -25,8 +25,6 @@ export function DepartmentLookup({ value, onChange }: Props) {
     search,
   })
 
-  //console.log('Departments:', data)
-
   function toggle(id: string) {
     if (value.includes(id)) {
       onChange(value.filter((x) => x !== id))
@@ -45,7 +43,7 @@ export function DepartmentLookup({ value, onChange }: Props) {
 
       <ScrollArea className='h-64 border rounded-md'>
         <div className='p-3 space-y-2'>
-          {data?.data.map((department: any) => (
+          {data?.data.map((department) => (
             <div key={department.id} className='flex items-center gap-3'>
               <Checkbox
                 checked={value.includes(department.id)}

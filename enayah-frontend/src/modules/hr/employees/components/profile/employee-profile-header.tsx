@@ -64,7 +64,7 @@ export function EmployeeProfileHeader({ profile }: Props) {
   const locale = useLocale()
 
   return (
-    <div className='rounded-xl border bg-%workground p-6'>
+    <div className='rounded-xl border bg-background p-6'>
       <div className='flex justify-between'>
         <Link href={`/${locale}/employees`}>
           <Button variant='ghost'>

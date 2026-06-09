@@ -50,7 +50,7 @@ export function CredentialLicenses({
   return (
     <Card>
       <CardHeader className='flex flex-row justify-between'>
-        <CardTitle>📄 Licenses ({licenses.length})</CardTitle>
+        <CardTitle>📄📝 Licenses ({licenses.length})</CardTitle>
 
         <Button size='sm' onClick={onAdd}>
           <Plus className='mr-2 h-4 w-4' />

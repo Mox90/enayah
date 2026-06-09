@@ -1,6 +1,6 @@
 import React from 'react'
 
-const EmploymentTab = (employment: any) => {
+const EmploymentTab = ({ employment }: { employment: any }) => {
   return <div>EmploymentTab</div>
 }
 

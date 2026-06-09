@@ -21,7 +21,7 @@ export const EmployeeController = {
 
   findAll: asyncHandler(async (req: Request, res: Response) => {
     const result = await EmployeeService.findAll()
-    //console.log(result)
+
     res.status(200).json(result.map(toEmployeeResponse))
   }),
 
@@ -69,7 +69,7 @@ export const EmployeeController = {
   getProfile: asyncHandler(async (req: Request, res: Response) => {
     const { id } = employeeIdSchema.parse(req.params)
 
-    const profile = await EmployeeService.getProfile(id)
+    const profile = await EmployeeService.getProfileSummary(id)
 
     res.status(200).json(profile)
   }),

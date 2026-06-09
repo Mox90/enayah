@@ -6,6 +6,8 @@ import { Pencil } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
+export type Gender = 'male' | 'female'
+
 export interface EmployeeNationality {
   id: string
   name: string
@@ -34,7 +36,7 @@ export interface EmployeePersonal {
 
   dateOfBirth: string | null
 
-  gender: 'male' | 'female'
+  gender: Gender
 
   countryId: string
 
@@ -49,7 +51,6 @@ export interface EmployeePersonal {
   deletedBy: string | null
 
   version: number
-
   nationality: EmployeeNationality
 }
 
@@ -100,7 +101,7 @@ const PersonalTab = ({ personal }: Props) => {
             <Field
               label='Gender'
               value={personal.gender
-                ?.replace('_', ' ')
+                ?.replaceAll('_', ' ')
                 ?.replace(/\b\w/g, (c: string) => c.toUpperCase())}
             />
 
@@ -144,10 +145,10 @@ const PersonalTab = ({ personal }: Props) => {
         <CardHeader className='flex flex-row items-center justify-between'>
           <CardTitle>Country Information</CardTitle>
 
-          <Button size='sm' variant='outline'>
+          {/* <Button size='sm' variant='outline'>
             <Pencil className='mr-2 h-4 w-4' />
             Edit
-          </Button>
+          </Button> */}
         </CardHeader>
 
         <CardContent>

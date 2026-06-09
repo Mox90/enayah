@@ -1,6 +1,6 @@
 'use client'
 
-const CPDTab = (cpd: any) => {
+const CPDTab = ({ cpd }: { cpd: any }) => {
   return <div>CPDTab</div>
 }
 

@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns'
 
-import { MoreHorizontal, Plus } from 'lucide-react'
+import { MoreHorizontal, MoreVertical, Plus } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 
@@ -91,7 +91,7 @@ export function CredentialBoards({ boards, onAdd, onEdit, onDelete }: Props) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button size='icon' variant='ghost'>
-                      <MoreHorizontal className='h-4 w-4' />
+                      <MoreVertical className='h-4 w-4' />
                     </Button>
                   </DropdownMenuTrigger>
 

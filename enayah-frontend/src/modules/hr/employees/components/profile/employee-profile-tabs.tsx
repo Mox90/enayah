@@ -17,6 +17,7 @@ interface Props {
 
 export function EmployeeProfileTabs({ employeeId, profile }: Props) {
   const [tab, setTab] = useState('personal')
+  //console.log(profile.personal)
   return (
     <Tabs value={tab} onValueChange={setTab}>
       <TabsList>

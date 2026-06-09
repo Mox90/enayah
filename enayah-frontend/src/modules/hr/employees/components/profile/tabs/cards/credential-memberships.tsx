@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { MoreHorizontal, Plus } from 'lucide-react'
+import { MoreHorizontal, MoreVertical, Plus } from 'lucide-react'
 
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 
@@ -101,7 +101,7 @@ export function CredentialMemberships({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button size='icon' variant='ghost'>
-                      <MoreHorizontal className='h-4 w-4' />
+                      <MoreVertical className='h-4 w-4' />
                     </Button>
                   </DropdownMenuTrigger>
 

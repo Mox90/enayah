@@ -1,6 +1,6 @@
 'use client'
 
-const TrainingTab = (training: any) => {
+const TrainingTab = ({ training }: { training: any }) => {
   return <div>TrainingTab</div>
 }
 

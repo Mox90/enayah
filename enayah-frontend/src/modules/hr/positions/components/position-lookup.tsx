@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { usePositions } from '../hooks/use-positions'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Checkbox } from '@/components/ui/checkbox'
+import { useLocale } from 'next-intl'
 
 interface Props {
   value: string[]
@@ -11,14 +12,14 @@ interface Props {
 
 export function PositionLookup({ value, onChange }: Props) {
   const [search, setSearch] = useState('')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
 
   const { data } = usePositions({
     page: 1,
     limit: 20,
     search,
   })
-
-  //console.log('Positions:', data)
 
   function toggle(id: string) {
     if (value.includes(id)) {
@@ -45,7 +46,7 @@ export function PositionLookup({ value, onChange }: Props) {
                 onCheckedChange={() => toggle(position.id)}
               />
 
-              <span>{position.titleEn}</span>
+              <span>{isRtl ? position.titleAr : position.titleEn}</span>
             </div>
           ))}
         </div>
