@@ -6,6 +6,7 @@ import { employmentRoutes } from './employments'
 import { positionItemRoutes } from './position-items'
 import { hrAnalyticsRoutes } from './analytics'
 import { hiringRoutes } from './hiring'
+import { credentialRoutes } from './credentials'
 
 const router = Router()
 
@@ -16,6 +17,7 @@ router.use('/employments', employmentRoutes.routes)
 router.use('/position-items', positionItemRoutes.routes)
 router.use('/analytics', hrAnalyticsRoutes.routes)
 router.use('/hiring', hiringRoutes.routes)
+router.use('/credentials', credentialRoutes.routes)
 
 export const hrModule = {
   routes: router,

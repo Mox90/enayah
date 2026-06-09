@@ -46,6 +46,14 @@ const statusLabel: Record<string, string> = {
   terminated: 'Terminated',
 }
 
+const workforceLabel: Record<string, string> = {
+  physician: 'Physician', // 1000
+  nurse: 'Nurse', // 2000
+  allied_health: 'Allied Health/Technician', // 3000
+  administrative: 'Administrative', // 4000
+  support_service: 'Support Service', //5000
+}
+
 interface Props {
   profile: EmployeeProfile
 }
@@ -56,7 +64,7 @@ export function EmployeeProfileHeader({ profile }: Props) {
   const locale = useLocale()
 
   return (
-    <div className='rounded-xl border bg-background p-6'>
+    <div className='rounded-xl border bg-%workground p-6'>
       <div className='flex justify-between'>
         <Link href={`/${locale}/employees`}>
           <Button variant='ghost'>
@@ -145,7 +153,8 @@ export function EmployeeProfileHeader({ profile }: Props) {
             <div>
               <strong>Workforce</strong>
               <br />
-              {e?.positionItem.workforceCategory}
+              {workforceLabel[e?.positionItem.workforceCategory ?? ''] ??
+                e?.positionItem.workforceCategory}
             </div>
           </div>
         </div>

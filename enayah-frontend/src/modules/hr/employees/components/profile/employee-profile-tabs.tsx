@@ -8,14 +8,17 @@ import EmploymentTab from './tabs/employment-tab'
 import CredentialsTab from './tabs/credentials-tab'
 import TrainingTab from './tabs/training-tab'
 import CPDTab from './tabs/cpd-tab'
+import { useState } from 'react'
 
 interface Props {
+  employeeId: string
   profile: EmployeeProfile
 }
 
-export function EmployeeProfileTabs({ profile }: Props) {
+export function EmployeeProfileTabs({ employeeId, profile }: Props) {
+  const [tab, setTab] = useState('personal')
   return (
-    <Tabs defaultValue='personal'>
+    <Tabs value={tab} onValueChange={setTab}>
       <TabsList>
         <TabsTrigger value='personal'>Personal</TabsTrigger>
 
@@ -37,7 +40,7 @@ export function EmployeeProfileTabs({ profile }: Props) {
       </TabsContent>
 
       <TabsContent value='credentials'>
-        <CredentialsTab credentials={profile.credentials} />
+        <CredentialsTab employeeId={employeeId} />
       </TabsContent>
 
       <TabsContent value='training'>

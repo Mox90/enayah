@@ -3,16 +3,12 @@
 import { useParams } from 'next/navigation'
 
 import { useEmployeeProfile } from '../../hooks/use-employee-profile'
-
-import { EmployeeProfileHeader } from './employee-profile-header'
-
 import { EmployeeProfileTabs } from './employee-profile-tabs'
+import { EmployeeProfileHeader } from './employee-profile-header'
 
 export function EmployeeProfileWorkspace() {
   const params = useParams()
-
   const id = params.id as string
-
   const { data, isLoading } = useEmployeeProfile(id)
 
   if (isLoading) {
@@ -27,7 +23,7 @@ export function EmployeeProfileWorkspace() {
     <div className='space-y-6'>
       <EmployeeProfileHeader profile={data} />
 
-      <EmployeeProfileTabs profile={data} />
+      <EmployeeProfileTabs employeeId={id} profile={data} />
     </div>
   )
 }
