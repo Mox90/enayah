@@ -30,7 +30,7 @@ export interface EmployeeProfile {
       alpha2: string
       alpha3: string
       numericCode: string
-    }
+    } | null
   }
 
   employment: {

@@ -96,7 +96,11 @@ export function employeeColumns(
       },
       header: 'Category',
       cell: ({ row }) => (
-        <Badge variant='secondary'>{row.original.categoryCode}</Badge>
+        <Badge variant='secondary'>
+          {row.original.categoryCode !== null
+            ? row.original.categoryCode
+            : 'N/A'}
+        </Badge>
       ),
     },
     {

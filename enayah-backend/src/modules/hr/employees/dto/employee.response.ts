@@ -102,7 +102,7 @@ export interface EmployeeDirectoryRow {
   highestDegree?: string | null
 }
 
-export interface EmployeeProfileResponse {
+/*export interface EmployeeProfileResponse {
   personal: EmployeePersonalInfo
   employment: EmployeeEmploymentInfo
   credentials: EmployeeCredentialInfo
@@ -110,7 +110,7 @@ export interface EmployeeProfileResponse {
   cpd: EmployeeCPDInfo
   documents: EmployeeDocumentInfo
   //TODO: add docuements, performance evaluations, etc. as needed
-}
+}*/
 
 /*
 source:

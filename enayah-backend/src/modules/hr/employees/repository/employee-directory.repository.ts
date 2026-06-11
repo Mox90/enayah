@@ -265,7 +265,10 @@ export const EmployeeDirectoryRepository = {
           eq(positions.id, latestMovement.officialPositionId),
         )
         .where(and(...conditions))
-        .orderBy(sortOrder === 'desc' ? desc(sortColumn) : asc(sortColumn))
+        .orderBy(
+          sortOrder === 'desc' ? desc(sortColumn) : asc(sortColumn),
+          asc(employees.employeeNumber),
+        )
         .offset(offset)
         .limit(limit),
 

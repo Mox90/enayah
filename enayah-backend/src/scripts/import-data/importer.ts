@@ -8,7 +8,7 @@ import {
   contracts,
   countries,
 } from '../../db/schema'
-import { and, desc, eq, InferInsertModel, like } from 'drizzle-orm'
+import { and, desc, eq, InferInsertModel, like, sql } from 'drizzle-orm'
 import ExcelJS from 'exceljs'
 
 type EmploymentInsert = InferInsertModel<typeof employments>
@@ -71,13 +71,15 @@ const generateSequenceNumber = async (
   tx: any,
   hireYear: string,
 ): Promise<string> => {
+  await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${hireYear}))`)
+
   const latestContract = await tx
     .select({ contractNumber: contracts.contractNumber })
     .from(contracts)
     .where(like(contracts.contractNumber, `${hireYear}-%`))
     .orderBy(desc(contracts.contractNumber))
     .limit(1)
-    .for('update') // ⚠️ Locks the row from other concurrent readers
+    //.for('update') // ⚠️ Locks the row from other concurrent readers
     .then((res: any[]) => res[0])
 
   let nextSequence = 1

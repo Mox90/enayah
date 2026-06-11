@@ -173,52 +173,64 @@ export function toEmployeeProfileResponse(employee: any) {
       gender: employee.gender,
       dateOfBirth: employee.dateOfBirth,
 
-      nationality: employee.nationality,
+      nationality: employee.nationality?.id ? employee.nationality : null,
     },
 
-    employment: {
-      id: employee.employmentId,
+    employment: employee.employmentId
+      ? {
+          id: employee.employmentId,
 
-      hireDate: employee.hireDate,
-      startDate: employee.startDate,
-      endDate: employee.endDate,
+          hireDate: employee.hireDate,
+          startDate: employee.startDate,
+          endDate: employee.endDate,
 
-      employmentType: employee.employmentType,
-      staffCategory: employee.staffCategory,
-      status: employee.employmentStatus,
+          employmentType: employee.employmentType,
+          staffCategory: employee.staffCategory,
+          status: employee.employmentStatus,
 
-      contract: {
-        id: employee.contractId,
-        contractNumber: employee.contractNumber,
-        contractType: employee.contractType,
-        startDate: employee.contractStartDate,
-        endDate: employee.contractEndDate,
-      },
+          contract: employee.contractId
+            ? {
+                id: employee.contractId,
+                contractNumber: employee.contractNumber,
+                contractType: employee.contractType,
+                startDate: employee.contractStartDate,
+                endDate: employee.contractEndDate,
+              }
+            : null,
 
-      movement: {
-        id: employee.movementId,
-        movementType: employee.movementType,
-        sequenceNumber: employee.sequenceNumber,
+          movement: employee.movementId
+            ? {
+                id: employee.movementId,
+                movementType: employee.movementType,
+                sequenceNumber: employee.sequenceNumber,
 
-        positionItem: {
-          id: employee.positionItemId,
-          itemNumber: employee.itemNumber,
-          categoryCode: employee.categoryCode,
-          workforceCategory: employee.workforceCategory,
-        },
+                positionItem: employee.positionItemId
+                  ? {
+                      id: employee.positionItemId,
+                      itemNumber: employee.itemNumber,
+                      categoryCode: employee.categoryCode,
+                      workforceCategory: employee.workforceCategory,
+                    }
+                  : null,
 
-        officialDepartment: {
-          id: employee.departmentId,
-          nameEn: employee.departmentNameEn,
-          nameAr: employee.departmentNameAr,
-        },
+                officialDepartment: employee.departmentId
+                  ? {
+                      id: employee.departmentId,
+                      nameEn: employee.departmentNameEn,
+                      nameAr: employee.departmentNameAr,
+                    }
+                  : null,
 
-        officialPosition: {
-          id: employee.positionId,
-          titleEn: employee.positionTitleEn,
-          titleAr: employee.positionTitleAr,
-        },
-      },
-    },
+                officialPosition: employee.positionId
+                  ? {
+                      id: employee.positionId,
+                      titleEn: employee.positionTitleEn,
+                      titleAr: employee.positionTitleAr,
+                    }
+                  : null,
+              }
+            : null,
+        }
+      : null,
   }
 }

@@ -16,5 +16,10 @@ export const latestEmployment = (tx: DB) =>
       status: employments.status,
     })
     .from(employments)
-    .orderBy(employments.employeeId, desc(employments.startDate))
+    .orderBy(
+      employments.employeeId,
+      desc(employments.startDate),
+      desc(employments.hireDate),
+      desc(employments.id),
+    )
     .as('latestEmployment')

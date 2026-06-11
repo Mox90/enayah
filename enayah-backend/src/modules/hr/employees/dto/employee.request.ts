@@ -45,18 +45,18 @@ export type EmployeeDirectoryQueryDto = z.infer<
 export const CreateEmployeeSchema = z.object({
   employeeNumber: z.string().min(1).max(10),
 
-  firstNameEn: z.string().min(1).max(100),
+  firstNameEn: z.string().trim().min(1).max(100),
   secondNameEn: z.string().max(100).nullable().optional(),
   thirdNameEn: z.string().max(100).nullable().optional(),
-  familyNameEn: z.string().min(1).max(100),
+  familyNameEn: z.string().trim().min(1).max(100),
 
-  firstNameAr: z.string().min(1).max(100),
+  firstNameAr: z.string().trim().min(1).max(100),
   secondNameAr: z.string().max(100).nullable().optional(),
   thirdNameAr: z.string().max(100).nullable().optional(),
-  familyNameAr: z.string().min(1).max(100),
+  familyNameAr: z.string().trim().min(1).max(100),
 
   gender: z.enum(['male', 'female']),
-  dateOfBirth: z.string().optional(),
+  dateOfBirth: z.iso.date().optional(), //z.string().optional(),
 
   countryId: z.uuid().nullable().optional(),
 })
