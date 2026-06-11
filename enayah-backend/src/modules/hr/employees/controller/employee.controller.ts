@@ -1,19 +1,25 @@
 import { Request, Response } from 'express'
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
-import {
-  createEmployeeSchema,
-  employeeDirectoryQuerySchema,
-  employeeDirectorySchema,
-  employeeIdSchema,
-  updateEmployeeSchema,
-} from '../dto/employee.request'
+
 import { EmployeeService } from '../service/employee.service'
-import { toEmployeeResponse } from '../dto/employee.mapper'
+import {
+  toEmployeeProfileResponse,
+  toEmployeeResponse,
+} from '../dto/employee.mapper'
+import {
+  CreateEmployeeSchema,
+  EmployeeDirectoryQuerySchema,
+  EmployeeIdSchema,
+  UpdateEmployeeSchema,
+} from '../dto/employee.request'
+import { EmployeeDirectoryService } from '../service/employee-directory.service'
+import { EmployeeProfileService } from '../service/employee-profile.service'
 
 export const EmployeeController = {
   create: asyncHandler(async (req: Request, res: Response) => {
-    const body = createEmployeeSchema.parse(req.body)
+    const body = CreateEmployeeSchema.parse(req.body)
     const employee = await EmployeeService.create(body)
+
     res.locals.resourceId = employee.id
     res.locals.after = employee
     res.status(201).json(toEmployeeResponse(employee))
@@ -26,11 +32,79 @@ export const EmployeeController = {
   }),
 
   findById: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = employeeIdSchema.parse(req.params)
+    const { id } = EmployeeIdSchema.parse(req.params)
     const employee = await EmployeeService.findById(id)
+
     res.status(200).json(toEmployeeResponse(employee))
   }),
 
+  findEmployeeDirectory: asyncHandler(async (req: Request, res: Response) => {
+    const query = EmployeeDirectoryQuerySchema.parse({
+      ...req.query,
+
+      departmentIds: req.query.departmentIds
+        ? String(req.query.departmentIds).split(',')
+        : undefined,
+
+      positionIds: req.query.positionIds
+        ? String(req.query.positionIds).split(',')
+        : undefined,
+
+      categoryCodes: req.query.categoryCodes
+        ? String(req.query.categoryCodes)
+            .split(',')
+
+            .map(Number)
+        : undefined,
+
+      genders: req.query.genders
+        ? String(req.query.genders).split(',')
+        : undefined,
+
+      nationalities: req.query.nationalities
+        ? String(req.query.nationalities).split(',')
+        : undefined,
+
+      employmentStatuses: req.query.employmentStatuses
+        ? String(req.query.employmentStatuses).split(',')
+        : undefined,
+    })
+
+    const result = await EmployeeDirectoryService.findRange(query)
+
+    res.status(200).json(result)
+  }),
+
+  getProfile: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = EmployeeIdSchema.parse(req.params)
+    const profile = await EmployeeProfileService.findProfile(id)
+    res.status(200).json(toEmployeeProfileResponse(profile))
+  }),
+
+  update: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = EmployeeIdSchema.parse(req.params)
+    const body = UpdateEmployeeSchema.parse(req.body)
+    const before = await EmployeeService.findById(id)
+    const updated = await EmployeeService.update(id, body)
+
+    res.locals.resourceId = id
+    res.locals.before = before
+    res.locals.after = updated
+    res.status(200).json(toEmployeeResponse(updated))
+  }),
+
+  delete: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = EmployeeIdSchema.parse(req.params)
+
+    const existing = await EmployeeService.softDelete(id, req.user?.id)
+
+    res.locals.resourceId = id
+    res.locals.before = existing
+    res.locals.after = null
+    res.status(204).send()
+  }),
+
+  /*
   getEmployees: asyncHandler(async (req: Request, res: Response) => {
     // const offset = Number(req.query.offset ?? 0)
     // const limit = Number(req.query.limit ?? 10)
@@ -102,5 +176,5 @@ export const EmployeeController = {
     //console.log('Query: ', req.query)
     const result = await EmployeeService.findEmployeeDirectoryRange(query)
     return res.status(200).json(result)
-  }),
+  }),*/
 }

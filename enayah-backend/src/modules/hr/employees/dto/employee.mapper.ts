@@ -9,26 +9,30 @@ import { employees } from '../../../../db'
 
 type EmployeeSelect = InferSelectModel<typeof employees>
 
-export const toEmployeeDb = (dto: CreateEmployeeDto) => ({
-  employeeNumber: dto.employeeNumber,
+export function toEmployeeDb(dto: CreateEmployeeDto) {
+  return {
+    employeeNumber: dto.employeeNumber,
 
-  firstNameEn: dto.firstNameEn,
-  secondNameEn: dto.secondNameEn,
-  thirdNameEn: dto.thirdNameEn,
-  familyNameEn: dto.familyNameEn,
+    firstNameEn: dto.firstNameEn,
+    secondNameEn: dto.secondNameEn ?? null,
+    thirdNameEn: dto.thirdNameEn ?? null,
+    familyNameEn: dto.familyNameEn,
 
-  firstNameAr: dto.firstNameAr,
-  secondNameAr: dto.secondNameAr,
-  thirdNameAr: dto.thirdNameAr,
-  familyNameAr: dto.familyNameAr,
+    firstNameAr: dto.firstNameAr,
+    secondNameAr: dto.secondNameAr ?? null,
+    thirdNameAr: dto.thirdNameAr ?? null,
+    familyNameAr: dto.familyNameAr,
 
-  dateOfBirth: dto.dateOfBirth,
-  gender: dto.gender,
+    gender: dto.gender,
 
-  countryId: dto.countryId,
-})
+    dateOfBirth: dto.dateOfBirth ?? null,
+
+    countryId: dto.countryId ?? null,
+  }
+}
 
 export const toEmployeeUpdateDb = (dto: UpdateEmployeeDto) => ({
+  employeeNumber: dto.employeeNumber,
   ...(dto.firstNameEn !== undefined && { firstNameEn: dto.firstNameEn }),
   ...(dto.secondNameEn !== undefined && { secondNameEn: dto.secondNameEn }),
   ...(dto.thirdNameEn !== undefined && { thirdNameEn: dto.thirdNameEn }),
@@ -85,67 +89,148 @@ export const toEmployeeResponse = (
   }
 }
 
-export function toEmployeeDirectoryResponse(
-  //employee: any,
-  employee: {
-    id: string
-    employeeNumber: string
-    firstNameEn: string
-    secondNameEn: string | null
-    thirdNameEn: string | null
-    familyNameEn: string
-    firstNameAr: string
-    secondNameAr: string | null
-    thirdNameAr: string | null
-    familyNameAr: string
-    gender: string | null
-    nationalityEn: string | null
-    hireDate: string | null
-    employmentStatus: string | null
-    pcn: string | null
-    categoryCode: number | null
-    departmentId: string | null
-    departmentNameEn: string | null
-    departmentNameAr: string | null
-    positionId: string | null
-    positionTitleEn: string | null
-    positionTitleAr: string | null
-  },
-): EmployeeDirectoryResponse {
-  //const employment = employee.employments?.[0]
+// export function toEmployeeDirectoryResponse(
+//   //employee: any,
+//   employee: {
+//     id: string
+//     employeeNumber: string
+//     firstNameEn: string
+//     secondNameEn: string | null
+//     thirdNameEn: string | null
+//     familyNameEn: string
+//     firstNameAr: string
+//     secondNameAr: string | null
+//     thirdNameAr: string | null
+//     familyNameAr: string
+//     gender: string | null
+//     nationalityEn: string | null
+//     hireDate: string | null
+//     employmentStatus: string | null
+//     pcn: string | null
+//     categoryCode: number | null
+//     departmentId: string | null
+//     departmentNameEn: string | null
+//     departmentNameAr: string | null
+//     positionId: string | null
+//     positionTitleEn: string | null
+//     positionTitleAr: string | null
+//   },
+// ): EmployeeDirectoryResponse {
+//   //const employment = employee.employments?.[0]
 
-  //const item = employment?.positionItem
+//   //const item = employment?.positionItem
 
+//   return {
+//     id: employee.id,
+//     employeeNumber: employee.employeeNumber,
+//     fullNameEn:
+//       `${employee.firstNameEn} ${employee.secondNameEn ?? ''} ${employee.thirdNameEn ?? ''} ${employee.familyNameEn}`
+//         .replace(/\s+/g, ' ')
+//         .trim(),
+//     fullNameAr:
+//       `${employee.firstNameAr} ${employee.secondNameAr ?? ''} ${employee.thirdNameAr ?? ''} ${employee.familyNameAr}`
+//         .replace(/\s+/g, ' ')
+//         .trim(),
+//     gender: employee.gender,
+//     nationality: employee.nationalityEn ?? null, //employee.nationality?.nationalityEn ?? null,
+//     department: employee.departmentId //item?.department
+//       ? {
+//           id: employee.departmentId, //item.department.id,
+//           nameEn: employee.departmentNameEn!, //item.department.nameEn,
+//           nameAr: employee.departmentNameAr!,
+//         }
+//       : null,
+//     position: employee.positionId //item?.position
+//       ? {
+//           id: employee.positionId,
+//           titleEn: employee.positionTitleEn!,
+//           titleAr: employee.positionTitleAr ?? null,
+//         }
+//       : null,
+//     pcn: employee.pcn ?? null, //item?.itemNumber ?? null,
+//     categoryCode: employee.categoryCode ?? null,
+//     hireDate: employee.hireDate ?? null,
+//     employmentStatus: employee.employmentStatus ?? null,
+//   }
+// }
+
+export function toEmployeeProfileResponse(employee: any) {
   return {
-    id: employee.id,
-    employeeNumber: employee.employeeNumber,
-    fullNameEn:
-      `${employee.firstNameEn} ${employee.secondNameEn ?? ''} ${employee.thirdNameEn ?? ''} ${employee.familyNameEn}`
-        .replace(/\s+/g, ' ')
-        .trim(),
-    fullNameAr:
-      `${employee.firstNameAr} ${employee.secondNameAr ?? ''} ${employee.thirdNameAr ?? ''} ${employee.familyNameAr}`
-        .replace(/\s+/g, ' ')
-        .trim(),
-    gender: employee.gender,
-    nationality: employee.nationalityEn ?? null, //employee.nationality?.nationalityEn ?? null,
-    department: employee.departmentId //item?.department
+    personal: {
+      id: employee.id,
+      employeeNumber: employee.employeeNumber,
+
+      firstNameEn: employee.firstNameEn,
+      secondNameEn: employee.secondNameEn,
+      thirdNameEn: employee.thirdNameEn,
+      familyNameEn: employee.familyNameEn,
+
+      firstNameAr: employee.firstNameAr,
+      secondNameAr: employee.secondNameAr,
+      thirdNameAr: employee.thirdNameAr,
+      familyNameAr: employee.familyNameAr,
+
+      gender: employee.gender,
+      dateOfBirth: employee.dateOfBirth,
+
+      nationality: employee.nationality?.id ? employee.nationality : null,
+    },
+
+    employment: employee.employmentId
       ? {
-          id: employee.departmentId, //item.department.id,
-          nameEn: employee.departmentNameEn!, //item.department.nameEn,
-          nameAr: employee.departmentNameAr!,
+          id: employee.employmentId,
+
+          hireDate: employee.hireDate,
+          startDate: employee.startDate,
+          endDate: employee.endDate,
+
+          employmentType: employee.employmentType,
+          staffCategory: employee.staffCategory,
+          status: employee.employmentStatus,
+
+          contract: employee.contractId
+            ? {
+                id: employee.contractId,
+                contractNumber: employee.contractNumber,
+                contractType: employee.contractType,
+                startDate: employee.contractStartDate,
+                endDate: employee.contractEndDate,
+              }
+            : null,
+
+          movement: employee.movementId
+            ? {
+                id: employee.movementId,
+                movementType: employee.movementType,
+                sequenceNumber: employee.sequenceNumber,
+
+                positionItem: employee.positionItemId
+                  ? {
+                      id: employee.positionItemId,
+                      itemNumber: employee.itemNumber,
+                      categoryCode: employee.categoryCode,
+                      workforceCategory: employee.workforceCategory,
+                    }
+                  : null,
+
+                officialDepartment: employee.departmentId
+                  ? {
+                      id: employee.departmentId,
+                      nameEn: employee.departmentNameEn,
+                      nameAr: employee.departmentNameAr,
+                    }
+                  : null,
+
+                officialPosition: employee.positionId
+                  ? {
+                      id: employee.positionId,
+                      titleEn: employee.positionTitleEn,
+                      titleAr: employee.positionTitleAr,
+                    }
+                  : null,
+              }
+            : null,
         }
       : null,
-    position: employee.positionId //item?.position
-      ? {
-          id: employee.positionId,
-          titleEn: employee.positionTitleEn!,
-          titleAr: employee.positionTitleAr ?? null,
-        }
-      : null,
-    pcn: employee.pcn ?? null, //item?.itemNumber ?? null,
-    categoryCode: employee.categoryCode ?? null,
-    hireDate: employee.hireDate ?? null,
-    employmentStatus: employee.employmentStatus ?? null,
   }
 }

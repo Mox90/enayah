@@ -13,7 +13,7 @@ const db = drizzle(pool)
 
 async function runMigration() {
   try {
-    await migrate(db, { migrationsFolder: 'drizzle' })
+    await migrate(db, { migrationsFolder: 'drizzle/schema' })
     console.log('✅ Migrations applied')
   } catch (err) {
     console.error('❌ Migration failed:', err)

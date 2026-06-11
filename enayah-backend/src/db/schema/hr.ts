@@ -8,14 +8,20 @@ import {
   pgTable,
   text,
   timestamp,
+  unique,
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core'
 import { baseColumns } from './base'
 import {
+  appointmentTypeEnum,
+  assignmentReasonEnum,
+  contractStatusEnum,
+  contractTypeEnum,
   employmentStatusEnum,
   employmentTypeEnum,
   genderEnum,
+  movementTypeEnum,
   staffCategoryEnum,
   workforceCategoryEnum,
 } from './enums'
@@ -42,15 +48,6 @@ export const employees = pgTable('employees', {
   ...baseColumns,
 })
 
-export const employeesRelations = relations(employees, ({ one, many }) => ({
-  nationality: one(countries, {
-    fields: [employees.countryId],
-    references: [countries.id],
-  }),
-
-  employments: many(employments),
-}))
-
 export const employments = pgTable(
   'employments',
   {
@@ -59,11 +56,6 @@ export const employments = pgTable(
     employeeId: uuid('employee_id')
       .notNull()
       .references(() => employees.id, { onDelete: 'cascade' }),
-    //itemNumber: varchar('item_number', { length: 50 }),
-    positionItemId: uuid('position_item_id').references(
-      () => positionItems.id,
-      { onDelete: 'restrict' },
-    ), // WHERE they are budgeted (PCN) or what PCN funds the employee
 
     hireDate: date('hire_date').notNull(),
     startDate: date('start_date').notNull(),
@@ -77,9 +69,7 @@ export const employments = pgTable(
     status: employmentStatusEnum('employment_status')
       .default('active')
       .notNull(), // active, terminated
-
     causeOfLeaving: varchar('cause_of_leaving', { length: 255 }),
-
     ...baseColumns,
   },
   (table) => ({
@@ -88,6 +78,44 @@ export const employments = pgTable(
 )
 //CREATE INDEX idx_employments_employee_id ON employments(employee_id);
 
+export const appointments = pgTable(
+  'appointments',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    employmentId: uuid('employment_id')
+      .notNull()
+      .references(() => employments.id, {
+        onDelete: 'cascade',
+      }),
+    //positionItemId: uuid('position_item_id').references(() => positionItems.id),
+    actualDepartmentId: uuid('actual_department_id').references(
+      () => departments.id,
+    ),
+    actualPositionId: uuid('actual_position_id').references(() => positions.id),
+    managerId: uuid('manager_id').references(() => employees.id),
+    startDate: date('start_date').notNull(),
+    endDate: date('end_date'),
+    appointmentType: appointmentTypeEnum('appointment_type')
+      .default('primary')
+      .notNull(),
+    remarks: text('remarks'),
+    assignmentReason: assignmentReasonEnum('assignment_reason'), //Organizational Restructuring, Temporary Coverage, Promotion, Management Decision, Acting Capacity, Rotation, Service Need
+    // status: varchar('status', { length: 20 }).$type<
+    //   'active' | 'ended' | 'cancelled'
+    // >(),
+    approvedBy: uuid('approved_by'),
+    approvedAt: timestamp('approved_at'),
+    ...baseColumns,
+  },
+  (table) => ({
+    employmentIdx: index('idx_appointments_employment').on(table.employmentId),
+    validDateRange: check(
+      'chk_appointments_valid_date_range',
+      sql`${table.endDate} IS NULL OR ${table.endDate} >= ${table.startDate}`,
+    ),
+  }),
+)
+
 export const contracts = pgTable(
   'contracts',
   {
@@ -95,11 +123,19 @@ export const contracts = pgTable(
     employmentId: uuid('employment_id')
       .notNull()
       .references(() => employments.id),
+    contractNumber: varchar('contract_number', {
+      length: 50,
+    })
+      .unique() // must be deterministic ex: 2026-000001, 2026-000002
+      .notNull(),
     startDate: date('start_date').notNull(),
     endDate: date('end_date').notNull(),
-    contractType: varchar('contract_type', { length: 50 }) // initial | renewal | amendment
+    contractType: contractTypeEnum('contract_type')
+      .default('initial') // initial | renewal | amendment
       .notNull(),
-    status: varchar('status', { length: 20 }).default('active'),
+    status: contractStatusEnum('status').default('draft').notNull(),
+    signedDate: date('signed_date'),
+    documentPath: text('document_path'),
     notes: text('notes'),
     ...baseColumns,
   },
@@ -112,61 +148,85 @@ export const contracts = pgTable(
   }),
 )
 
-export const jobAssignments = pgTable(
-  'job_assignments',
+export const contractMovements = pgTable(
+  'contract_movements',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-
-    employmentId: uuid('employment_id')
+    contractId: uuid('contract_id')
       .notNull()
-      .references(() => employments.id, { onDelete: 'cascade' }),
-
-    departmentId: uuid('department_id').references(() => departments.id), // point to the real/actual department of an employee
-    positionId: uuid('position_id').references(() => positions.id), // point to the real/actual role/position of an employee
-
-    managerId: uuid('manager_id').references(() => employees.id, {
-      onDelete: 'restrict',
-    }),
+      .references(() => contracts.id, {
+        onDelete: 'cascade',
+      }),
+    positionItemId: uuid('position_item_id')
+      .references(() => positionItems.id, { onDelete: 'restrict' })
+      .notNull(), // WHERE they are budgeted (PCN) or what PCN funds the employee
+    officialDepartmentId: uuid('official_department_id')
+      .references(() => departments.id)
+      .notNull(), // point to the legal department of an employee
+    officialPositionId: uuid('official_position_id')
+      .references(() => positions.id)
+      .notNull(), // point to the legal role/position of an employee
 
     startDate: date('start_date').notNull(),
     endDate: date('end_date'),
 
-    isPrimary: boolean('is_primary').default(true),
+    sequenceNumber: integer('sequence_number').default(1).notNull(),
+    movementType: movementTypeEnum('movement_type')
+      .default('initial')
+      .notNull(),
+    remarks: text('remarks'),
 
     ...baseColumns,
   },
 
   (table) => ({
-    employmentIdx: index('idx_job_assignments_employment_id').on(
-      table.employmentId,
+    contractIdx: index('idx_contract_movements_contract_id').on(
+      table.contractId,
+    ),
+    uniqueSequence: unique('uq_contract_sequence').on(
+      table.contractId,
+      table.sequenceNumber,
     ),
     validDateRange: check(
       'chk_job_assignments_valid_date_range',
       sql`${table.endDate} IS NULL OR ${table.endDate} >= ${table.startDate}`,
     ),
+    validSequence: check(
+      'sequence_number_whole_number',
+      sql`${table.sequenceNumber} >= 1`,
+    ),
   }),
 )
 
-export const compensations = pgTable('compensations', {
-  id: uuid('id').defaultRandom().primaryKey(),
+export const compensations = pgTable(
+  'compensations',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
 
-  employmentId: uuid('employment_id')
-    .notNull()
-    .references(() => employments.id),
-  effectiveDate: date('effective_date').notNull(),
+    contractMovementId: uuid('contract_movement_id')
+      .notNull()
+      .references(() => contractMovements.id)
+      .unique(),
+    effectiveDate: date('effective_date').notNull(),
 
-  baseSalary: numeric('base_salary').notNull(),
-  status: varchar('status', { length: 20 }) // draft, approved, applied
-    .$type<'draft' | 'approved' | 'applied'>()
-    .default('draft')
-    .notNull(),
-  reason: varchar('reason', { length: 50 }), // increment, promotion
+    baseSalary: numeric('base_salary').notNull(),
+    status: varchar('status', { length: 20 }) // draft, approved, applied
+      .$type<'draft' | 'approved' | 'applied'>()
+      .default('draft')
+      .notNull(),
+    reason: varchar('reason', { length: 50 }), // increment, promotion
 
-  approvedBy: uuid('approved_by'),
-  approvedAt: timestamp('approved_at'),
+    approvedBy: uuid('approved_by'),
+    approvedAt: timestamp('approved_at'),
 
-  createdAt: timestamp('created_at').defaultNow(),
-})
+    createdAt: timestamp('created_at').defaultNow(),
+  },
+  (table) => ({
+    contractMovementIdx: index('idx_compensations_contract_movement').on(
+      table.contractMovementId,
+    ),
+  }),
+)
 
 export const compensationAllowances = pgTable('compensation_allowances', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -204,6 +264,87 @@ export const positionItems = pgTable('position_items', {
   ...baseColumns,
 })
 
+export const employeesRelations = relations(employees, ({ one, many }) => ({
+  nationality: one(countries, {
+    fields: [employees.countryId],
+    references: [countries.id],
+  }),
+  employments: many(employments),
+  //managers: many(contractMovements),
+}))
+
+export const employmentsRelations = relations(employments, ({ one, many }) => ({
+  employee: one(employees, {
+    fields: [employments.employeeId],
+    references: [employees.id],
+  }),
+  contracts: many(contracts),
+  appointments: many(appointments),
+}))
+
+export const appointmentsRelations = relations(appointments, ({ one }) => ({
+  employment: one(employments, {
+    fields: [appointments.employmentId],
+    references: [employments.id],
+  }),
+
+  department: one(departments, {
+    fields: [appointments.actualDepartmentId],
+    references: [departments.id],
+  }),
+
+  position: one(positions, {
+    fields: [appointments.actualPositionId],
+    references: [positions.id],
+  }),
+
+  manager: one(employees, {
+    fields: [appointments.managerId],
+    references: [employees.id],
+  }),
+
+  // positionItem: one(positionItems, {
+  //   fields: [appointments.positionItemId],
+  //   references: [positionItems.id],
+  // }),
+}))
+
+export const contractsRelations = relations(contracts, ({ one, many }) => ({
+  employment: one(employments, {
+    fields: [contracts.employmentId],
+    references: [employments.id],
+  }),
+
+  movements: many(contractMovements),
+}))
+
+export const contractMovementsRelations = relations(
+  contractMovements,
+  ({ one, many }) => ({
+    contract: one(contracts, {
+      fields: [contractMovements.contractId],
+      references: [contracts.id],
+    }),
+
+    positionItem: one(positionItems, {
+      fields: [contractMovements.positionItemId],
+      references: [positionItems.id],
+    }),
+
+    department: one(departments, {
+      fields: [contractMovements.officialDepartmentId],
+      references: [departments.id],
+    }),
+
+    position: one(positions, {
+      fields: [contractMovements.officialPositionId],
+      references: [positions.id],
+    }),
+
+    compensations: many(compensations),
+  }),
+)
+
 export const positionItemsRelations = relations(
   positionItems,
   ({ one, many }) => ({
@@ -222,18 +363,29 @@ export const positionItemsRelations = relations(
       references: [jobGrades.id],
     }),
 
-    employments: many(employments),
+    contractMovements: many(contractMovements),
+    //appointments: many(appointments),
   }),
 )
 
-export const employmentsRelations = relations(employments, ({ one }) => ({
-  employee: one(employees, {
-    fields: [employments.employeeId],
-    references: [employees.id],
-  }),
+export const compensationsRelations = relations(
+  compensations,
+  ({ one, many }) => ({
+    contractMovement: one(contractMovements, {
+      fields: [compensations.contractMovementId],
+      references: [contractMovements.id],
+    }),
 
-  positionItem: one(positionItems, {
-    fields: [employments.positionItemId],
-    references: [positionItems.id],
+    allowances: many(compensationAllowances),
   }),
-}))
+)
+
+export const compensationAllowancesRelations = relations(
+  compensationAllowances,
+  ({ one }) => ({
+    compensation: one(compensations, {
+      fields: [compensationAllowances.compensationId],
+      references: [compensations.id],
+    }),
+  }),
+)
