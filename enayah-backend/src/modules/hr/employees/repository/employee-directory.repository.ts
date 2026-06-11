@@ -3,9 +3,11 @@ import {
   asc,
   desc,
   eq,
+  gte,
   ilike,
   inArray,
   isNull,
+  lte,
   or,
   sql,
 } from 'drizzle-orm'
@@ -35,6 +37,10 @@ export const EmployeeDirectoryRepository = {
       positionIds,
       categoryCodes,
       employmentStatuses,
+      hireDateFrom,
+      hireDateTo,
+      contractEndDateFrom,
+      contractEndDateTo,
       sortBy,
       sortOrder,
     } = params
@@ -119,6 +125,22 @@ export const EmployeeDirectoryRepository = {
       conditions.push(
         inArray(latestEmploymentRow.status, employmentStatuses as any[]),
       )
+    }
+
+    if (hireDateFrom) {
+      conditions.push(gte(latestEmploymentRow.hireDate, hireDateFrom))
+    }
+
+    if (hireDateTo) {
+      conditions.push(lte(latestEmploymentRow.hireDate, hireDateTo))
+    }
+
+    if (contractEndDateFrom) {
+      conditions.push(gte(contracts.endDate, contractEndDateFrom))
+    }
+
+    if (contractEndDateTo) {
+      conditions.push(lte(contracts.endDate, contractEndDateTo))
     }
 
     //--------------------------------

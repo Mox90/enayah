@@ -20,6 +20,12 @@ type EmployeeFilters = {
   genders: string[]
   nationalities: string[]
   employmentStatuses: string[]
+
+  hireDateFrom?: string
+  hireDateTo?: string
+
+  contractEndDateFrom?: string
+  contractEndDateTo?: string
 }
 
 export function EmployeeWorkspace() {
@@ -43,6 +49,12 @@ export function EmployeeWorkspace() {
     genders: [] as string[],
     nationalities: [] as string[],
     employmentStatuses: [] as string[],
+
+    hireDateFrom: undefined,
+    hireDateTo: undefined,
+
+    contractEndDateFrom: undefined,
+    contractEndDateTo: undefined,
   })
 
   //------------------------------------
@@ -84,6 +96,12 @@ export function EmployeeWorkspace() {
             genders: newFilters.genders ?? [],
             nationalities: newFilters.nationalities ?? [],
             employmentStatuses: newFilters.employmentStatuses ?? [],
+
+            hireDateFrom: newFilters.hireDateFrom,
+            hireDateTo: newFilters.hireDateTo,
+
+            contractEndDateFrom: newFilters.contractEndDateFrom,
+            contractEndDateTo: newFilters.contractEndDateTo,
           })
           setPage(1)
           setFilterOpen(false)
@@ -96,6 +114,12 @@ export function EmployeeWorkspace() {
             genders: [],
             nationalities: [],
             employmentStatuses: [],
+
+            hireDateFrom: undefined,
+            hireDateTo: undefined,
+
+            contractEndDateFrom: undefined,
+            contractEndDateTo: undefined,
           })
           setPage(1)
           setFilterOpen(false)

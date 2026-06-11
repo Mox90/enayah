@@ -141,37 +141,144 @@ export const contractStatusEnum = pgEnum('status', [
 ])
 
 export const employeeDocumentTypeEnum = pgEnum('employee_document_type', [
+  //-----------------------------------
   // Recruitment
+  //-----------------------------------
+
   'cv',
   'job_application',
   'interview_evaluation',
+  'offer_letter',
 
+  //-----------------------------------
   // Employment
-  'job_offer_acceptance',
-  'letter_of_appointment',
+  //-----------------------------------
+
   'employment_contract',
+  'contract_amendment',
+  'contract_renewal',
+  'appointment_letter',
   'job_description',
-  'non_disclosure_agreement',
+  'nda',
 
-  // Verification
-  'primary_source_verification',
-  'background_check',
-  'reference_check',
-
-  // Occupational Health
-  'pre_employment_medical',
-  'fit_to_work_certificate',
-  'vaccination_record',
-
-  // Leave
-  'sick_leave_certificate',
-  'maternity_leave_document',
-
+  //-----------------------------------
   // Identity
+  //-----------------------------------
+
   'national_id',
   'iqama',
   'passport',
+  'visa',
+  'driving_license',
+  'gcc_id',
+  'other_identification',
 
-  // Other
+  //-----------------------------------
+  // Education
+  //-----------------------------------
+
+  'diploma',
+  'transcript',
+  'board_certificate',
+  'fellowship_certificate',
+  'training_certificate',
+
+  //-----------------------------------
+  // Professional License
+  //-----------------------------------
+
+  'professional_license',
+  'saudi_council_registration',
+  'home_country_license',
+
+  //-----------------------------------
+  // Life Support
+  //-----------------------------------
+
+  'bls_certificate',
+  'acls_certificate',
+  'pals_certificate',
+  'atls_certificate',
+  'life_support_other',
+
+  //-----------------------------------
+  // Verification
+  //-----------------------------------
+
+  'primary_source_verification',
+  'background_check',
+  'reference_check',
+  'good_standing_certificate',
+
+  //-----------------------------------
+  // Medical
+  //-----------------------------------
+
+  'pre_employment_medical',
+  'fit_to_work_certificate',
+  'vaccination_record',
+  'occupational_health_record',
+
+  //-----------------------------------
+  // Insurance
+  //-----------------------------------
+
+  'malpractice_insurance',
+  'health_insurance',
+
+  //-----------------------------------
+  // Performance
+  //-----------------------------------
+
+  'orientation_certificate',
+  'probation_evaluation',
+  'performance_appraisal',
+
+  //-----------------------------------
+  // HR
+  //-----------------------------------
+
+  'promotion_letter',
+  'transfer_letter',
+  'disciplinary_action',
+  'warning_letter',
+  'termination_letter',
+  'resignation_letter',
+  'retirement_letter',
+
+  //-----------------------------------
+  // Leave
+  //-----------------------------------
+
+  'sick_leave_certificate',
+  'maternity_leave_document',
+
+  //-----------------------------------
+  // Miscellaneous
+  //-----------------------------------
+
+  'other',
+])
+
+export const identificationTypeEnum = pgEnum('identification_type', [
+  'national_id',
+  'iqama',
+  'gcc_id',
+  'passport',
+  'other',
+])
+
+export const emailTypeEnum = pgEnum('email_type', [
+  'work',
+  'personal',
+  'secondary',
+  'other',
+])
+
+export const phoneTypeEnum = pgEnum('phone_type', [
+  'mobile',
+  'work',
+  'home',
+  'fax',
   'other',
 ])

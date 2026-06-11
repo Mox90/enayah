@@ -8,6 +8,13 @@
       "when": 1781111138407,
       "tag": "0000_condemned_sally_floyd",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781206508006,
+      "tag": "0001_normal_captain_stacy",
+      "breakpoints": true
     }
   ]
 }

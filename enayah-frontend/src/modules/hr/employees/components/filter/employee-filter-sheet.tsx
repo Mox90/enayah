@@ -18,6 +18,9 @@ import { Button } from '@/components/ui/button'
 import { EnterpriseFilterCheckboxGroup } from '@/components/filter/enterprise-filter-checkbox-group'
 import { DepartmentLookup } from '@/modules/hr/departments/components/department-lookup'
 import { PositionLookup } from '@/modules/hr/positions/components/position-lookup'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { DatePicker } from '@/components/dialogs/date-picker'
 
 interface EmployeeFilters {
   departmentIds: string[]
@@ -26,17 +29,19 @@ interface EmployeeFilters {
   genders: string[]
   nationalities: string[]
   employmentStatuses: string[]
+
+  hireDateFrom?: string
+  hireDateTo?: string
+
+  contractEndDateFrom?: string
+  contractEndDateTo?: string
 }
 
 interface Props {
   open: boolean
-
   onOpenChange: (open: boolean) => void
-
   values: EmployeeFilters
-
   onApply: (filters: EmployeeFilters) => void
-
   onReset: () => void
 }
 
@@ -47,7 +52,7 @@ export function EmployeeFilterSheet({
   onApply,
   onReset,
 }: Props) {
-  const [local, setLocal] = useState(values)
+  const [local, setLocal] = useState<EmployeeFilters>({ ...values })
 
   return (
     <Sheet
@@ -87,6 +92,83 @@ export function EmployeeFilterSheet({
             }
           />
 
+          <div className='rounded-lg border p-4 space-y-4'>
+            <h3 className='text-lg font-semibold'>Date Filters</h3>
+
+            {/* Hire Date */}
+
+            <div className='space-y-2'>
+              <Label>Hire Date</Label>
+
+              <div className='grid grid-cols-2 gap-3'>
+                <div className='space-y-1'>
+                  <div className='text-xs text-muted-foreground'>From</div>
+
+                  <DatePicker
+                    value={local.hireDateFrom}
+                    onChange={(value) =>
+                      setLocal({
+                        ...local,
+
+                        hireDateFrom: value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className='space-y-1'>
+                  <div className='text-xs text-muted-foreground'>To</div>
+                  <DatePicker
+                    value={local.hireDateTo}
+                    onChange={(value) =>
+                      setLocal({
+                        ...local,
+
+                        hireDateTo: value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Contract End Date */}
+
+            <div className='space-y-2'>
+              <Label>Contract End Date</Label>
+
+              <div className='grid grid-cols-2 gap-3'>
+                <div className='space-y-1'>
+                  <div className='text-xs text-muted-foreground'>From</div>
+
+                  <DatePicker
+                    value={local.contractEndDateFrom}
+                    onChange={(value) =>
+                      setLocal({
+                        ...local,
+                        contractEndDateFrom: value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className='space-y-1'>
+                  <div className='text-xs text-muted-foreground'>To</div>
+
+                  <DatePicker
+                    value={local.contractEndDateTo}
+                    onChange={(value) =>
+                      setLocal({
+                        ...local,
+                        contractEndDateTo: value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* CountryLookup */}
 
           <div className='text-lg font-medium'>Gender</div>
@@ -106,6 +188,26 @@ export function EmployeeFilterSheet({
               setLocal({
                 ...local,
                 genders,
+              })
+            }
+          />
+
+          <div className='text-lg font-medium'>Category</div>
+
+          <EnterpriseFilterCheckboxGroup
+            values={local.categoryCodes.map(String)}
+            options={[
+              { value: '1000', label: 'Physician' },
+              { value: '2000', label: 'Nurse' },
+              { value: '3000', label: 'Allied Health' },
+              { value: '4000', label: 'Administrative' },
+              { value: '5000', label: 'Support Services' },
+            ]}
+            onChange={(values) =>
+              setLocal({
+                ...local,
+
+                categoryCodes: values.map(Number),
               })
             }
           />
@@ -137,12 +239,31 @@ export function EmployeeFilterSheet({
         </div>
 
         <div className='flex gap-3 m-4 '>
-          <Button variant='outline' onClick={onReset}>
+          <Button
+            variant='outline'
+            onClick={() => {
+              const empty: EmployeeFilters = {
+                departmentIds: [],
+                positionIds: [],
+                categoryCodes: [],
+                genders: [],
+                nationalities: [],
+                employmentStatuses: [],
+                hireDateFrom: undefined,
+                hireDateTo: undefined,
+                contractEndDateFrom: undefined,
+                contractEndDateTo: undefined,
+              }
+              setLocal(empty)
+              onReset()
+            }}
+          >
             Reset
           </Button>
 
           <Button
             onClick={() => {
+              //console.log(local)
               onApply(local)
               onOpenChange(false)
             }}
