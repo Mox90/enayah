@@ -8,6 +8,11 @@ export interface EmployeeDirectoryParams {
   genders?: string[]
   nationalities?: string[]
   employmentStatuses?: string[]
+  hireDateFrom?: string
+  hireDateTo?: string
+
+  contractEndDateFrom?: string
+  contractEndDateTo?: string
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
 }

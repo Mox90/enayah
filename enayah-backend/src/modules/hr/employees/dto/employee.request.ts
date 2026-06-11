@@ -9,6 +9,10 @@ export const EmployeeDirectoryQuerySchema = z.object({
   categoryCodes: z.array(z.coerce.number().int()).optional(),
   genders: z.array(z.enum(['male', 'female'])).optional(),
   nationalities: z.array(z.string().length(2)).optional(),
+  hireDateFrom: z.string().optional(),
+  hireDateTo: z.string().optional(),
+  contractEndDateFrom: z.string().optional(),
+  contractEndDateTo: z.string().optional(),
   employmentStatuses: z
     .array(
       z.enum([
