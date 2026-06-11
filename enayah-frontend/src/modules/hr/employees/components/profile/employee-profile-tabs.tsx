@@ -2,13 +2,14 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import { EmployeeProfile } from '../../types/employee-directory.types'
+//import { EmployeeProfile } from '../../types/employee-directory.types'
 import PersonalTab from './tabs/personal-tab'
 import EmploymentTab from './tabs/employment-tab'
 import CredentialsTab from './tabs/credentials-tab'
 import TrainingTab from './tabs/training-tab'
 import CPDTab from './tabs/cpd-tab'
 import { useState } from 'react'
+import { EmployeeProfile } from '../../types/employee-profile.types'
 
 interface Props {
   employeeId: string

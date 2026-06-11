@@ -1,36 +1,78 @@
 //import { api } from '@/lib/api'
 import { api } from '@/lib/api/client'
 //import { PaginatedResponse } from '@/types/pagination'
-import { Employee, EmployeeListResponse } from '../types/employee-view.types'
+//import { Employee, EmployeeListResponse } from '../types/employee-view.types'
 import { API_ENDPOINTS } from '@/lib/api/endpoints'
-import { DepartmentHierarchyNode } from '../types/employee-hierarchy.types'
 import {
   EmployeeDirectoryParams,
   EmployeeDirectoryResponse,
-  EmployeeProfile,
 } from '../types/employee-directory.types'
+import {
+  CreateEmployeeDto,
+  UpdateEmployeeDto,
+} from '../types/employee-request.types'
+import { Employee } from '../types/employee.types'
+import { EmployeeProfile } from '../types/employee-profile.types'
 
 //import { Employee } from '../types/employee.types'
 
 export const employeeService = {
-  /*async getEmployees(params: {
-    page: number
-    limit: number
-    search?: string
-    sortBy?: string
-    sortOrder?: 'asc' | 'desc'
-  }) {
-    const response = await api.get<PaginatedResponse<Employee>>(
-      `${API_ENDPOINTS.hr.employees}`,
-      {
-        params,
-      },
+  //----------------------------------
+  // Paginated EMployees
+  //----------------------------------
+  getDirectory: async (
+    params: EmployeeDirectoryParams,
+  ): Promise<EmployeeDirectoryResponse> => {
+    const response = await api.get(API_ENDPOINTS.hr.employees, { params })
+    return response.data
+  },
+
+  //----------------------------------
+  // Employee Master Record
+  //----------------------------------
+
+  getEmployee: async (id: string): Promise<Employee> => {
+    const response = await api.get(`${API_ENDPOINTS.hr.employees}/${id}`)
+    return response.data
+  },
+
+  //----------------------------------
+  // Employee Profile
+  //----------------------------------
+
+  getProfile: async (id: string): Promise<EmployeeProfile> => {
+    const response = await api.get(
+      `${API_ENDPOINTS.hr.employees}/${id}/profile`,
     )
 
     return response.data
-  },*/
+  },
 
-  getEmployeesByRange: async (params: {
+  async create(dto: CreateEmployeeDto): Promise<Employee> {
+    const response = await api.post(API_ENDPOINTS.hr.employees, dto)
+
+    return response.data
+  },
+
+  //----------------------------------
+  // Update
+  //----------------------------------
+
+  update: async (id: string, dto: UpdateEmployeeDto): Promise<Employee> => {
+    const response = await api.put(`${API_ENDPOINTS.hr.employees}/${id}`, dto)
+
+    return response.data
+  },
+
+  //----------------------------------
+  // Soft Delete
+  //----------------------------------
+
+  async delete(id: string): Promise<void> {
+    await api.delete(`${API_ENDPOINTS.hr.employees}/${id}`)
+  },
+
+  /*getEmployeesByRange: async (params: {
     offset: number
     limit: number
     search?: string
@@ -45,11 +87,6 @@ export const employeeService = {
     )
     return response.data
   },
-
-  /*getOrganizationView: async (): Promise<OrganizationNode[]> => {
-    const response = await api.get(`${API_ENDPOINTS.hr.positionItems}/org-view`)
-    return response.data
-  },*/
 
   getOrganizationTreeView: async (): Promise<DepartmentHierarchyNode[]> => {
     const response = await api.get(`${API_ENDPOINTS.org.departments}/tree`)
@@ -78,5 +115,5 @@ export const employeeService = {
       `${API_ENDPOINTS.hr.employees}/${id}/profile`,
     )
     return response.data
-  },
+  },*/
 }

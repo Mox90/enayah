@@ -95,42 +95,83 @@ export const lifeSupportTypeEnum = pgEnum('life_support_type', [
   'other',
 ])
 
-export const employeeDocumentTypeEnum = pgEnum(
-  'employee_document_type',
+export const contractTypeEnum = pgEnum('contract_type', [
+  'initial',
+  'renewal',
+  'amendment',
+])
 
-  [
-    // Recruitment
-    'cv',
-    'job_application',
-    'interview_evaluation',
+export const movementTypeEnum = pgEnum('movement_type', [
+  'initial',
+  'renewal',
+  'promotion',
+  'transfer',
+  'demotion',
+  'temporary_assignment',
+  'acting',
+  'amendment',
+])
 
-    // Employment
-    'job_offer_acceptance',
-    'letter_of_appointment',
-    'employment_contract',
-    'job_description',
-    'non_disclosure_agreement',
+export const appointmentTypeEnum = pgEnum('appointment_type', [
+  'primary',
+  'acting',
+  'temporary',
+  'rotation',
+  'secondment',
+  'concurrent',
+  'permanent_transfer',
+])
 
-    // Verification
-    'primary_source_verification',
-    'background_check',
-    'reference_check',
+export const assignmentReasonEnum = pgEnum('assignment_reason', [
+  'organizational_restructuring',
+  'temporary_coverage',
+  'promotion',
+  'management_decision',
+  'acting_capacity',
+  'rotation',
+  'service_need',
+])
 
-    // Occupational Health
-    'pre_employment_medical',
-    'fit_to_work_certificate',
-    'vaccination_record',
+export const contractStatusEnum = pgEnum('status', [
+  'draft',
+  'active',
+  'superseded',
+  'cancelled',
+  'expired',
+])
 
-    // Leave
-    'sick_leave_certificate',
-    'maternity_leave_document',
+export const employeeDocumentTypeEnum = pgEnum('employee_document_type', [
+  // Recruitment
+  'cv',
+  'job_application',
+  'interview_evaluation',
 
-    // Identity
-    'national_id',
-    'iqama',
-    'passport',
+  // Employment
+  'job_offer_acceptance',
+  'letter_of_appointment',
+  'employment_contract',
+  'job_description',
+  'non_disclosure_agreement',
 
-    // Other
-    'other',
-  ],
-)
+  // Verification
+  'primary_source_verification',
+  'background_check',
+  'reference_check',
+
+  // Occupational Health
+  'pre_employment_medical',
+  'fit_to_work_certificate',
+  'vaccination_record',
+
+  // Leave
+  'sick_leave_certificate',
+  'maternity_leave_document',
+
+  // Identity
+  'national_id',
+  'iqama',
+  'passport',
+
+  // Other
+  'other',
+])

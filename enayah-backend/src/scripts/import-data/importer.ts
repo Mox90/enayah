@@ -1,4 +1,4 @@
-import { db } from '../../db'
+import { appointments, compensations, contractMovements, db } from '../../db'
 import {
   departments,
   positions,
@@ -6,15 +6,16 @@ import {
   employees,
   employments,
   contracts,
-  jobAssignments,
   countries,
 } from '../../db/schema'
-import { and, eq, InferInsertModel } from 'drizzle-orm'
+import { and, desc, eq, InferInsertModel, like } from 'drizzle-orm'
 import ExcelJS from 'exceljs'
 
 type EmploymentInsert = InferInsertModel<typeof employments>
 type ContractInsert = InferInsertModel<typeof contracts>
-type JobAssignmentInsert = InferInsertModel<typeof jobAssignments>
+type ContractMovementInsert = InferInsertModel<typeof contractMovements>
+type CompensationInsert = InferInsertModel<typeof compensations>
+type AppointmentInsert = InferInsertModel<typeof appointments>
 
 // =========================
 // HELPERS
@@ -63,6 +64,30 @@ function parseDateOnly(value: any): string | null {
   }
 
   return formatDateOnlyLocal(date) // ✅ FIXED
+}
+
+// 1. Accept the transaction context 'tx' as the first argument
+const generateSequenceNumber = async (
+  tx: any,
+  hireYear: string,
+): Promise<string> => {
+  const latestContract = await tx
+    .select({ contractNumber: contracts.contractNumber })
+    .from(contracts)
+    .where(like(contracts.contractNumber, `${hireYear}-%`))
+    .orderBy(desc(contracts.contractNumber))
+    .limit(1)
+    .for('update') // ⚠️ Locks the row from other concurrent readers
+    .then((res: any[]) => res[0])
+
+  let nextSequence = 1
+  if (latestContract?.contractNumber) {
+    const currentSequenceStr = latestContract.contractNumber.split('-')[1]
+    nextSequence = parseInt(currentSequenceStr ?? '1', 10) + 1
+  }
+
+  const paddedSequence = String(nextSequence).padStart(6, '0')
+  return `${hireYear}-${paddedSequence}`
 }
 
 function assertExists<T>(value: T | undefined | null, message: string): T {
@@ -274,7 +299,6 @@ export async function runImport() {
           if (!employmentExists) {
             const data: EmploymentInsert = {
               employeeId: employee.id,
-              positionItemId: positionItem.id,
               hireDate: parseDateOnly(row.hireDate)!,
               startDate: parseDateOnly(row.startDate)!,
               employmentType: 'full_time',
@@ -294,32 +318,82 @@ export async function runImport() {
             // =========================
             const hireDate = parseDateOnly(row.hireDate)
 
-            const contractType =
-              hireDate && new Date(hireDate) >= new Date('2025-05-01')
-                ? 'initial'
-                : 'renewal'
+            const hireYear = hireDate
+              ? hireDate.substring(0, 4)
+              : new Date().getFullYear().toString()
 
-            const contractData: ContractInsert = {
+            // const contractType =
+            //   hireDate && new Date(hireDate) >= new Date('2025-05-01')
+            //     ? 'initial'
+            //     : 'renewal'
+
+            const contractNumber = await generateSequenceNumber(tx, hireYear)
+
+            const [contract] = await tx
+              .insert(contracts)
+              .values({
+                employmentId: emp.id,
+                contractNumber,
+                startDate: parseDateOnly(row.startDate)!,
+                endDate: parseDateOnly(row.endDate)!,
+                contractType: 'initial',
+                status: 'active',
+              })
+              .returning()
+
+            const createdContract = assertExists(
+              contract,
+              'Failed to create contract',
+            )
+
+            // =========================
+            // 8. CONTRACT MOVEMENT
+            // =========================
+
+            const [movement] = await tx
+              .insert(contractMovements)
+              .values({
+                contractId: createdContract.id,
+                positionItemId: positionItem.id,
+                officialDepartmentId: department.id,
+                officialPositionId: position.id,
+                startDate: parseDateOnly(row.startDate)!,
+                endDate: parseDateOnly(row.endDate),
+                sequenceNumber: 1,
+                movementType: 'initial',
+                remarks: null,
+              })
+              .returning()
+
+            const createdMovement = assertExists(
+              movement,
+              'Failed to create movement',
+            )
+
+            // =========================
+            // 9. COMPENSATION
+            // =========================
+
+            await tx.insert(compensations).values({
+              contractMovementId: createdMovement.id,
+              effectiveDate: parseDateOnly(row.startDate)!,
+              baseSalary: '0',
+              status: 'approved',
+              reason: 'initial',
+            })
+
+            // =========================
+            // 10. APPOINTMENT
+            // =========================
+
+            await tx.insert(appointments).values({
               employmentId: emp.id,
+              actualDepartmentId: department.id,
+              actualPositionId: position.id,
               startDate: parseDateOnly(row.startDate)!,
-              endDate: parseDateOnly(row.endDate),
-              contractType,
-            } as any
-
-            await tx.insert(contracts).values(contractData)
-
-            // =========================
-            // 8. JOB ASSIGNMENT
-            // =========================
-            const jobAssignmentData: JobAssignmentInsert = {
-              employmentId: emp.id,
-              departmentId: department.id,
-              positionId: position.id,
-              startDate: parseDateOnly(row.startDate),
-              isPrimary: true,
-            } as any
-
-            await tx.insert(jobAssignments).values(jobAssignmentData)
+              appointmentType: 'primary',
+              assignmentReason: 'service_need',
+            })
 
             console.log(`✅ Imported: ${row.employeeNumber}`)
           }

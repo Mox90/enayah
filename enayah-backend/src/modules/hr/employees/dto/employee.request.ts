@@ -1,6 +1,80 @@
-// employee.request.ts
 import { z } from 'zod'
 
+export const EmployeeDirectoryQuerySchema = z.object({
+  offset: z.coerce.number().int().min(0).default(0),
+  limit: z.coerce.number().int().min(1).max(500).default(20),
+  search: z.string().trim().optional(),
+  departmentIds: z.array(z.uuid()).optional(),
+  positionIds: z.array(z.uuid()).optional(),
+  categoryCodes: z.array(z.coerce.number().int()).optional(),
+  genders: z.array(z.enum(['male', 'female'])).optional(),
+  nationalities: z.array(z.string().length(2)).optional(),
+  employmentStatuses: z
+    .array(
+      z.enum([
+        'active',
+        'terminated',
+        'resigned',
+        'retired',
+        'deceased',
+        'suspended',
+      ]),
+    )
+    .optional(),
+
+  sortBy: z
+    .enum([
+      'employeeNumber',
+      'hireDate',
+      'department',
+      'position',
+      'categoryCode',
+      'nationality',
+      'gender',
+      'createdAt',
+    ])
+    .optional(),
+
+  sortOrder: z.enum(['asc', 'desc']).default('asc'),
+})
+
+export type EmployeeDirectoryQueryDto = z.infer<
+  typeof EmployeeDirectoryQuerySchema
+>
+
+export const CreateEmployeeSchema = z.object({
+  employeeNumber: z.string().min(1).max(10),
+
+  firstNameEn: z.string().min(1).max(100),
+  secondNameEn: z.string().max(100).nullable().optional(),
+  thirdNameEn: z.string().max(100).nullable().optional(),
+  familyNameEn: z.string().min(1).max(100),
+
+  firstNameAr: z.string().min(1).max(100),
+  secondNameAr: z.string().max(100).nullable().optional(),
+  thirdNameAr: z.string().max(100).nullable().optional(),
+  familyNameAr: z.string().min(1).max(100),
+
+  gender: z.enum(['male', 'female']),
+  dateOfBirth: z.string().optional(),
+
+  countryId: z.uuid().nullable().optional(),
+})
+
+export type CreateEmployeeDto = z.infer<typeof CreateEmployeeSchema>
+
+export const UpdateEmployeeSchema = CreateEmployeeSchema.partial().extend({
+  version: z.number().int(),
+})
+
+export type UpdateEmployeeDto = z.infer<typeof UpdateEmployeeSchema>
+
+export const EmployeeIdSchema = z.object({
+  id: z.uuid().describe('The unique identifier of the employee'),
+})
+
+export type EmployeeIdParam = z.infer<typeof EmployeeIdSchema>
+/*
 export const createEmployeeSchema = z.object({
   employeeNumber: z.string().trim().min(1).max(10),
 
@@ -36,9 +110,7 @@ export const updateEmployeeSchema = createEmployeeSchema.partial().extend({
   version: z.number().int().positive(),
 })
 
-export const employeeIdSchema = z.object({
-  id: z.uuid().describe('The unique identifier of the employee'),
-})
+
 
 export interface EmployeeListQueryDto {
   offset: number
@@ -70,4 +142,5 @@ export type EmployeeDirectoryQueryDto = z.infer<
 export type employeeDirectoryDto = z.infer<typeof employeeDirectorySchema>
 export type CreateEmployeeDto = z.infer<typeof createEmployeeSchema>
 export type UpdateEmployeeDto = z.infer<typeof updateEmployeeSchema>
-export type EmployeeIdParam = z.infer<typeof employeeIdSchema>
+
+*/

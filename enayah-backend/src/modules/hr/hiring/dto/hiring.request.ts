@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { createEmployeeSchema } from '../../employees/dto/employee.request'
 import { createEmploymentSchema } from '../../employments/dto/employment.request'
-import { createJobAssignmentSchema } from '../../job-assignments/dto/jobAssignment.request'
+//import { createJobAssignmentSchema } from '../../job-assignments/dto/jobAssignment.request'
 import {
   contractBaseSchema,
   createContractSchema,
@@ -12,7 +12,7 @@ import { createCompensationSchema } from '../../compensations/dto/compensation.r
 export const hireEmployeeSchema = z.object({
   employee: createEmployeeSchema,
   employment: createEmploymentSchema.omit({ employeeId: true }),
-  jobAssignment: createJobAssignmentSchema.optional(),
+  //jobAssignment: createJobAssignmentSchema.optional(),
   contract: contractBaseSchema
     .omit({
       employmentId: true,

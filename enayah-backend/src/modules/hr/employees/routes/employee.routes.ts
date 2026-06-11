@@ -14,37 +14,14 @@ const router = Router()
 router.use(requireAuth)
 router.use(attachPermissions)
 
-/*
-
-audit('CREATE_EMPLOYEE', {
-  resource: 'EMPLOYEE',
-  sanitize: {
-    redactFields: ['email', 'phone'],
-  },
-})
-
-*/
-
 router.get(
   '/:id/profile',
   requirePermission('employee.view'),
   EmployeeController.getProfile,
 )
 
-// router.get(
-//   '/employee-directory',
-//   requirePermission('employee.view'),
-//   EmployeeController.findEmployeeDirectory,
-// )
-
 router.get(
   '/',
-  requirePermission('employee.view'),
-  EmployeeController.getEmployees,
-)
-
-router.get(
-  '/directory',
   requirePermission('employee.view'),
   EmployeeController.findEmployeeDirectory,
 )
@@ -52,7 +29,7 @@ router.get(
 router.post(
   '/',
   requirePermission('employee.create'),
-  audit('CREATE_EMPLOYEE', {
+  audit('EMPLOYEE_CREATE', {
     resource: 'EMPLOYEE',
     sanitize: {
       redactFields: ['email', 'phone'],
@@ -62,9 +39,9 @@ router.post(
 )
 
 router.get(
-  '/find-all',
+  '/:id/profile',
   requirePermission('employee.view'),
-  EmployeeController.findAll,
+  EmployeeController.getProfile,
 )
 
 router.get(
@@ -73,15 +50,15 @@ router.get(
   EmployeeController.findById,
 )
 
-router.put(
+router.patch(
   '/:id',
   requirePermission('employee.update'),
   audit('EMPLOYEE_UPDATE', {
     resource: 'EMPLOYEE',
     getResourceId: (req) => getParam(req.params.id),
-    sanitize: {
-      redactFields: ['email', 'phone'],
-    },
+    // sanitize: {
+    //   redactFields: ['email', 'phone'],
+    // },
   }),
   EmployeeController.update,
 )
@@ -89,7 +66,7 @@ router.put(
 router.delete(
   '/:id',
   requirePermission('employee.delete'),
-  audit('DELETE_EMPLOYEE', {
+  audit('EMPLOYEE_DELETE', {
     resource: 'EMPLOYEE',
     getResourceId: (req) => getParam(req.params.id),
     sanitize: {

@@ -1,4 +1,43 @@
-// employee.response.ts
+export interface EmployeeDirectoryItemResponse {
+  id: string
+  employeeNumber: string
+  firstNameEn: string
+  secondNameEn: string | null
+  thirdNameEn: string | null
+  familyNameEn: string
+  firstNameAr: string
+  secondNameAr: string | null
+  thirdNameAr: string | null
+  familyNameAr: string
+  gender: string | null
+  nationalityEn: string | null
+  nationalityAr: string | null
+  hireDate: string | null
+  employmentStatus: string | null
+  pcn: string | null
+  categoryCode: number | null
+  workforceCategory: string | null
+  departmentId: string | null
+  departmentNameEn: string | null
+  departmentNameAr: string | null
+  positionId: string | null
+  positionTitleEn: string | null
+  positionTitleAr: string | null
+}
+
+export interface EmployeeDirectoryResponse {
+  items: EmployeeDirectoryItemResponse[]
+  total: number
+  offset: number
+  limit: number
+}
+
+export interface EmployeeProfileResponse {
+  personal: any
+  employment: any
+  appointments: any[]
+}
+
 export interface EmployeeResponse {
   id: string
   employeeNumber: string

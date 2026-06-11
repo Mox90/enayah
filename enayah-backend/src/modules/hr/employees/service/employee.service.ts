@@ -4,51 +4,43 @@ import { CpdRepository } from '../../cpd/repository/cpd.repository'
 import { CredentialRepository } from '../../credentials/repository/credential.repository'
 import { EmploymentRepository } from '../../employments/repository/employment.repository'
 import { TrainingRepository } from '../../training/repository/training.repository'
-import {
-  toEmployeeDb,
-  toEmployeeResponse,
-  toEmployeeUpdateDb,
-} from '../dto/employee.mapper'
-import {
-  CreateEmployeeDto,
-  EmployeeDirectoryQueryDto,
-  EmployeeListQueryDto,
-  UpdateEmployeeDto,
-} from '../dto/employee.request'
+import { CreateEmployeeDto, UpdateEmployeeDto } from '../dto/employee.request'
 import { EmployeeRepository } from '../repository/employee.repository'
 
 export const EmployeeService = {
-  create: async (data: CreateEmployeeDto) => {
+  async create(data: CreateEmployeeDto) {
     return db.transaction(async (tx) => {
-      const employee = await EmployeeRepository.create(tx, data)
-      return employee
+      return EmployeeRepository.create(tx, data)
     })
   },
 
-  findAll: async () => {
-    return db.transaction((tx) => EmployeeRepository.findAll(tx))
+  async findAll() {
+    return EmployeeRepository.findAll(db)
   },
 
-  findById: async (id: string) => {
-    return db.transaction((tx) => EmployeeRepository.findById(tx, id))
+  async findById(id: string) {
+    return EmployeeRepository.findById(db, id)
   },
 
-  getEmployees: async (params: EmployeeListQueryDto) => {
-    return EmployeeRepository.findRange(db, params)
-  },
-
-  update: async (id: string, data: UpdateEmployeeDto) => {
-    return db.transaction((tx) => EmployeeRepository.update(tx, id, data))
-  },
-
-  delete: async (id: string, userId?: string) => {
+  async update(id: string, data: UpdateEmployeeDto) {
     return db.transaction(async (tx) => {
-      const existing = await EmployeeRepository.softDelete(tx, id, userId)
-      return existing
+      return EmployeeRepository.update(tx, id, data)
+    })
+  },
+
+  async softDelete(id: string, userId?: string) {
+    return db.transaction(async (tx) => {
+      return EmployeeRepository.softDelete(tx, id, userId)
     })
   },
 
   // employee.service.ts
+
+  /*
+
+  getEmployees: async (params: EmployeeListQueryDto) => {
+    return EmployeeRepository.findRange(db, params)
+  },
 
   getProfile: async (employeeId: string) => {
     return db.transaction(async (tx) => {
@@ -148,5 +140,5 @@ export const EmployeeService = {
     return db.transaction((tx) =>
       EmployeeRepository.findEmployeeDirectoryRange(tx, params),
     )
-  },
+  },*/
 }

@@ -6,7 +6,7 @@ import { HireEmployeeDto } from '../dto/hiring.request'
 
 import { EmployeeRepository } from '../../employees/repository/employee.repository'
 import { EmploymentRepository } from '../../employments/repository/employment.repository'
-import { JobAssignmentRepository } from '../../job-assignments/repository/jobAssignment.repository'
+//import { JobAssignmentRepository } from '../../job-assignments/repository/jobAssignment.repository'
 import { ContractRepository } from '../../contracts/repository/contract.repository'
 import { CompensationRepository } from '../../compensations/repository/compensation.repository'
 
@@ -54,13 +54,13 @@ export const HiringService = {
       }
 
       // JOB Assignment
-      if (dto.jobAssignment) {
-        await JobAssignmentRepository.create(tx, {
-          employmentId: employment.id,
-          ...dto.jobAssignment,
-          isPrimary: true,
-        })
-      }
+      // if (dto.jobAssignment) {
+      //   await JobAssignmentRepository.create(tx, {
+      //     employmentId: employment.id,
+      //     ...dto.jobAssignment,
+      //     isPrimary: true,
+      //   })
+      // }
 
       if (dto.compensation) {
         if (!dto.contract) {

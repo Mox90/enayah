@@ -23,10 +23,8 @@ import {
 import { Button } from '@/components/ui/button'
 
 import { Badge } from '@/components/ui/badge'
-import { EmployeeProfile } from '../../types/employee-directory.types'
 import { useLocale } from 'next-intl'
-
-//import { EmployeeProfile } from '../../types/employee-profile.types'
+import { EmployeeProfile } from '../../types/employee-profile.types'
 
 const statusClass: Record<string, string> = {
   active: 'bg-green-100 text-green-700 border-green-200',
@@ -126,8 +124,8 @@ export function EmployeeProfileHeader({ profile }: Props) {
           </h1>
 
           <div>Employee #{p.employeeNumber}</div>
-          <div>{e?.positionItem.position.titleEn}</div>
-          <div>{e?.positionItem.department.nameEn}</div>
+          <div>{e?.movement.officialPosition.titleEn}</div>
+          <div>{e?.movement.officialDepartment.nameEn}</div>
           <Badge
             variant={'outline'}
             className={statusClass[e?.status ?? ''] ?? ''}
@@ -143,18 +141,19 @@ export function EmployeeProfileHeader({ profile }: Props) {
             <div>
               <strong>Position Control Number</strong>
               <br />
-              {e?.positionItem.itemNumber}
+              {e?.movement.positionItem.itemNumber}
             </div>
             <div>
               <strong>Category</strong>
               <br />
-              {e?.positionItem.categoryCode}
+              {e?.movement.positionItem.categoryCode}
             </div>
             <div>
               <strong>Workforce</strong>
               <br />
-              {workforceLabel[e?.positionItem.workforceCategory ?? ''] ??
-                e?.positionItem.workforceCategory}
+              {workforceLabel[
+                e?.movement.positionItem.workforceCategory ?? ''
+              ] ?? e?.movement.positionItem.workforceCategory}
             </div>
           </div>
         </div>

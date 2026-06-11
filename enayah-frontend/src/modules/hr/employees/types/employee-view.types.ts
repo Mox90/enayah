@@ -6,36 +6,36 @@ export type EmployeeView =
   | 'create'
   | 'profile'
 
-export interface Employee {
-  id: string
+// export interface Employee {
+//   id: string
 
-  employeeNumber: string
+//   employeeNumber: string
 
-  firstNameEn: string
-  secondNameEn?: string
-  thirdNameEn?: string
-  familyNameEn: string
+//   firstNameEn: string
+//   secondNameEn?: string
+//   thirdNameEn?: string
+//   familyNameEn: string
 
-  firstNameAr: string
-  secondNameAr?: string
-  thirdNameAr?: string
-  familyNameAr: string
+//   firstNameAr: string
+//   secondNameAr?: string
+//   thirdNameAr?: string
+//   familyNameAr: string
 
-  gender?: string
+//   gender?: string
 
-  nationality?: {
-    id: string
-    nameEn: string
-    nameAr: string
-  }
+//   nationality?: {
+//     id: string
+//     nameEn: string
+//     nameAr: string
+//   }
 
-  createdAt: string
-  updatedAt: string
-}
+//   createdAt: string
+//   updatedAt: string
+// }
 
-export interface EmployeeListResponse {
-  items: Employee[]
-  total: number
-  offset: number
-  limit: number
-}
+// export interface EmployeeListResponse {
+//   items: Employee[]
+//   total: number
+//   offset: number
+//   limit: number
+// }

@@ -1,33 +1,11 @@
 // employee.repository.ts
 import { AppError } from '../../../../core/errors/AppError'
-import {
-  countries,
-  DB,
-  db,
-  departments,
-  employees,
-  employments,
-  positionItems,
-  positions,
-} from '../../../../db'
-import {
-  and,
-  asc,
-  desc,
-  eq,
-  ilike,
-  inArray,
-  isNull,
-  or,
-  sql,
-} from 'drizzle-orm'
-import {
-  CreateEmployeeDto,
-  EmployeeDirectoryQueryDto,
-  UpdateEmployeeDto,
-} from '../dto/employee.request'
-import { toEmployeeDb, toEmployeeUpdateDb } from '../dto/employee.mapper'
+import { DB, employees } from '../../../../db'
+import { and, eq, sql } from 'drizzle-orm'
+import { CreateEmployeeDto, UpdateEmployeeDto } from '../dto/employee.request'
+//import { toEmployeeDb, toEmployeeUpdateDb } from '../dto/employee.mapper'
 import { Tx } from '../../../../core/types/db.types'
+import { toEmployeeDb, toEmployeeUpdateDb } from '../mapper/employee.db.mapper'
 
 //type DbOrTx = typeof db | PgTransaction<any, any, any>
 
@@ -37,20 +15,36 @@ const employeeWithRelations = {
 } as const
 
 //function findByIdOrThrow(executor: DB, id: string): Promise<any>
-function findByIdOrThrow(executor: DB | Tx, id: string): Promise<any>
-async function findByIdOrThrow(executor: any, id: string) {
-  const result = await executor.query.employees.findFirst({
+// function findByIdOrThrow(executor: DB | Tx, id: string): Promise<any>
+// async function findByIdOrThrow(executor: any, id: string) {
+//   const result = await executor.query.employees.findFirst({
+//     where: and(eq(employees.id, id), isActive),
+//     with: {
+//       nationality: true,
+//     },
+//   })
+
+//   if (!result) {
+//     throw new AppError('Employee not found', 404)
+//   }
+
+//   return result
+// }
+
+async function findByIdOrThrow(tx: DB, id: string) {
+  const employee = await tx.query.employees.findFirst({
     where: and(eq(employees.id, id), isActive),
+
     with: {
       nationality: true,
     },
   })
 
-  if (!result) {
+  if (!employee) {
     throw new AppError('Employee not found', 404)
   }
 
-  return result
+  return employee
 }
 
 function assertExists<T>(
@@ -85,232 +79,232 @@ export const EmployeeRepository = {
     return findByIdOrThrow(tx, id)
   },
 
-  findRange: async (
-    tx: DB,
-    params: {
-      offset: number
-      limit: number
-      search?: string
-      sortBy?: string
-      sortOrder?: 'asc' | 'desc'
-    },
-  ) => {
-    const { offset, limit } = params
-    const whereClause = isActive
-    const [items, totalResult] = await Promise.all([
-      tx.query.employees.findMany({
-        where: whereClause,
-        orderBy: (e, { asc }) => [asc(e.employeeNumber)],
-        with: employeeWithRelations,
-        offset,
-        limit,
-      }),
+  // findRange: async (
+  //   tx: DB,
+  //   params: {
+  //     offset: number
+  //     limit: number
+  //     search?: string
+  //     sortBy?: string
+  //     sortOrder?: 'asc' | 'desc'
+  //   },
+  // ) => {
+  //   const { offset, limit } = params
+  //   const whereClause = isActive
+  //   const [items, totalResult] = await Promise.all([
+  //     tx.query.employees.findMany({
+  //       where: whereClause,
+  //       orderBy: (e, { asc }) => [asc(e.employeeNumber)],
+  //       with: employeeWithRelations,
+  //       offset,
+  //       limit,
+  //     }),
 
-      tx
-        .select({
-          count: sql<number>`count(*)`,
-        })
-        .from(employees)
-        .where(whereClause),
-    ])
+  //     tx
+  //       .select({
+  //         count: sql<number>`count(*)`,
+  //       })
+  //       .from(employees)
+  //       .where(whereClause),
+  //   ])
 
-    return {
-      items,
-      total: Number(totalResult[0]?.count ?? 0),
-      offset,
-      limit,
-    }
-  },
+  //   return {
+  //     items,
+  //     total: Number(totalResult[0]?.count ?? 0),
+  //     offset,
+  //     limit,
+  //   }
+  // },
 
-  findEmployeeDirectoryRange: async (
-    tx: DB,
-    params: EmployeeDirectoryQueryDto,
-  ) => {
-    const {
-      offset,
-      limit,
-      search,
-      departmentIds,
-      positionIds,
-      categoryCodes,
-      genders,
-      nationalities,
-      employmentStatuses,
-      sortBy,
-      sortOrder,
-    } = params
+  // findEmployeeDirectoryRange: async (
+  //   tx: DB,
+  //   params: EmployeeDirectoryQueryDto,
+  // ) => {
+  //   const {
+  //     offset,
+  //     limit,
+  //     search,
+  //     departmentIds,
+  //     positionIds,
+  //     categoryCodes,
+  //     genders,
+  //     nationalities,
+  //     employmentStatuses,
+  //     sortBy,
+  //     sortOrder,
+  //   } = params
 
-    const conditions = [
-      eq(employees.isDeleted, false),
-      isNull(employees.deletedAt),
-    ]
+  //   const conditions = [
+  //     eq(employees.isDeleted, false),
+  //     isNull(employees.deletedAt),
+  //   ]
 
-    // -----------------------------
-    // Search
-    // -----------------------------
-    if (search) {
-      conditions.push(
-        or(
-          ilike(employees.employeeNumber, `%${search}%`),
+  //   // -----------------------------
+  //   // Search
+  //   // -----------------------------
+  //   if (search) {
+  //     conditions.push(
+  //       or(
+  //         ilike(employees.employeeNumber, `%${search}%`),
 
-          ilike(employees.firstNameEn, `%${search}%`),
+  //         ilike(employees.firstNameEn, `%${search}%`),
 
-          ilike(employees.secondNameEn, `%${search}%`),
+  //         ilike(employees.secondNameEn, `%${search}%`),
 
-          ilike(employees.thirdNameEn, `%${search}%`),
+  //         ilike(employees.thirdNameEn, `%${search}%`),
 
-          ilike(employees.familyNameEn, `%${search}%`),
+  //         ilike(employees.familyNameEn, `%${search}%`),
 
-          ilike(employees.firstNameAr, `%${search}%`),
+  //         ilike(employees.firstNameAr, `%${search}%`),
 
-          ilike(employees.secondNameAr, `%${search}%`),
+  //         ilike(employees.secondNameAr, `%${search}%`),
 
-          ilike(employees.thirdNameAr, `%${search}%`),
+  //         ilike(employees.thirdNameAr, `%${search}%`),
 
-          ilike(employees.familyNameAr, `%${search}%`),
-        )!,
-      )
-    }
+  //         ilike(employees.familyNameAr, `%${search}%`),
+  //       )!,
+  //     )
+  //   }
 
-    // -----------------------------
-    // Gender
-    // -----------------------------
+  //   // -----------------------------
+  //   // Gender
+  //   // -----------------------------
 
-    if (genders?.length) {
-      conditions.push(inArray(employees.gender, genders as any[]))
-      //conditions.push(inArray(employees.gender, genders))
-    }
+  //   if (genders?.length) {
+  //     conditions.push(inArray(employees.gender, genders as any[]))
+  //     //conditions.push(inArray(employees.gender, genders))
+  //   }
 
-    // -----------------------------
-    // Department
-    // -----------------------------
+  //   // -----------------------------
+  //   // Department
+  //   // -----------------------------
 
-    if (departmentIds?.length) {
-      conditions.push(inArray(positionItems.departmentId, departmentIds))
-    }
+  //   if (departmentIds?.length) {
+  //     conditions.push(inArray(positionItems.departmentId, departmentIds))
+  //   }
 
-    // -----------------------------
-    // Position
-    // -----------------------------
+  //   // -----------------------------
+  //   // Position
+  //   // -----------------------------
 
-    if (positionIds?.length) {
-      conditions.push(inArray(positionItems.positionId, positionIds))
-    }
+  //   if (positionIds?.length) {
+  //     conditions.push(inArray(positionItems.positionId, positionIds))
+  //   }
 
-    // -----------------------------
-    // Category
-    // -----------------------------
+  //   // -----------------------------
+  //   // Category
+  //   // -----------------------------
 
-    if (categoryCodes?.length) {
-      conditions.push(inArray(positionItems.categoryCode, categoryCodes))
-    }
+  //   if (categoryCodes?.length) {
+  //     conditions.push(inArray(positionItems.categoryCode, categoryCodes))
+  //   }
 
-    // -----------------------------
-    // Employment Status
-    // -----------------------------
+  //   // -----------------------------
+  //   // Employment Status
+  //   // -----------------------------
 
-    if (employmentStatuses?.length) {
-      conditions.push(inArray(employments.status, employmentStatuses as any[]))
-      //conditions.push(inArray(employments.status, employmentStatuses))
-    }
+  //   if (employmentStatuses?.length) {
+  //     conditions.push(inArray(employments.status, employmentStatuses as any[]))
+  //     //conditions.push(inArray(employments.status, employmentStatuses))
+  //   }
 
-    // -----------------------------
-    // Nationality
-    // -----------------------------
+  //   // -----------------------------
+  //   // Nationality
+  //   // -----------------------------
 
-    if (nationalities?.length) {
-      conditions.push(inArray(countries.alpha2, nationalities))
-    }
+  //   if (nationalities?.length) {
+  //     conditions.push(inArray(countries.alpha2, nationalities))
+  //   }
 
-    const sortableColumns = {
-      employeeNumber: employees.employeeNumber,
-      hireDate: employments.hireDate,
-      department: departments.nameEn,
-      position: positions.titleEn,
-      categoryCode: positionItems.categoryCode,
-      nationality: countries.nationalityEn,
-      gender: employees.gender,
-      createdAt: employees.createdAt,
-    }
+  //   const sortableColumns = {
+  //     employeeNumber: employees.employeeNumber,
+  //     hireDate: employments.hireDate,
+  //     department: departments.nameEn,
+  //     position: positions.titleEn,
+  //     categoryCode: positionItems.categoryCode,
+  //     nationality: countries.nationalityEn,
+  //     gender: employees.gender,
+  //     createdAt: employees.createdAt,
+  //   }
 
-    const sortColumn =
-      sortableColumns[sortBy as keyof typeof sortableColumns] ??
-      employees.employeeNumber
+  //   const sortColumn =
+  //     sortableColumns[sortBy as keyof typeof sortableColumns] ??
+  //     employees.employeeNumber
 
-    const [items, totalResult] = await Promise.all([
-      tx
-        .select({
-          id: employees.id,
-          employeeNumber: employees.employeeNumber,
-          firstNameEn: employees.firstNameEn,
-          secondNameEn: employees.secondNameEn,
-          thirdNameEn: employees.thirdNameEn,
-          familyNameEn: employees.familyNameEn,
-          firstNameAr: employees.firstNameAr,
-          secondNameAr: employees.secondNameAr,
-          thirdNameAr: employees.thirdNameAr,
-          familyNameAr: employees.familyNameAr,
-          gender: employees.gender,
-          nationalityEn: countries.nationalityEn,
-          nationalityAr: countries.nationalityAr,
-          hireDate: employments.hireDate,
-          employmentStatus: employments.status,
-          pcn: positionItems.itemNumber,
-          categoryCode: positionItems.categoryCode,
-          workforceCategory: positionItems.workforceCategory,
-          departmentId: departments.id,
-          departmentNameEn: departments.nameEn,
-          departmentNameAr: departments.nameAr,
-          positionId: positions.id,
-          positionTitleEn: positions.titleEn,
-          positionTitleAr: positions.titleAr,
-        })
-        .from(employees)
-        .leftJoin(countries, eq(employees.countryId, countries.id))
-        .leftJoin(
-          employments,
-          and(
-            eq(employments.employeeId, employees.id),
-            eq(employments.status, 'active'),
-          ),
-        )
-        .leftJoin(
-          positionItems,
-          eq(employments.positionItemId, positionItems.id),
-        )
-        .leftJoin(departments, eq(positionItems.departmentId, departments.id))
-        .leftJoin(positions, eq(positionItems.positionId, positions.id))
-        .where(and(...conditions))
-        .orderBy(sortOrder === 'desc' ? desc(sortColumn) : asc(sortColumn))
-        .offset(offset)
-        .limit(limit),
-      tx
-        .select({
-          count: sql<number>`count(*)`,
-        })
-        .from(employees)
-        .leftJoin(countries, eq(employees.countryId, countries.id))
-        .leftJoin(
-          employments,
-          and(
-            eq(employments.employeeId, employees.id),
-            eq(employments.status, 'active'),
-          ),
-        )
-        .leftJoin(
-          positionItems,
-          eq(employments.positionItemId, positionItems.id),
-        )
-        .where(and(...conditions)),
-    ])
+  //   const [items, totalResult] = await Promise.all([
+  //     tx
+  //       .select({
+  //         id: employees.id,
+  //         employeeNumber: employees.employeeNumber,
+  //         firstNameEn: employees.firstNameEn,
+  //         secondNameEn: employees.secondNameEn,
+  //         thirdNameEn: employees.thirdNameEn,
+  //         familyNameEn: employees.familyNameEn,
+  //         firstNameAr: employees.firstNameAr,
+  //         secondNameAr: employees.secondNameAr,
+  //         thirdNameAr: employees.thirdNameAr,
+  //         familyNameAr: employees.familyNameAr,
+  //         gender: employees.gender,
+  //         nationalityEn: countries.nationalityEn,
+  //         nationalityAr: countries.nationalityAr,
+  //         hireDate: employments.hireDate,
+  //         employmentStatus: employments.status,
+  //         pcn: positionItems.itemNumber,
+  //         categoryCode: positionItems.categoryCode,
+  //         workforceCategory: positionItems.workforceCategory,
+  //         departmentId: departments.id,
+  //         departmentNameEn: departments.nameEn,
+  //         departmentNameAr: departments.nameAr,
+  //         positionId: positions.id,
+  //         positionTitleEn: positions.titleEn,
+  //         positionTitleAr: positions.titleAr,
+  //       })
+  //       .from(employees)
+  //       .leftJoin(countries, eq(employees.countryId, countries.id))
+  //       .leftJoin(
+  //         employments,
+  //         and(
+  //           eq(employments.employeeId, employees.id),
+  //           eq(employments.status, 'active'),
+  //         ),
+  //       )
+  //       .leftJoin(
+  //         positionItems,
+  //         eq(employments.positionItemId, positionItems.id),
+  //       )
+  //       .leftJoin(departments, eq(positionItems.departmentId, departments.id))
+  //       .leftJoin(positions, eq(positionItems.positionId, positions.id))
+  //       .where(and(...conditions))
+  //       .orderBy(sortOrder == 'desc' ? desc(sortColumn) : asc(sortColumn))
+  //       .offset(offset)
+  //       .limit(limit),
+  //     tx
+  //       .select({
+  //         count: sql<number>`count(*)`,
+  //       })
+  //       .from(employees)
+  //       .leftJoin(countries, eq(employees.countryId, countries.id))
+  //       .leftJoin(
+  //         employments,
+  //         and(
+  //           eq(employments.employeeId, employees.id),
+  //           eq(employments.status, 'active'),
+  //         ),
+  //       )
+  //       .leftJoin(
+  //         positionItems,
+  //         eq(employments.positionItemId, positionItems.id),
+  //       )
+  //       .where(and(...conditions)),
+  //   ])
 
-    return {
-      items,
-      total: Number(totalResult[0]?.count ?? 0),
-      offset,
-      limit,
-    }
-  },
+  //   return {
+  //     items,
+  //     total: Number(totalResult[0]?.count ?? 0),
+  //     offset,
+  //     limit,
+  //   }
+  // },
 
   update: async (
     tx: DB,
@@ -347,15 +341,15 @@ export const EmployeeRepository = {
     return existing
   },
 
-  findProfileBase: async (tx: DB, id: string) => {
-    const result = tx.query.employees.findFirst({
-      where: and(eq(employees.id, id), isActive),
-      with: {
-        nationality: true,
-      },
-    })
-    return assertExists(result, 'Employee not found', 404)
-  },
+  // findProfileBase: async (tx: DB, id: string) => {
+  //   const result = tx.query.employees.findFirst({
+  //     where: and(eq(employees.id, id), isActive),
+  //     with: {
+  //       nationality: true,
+  //     },
+  //   })
+  //   return assertExists(result, 'Employee not found', 404)
+  // },
 
   // findHierarchy: async (tx: DB) => {
   //   return tx.query.departments.findMany({
