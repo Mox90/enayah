@@ -346,7 +346,7 @@ export const PositionItemRepository = {
       .set({
         status,
         updatedAt: new Date(),
-        //version: sql`${positionItems.version} + 1`,
+        version: sql`${positionItems.version} + 1`,
       }) // Update the status and the updatedAt field
       .where(eq(positionItems.id, id))
       .returning()

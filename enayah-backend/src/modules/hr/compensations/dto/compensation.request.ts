@@ -20,7 +20,9 @@ export const CreateCompensationSchema = z.object({
 
 export const UpdateCompensationSchema = CreateCompensationSchema.omit({
   contractMovementId: true,
-}).partial()
+})
+  .required()
+  .partial()
 
 export const CompensationIdSchema = z.object({
   id: z.uuid(),

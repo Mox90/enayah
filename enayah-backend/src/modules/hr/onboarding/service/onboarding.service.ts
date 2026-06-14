@@ -18,6 +18,7 @@ import {
 import { ContractMovementRepository } from '../../contract-movements/repository/contract-movement.repository'
 import { AppointmentRepository } from '../../appointments/repository/appointment.repository'
 import { CompensationAllowanceRepository } from '../../compensations/repository/compensation-allowance.repository'
+import { RunningNumberService } from '../../../../core/service/running-number.service'
 
 export const OnboardingService = {
   submit: async (dto: OnboardingSubmitDto) => {
@@ -61,9 +62,12 @@ export const OnboardingService = {
         throw new AppError('Contract details are required', 400)
       }
 
+      //const contractNumber =
+      //  dto.contract.contractNumber ??
+      //  `CN-${new Date().getFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`
       const contractNumber =
         dto.contract.contractNumber ??
-        `CN-${new Date().getFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`
+        (await RunningNumberService.generate(tx, 'CONTRACT'))
 
       if (dto.contract.startDate !== dto.employment.startDate) {
         throw new AppError(
@@ -134,6 +138,13 @@ export const OnboardingService = {
       let compensation = null
 
       let allowances: unknown[] = []
+
+      if (dto.allowances?.length && !dto.compensation) {
+        throw new AppError(
+          'Compensation is required when allowances are provided',
+          400,
+        )
+      }
 
       if (dto.compensation) {
         if (dto.compensation.effectiveDate !== dto.contract.startDate) {

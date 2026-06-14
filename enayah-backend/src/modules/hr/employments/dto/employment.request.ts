@@ -33,6 +33,7 @@ export const updateEmploymentSchema = createEmploymentSchema
   .omit({
     employeeId: true,
   })
+  .required()
   .partial()
 
 export const terminateEmploymentSchema = z.object({

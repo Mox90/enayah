@@ -34,6 +34,12 @@ export const updateContractSchema = contractBaseSchema
     employmentId: true,
   })
   .partial()
+  .extend({
+    contractType: z.enum(['initial', 'renewal', 'amendment']).optional(),
+    status: z
+      .enum(['draft', 'active', 'superseded', 'cancelled', 'expired'])
+      .optional(),
+  })
   .refine(
     (data) => {
       if (!data.startDate || !data.endDate) return true

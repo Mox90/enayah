@@ -95,7 +95,7 @@ export const ContractRepository = {
       .where(and(eq(contracts.id, id), isActive))
       .returning({ id: contracts.id })
 
-    return assertExists(row, 'Failed to supersede contract', 500)
+    return assertExists(row, 'Failed to supersede contract', 404)
   },
 
   cancel: async (tx: DB, id: string) => {
@@ -108,7 +108,7 @@ export const ContractRepository = {
       .where(and(eq(contracts.id, id), isActive))
       .returning({ id: contracts.id })
 
-    return assertExists(row, 'Cancel failed', 500)
+    return assertExists(row, 'Cancel failed', 404)
   },
 
   expire: async (tx: DB, id: string) => {
@@ -121,7 +121,7 @@ export const ContractRepository = {
       .where(and(eq(contracts.id, id), isActive))
       .returning({ id: contracts.id })
 
-    return assertExists(row, 'Expire failed', 500)
+    return assertExists(row, 'Expire failed', 404)
   },
 
   softDelete: async (tx: DB, id: string, userId?: string) => {
