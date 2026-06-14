@@ -1,3 +1,38 @@
+// src/modules/hr/compensations/dto/compensation.request.ts
+
+import { z } from 'zod'
+
+export const CreateCompensationSchema = z.object({
+  contractMovementId: z.uuid(),
+
+  effectiveDate: z.iso.date(),
+
+  baseSalary: z.coerce.number().positive(),
+
+  status: z.enum(['draft', 'approved', 'applied']).default('draft'),
+
+  reason: z.string().trim().max(50).nullable().optional(),
+
+  approvedBy: z.uuid().nullable().optional(),
+
+  approvedAt: z.coerce.date().nullable().optional(),
+})
+
+export const UpdateCompensationSchema = CreateCompensationSchema.omit({
+  contractMovementId: true,
+})
+  .required()
+  .partial()
+
+export const CompensationIdSchema = z.object({
+  id: z.uuid(),
+})
+
+export type CreateCompensationDto = z.infer<typeof CreateCompensationSchema>
+export type UpdateCompensationDto = z.infer<typeof UpdateCompensationSchema>
+
+/*
+
 import { z } from 'zod'
 
 export const allowanceSchema = z.object({
@@ -37,3 +72,5 @@ export const approveCompensationSchema = z.object({
 })
 
 export type CreateCompensationDto = z.infer<typeof createCompensationSchema>
+
+*/

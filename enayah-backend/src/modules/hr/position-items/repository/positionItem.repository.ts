@@ -343,7 +343,11 @@ export const PositionItemRepository = {
     // Implementation for updating the status of a position item
     return tx
       .update(positionItems)
-      .set({ status, updatedAt: new Date() }) // Update the status and the updatedAt field
+      .set({
+        status,
+        updatedAt: new Date(),
+        version: sql`${positionItems.version} + 1`,
+      }) // Update the status and the updatedAt field
       .where(eq(positionItems.id, id))
       .returning()
   },
@@ -368,25 +372,25 @@ export const PositionItemRepository = {
   //     orderBy: [asc(positionItems.departmentId), asc(positionItems.itemNumber)],
   //   })
   // },
-  findHierarchyData: async (tx: DB): Promise<PositionItemHierarchy[]> => {
-    return tx.query.positionItems.findMany({
-      where: and(
-        eq(positionItems.isDeleted, false),
-        isNull(positionItems.deletedAt),
-        ne(positionItems.status, 'frozen'),
-      ),
-      with: {
-        department: true,
-        position: true,
-        employments: {
-          where: eq(employments.status, 'active'),
-          with: {
-            employee: true,
-          },
-        },
-      },
-    }) as Promise<PositionItemHierarchy[]>
-  },
+  // findHierarchyData: async (tx: DB): Promise<PositionItemHierarchy[]> => {
+  //   return tx.query.positionItems.findMany({
+  //     where: and(
+  //       eq(positionItems.isDeleted, false),
+  //       isNull(positionItems.deletedAt),
+  //       ne(positionItems.status, 'frozen'),
+  //     ),
+  //     with: {
+  //       department: true,
+  //       position: true,
+  //       employments: {
+  //         where: eq(employments.status, 'active'),
+  //         with: {
+  //           employee: true,
+  //         },
+  //       },
+  //     },
+  //   }) as Promise<PositionItemHierarchy[]>
+  // },
 
   findOrganizationHierarchy: async (tx: DB) => {
     return tx.query.departments.findMany({

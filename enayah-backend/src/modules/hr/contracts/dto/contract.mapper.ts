@@ -1,26 +1,51 @@
-// contract.mapper.ts
+import { CreateContractDto, UpdateContractDto } from '../dto/contract.request'
 
-import { contracts } from '../../../../db'
-import { InferInsertModel } from 'drizzle-orm'
-import { CreateContractDto } from './contract.request'
-import { ContractResponse } from './contract.response'
+export function toContractDb(dto: CreateContractDto) {
+  return {
+    employmentId: dto.employmentId,
+    contractNumber: dto.contractNumber.trim(),
+    startDate: dto.startDate,
+    endDate: dto.endDate,
+    contractType: dto.contractType,
+    status: dto.status,
+    signedDate: dto.signedDate ?? null,
+    documentPath: dto.documentPath ?? null,
+    notes: dto.notes ?? null,
+  }
+}
 
-type ContractInsert = InferInsertModel<typeof contracts>
+export function toContractUpdateDb(dto: UpdateContractDto) {
+  return {
+    ...(dto.contractNumber !== undefined && {
+      contractNumber: dto.contractNumber.trim(),
+    }),
 
-export const toContractDb = (dto: CreateContractDto): ContractInsert => ({
-  employmentId: dto.employmentId,
-  contractType: dto.contractType,
-  startDate: dto.startDate,
-  endDate: dto.endDate,
-  status: 'active',
-  notes: dto.notes ?? null,
-})
+    ...(dto.startDate !== undefined && {
+      startDate: dto.startDate,
+    }),
 
-export const toContractResponse = (row: ContractResponse) => ({
-  id: row.id,
-  employmentId: row.employmentId,
-  startDate: row.startDate,
-  endDate: row.endDate,
-  contractType: row.contractType,
-  status: row.status,
-})
+    ...(dto.endDate !== undefined && {
+      endDate: dto.endDate,
+    }),
+
+    ...(dto.contractType !== undefined && {
+      contractType: dto.contractType,
+    }),
+
+    ...(dto.status !== undefined && {
+      status: dto.status,
+    }),
+
+    ...(dto.signedDate !== undefined && {
+      signedDate: dto.signedDate,
+    }),
+
+    ...(dto.documentPath !== undefined && {
+      documentPath: dto.documentPath,
+    }),
+
+    ...(dto.notes !== undefined && {
+      notes: dto.notes,
+    }),
+  }
+}
