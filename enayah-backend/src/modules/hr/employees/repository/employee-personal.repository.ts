@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm'
-import { DB } from '../../../../db'
+//import { DB } from '../../../../db'
 import {
   employeeAddresses,
   employeeDependents,
@@ -9,6 +9,7 @@ import {
   employeePhoneNumbers,
   employeeVisas,
 } from '../../../../db/schema'
+import { DB } from '../../../../db/client'
 
 type DbOrTx = DB
 
