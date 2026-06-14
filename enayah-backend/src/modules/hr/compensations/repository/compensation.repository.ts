@@ -1,47 +1,79 @@
-import { DB, compensations, compensationAllowances } from '../../../../db'
-import { eq, desc } from 'drizzle-orm'
-import { toCompensationDb, toAllowanceDb } from '../dto/compensation.mapper'
+// src/modules/hr/compensations/repository/compensation.repository.ts
+
+import { and, eq } from 'drizzle-orm'
+
 import { AppError } from '../../../../core/errors/AppError'
-import { CreateCompensationDto } from '../dto/compensation.request'
+import { DB, compensations } from '../../../../db'
+
+import {
+  CreateCompensationDto,
+  UpdateCompensationDto,
+} from '../dto/compensation.request'
+
+import {
+  toCompensationDb,
+  toCompensationUpdateDb,
+} from '../dto/compensation.mapper'
+
+function assertExists<T>(
+  value: T | undefined,
+  message: string,
+  statusCode = 500,
+): T {
+  if (!value) throw new AppError(message, statusCode)
+  return value
+}
 
 export const CompensationRepository = {
   create: async (tx: DB, dto: CreateCompensationDto) => {
-    const [comp] = await tx
+    const [createdRaw] = await tx
       .insert(compensations)
       .values(toCompensationDb(dto))
-      .returning()
+      .returning({ id: compensations.id })
 
-    if (!comp) {
-      throw new AppError('Failed to create compensation', 500)
-    }
+    const created = assertExists(createdRaw, 'Failed to create compensation')
 
-    if (dto.allowances?.length) {
-      await tx
-        .insert(compensationAllowances)
-        .values(toAllowanceDb(comp.id, dto.allowances))
-    }
-
-    return comp
+    return CompensationRepository.findById(tx, created.id)
   },
 
   findById: async (tx: DB, id: string) => {
-    return tx.query.compensations.findFirst({
+    const result = await tx.query.compensations.findFirst({
       where: eq(compensations.id, id),
+      with: {
+        allowances: true,
+      },
+    })
+
+    if (!result) {
+      throw new AppError('Compensation not found', 404)
+    }
+
+    return result
+  },
+
+  findByContractMovementId: async (tx: DB, contractMovementId: string) => {
+    return tx.query.compensations.findFirst({
+      where: eq(compensations.contractMovementId, contractMovementId),
       with: {
         allowances: true,
       },
     })
   },
 
-  getCurrent: async (tx: DB, employmentId: string) => {
-    return tx.query.compensations.findFirst({
-      where: eq(compensations.employmentId, employmentId),
-      orderBy: (c, { desc }) => [desc(c.effectiveDate)],
-    })
+  update: async (tx: DB, id: string, dto: UpdateCompensationDto) => {
+    const [updatedRaw] = await tx
+      .update(compensations)
+      .set(toCompensationUpdateDb(dto))
+      .where(eq(compensations.id, id))
+      .returning({ id: compensations.id })
+
+    const updated = assertExists(updatedRaw, 'Update failed')
+
+    return CompensationRepository.findById(tx, updated.id)
   },
 
   approve: async (tx: DB, id: string, userId: string) => {
-    await tx
+    const [updatedRaw] = await tx
       .update(compensations)
       .set({
         status: 'approved',
@@ -49,5 +81,32 @@ export const CompensationRepository = {
         approvedAt: new Date(),
       })
       .where(eq(compensations.id, id))
+      .returning({ id: compensations.id })
+
+    const updated = assertExists(updatedRaw, 'Approval failed')
+
+    return CompensationRepository.findById(tx, updated.id)
+  },
+
+  apply: async (tx: DB, id: string) => {
+    const [updatedRaw] = await tx
+      .update(compensations)
+      .set({
+        status: 'applied',
+      })
+      .where(eq(compensations.id, id))
+      .returning({ id: compensations.id })
+
+    const updated = assertExists(updatedRaw, 'Apply failed')
+
+    return CompensationRepository.findById(tx, updated.id)
+  },
+
+  delete: async (tx: DB, id: string) => {
+    const existing = await CompensationRepository.findById(tx, id)
+
+    await tx.delete(compensations).where(eq(compensations.id, id))
+
+    return existing
   },
 }

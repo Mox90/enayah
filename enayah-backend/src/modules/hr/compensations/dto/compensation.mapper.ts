@@ -1,20 +1,48 @@
-import { AllowanceInput } from '../domain/allowance.types'
-import { CreateCompensationDto } from './compensation.request'
+// src/modules/hr/compensations/dto/compensation.mapper.ts
+
+import {
+  CreateCompensationDto,
+  UpdateCompensationDto,
+} from './compensation.request'
 
 export const toCompensationDb = (dto: CreateCompensationDto) => ({
-  employmentId: dto.employmentId,
+  contractMovementId: dto.contractMovementId,
+
   effectiveDate: dto.effectiveDate,
+
   baseSalary: dto.baseSalary.toString(),
-  status: 'draft' as const,
-  reason: dto.reason,
+
+  status: dto.status,
+
+  reason: dto.reason ?? null,
+
+  approvedBy: dto.approvedBy ?? null,
+
+  approvedAt: dto.approvedAt ?? null,
 })
 
-export const toAllowanceDb = (
-  compensationId: string,
-  allowances: AllowanceInput[],
-) =>
-  allowances.map((a) => ({
-    compensationId,
-    type: a.type,
-    amount: a.amount.toString(),
-  }))
+export const toCompensationUpdateDb = (dto: UpdateCompensationDto) => ({
+  ...(dto.effectiveDate !== undefined && {
+    effectiveDate: dto.effectiveDate,
+  }),
+
+  ...(dto.baseSalary !== undefined && {
+    baseSalary: dto.baseSalary.toString(),
+  }),
+
+  ...(dto.status !== undefined && {
+    status: dto.status,
+  }),
+
+  ...(dto.reason !== undefined && {
+    reason: dto.reason,
+  }),
+
+  ...(dto.approvedBy !== undefined && {
+    approvedBy: dto.approvedBy,
+  }),
+
+  ...(dto.approvedAt !== undefined && {
+    approvedAt: dto.approvedAt,
+  }),
+})

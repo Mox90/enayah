@@ -1,3 +1,4 @@
-import routes from './routes/employee.routes'
+import employeeRoutes from './routes/employee.routes'
+import employeePersonalRoutes from './routes/employee-personal.routes'
 
-export const employeeRoutes = { routes }
+export { employeeRoutes, employeePersonalRoutes }
