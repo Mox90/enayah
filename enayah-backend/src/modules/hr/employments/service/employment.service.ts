@@ -8,48 +8,72 @@ import {
 import { EmploymentRepository } from '../repository/employment.repository'
 
 export const EmploymentService = {
-  hire: async (dto: CreateEmploymentDto) => {
-    return db.transaction(async (tx) => {
-      const existing = await EmploymentRepository.findActiveByEmployee(
-        tx,
-        dto.employeeId,
-      )
+  // hire: async (dto: CreateEmploymentDto) => {
+  //   return db.transaction(async (tx) => {
+  //     const existing = await EmploymentRepository.findActiveByEmployee(
+  //       tx,
+  //       dto.employeeId,
+  //     )
 
-      if (existing) {
-        throw new AppError('Employee already has an active employment', 400)
-      }
+  //     if (existing) {
+  //       throw new AppError('Employee already has an active employment', 400)
+  //     }
 
-      /*if(dto.staffCategory === 'military' && dto.positionItemId) {
-        throw new AppError('Military cannot have position item', 400)
-      }*/
+  //     /*if(dto.staffCategory === 'military' && dto.positionItemId) {
+  //       throw new AppError('Military cannot have position item', 400)
+  //     }*/
 
-      if (
-        (dto.staffCategory === 'civilian' ||
-          dto.staffCategory === 'contractual') &&
-        !dto.positionItemId
-      ) {
-        throw new AppError('Civilian/Contractual must have position item', 400)
-      }
+  //     if (
+  //       (dto.staffCategory === 'civilian' ||
+  //         dto.staffCategory === 'contractual') &&
+  //       !dto.positionItemId
+  //     ) {
+  //       throw new AppError('Civilian/Contractual must have position item', 400)
+  //     }
 
-      if (dto.positionItemId) {
-        const position = await EmploymentRepository.findPositionItemOrThrow(
-          tx,
-          dto.positionItemId,
-        )
+  //     if (dto.positionItemId) {
+  //       const position = await EmploymentRepository.findPositionItemOrThrow(
+  //         tx,
+  //         dto.positionItemId,
+  //       )
 
-        if (position.status !== 'vacant') {
-          throw new AppError('Position item not available', 400)
-        }
-      }
+  //       if (position.status !== 'vacant') {
+  //         throw new AppError('Position item not available', 400)
+  //       }
+  //     }
 
-      const employment = await EmploymentRepository.create(tx, dto)
+  //     const employment = await EmploymentRepository.create(tx, dto)
 
-      return employment
-    })
+  //     return employment
+  //   })
+  // },
+
+  create: async (dto: CreateEmploymentDto) => {
+    return db.transaction((tx) => EmploymentRepository.create(tx, dto))
   },
 
   findAll: async () => {
     return db.transaction(async (tx) => EmploymentRepository.findAll(tx))
+  },
+
+  findById: async (id: string) => {
+    return db.transaction(async (tx) => EmploymentRepository.findById(tx, id))
+  },
+
+  findByEmployeeId: async (employeeId: string) => {
+    return db.transaction(async (tx) =>
+      EmploymentRepository.findByEmployeeId(tx, employeeId),
+    )
+  },
+
+  findActiveByEmployee: async (employeeId: string) => {
+    return db.transaction(async (tx) =>
+      EmploymentRepository.findActiveByEmployee(tx, employeeId),
+    )
+  },
+
+  update: async (id: string, dto: UpdateEmploymentDto) => {
+    return db.transaction((tx) => EmploymentRepository.update(tx, id, dto))
   },
 
   terminate: async (id: string, dto: UpdateEmploymentDto) => {
@@ -57,7 +81,7 @@ export const EmploymentService = {
       EmploymentRepository.terminate(tx, id, { ...dto, status: 'terminated' }),
     )
   },
-  delete: async (id: string, userId?: string) => {
+  softDelete: async (id: string, userId?: string) => {
     return db.transaction(async (tx) => {
       const existing = await EmploymentRepository.softDelete(tx, id, userId)
       return existing

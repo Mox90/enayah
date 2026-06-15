@@ -1,5 +1,3 @@
-// src/modules/hr/onboarding/dto/onboarding.request.ts
-
 import { z } from 'zod'
 
 import { CreateEmployeeSchema } from '../../employees/dto/employee.request'

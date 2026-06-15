@@ -10,7 +10,7 @@ interface Props {
   view: EmployeeView
   selectedIds: string[]
   onViewChange: (view: EmployeeView) => void
-  onHire?: () => void
+  onBoard?: () => void
   onFilter?: () => void
 }
 
@@ -18,13 +18,13 @@ export function EmployeeToolbar({
   view,
   selectedIds,
   onViewChange,
-  onHire,
+  onBoard,
   onFilter,
 }: Props) {
   return (
     <div className='flex items-center justify-between'>
       <div className='flex items-center gap-3'>
-        <Button onClick={onHire}>Hire Employee</Button>
+        <Button onClick={onBoard}>Hire Employee</Button>
 
         <Button variant='outline' onClick={onFilter}>
           Filter

@@ -1,8 +1,11 @@
-// src/modules/hr/compensations/repository/compensation-allowance.repository.ts
-
 import { eq } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
 import { compensationAllowances, DB } from '../../../../db'
+import {
+  CreateAllowanceDto,
+  UpdateAllowanceDto,
+} from '../dto/compensation.request'
+import { toAllowanceDb, toAllowanceUpdateDb } from '../dto/compensation.mapper'
 
 function assertExists<T>(
   value: T | undefined,
@@ -13,16 +16,11 @@ function assertExists<T>(
   return value
 }
 
-type AllowanceInput = {
-  type: string
-  amount: number
-}
-
 export const CompensationAllowanceRepository = {
-  create: async (tx: DB, data: typeof compensationAllowances.$inferInsert) => {
+  create: async (tx: DB, compensationId: string, dto: CreateAllowanceDto) => {
     const [createdRaw] = await tx
       .insert(compensationAllowances)
-      .values(data)
+      .values(toAllowanceDb(compensationId, dto))
       .returning({ id: compensationAllowances.id })
 
     const created = assertExists(
@@ -36,17 +34,14 @@ export const CompensationAllowanceRepository = {
   createMany: async (
     tx: DB,
     compensationId: string,
-    allowances: AllowanceInput[],
+    allowances: CreateAllowanceDto[],
   ) => {
     if (!allowances.length) return []
+
     return tx
       .insert(compensationAllowances)
       .values(
-        allowances.map((allowance) => ({
-          compensationId,
-          type: allowance.type,
-          amount: allowance.amount.toString(),
-        })),
+        allowances.map((allowance) => toAllowanceDb(compensationId, allowance)),
       )
       .returning()
   },
@@ -69,14 +64,10 @@ export const CompensationAllowanceRepository = {
     })
   },
 
-  update: async (
-    tx: DB,
-    id: string,
-    data: Partial<typeof compensationAllowances.$inferInsert>,
-  ) => {
+  update: async (tx: DB, id: string, dto: UpdateAllowanceDto) => {
     const [updatedRaw] = await tx
       .update(compensationAllowances)
-      .set(data)
+      .set(toAllowanceUpdateDb(dto))
       .where(eq(compensationAllowances.id, id))
       .returning({ id: compensationAllowances.id })
 

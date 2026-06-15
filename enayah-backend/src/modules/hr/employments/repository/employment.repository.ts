@@ -1,6 +1,4 @@
-// src/modules/hr/employments/repository/employment.repository.ts
-
-import { and, eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
 import { DB, employments } from '../../../../db'
 import {
@@ -34,6 +32,15 @@ async function findByIdOrThrow(tx: DB, id: string) {
 
 export const EmploymentRepository = {
   create: async (tx: DB, data: CreateEmploymentDto) => {
+    const existing = await EmploymentRepository.findActiveByEmployee(
+      tx,
+      data.employeeId,
+    )
+
+    if (existing && data.status === 'active') {
+      throw new AppError('Employee already has active employment', 400)
+    }
+
     const [createdRaw] = await tx
       .insert(employments)
       .values(toEmploymentDb(data))
@@ -48,6 +55,13 @@ export const EmploymentRepository = {
     return findByIdOrThrow(tx, id)
   },
 
+  findByEmployeeId: async (tx: DB, employeeId: string) => {
+    return tx.query.employments.findMany({
+      where: and(eq(employments.employeeId, employeeId), isActive),
+      orderBy: (e, { desc }) => [desc(e.startDate)],
+    })
+  },
+
   findActiveByEmployee: async (tx: DB, employeeId: string) => {
     return tx.query.employments.findFirst({
       where: and(
@@ -55,6 +69,7 @@ export const EmploymentRepository = {
         eq(employments.status, 'active'),
         isActive,
       ),
+      orderBy: (e, { desc }) => [desc(e.startDate)],
     })
   },
 
@@ -77,6 +92,7 @@ export const EmploymentRepository = {
       .set({
         ...toEmploymentUpdateDb(dto),
         updatedAt: new Date(),
+        version: sql`${employments.version} + 1`,
       })
       .where(and(eq(employments.id, id), isActive))
       .returning({ id: employments.id })

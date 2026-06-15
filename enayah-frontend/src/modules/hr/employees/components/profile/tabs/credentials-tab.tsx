@@ -16,6 +16,8 @@ interface Props {
 const CredentialsTab = ({ employeeId }: Props) => {
   const { data, isLoading, error, isError } = useEmployeeCredentials(employeeId)
 
+  //console.log(data.credentials, isLoading, error, isError)
+
   if (isLoading) {
     return <div className='p-8 text-center'>Loading credentials...</div>
   }
@@ -27,23 +29,23 @@ const CredentialsTab = ({ employeeId }: Props) => {
       </div>
     )
   }
-  const c = data?.credentials
+  //const c = data?.credentials
 
   return (
     <div className='space-y-6'>
-      <CredentialDegrees degrees={c?.degrees ?? []} />
+      <CredentialDegrees degrees={data?.degrees ?? []} />
 
-      <CredentialBoards boards={c?.boards ?? []} />
+      <CredentialBoards boards={data?.boards ?? []} />
 
-      <CredentialLicenses licenses={c?.licenses ?? []} />
+      <CredentialLicenses licenses={data?.licenses ?? []} />
 
-      <CredentialFellowships fellowships={c?.fellowships ?? []} />
+      <CredentialFellowships fellowships={data?.fellowships ?? []} />
 
-      <CredentialMemberships memberships={c?.memberships ?? []} />
+      <CredentialMemberships memberships={data?.memberships ?? []} />
 
-      <CredentialLifeSupport lifeSupports={c?.lifeSupport ?? []} />
+      <CredentialLifeSupport lifeSupports={data?.lifeSupport ?? []} />
 
-      <CredentialMalpractice malpractice={c?.malpractice ?? []} />
+      <CredentialMalpractice malpractice={data?.malpractice ?? []} />
     </div>
   )
 }

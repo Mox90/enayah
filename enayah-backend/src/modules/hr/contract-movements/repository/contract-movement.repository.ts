@@ -1,8 +1,12 @@
-// src/modules/hr/contract-movements/repository/contract-movement.repository.ts
-
-import { and, eq } from 'drizzle-orm'
+import { and, eq, max, sql } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
-import { DB, contractMovements } from '../../../../db'
+import { contractMovements, DB, positionItems } from '../../../../db'
+import {
+  CreateContractMovementDto,
+  UpdateContractMovementDto,
+} from '../dto/contract-movement.request'
+
+const isActive = eq(contractMovements.isDeleted, false)
 
 function assertExists<T>(
   value: T | undefined,
@@ -13,13 +17,40 @@ function assertExists<T>(
   return value
 }
 
-const isActive = eq(contractMovements.isDeleted, false)
+async function findByIdOrThrow(tx: DB, id: string) {
+  const result = await tx.query.contractMovements.findFirst({
+    where: and(eq(contractMovements.id, id), isActive),
+  })
+
+  if (!result) {
+    throw new AppError('Contract movement not found', 404)
+  }
+
+  return result
+}
 
 export const ContractMovementRepository = {
-  create: async (tx: DB, data: typeof contractMovements.$inferInsert) => {
+  create: async (
+    tx: DB,
+    data: CreateContractMovementDto & {
+      officialDepartmentId: string
+      officialPositionId: string
+      sequenceNumber: number
+    },
+  ) => {
     const [createdRaw] = await tx
       .insert(contractMovements)
-      .values(data)
+      .values({
+        contractId: data.contractId,
+        positionItemId: data.positionItemId,
+        officialDepartmentId: data.officialDepartmentId,
+        officialPositionId: data.officialPositionId,
+        startDate: data.startDate,
+        endDate: data.endDate ?? null,
+        sequenceNumber: data.sequenceNumber,
+        movementType: data.movementType,
+        remarks: data.remarks ?? null,
+      })
       .returning({ id: contractMovements.id })
 
     const created = assertExists(
@@ -27,19 +58,11 @@ export const ContractMovementRepository = {
       'Failed to create contract movement',
     )
 
-    return ContractMovementRepository.findById(tx, created.id)
+    return findByIdOrThrow(tx, created.id)
   },
 
   findById: async (tx: DB, id: string) => {
-    const result = await tx.query.contractMovements.findFirst({
-      where: and(eq(contractMovements.id, id), isActive),
-    })
-
-    if (!result) {
-      throw new AppError('Contract movement not found', 404)
-    }
-
-    return result
+    return findByIdOrThrow(tx, id)
   },
 
   findByContractId: async (tx: DB, contractId: string) => {
@@ -49,11 +72,18 @@ export const ContractMovementRepository = {
     })
   },
 
-  update: async (
-    tx: DB,
-    id: string,
-    data: Partial<typeof contractMovements.$inferInsert>,
-  ) => {
+  getNextSequenceNumber: async (tx: DB, contractId: string) => {
+    const [row] = await tx
+      .select({
+        maxSequence: sql<number>`coalesce(max(${contractMovements.sequenceNumber}), 0)`,
+      })
+      .from(contractMovements)
+      .where(and(eq(contractMovements.contractId, contractId), isActive))
+
+    return Number(row?.maxSequence ?? 0) + 1
+  },
+
+  update: async (tx: DB, id: string, data: UpdateContractMovementDto) => {
     const [updatedRaw] = await tx
       .update(contractMovements)
       .set({
@@ -65,11 +95,11 @@ export const ContractMovementRepository = {
 
     const updated = assertExists(updatedRaw, 'Update failed')
 
-    return ContractMovementRepository.findById(tx, updated.id)
+    return findByIdOrThrow(tx, updated.id)
   },
 
   softDelete: async (tx: DB, id: string, userId?: string) => {
-    const existing = await ContractMovementRepository.findById(tx, id)
+    const existing = await findByIdOrThrow(tx, id)
 
     await tx
       .update(contractMovements)

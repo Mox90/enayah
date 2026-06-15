@@ -1,8 +1,8 @@
-// src/jobs/auditRetention.job.ts
-
-import { auditLogs, db } from '../db'
+//import { auditLogs, db } from '../db'
 import { lt } from 'drizzle-orm'
-import { AuditPolicy } from '../modules/iam/audit/policies/audit.policy'
+//import { AuditPolicy } from '../modules/iam/audit/policies/audit.policy'
+import { auditLogs, db } from '../../db'
+import { AuditPolicy } from '../../modules/iam/audit/policies/audit.policy'
 
 export async function purgeOldAuditLogs() {
   const cutoff = new Date()

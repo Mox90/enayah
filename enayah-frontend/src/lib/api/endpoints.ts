@@ -1,5 +1,3 @@
-// src/lib/api/endpoints.ts
-
 export const API_ENDPOINTS = {
   org: {
     departments: '/org/departments',
@@ -11,6 +9,7 @@ export const API_ENDPOINTS = {
     positionItems: '/hr/position-items',
     positions: '/hr/positions',
     credentials: '/hr/credentials',
+    onboarding: '/hr/onboarding',
   },
 
   iam: {
@@ -18,5 +17,9 @@ export const API_ENDPOINTS = {
     signup: 'iam/auth/signup',
     me: '/iam/auth/me',
     logout: '/iam/auth/logout',
+  },
+
+  countries: {
+    get: '/countries',
   },
 }

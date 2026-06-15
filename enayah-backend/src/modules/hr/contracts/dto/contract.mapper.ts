@@ -1,9 +1,11 @@
-import { CreateContractDto, UpdateContractDto } from '../dto/contract.request'
+import { CreateContractDto, UpdateContractDto } from './contract.request'
 
-export function toContractDb(dto: CreateContractDto) {
+export function toContractDb(
+  dto: CreateContractDto & { contractNumber: string },
+) {
   return {
     employmentId: dto.employmentId,
-    contractNumber: dto.contractNumber.trim(),
+    contractNumber: dto.contractNumber,
     startDate: dto.startDate,
     endDate: dto.endDate,
     contractType: dto.contractType,
@@ -17,7 +19,7 @@ export function toContractDb(dto: CreateContractDto) {
 export function toContractUpdateDb(dto: UpdateContractDto) {
   return {
     ...(dto.contractNumber !== undefined && {
-      contractNumber: dto.contractNumber.trim(),
+      contractNumber: dto.contractNumber,
     }),
 
     ...(dto.startDate !== undefined && {

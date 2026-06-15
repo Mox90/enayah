@@ -1,67 +1,61 @@
-import { InferInsertModel, InferSelectModel } from 'drizzle-orm'
 import {
   CreateEmploymentDto,
   TerminateEmploymentDto,
   UpdateEmploymentDto,
 } from './employment.request'
-import { EmploymentResponse } from './employment.response'
-import { employments } from '../../../../db'
 
-//type EmploymentUpdate = Partial<InferInsertModel<typeof employments>>
-type EmploymentInsert = InferInsertModel<typeof employments>
-type EmploymentSelect = InferSelectModel<typeof employments>
+export function toEmploymentDb(dto: CreateEmploymentDto) {
+  return {
+    employeeId: dto.employeeId,
 
-export const toEmploymentDb = (dto: CreateEmploymentDto): EmploymentInsert => ({
-  employeeId: dto.employeeId,
-  staffCategory: dto.staffCategory,
-  positionItemId: dto.positionItemId ?? undefined,
-  //status: dto.status,
-  hireDate: dto.hireDate,
-  startDate: dto.startDate,
-  endDate: dto.endDate ?? undefined,
-  employmentType: dto.employmentType ?? undefined,
-  status: 'active',
-})
+    hireDate: dto.hireDate,
+    startDate: dto.startDate,
+    endDate: dto.endDate ?? null,
 
-export const toEmploymentUpdateDb = (
-  dto: UpdateEmploymentDto,
-): Partial<EmploymentInsert> => ({
-  ...(dto.employeeId !== undefined && { employeeId: dto.employeeId }),
-  ...(dto.staffCategory !== undefined && { staffCategory: dto.staffCategory }),
-  ...(dto.positionItemId !== undefined && {
-    positionItemId: dto.positionItemId,
-  }),
-  ...(dto.hireDate !== undefined && { hireDate: dto.hireDate }),
-  ...(dto.startDate !== undefined && { startDate: dto.startDate }),
-  ...(dto.endDate !== undefined && { endDate: dto.endDate }),
-  ...(dto.employmentType !== undefined && {
     employmentType: dto.employmentType,
-  }),
-  //...(dto.employeeId !== undefined && { employeeId: dto.employeeId }),
-  ...(dto.causeOfLeaving !== undefined && {
-    causeOfLeaving: dto.causeOfLeaving,
-  }),
-  ...(dto.status !== undefined && { status: dto.status }),
-  updatedAt: new Date(),
-  //...(dto.updatedAt !== undefined && { updatedAt: dto.updatedAt }),
-})
+    staffCategory: dto.staffCategory,
+    status: dto.status,
 
-export const toEmploymentResponse = (dto: any): EmploymentResponse => ({
-  id: dto.id,
-  employeeId: dto.employeeId,
-  staffCategory: dto.staffCategory,
-  positionItemId: dto.positionItemId ?? undefined,
-  status: dto.status,
-  hireDate: dto.hireDate,
-  startDate: dto.startDate,
-  endDate: dto.endDate ?? undefined,
-})
+    causeOfLeaving: dto.causeOfLeaving ?? null,
+  }
+}
 
-export const toEmploymentTerminateDb = (
-  dto: TerminateEmploymentDto,
-): Partial<EmploymentInsert> => ({
-  endDate: dto.endDate,
-  causeOfLeaving: dto.causeOfLeaving ?? undefined,
-  status: 'terminated',
-  updatedAt: new Date(),
-})
+export function toEmploymentUpdateDb(dto: UpdateEmploymentDto) {
+  return {
+    ...(dto.hireDate !== undefined && {
+      hireDate: dto.hireDate,
+    }),
+
+    ...(dto.startDate !== undefined && {
+      startDate: dto.startDate,
+    }),
+
+    ...(dto.endDate !== undefined && {
+      endDate: dto.endDate,
+    }),
+
+    ...(dto.employmentType !== undefined && {
+      employmentType: dto.employmentType,
+    }),
+
+    ...(dto.staffCategory !== undefined && {
+      staffCategory: dto.staffCategory,
+    }),
+
+    ...(dto.status !== undefined && {
+      status: dto.status,
+    }),
+
+    ...(dto.causeOfLeaving !== undefined && {
+      causeOfLeaving: dto.causeOfLeaving,
+    }),
+  }
+}
+
+export function toEmploymentTerminateDb(dto: TerminateEmploymentDto) {
+  return {
+    endDate: dto.endDate,
+    status: dto.status,
+    causeOfLeaving: dto.causeOfLeaving ?? null,
+  }
+}

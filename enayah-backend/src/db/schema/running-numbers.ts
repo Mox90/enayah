@@ -1,5 +1,3 @@
-// src/db/schema/running-numbers.ts
-
 import { integer, pgTable, varchar } from 'drizzle-orm/pg-core'
 import { baseColumns } from './base'
 
