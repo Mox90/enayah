@@ -59,3 +59,14 @@ export type CreatePositionItemDTO = z.infer<typeof createPositionItemSchema>
 export type UpdatePositionItemDTO = z.infer<typeof updatePositionItemSchema>
 //export type AssignEmployeeDTO = z.infer<typeof assignEmployeeSchema>
 export type PositionItemIdDTO = z.infer<typeof positionItemIdSchema>
+
+// positionItem.request.ts
+
+export const PositionItemLookupQuerySchema = z.object({
+  search: z.string().trim().optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+})
+
+export type PositionItemLookupQueryDTO = z.infer<
+  typeof PositionItemLookupQuerySchema
+>

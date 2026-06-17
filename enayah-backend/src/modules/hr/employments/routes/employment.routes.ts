@@ -1,36 +1,53 @@
-// employment.routes.ts
 import { Router } from 'express'
 import { requireAuth } from '../../../../core/middleware/auth.middleware'
-import { requirePermission } from '../../../../core/middleware/permission.middleware'
+import {
+  attachPermissions,
+  requirePermission,
+} from '../../../../core/middleware/permission.middleware'
 import { audit } from '../../../../core/middleware/audit.middleware'
-import { EmploymentController } from '../controller/employment.controller'
 import { getParam } from '../../../../core/utils/request.utils'
+import { EmploymentController } from '../controller/employment.controller'
 
 const router = Router()
 
 router.use(requireAuth)
+router.use(attachPermissions)
 
 router.get(
   '/',
-  requirePermission('employment.view'),
+  requirePermission('employee.view'),
   EmploymentController.findAll,
 )
 
 router.post(
   '/',
-  requirePermission('employment.create'),
-  audit('HIRE_EMPLOYEE', {
+  requirePermission('employee.update'),
+  audit('EMPLOYMENT_CREATE', {
     resource: 'EMPLOYMENT',
-    sanitize: {
-      allowList: ['employeeId', 'status', 'startDate'],
-    },
   }),
-  EmploymentController.hire,
+  EmploymentController.create,
 )
-router.post(
+
+router.get(
+  '/:id',
+  requirePermission('employee.view'),
+  EmploymentController.findById,
+)
+
+router.patch(
+  '/:id',
+  requirePermission('employee.update'),
+  audit('EMPLOYMENT_UPDATE', {
+    resource: 'EMPLOYMENT',
+    getResourceId: (req) => getParam(req.params.id),
+  }),
+  EmploymentController.update,
+)
+
+router.patch(
   '/:id/terminate',
-  requirePermission('employment.terminate'),
-  audit('TERMINATE_EMPLOYMENT', {
+  requirePermission('employee.update'),
+  audit('EMPLOYMENT_TERMINATE', {
     resource: 'EMPLOYMENT',
     getResourceId: (req) => getParam(req.params.id),
   }),
@@ -39,12 +56,12 @@ router.post(
 
 router.delete(
   '/:id',
-  requirePermission('employment.delete'),
-  audit('DELETE_EMPLOYMENT', {
+  requirePermission('employee.update'),
+  audit('EMPLOYMENT_DELETE', {
     resource: 'EMPLOYMENT',
     getResourceId: (req) => getParam(req.params.id),
   }),
-  EmploymentController.delete,
+  EmploymentController.softDelete,
 )
 
 export default router

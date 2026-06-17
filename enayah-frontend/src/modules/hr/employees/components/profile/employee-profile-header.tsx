@@ -10,6 +10,7 @@ import {
   MoveRight,
   UserMinus,
   UserX,
+  ArrowRight,
 } from 'lucide-react'
 
 import {
@@ -23,7 +24,7 @@ import {
 import { Button } from '@/components/ui/button'
 
 import { Badge } from '@/components/ui/badge'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { EmployeeProfile } from '../../types/employee-profile.types'
 
 const statusClass: Record<string, string> = {
@@ -60,14 +61,26 @@ export function EmployeeProfileHeader({ profile }: Props) {
   const p = profile.personal
   const e = profile.employment
   const locale = useLocale()
+  const ct = useTranslations('common')
+  const cont = useTranslations('contracts')
+  const et = useTranslations('employees')
+  const isRtl = locale === 'ar'
+
+  const name = isRtl
+    ? [p.firstNameAr, p.secondNameAr, p.thirdNameAr, p.familyNameAr]
+    : [p.firstNameEn, p.secondNameEn, p.thirdNameEn, p.familyNameEn]
 
   return (
     <div className='rounded-xl border bg-background p-6'>
       <div className='flex justify-between'>
         <Link href={`/${locale}/employees`}>
           <Button variant='ghost'>
-            <ArrowLeft className='mr-2 h-4 w-4' />
-            Back
+            {isRtl ? (
+              <ArrowRight className='mr-2 h-4 w-4' />
+            ) : (
+              <ArrowLeft className='mr-2 h-4 w-4' />
+            )}
+            {ct('back')}
           </Button>
         </Link>
 
@@ -81,31 +94,31 @@ export function EmployeeProfileHeader({ profile }: Props) {
           <DropdownMenuContent align='end'>
             <DropdownMenuItem>
               <Pencil className='mr-2 h-4 w-4' />
-              Edit
+              {ct('edit')}
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
 
             <DropdownMenuItem>
               <FilePenLine className='mr-2 h-4 w-4' />
-              Contract
+              {cont('contract')}
             </DropdownMenuItem>
 
             <DropdownMenuItem>
               <MoveRight className='mr-2 h-4 w-4' />
-              Transfer
+              {cont('transfer')}
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
 
             <DropdownMenuItem>
               <UserMinus className='mr-2 h-4 w-4' />
-              Deactivate
+              {ct('deactivate')}
             </DropdownMenuItem>
 
             <DropdownMenuItem>
               <UserX className='mr-2 h-4 w-4' />
-              Terminate
+              {ct('terminate')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -118,14 +131,24 @@ export function EmployeeProfileHeader({ profile }: Props) {
 
         <div className='space-y-2'>
           <h1 className='text-3xl font-bold'>
-            {[p.firstNameEn, p.secondNameEn, p.thirdNameEn, p.familyNameEn]
-              .filter(Boolean)
-              .join(' ')}
+            {name.filter(Boolean).join(' ')}
           </h1>
 
-          <div>Employee #{p.employeeNumber}</div>
-          <div>{e?.movement.officialPosition.titleEn}</div>
-          <div>{e?.movement.officialDepartment.nameEn}</div>
+          <div>
+            {et('employeeNumber')} {p.employeeNumber}
+          </div>
+          <div>
+            {isRtl
+              ? (e?.movement.officialPosition.titleAr ??
+                e?.movement.officialPosition.titleEn)
+              : e?.movement.officialPosition.titleEn}
+          </div>
+          <div>
+            {isRtl
+              ? (e?.movement.officialDepartment.nameAr ??
+                e?.movement.officialDepartment.nameEn)
+              : e?.movement.officialDepartment.nameEn}
+          </div>
           <Badge
             variant={'outline'}
             className={statusClass[e?.status ?? ''] ?? ''}
@@ -134,22 +157,22 @@ export function EmployeeProfileHeader({ profile }: Props) {
           </Badge>
           <div className='grid grid-cols-2 gap-x-10 gap-y-2 pt-5'>
             <div>
-              <strong>Hire Date</strong>
+              <strong>{et('hireDate')}</strong>
               <br />
               {e?.hireDate}
             </div>
             <div>
-              <strong>Position Control Number</strong>
+              <strong>{et('pcnText')}</strong>
               <br />
               {e?.movement.positionItem.itemNumber}
             </div>
             <div>
-              <strong>Category</strong>
+              <strong>{et('category')}</strong>
               <br />
               {e?.movement.positionItem.categoryCode}
             </div>
             <div>
-              <strong>Workforce</strong>
+              <strong>{et('workforce')}</strong>
               <br />
               {workforceLabel[
                 e?.movement.positionItem.workforceCategory ?? ''

@@ -11,13 +11,15 @@ import { Button } from '@/components/ui/button'
 import { EnterpriseFilterConfig } from './enterprise-filter-types'
 import { EnterpriseFilterGroup } from './enterprise-filter-group'
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 
+type EnterpriseFilterValues = Record<string, string[]>
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   config: EnterpriseFilterConfig[]
-  values: Record<string, any>
-  onApply: (values: Record<string, any>) => void
+  values: EnterpriseFilterValues
+  onApply: (values: EnterpriseFilterValues) => void
   onReset: () => void
 }
 
@@ -31,6 +33,7 @@ export function EnterpriseFilterSheet({
   onReset,
 }: Props) {
   const [localValues, setLocalValues] = useState(values)
+  const t = useTranslations('common')
 
   return (
     <Sheet
@@ -66,7 +69,7 @@ export function EnterpriseFilterSheet({
 
         <div className='flex gap-3 mt-8'>
           <Button variant='outline' onClick={onReset}>
-            Reset
+            {t('reset')}
           </Button>
 
           <Button
@@ -75,7 +78,7 @@ export function EnterpriseFilterSheet({
               onOpenChange(false)
             }}
           >
-            Apply
+            {t('apply')}
           </Button>
         </div>
       </SheetContent>

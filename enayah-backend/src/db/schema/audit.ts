@@ -1,5 +1,3 @@
-// src/db/schema/auditLogs.ts
-
 import {
   pgTable,
   uuid,

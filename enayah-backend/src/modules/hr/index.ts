@@ -8,6 +8,9 @@ import { hrAnalyticsRoutes } from './analytics'
 //import { hiringRoutes } from './hiring'
 import { credentialRoutes } from './credentials'
 import { onboardingRoutes } from './onboarding'
+import { contractRoutes } from './contracts'
+import { contractMovementRoutes } from './contract-movements'
+import { appointmentRoutes } from './appointments'
 
 const router = Router()
 
@@ -20,6 +23,9 @@ router.use('/position-items', positionItemRoutes.routes)
 router.use('/analytics', hrAnalyticsRoutes.routes)
 router.use('/onboarding', onboardingRoutes.routes)
 router.use('/credentials', credentialRoutes.routes)
+router.use('/contracts', contractRoutes)
+router.use('/contract-movements', contractMovementRoutes)
+router.use('/appointments', appointmentRoutes)
 
 export const hrModule = {
   routes: router,

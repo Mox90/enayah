@@ -28,13 +28,19 @@ async function findByIdOrThrow(tx: DB, id: string) {
 }
 
 export const ContractRepository = {
-  create: async (tx: DB, dto: CreateContractDto) => {
+  create: async (
+    tx: DB,
+    dto: CreateContractDto & { contractNumber: string },
+  ) => {
     const [row] = await tx
+
       .insert(contracts)
+
       .values(toContractDb(dto))
+
       .returning({ id: contracts.id })
 
-    const created = assertExists(row, 'Failed to create contract', 500)
+    const created = assertExists(row, 'Failed to create contract')
 
     return findByIdOrThrow(tx, created.id)
   },
@@ -43,14 +49,14 @@ export const ContractRepository = {
     return findByIdOrThrow(tx, id)
   },
 
-  findByEmployment: async (tx: DB, employmentId: string) => {
+  findByEmploymentId: async (tx: DB, employmentId: string) => {
     return tx.query.contracts.findMany({
       where: and(eq(contracts.employmentId, employmentId), isActive),
       orderBy: (c, { desc }) => [desc(c.startDate)],
     })
   },
 
-  getCurrentByEmployment: async (tx: DB, employmentId: string) => {
+  findActiveByEmploymentId: async (tx: DB, employmentId: string) => {
     return tx.query.contracts.findFirst({
       where: and(
         eq(contracts.employmentId, employmentId),
@@ -70,15 +76,16 @@ export const ContractRepository = {
         ...toContractUpdateDb(dto),
         updatedAt: new Date(),
       })
+
       .where(and(eq(contracts.id, id), isActive))
       .returning({ id: contracts.id })
 
-    const updated = assertExists(row, 'Update failed', 500)
+    const updated = assertExists(row, 'Update failed')
 
     return findByIdOrThrow(tx, updated.id)
   },
 
-  supersedeContract: async (tx: DB, id: string, newStartDate: string) => {
+  supersede: async (tx: DB, id: string, newStartDate: string) => {
     const previousEndDate = new Date(
       new Date(newStartDate).getTime() - 86400000,
     )
@@ -95,7 +102,7 @@ export const ContractRepository = {
       .where(and(eq(contracts.id, id), isActive))
       .returning({ id: contracts.id })
 
-    return assertExists(row, 'Failed to supersede contract', 404)
+    return assertExists(row, 'Failed to supersede contract')
   },
 
   cancel: async (tx: DB, id: string) => {
@@ -108,7 +115,7 @@ export const ContractRepository = {
       .where(and(eq(contracts.id, id), isActive))
       .returning({ id: contracts.id })
 
-    return assertExists(row, 'Cancel failed', 404)
+    return assertExists(row, 'Cancel failed')
   },
 
   expire: async (tx: DB, id: string) => {
@@ -121,7 +128,7 @@ export const ContractRepository = {
       .where(and(eq(contracts.id, id), isActive))
       .returning({ id: contracts.id })
 
-    return assertExists(row, 'Expire failed', 404)
+    return assertExists(row, 'Expire failed')
   },
 
   softDelete: async (tx: DB, id: string, userId?: string) => {

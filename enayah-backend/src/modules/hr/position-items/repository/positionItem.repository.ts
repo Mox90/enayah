@@ -22,6 +22,7 @@ import { AppError } from '../../../../core/errors/AppError'
 import {
   CreatePositionItemDTO,
   JobPositionItemQueryDTO,
+  PositionItemLookupQueryDTO,
   UpdatePositionItemDTO,
 } from '../dto/positionItem.request'
 import {
@@ -53,43 +54,58 @@ function assertExists<T>(value: T | undefined, msg: string, status = 500): T {
 }
 
 export const PositionItemRepository = {
-  assignIfAvailable: async (id: string, tx = db) => {
-    const result = await tx
+  // assignIfAvailable: async (id: string, tx = db) => {
+  //   const result = await tx
+  //     .update(positionItems)
+  //     .set({ status: 'filled', updatedAt: new Date() }) // Update the status to 'filled' and set the updatedAt field
+  //     .where(
+  //       and(
+  //         eq(positionItems.id, id),
+  //         inArray(positionItems.status, ['vacant']), // or 'open'
+  //       ),
+  //     )
+  //     .returning()
+
+  //   if (result.length === 0) {
+  //     throw new AppError('Position item not available', 400)
+  //   }
+
+  //   return result[0]
+  // },
+
+  assignIfAvailable: async (tx: DB, id: string) => {
+    const [row] = await tx
       .update(positionItems)
-      .set({ status: 'filled', updatedAt: new Date() }) // Update the status to 'filled' and set the updatedAt field
+      .set({
+        status: 'filled',
+        updatedAt: new Date(),
+        version: sql`${positionItems.version} + 1`,
+      })
       .where(
         and(
           eq(positionItems.id, id),
-          inArray(positionItems.status, ['vacant']), // or 'open'
+          eq(positionItems.isDeleted, false),
+          isNull(positionItems.deletedAt),
+          eq(positionItems.status, 'vacant'),
         ),
       )
-      .returning()
+      .returning({
+        id: positionItems.id,
+        itemNumber: positionItems.itemNumber,
+        departmentId: positionItems.departmentId,
+        positionId: positionItems.positionId,
+        status: positionItems.status,
+        categoryCode: positionItems.categoryCode,
+        workforceCategory: positionItems.workforceCategory,
+      })
 
-    if (result.length === 0) {
-      throw new AppError('Position item not available', 400)
+    if (!row) {
+      throw new AppError('Position item is not available', 400)
     }
 
-    return result[0]
+    return row
   },
 
-  /*create: async (tx: DB, data: CreatePositionItemDTO) => {
-    const insertPayload = {
-      ...toPositionItemDB(data),
-      workforceCategory: data.workforceCategory,
-    }
-
-    const [row] = await tx
-      .insert(positionItems)
-      .values({
-        ...toPositionItemDB(data),
-        workforceCategory: data.workforceCategory,
-      })
-      .returning()
-
-    const created = assertExists(row, 'Failed to create position item')
-
-    return findByIdOrThrow(tx, created.id)
-  },*/
   create: async (tx: DB, data: CreatePositionItemDTO) => {
     const [row] = await tx
       .insert(positionItems)
@@ -108,24 +124,57 @@ export const PositionItemRepository = {
     return positionItems.map(toPositionItemResponse)
   },
 
-  findLookup: async () => {
+  findLookup: async (params?: PositionItemLookupQueryDTO) => {
+    const search = params?.search?.trim()
+    const limit = params?.limit ?? 20
+
+    const conditions = [
+      eq(positionItems.isDeleted, false),
+      isNull(positionItems.deletedAt),
+      eq(positionItems.status, 'vacant'),
+    ]
+
+    if (search) {
+      conditions.push(
+        or(
+          ilike(positionItems.itemNumber, `%${search}%`),
+          ilike(departments.nameEn, `%${search}%`),
+          ilike(departments.nameAr, `%${search}%`),
+          ilike(positions.titleEn, `%${search}%`),
+          ilike(positions.titleAr, `%${search}%`),
+          ilike(sql`${positionItems.categoryCode}::text`, `%${search}%`),
+        )!,
+      )
+    }
+
     return db
       .select({
         id: positionItems.id,
+
         itemNumber: positionItems.itemNumber,
+
         departmentId: positionItems.departmentId,
+        departmentNameEn: departments.nameEn,
+        departmentNameAr: departments.nameAr,
+
         positionId: positionItems.positionId,
+        positionTitleEn: positions.titleEn,
+        positionTitleAr: positions.titleAr,
+
+        categoryCode: positionItems.categoryCode,
+        workforceCategory: positionItems.workforceCategory,
+
+        minSalary: positionItems.minSalary,
+        maxSalary: positionItems.maxSalary,
+
         status: positionItems.status,
       })
       .from(positionItems)
-      .where(
-        and(
-          eq(positionItems.isDeleted, false),
-          isNull(positionItems.deletedAt),
-          eq(positionItems.status, 'vacant'),
-        ),
-      )
+      .leftJoin(departments, eq(positionItems.departmentId, departments.id))
+      .leftJoin(positions, eq(positionItems.positionId, positions.id))
+      .where(and(...conditions))
       .orderBy(asc(positionItems.itemNumber))
+      .limit(limit)
   },
 
   findById: async (tx: DB, id: string) => {
@@ -351,46 +400,6 @@ export const PositionItemRepository = {
       .where(eq(positionItems.id, id))
       .returning()
   },
-
-  // findHierarchyData: async (tx: DB) => {
-  //   return tx.query.positionItems.findMany({
-  //     where: and(
-  //       eq(positionItems.isDeleted, false),
-  //       isNull(positionItems.deletedAt),
-  //       ne(positionItems.status, 'frozen'),
-  //     ),
-  //     with: {
-  //       department: true,
-  //       position: true,
-  //       employments: {
-  //         where: eq(employments.status, 'active'),
-  //         with: {
-  //           employee: true,
-  //         },
-  //       },
-  //     },
-  //     orderBy: [asc(positionItems.departmentId), asc(positionItems.itemNumber)],
-  //   })
-  // },
-  // findHierarchyData: async (tx: DB): Promise<PositionItemHierarchy[]> => {
-  //   return tx.query.positionItems.findMany({
-  //     where: and(
-  //       eq(positionItems.isDeleted, false),
-  //       isNull(positionItems.deletedAt),
-  //       ne(positionItems.status, 'frozen'),
-  //     ),
-  //     with: {
-  //       department: true,
-  //       position: true,
-  //       employments: {
-  //         where: eq(employments.status, 'active'),
-  //         with: {
-  //           employee: true,
-  //         },
-  //       },
-  //     },
-  //   }) as Promise<PositionItemHierarchy[]>
-  // },
 
   findOrganizationHierarchy: async (tx: DB) => {
     return tx.query.departments.findMany({

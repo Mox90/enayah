@@ -24,7 +24,7 @@ import {
   FilePenLine,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 interface Props {
   selectedIds: string[]
@@ -33,6 +33,7 @@ interface Props {
 export function EmployeeSelectionActions({ selectedIds }: Props) {
   const router = useRouter()
   const locale = useLocale()
+  const t = useTranslations('common')
   if (selectedIds.length === 0) {
     return null
   }
@@ -41,7 +42,9 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
 
   return (
     <div className='flex items-center gap-3'>
-      <span className='text-sm font-medium'>{selectedIds.length} Selected</span>
+      <span className='text-sm font-medium'>
+        {selectedIds.length} {t('selected')}
+      </span>
 
       {/* --------------------- */}
       {/* Export */}
@@ -51,7 +54,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
         <DropdownMenuTrigger asChild>
           <Button variant='outline'>
             <Download className='mr-2 h-4 w-4' />
-            Export
+            {t('export')}
           </Button>
         </DropdownMenuTrigger>
 
@@ -62,7 +65,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
             }}
           >
             <FileSpreadsheet className='mr-2 h-4 w-4' />
-            Excel
+            {t('excel')}
           </DropdownMenuItem>
 
           <DropdownMenuItem
@@ -71,7 +74,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
             }}
           >
             <File className='mr-2 h-4 w-4' />
-            CSV
+            {t('csv')}
           </DropdownMenuItem>
 
           <DropdownMenuItem
@@ -80,7 +83,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
             }}
           >
             <FileText className='mr-2 h-4 w-4' />
-            PDF
+            {t('pdf')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -96,7 +99,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
         }}
       >
         <Printer className='mr-2 h-4 w-4' />
-        Print
+        {t('print')}
       </Button>
 
       {/* --------------------- */}
@@ -107,7 +110,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
         <DropdownMenuTrigger asChild>
           <Button variant='outline'>
             <MoreHorizontal className='mr-2 h-4 w-4' />
-            Actions
+            {t('actions')}
           </Button>
         </DropdownMenuTrigger>
 
@@ -120,7 +123,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
                 }
               >
                 <Eye className='mr-2 h-4 w-4' />
-                Profile
+                {t('profile')}
               </DropdownMenuItem>
 
               <DropdownMenuItem
@@ -131,7 +134,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
                 }
               >
                 <FilePenLine className='mr-2 h-4 w-4' />
-                Amend Contract
+                {t('amendContract')}
               </DropdownMenuItem>
             </>
           )}
@@ -142,7 +145,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
             }}
           >
             <UserRoundCog className='mr-2 h-4 w-4' />
-            Assign Training
+            {t('assignTraining')}
           </DropdownMenuItem>
 
           <DropdownMenuItem
@@ -151,7 +154,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
             }}
           >
             <Mail className='mr-2 h-4 w-4' />
-            Send Email
+            {t('sendEmail')}
           </DropdownMenuItem>
 
           <DropdownMenuItem
@@ -160,7 +163,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
             }}
           >
             <UserMinus className='mr-2 h-4 w-4' />
-            Deactivate
+            {t('deactivate')}
           </DropdownMenuItem>
 
           <DropdownMenuItem
@@ -169,7 +172,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
             }}
           >
             <UserX className='mr-2 h-4 w-4' />
-            Terminate
+            {t('terminate')}
           </DropdownMenuItem>
 
           {/* <DropdownMenuItem

@@ -1,76 +1,47 @@
-import { db, contracts, DB } from '../../../../db'
-import { and, eq, sql } from 'drizzle-orm'
-import { AppError } from '../../../../core/errors/AppError'
-import { CreateContractDto } from '../dto/contract.request'
+import { RunningNumberService } from '../../../../core/service/running-number.service'
+import { db } from '../../../../db'
+import { CreateContractDto, UpdateContractDto } from '../dto/contract.request'
 import { ContractRepository } from '../repository/contract.repository'
-
-const validateNoOverlap = async (tx: DB, dto: CreateContractDto) => {
-  const existing = await tx.query.contracts.findMany({
-    where: and(
-      eq(contracts.employmentId, dto.employmentId),
-      eq(contracts.isDeleted, false),
-    ),
-  })
-
-  for (const c of existing) {
-    const overlap =
-      new Date(dto.startDate) <= new Date(c.endDate) &&
-      new Date(dto.endDate) >= new Date(c.startDate)
-
-    if (overlap) {
-      throw new AppError(
-        `Contract overlaps (${c.startDate} - ${c.endDate})`,
-        400,
-      )
-    }
-  }
-}
 
 export const ContractService = {
   create: async (dto: CreateContractDto) => {
     return db.transaction(async (tx) => {
-      // 🔒 1. LOCK (prevents race condition)
-      /*await tx.execute(sql`
-        SELECT id FROM contracts
-        WHERE employment_id = ${dto.employmentId}
-        FOR UPDATE
-      `)*/
-      await tx.execute(sql`
-        SELECT id FROM employments
-        WHERE id = ${dto.employmentId}
-        FOR UPDATE
-      `)
+      const contractNumber =
+        dto.contractNumber ??
+        (await RunningNumberService.generate(tx, 'CONTRACT'))
 
-      // 🔍 2. GET CURRENT CONTRACT
-      const current = await ContractRepository.getCurrentByEmployment(
-        tx,
-        dto.employmentId,
-      )
-
-      // 🧠 3. CLOSE ONLY IF OVERLAPPING OR ACTIVE
-      if (current) {
-        const currentEnd = new Date(current.endDate)
-        const newStart = new Date(dto.startDate)
-        const isOverlapping = newStart <= currentEnd
-
-        if (isOverlapping) {
-          await ContractRepository.closeContract(tx, current.id, dto.startDate)
-        }
-      }
-
-      // 🔥 4. VALIDATE (after closing potential overlap)
-      await validateNoOverlap(tx, dto)
-
-      // 🚀 5. CREATE NEW CONTRACT
-      return ContractRepository.create(tx, dto)
+      return ContractRepository.create(tx, {
+        ...dto,
+        contractNumber,
+      })
     })
   },
 
   findById: async (id: string) => {
-    return db.transaction((tx) => ContractRepository.findById(tx, id))
+    return ContractRepository.findById(db, id)
   },
 
-  delete: async (id: string) => {
-    return db.transaction((tx) => ContractRepository.delete(tx, id))
+  findByEmploymentId: async (employmentId: string) => {
+    return ContractRepository.findByEmploymentId(db, employmentId)
+  },
+
+  findActiveByEmploymentId: async (employmentId: string) => {
+    return ContractRepository.findActiveByEmploymentId(db, employmentId)
+  },
+
+  update: async (id: string, dto: UpdateContractDto) => {
+    return db.transaction((tx) => ContractRepository.update(tx, id, dto))
+  },
+
+  cancel: async (id: string) => {
+    return db.transaction((tx) => ContractRepository.cancel(tx, id))
+  },
+
+  expire: async (id: string) => {
+    return db.transaction((tx) => ContractRepository.expire(tx, id))
+  },
+
+  softDelete: async (id: string, userId?: string) => {
+    return db.transaction((tx) => ContractRepository.softDelete(tx, id, userId))
   },
 }

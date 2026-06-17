@@ -8,20 +8,11 @@ import { DataTableColumnHeader } from '@/components/tables'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 
-const genderClass: Record<string, string> = {
-  male: 'bg-blue-100 text-blue-700 border-blue-200',
-  female: 'bg-pink-100 text-pink-700 border-pink-200',
-}
-
-const genderLabel: Record<string, string> = {
-  male: 'Male',
-  female: 'Female',
-}
-
 export function employeeColumns(
   sortBy: string,
   sortOrder: 'asc' | 'desc',
 ): ColumnDef<EmployeeDirectoryRow>[] {
+  //const et = useTranslations('employees')
   return [
     {
       id: 'select',

@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { iamModule } from './modules/iam'
 import { orgModule } from './modules/org'
 import { hrModule } from './modules/hr'
+import { countryRoutes } from './modules/countries'
 
 const router = Router()
 
@@ -11,6 +12,7 @@ const router = Router()
 router.use('/iam', iamModule.routes)
 router.use('/org', orgModule.routes)
 router.use('/hr', hrModule.routes)
+router.use('/countries', countryRoutes)
 
 //router.use('/departments', departmentModule.routes)
 //router.use('/positions', positionModule.routes)

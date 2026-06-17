@@ -1,19 +1,17 @@
 // src/modules/hr/compensations/repository/compensation.repository.ts
 
-import { and, eq } from 'drizzle-orm'
-
+import { eq } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
-import { DB, compensations } from '../../../../db'
-
+import { compensations, DB } from '../../../../db'
 import {
   CreateCompensationDto,
   UpdateCompensationDto,
 } from '../dto/compensation.request'
-
 import {
   toCompensationDb,
   toCompensationUpdateDb,
 } from '../dto/compensation.mapper'
+import { CompensationAllowanceRepository } from './compensation-allowance.repository'
 
 function assertExists<T>(
   value: T | undefined,
@@ -32,6 +30,14 @@ export const CompensationRepository = {
       .returning({ id: compensations.id })
 
     const created = assertExists(createdRaw, 'Failed to create compensation')
+
+    if (dto.allowances.length) {
+      await CompensationAllowanceRepository.createMany(
+        tx,
+        created.id,
+        dto.allowances,
+      )
+    }
 
     return CompensationRepository.findById(tx, created.id)
   },

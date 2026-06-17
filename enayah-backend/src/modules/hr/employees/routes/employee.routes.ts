@@ -15,6 +15,29 @@ router.use(requireAuth)
 router.use(attachPermissions)
 
 router.get(
+  '/:employeeId/employments',
+  requirePermission('employee.view'),
+  EmploymentController.findByEmployeeId,
+)
+
+router.get(
+  '/:employeeId/employments/active',
+  requirePermission('employee.view'),
+  EmploymentController.findActiveByEmployee,
+)
+
+router.post(
+  '/:employeeId/employments',
+  requirePermission('employee.update'),
+  audit('EMPLOYMENT_CREATE', {
+    resource: 'EMPLOYMENT',
+    getResourceId: (req) => getParam(req.params.employeeId),
+  }),
+
+  EmploymentController.createForEmployee,
+)
+
+router.get(
   '/:id/profile',
   requirePermission('employee.view'),
   EmployeeController.getProfile,

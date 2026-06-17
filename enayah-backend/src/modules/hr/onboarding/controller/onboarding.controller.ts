@@ -1,9 +1,8 @@
-// src/modules/hr/onboarding/controller/onboarding.controller.ts
-
 import { Request, Response } from 'express'
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
 import { OnboardingSubmitSchema } from '../dto/onboarding.request'
 import { OnboardingService } from '../service/onboarding.service'
+import { toOnboardingResponse } from '../dto/onboarding.response'
 
 export const OnboardingController = {
   submit: asyncHandler(async (req: Request, res: Response) => {
@@ -14,6 +13,6 @@ export const OnboardingController = {
     res.locals.resourceId = result.employee.id
     res.locals.after = result
 
-    res.status(201).json(result)
+    res.status(201).json(toOnboardingResponse(result))
   }),
 }

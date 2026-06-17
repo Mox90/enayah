@@ -14,6 +14,7 @@ import { EmployeeRepository } from '../../employees/repository/employee.reposito
 import {
   CreatePositionItemDTO,
   JobPositionItemQueryDTO,
+  PositionItemLookupQueryDTO,
   UpdatePositionItemDTO,
 } from '../dto/positionItem.request'
 
@@ -62,14 +63,10 @@ export const PositionItemService = {
     }
   },
 
-  findLookup: async () => {
-    const result = await PositionItemRepository.findLookup()
-    return result
+  lookup: async (params: PositionItemLookupQueryDTO) => {
+    return PositionItemRepository.findLookup(params)
   },
 
-  /*update: async (id: string, data: UpdatePositionItemDTO) => {
-    return db.transaction((tx) => PositionItemRepository.update(tx, id, data))
-  },*/
   update: async (id: string, data: UpdatePositionItemDTO, userId?: string) => {
     return db.transaction((tx) =>
       PositionItemRepository.update(tx, id, data, userId),
@@ -93,14 +90,14 @@ export const PositionItemService = {
 
   // employee.service.ts
 
-  findManpowerView: async () => {
-    const items = await PositionItemRepository.findHierarchyData(db)
-    //return toHierarchyResponse(items)
-    return toDepartmentHierarchyResponse(items)
-  },
+  // findManpowerView: async () => {
+  //   const items = await PositionItemRepository.findHierarchyData(db)
+  //   //return toHierarchyResponse(items)
+  //   return toDepartmentHierarchyResponse(items)
+  // },
 
-  findOrganizationHierarchyView: async () => {
-    const items = await PositionItemRepository.findHierarchyData(db)
-    return toOrganizationHierarchyResponse(items)
-  },
+  // findOrganizationHierarchyView: async () => {
+  //   const items = await PositionItemRepository.findHierarchyData(db)
+  //   return toOrganizationHierarchyResponse(items)
+  // },
 }

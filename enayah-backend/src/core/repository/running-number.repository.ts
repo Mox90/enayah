@@ -1,5 +1,3 @@
-// src/core/repository/running-number.repository.ts
-
 import { eq, sql } from 'drizzle-orm'
 import { DB, runningNumbers } from '../../db'
 import { AppError } from '../errors/AppError'

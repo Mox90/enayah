@@ -21,6 +21,30 @@ router.post(
   ContractController.create,
 )
 
+router.get(
+  '/:id',
+  requirePermission('employee.view'),
+  ContractController.findById,
+)
+
+router.patch(
+  '/:id',
+  requirePermission('employee.update'),
+  ContractController.update,
+)
+
+router.patch(
+  '/:id/cancel',
+  requirePermission('employee.update'),
+  ContractController.cancel,
+)
+
+router.patch(
+  '/:id/expire',
+  requirePermission('employee.update'),
+  ContractController.expire,
+)
+
 router.delete(
   '/:id',
   requirePermission('contract.delete'),
@@ -28,7 +52,7 @@ router.delete(
     resource: 'CONTRACT',
     getResourceId: (req) => getParam(req.params.id),
   }),
-  ContractController.delete,
+  ContractController.softDelete,
 )
 
 export default router

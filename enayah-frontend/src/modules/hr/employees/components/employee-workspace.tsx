@@ -12,6 +12,7 @@ import { EmployeeKanbanView } from './kanban/employee-kanban-view'
 import { EmployeeTreeView } from './tree/employee-tree-view'
 import { EmployeeHierarchyView } from './hierarchy/employee-hierarchy-view'
 import { EmployeeFilterSheet } from './filter/employee-filter-sheet'
+import { OnboardingForm } from './onboarding/onboarding-form'
 
 type EmployeeFilters = {
   departmentIds: string[]
@@ -72,12 +73,25 @@ export function EmployeeWorkspace() {
     ...filters,
   })
 
+  const [mode, setMode] = useState<'directory' | 'onboarding'>('directory')
+
+  if (mode === 'onboarding') {
+    return (
+      <OnboardingForm
+        onCancel={() => {
+          setMode('directory')
+        }}
+      />
+    )
+  }
+
   return (
     <div className='space-y-4'>
       <EmployeeToolbar
         view={view}
         selectedIds={Object.keys(rowSelection)}
         onViewChange={setView}
+        onBoard={() => setMode('onboarding')}
         onFilter={() => setFilterOpen(true)}
       />
 

@@ -1,31 +1,74 @@
 import { Request, Response } from 'express'
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
-import { createContractSchema, contractIdSchema } from '../dto/contract.request'
+import {
+  contractIdSchema,
+  createContractSchema,
+  employmentIdParamSchema,
+  updateContractSchema,
+} from '../dto/contract.request'
 import { ContractService } from '../service/contract.service'
-import { toContractResponse } from '../dto/contract.mapper'
 
 export const ContractController = {
   create: asyncHandler(async (req: Request, res: Response) => {
     const body = createContractSchema.parse(req.body)
+    const result = await ContractService.create(body)
 
-    const created = await ContractService.create(body)
-
-    res.locals.resourceId = created.id
-    res.locals.after = created
-
-    res.status(201).json(toContractResponse(created))
+    res.status(201).json(result)
   }),
 
-  delete: asyncHandler(async (req: Request, res: Response) => {
+  findById: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = contractIdSchema.parse(req.params)
+    const result = await ContractService.findById(id)
+
+    res.status(200).json(result)
+  }),
+
+  findByEmploymentId: asyncHandler(async (req: Request, res: Response) => {
+    const { employmentId } = employmentIdParamSchema.parse(req.params)
+    const result = await ContractService.findByEmploymentId(employmentId)
+
+    res.status(200).json(result)
+  }),
+
+  findActiveByEmploymentId: asyncHandler(
+    async (req: Request, res: Response) => {
+      const { employmentId } = employmentIdParamSchema.parse(req.params)
+      const result =
+        await ContractService.findActiveByEmploymentId(employmentId)
+
+      res.status(200).json(result)
+    },
+  ),
+
+  update: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = contractIdSchema.parse(req.params)
+    const body = updateContractSchema.parse(req.body)
+
+    const result = await ContractService.update(id, body)
+
+    res.status(200).json(result)
+  }),
+
+  cancel: asyncHandler(async (req: Request, res: Response) => {
     const { id } = contractIdSchema.parse(req.params)
 
-    const before = await ContractService.findById(id)
+    const result = await ContractService.cancel(id)
 
-    await ContractService.delete(id)
+    res.status(200).json(result)
+  }),
 
-    res.locals.resourceId = id
-    res.locals.before = before
-    res.locals.after = null
+  expire: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = contractIdSchema.parse(req.params)
+
+    const result = await ContractService.expire(id)
+
+    res.status(200).json(result)
+  }),
+
+  softDelete: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = contractIdSchema.parse(req.params)
+
+    await ContractService.softDelete(id, req.user?.id)
 
     res.status(204).send()
   }),

@@ -6,6 +6,7 @@ import {
   positionItemIdSchema,
   updatePositionItemSchema,
   positionItemQuerySchema,
+  PositionItemLookupQuerySchema,
 } from '../dto/positionItem.request'
 import { PositionItemService } from '../service/positionItem.service'
 import { PositionItemRepository } from '../repository/positionItem.repository'
@@ -50,21 +51,25 @@ export const PositionItemController = {
   }),
 
   findLookup: asyncHandler(async (req: Request, res: Response) => {
-    const positionItems = await PositionItemService.findLookup()
-    res.status(200).json(positionItems)
+    const query = PositionItemLookupQuerySchema.parse(req.query)
+    const result = await PositionItemService.lookup(query)
+
+    res.status(200).json({
+      items: result,
+    })
   }),
 
-  findManpowerView: asyncHandler(async (req: Request, res: Response) => {
-    const result = await PositionItemService.findManpowerView()
-    res.status(200).json(result)
-  }),
+  // findManpowerView: asyncHandler(async (req: Request, res: Response) => {
+  //   const result = await PositionItemService.findManpowerView()
+  //   res.status(200).json(result)
+  // }),
 
-  findOrganizationHierarchyView: asyncHandler(
-    async (req: Request, res: Response) => {
-      const result = await PositionItemService.findOrganizationHierarchyView()
-      res.status(200).json(result)
-    },
-  ),
+  // findOrganizationHierarchyView: asyncHandler(
+  //   async (req: Request, res: Response) => {
+  //     const result = await PositionItemService.findOrganizationHierarchyView()
+  //     res.status(200).json(result)
+  //   },
+  // ),
 
   update: asyncHandler(async (req: Request, res: Response) => {
     const { id } = positionItemIdSchema.parse(req.params)

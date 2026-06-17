@@ -1,5 +1,3 @@
-// src/core/services/running-number.service.ts
-
 import { DB } from '../../db'
 import { RunningNumberRepository } from '../repository/running-number.repository'
 
@@ -10,37 +8,12 @@ type RunningNumberType =
   | 'TRANSFER'
   | 'PROMOTION'
 
-const CONFIG: Record<
-  RunningNumberType,
-  {
-    prefix: string
-    includeYearAfterPrefix: boolean
-  }
-> = {
-  EMPLOYEE: {
-    prefix: 'EMP',
-    includeYearAfterPrefix: true,
-  },
-
-  CONTRACT: {
-    prefix: '',
-    includeYearAfterPrefix: true,
-  },
-
-  PCN: {
-    prefix: 'PCN',
-    includeYearAfterPrefix: true,
-  },
-
-  TRANSFER: {
-    prefix: 'TRF',
-    includeYearAfterPrefix: true,
-  },
-
-  PROMOTION: {
-    prefix: 'PRM',
-    includeYearAfterPrefix: true,
-  },
+const CONFIG: Record<RunningNumberType, { prefix: string }> = {
+  EMPLOYEE: { prefix: 'EMP' },
+  CONTRACT: { prefix: '' },
+  PCN: { prefix: 'PCN' },
+  TRANSFER: { prefix: 'TRF' },
+  PROMOTION: { prefix: 'PRM' },
 }
 
 export const RunningNumberService = {
@@ -57,10 +30,6 @@ export const RunningNumberService = {
       return `${year}-${sequence}`
     }
 
-    if (config.includeYearAfterPrefix) {
-      return `${config.prefix}${year}-${sequence}`
-    }
-
-    return `${config.prefix}${sequence}`
+    return `${config.prefix}${year}-${sequence}`
   },
 }

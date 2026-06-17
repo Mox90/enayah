@@ -10,6 +10,7 @@ import TrainingTab from './tabs/training-tab'
 import CPDTab from './tabs/cpd-tab'
 import { useState } from 'react'
 import { EmployeeProfile } from '../../types/employee-profile.types'
+import { useLocale, useTranslations } from 'next-intl'
 
 interface Props {
   employeeId: string
@@ -18,40 +19,46 @@ interface Props {
 
 export function EmployeeProfileTabs({ employeeId, profile }: Props) {
   const [tab, setTab] = useState('personal')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
+  const et = useTranslations('employees')
   //console.log(profile.personal)
+  //console.log(profile.employment)
   return (
-    <Tabs value={tab} onValueChange={setTab}>
+    <Tabs value={tab} onValueChange={setTab} dir={isRtl ? 'rtl' : 'ltr'}>
       <TabsList>
-        <TabsTrigger value='personal'>Personal</TabsTrigger>
+        <TabsTrigger value='personal'>{et('personal')}</TabsTrigger>
 
-        <TabsTrigger value='employment'>Employment</TabsTrigger>
+        <TabsTrigger value='employment'>{et('employment')}</TabsTrigger>
 
-        <TabsTrigger value='credentials'>Credentials</TabsTrigger>
+        <TabsTrigger value='credentials'>{et('credentials')}</TabsTrigger>
 
-        <TabsTrigger value='training'>Training</TabsTrigger>
+        <TabsTrigger value='training'>{et('training')}</TabsTrigger>
 
-        <TabsTrigger value='cpd'>CPD</TabsTrigger>
+        <TabsTrigger value='cpd'>{et('cpd')}</TabsTrigger>
       </TabsList>
 
-      <TabsContent value='personal'>
-        <PersonalTab personal={profile.personal} />
-      </TabsContent>
+      <div className={isRtl ? 'text-right' : 'text-left'}>
+        <TabsContent value='personal'>
+          <PersonalTab personal={profile.personal} />
+        </TabsContent>
 
-      <TabsContent value='employment'>
-        <EmploymentTab employment={profile.employment} />
-      </TabsContent>
+        <TabsContent value='employment'>
+          <EmploymentTab employment={profile.employment} />
+        </TabsContent>
 
-      <TabsContent value='credentials'>
-        <CredentialsTab employeeId={employeeId} />
-      </TabsContent>
+        <TabsContent value='credentials'>
+          <CredentialsTab employeeId={employeeId} />
+        </TabsContent>
 
-      <TabsContent value='training'>
-        <TrainingTab training={employeeId} />
-      </TabsContent>
+        <TabsContent value='training'>
+          <TrainingTab training={employeeId} />
+        </TabsContent>
 
-      <TabsContent value='cpd'>
-        <CPDTab cpd={employeeId} />
-      </TabsContent>
+        <TabsContent value='cpd'>
+          <CPDTab cpd={employeeId} />
+        </TabsContent>
+      </div>
     </Tabs>
   )
 }

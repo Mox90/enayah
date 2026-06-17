@@ -26,8 +26,9 @@ import { DataTablePagination } from './data-table-pagination'
 import { DataTableToolbar } from './data-table-toolbar'
 import { DataTableEmpty } from './data-table-empty'
 import { DataTableSkeleton } from './data-table-skeleton'
+import { useLocale } from 'next-intl'
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends { id: string }, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 
@@ -54,7 +55,7 @@ interface DataTableProps<TData, TValue> {
   onRowSelectionChange: OnChangeFn<RowSelectionState>
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends { id: string }, TValue>({
   columns,
   data,
   total = 0,
@@ -88,7 +89,7 @@ export function DataTable<TData, TValue>({
   const table = useReactTable({
     data,
     columns,
-    getRowId: (row: any) => row.id,
+    getRowId: (row) => row.id,
     state: {
       sorting,
       columnVisibility,
@@ -113,6 +114,8 @@ export function DataTable<TData, TValue>({
     onRowSelectionChange,
     getCoreRowModel: getCoreRowModel(),
   })
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
   //console.log('TABLE SORTING', table.getState().sorting)
   return (
     <div className='space-y-4'>
@@ -124,12 +127,15 @@ export function DataTable<TData, TValue>({
       />
 
       <div className='rounded-xl border'>
-        <Table>
+        <Table dir={isRtl ? 'rtl' : 'ltr'}>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    className={isRtl ? 'text-right' : 'text-left'}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(

@@ -1,5 +1,3 @@
-// src/modules/hr/hiring/service/hiring.service.ts
-
 import { db } from '../../../../db'
 import { AppError } from '../../../../core/errors/AppError'
 
@@ -62,9 +60,6 @@ export const OnboardingService = {
         throw new AppError('Contract details are required', 400)
       }
 
-      //const contractNumber =
-      //  dto.contract.contractNumber ??
-      //  `CN-${new Date().getFullYear()}-${crypto.randomUUID().slice(0, 8).toUpperCase()}`
       const contractNumber =
         dto.contract.contractNumber ??
         (await RunningNumberService.generate(tx, 'CONTRACT'))
@@ -92,7 +87,11 @@ export const OnboardingService = {
         throw new AppError('Position item is required for assignment', 400)
       }
 
-      const positionItem = await PositionItemRepository.findById(
+      // const positionItem = await PositionItemRepository.findById(
+      //   tx,
+      //   dto.movement.positionItemId,
+      // )
+      const positionItem = await PositionItemRepository.assignIfAvailable(
         tx,
         dto.movement.positionItemId,
       )
@@ -117,7 +116,7 @@ export const OnboardingService = {
         remarks: dto.movement.remarks ?? null,
       })
 
-      await PositionItemRepository.updateStatus(tx, positionItem.id, 'filled')
+      //await PositionItemRepository.updateStatus(tx, positionItem.id, 'filled')
 
       // ----------------------------------
       // 6. Appointment / Actual Assignment
@@ -137,7 +136,7 @@ export const OnboardingService = {
 
       let compensation = null
 
-      let allowances: unknown[] = []
+      //let allowances: unknown[] = []
 
       if (dto.allowances?.length && !dto.compensation) {
         throw new AppError(
@@ -154,18 +153,21 @@ export const OnboardingService = {
           )
         }
 
-        compensation = await CompensationRepository.create(tx, {
-          ...dto.compensation,
-          contractMovementId: movement.id,
-        })
+        compensation = dto.compensation
+          ? await CompensationRepository.create(tx, {
+              ...dto.compensation,
+              contractMovementId: movement.id,
+              allowances: dto.allowances ?? [],
+            })
+          : null
 
-        if (dto.allowances?.length) {
-          allowances = await CompensationAllowanceRepository.createMany(
-            tx,
-            compensation.id,
-            dto.allowances,
-          )
-        }
+        // if (dto.allowances?.length) {
+        //   allowances = await CompensationAllowanceRepository.createMany(
+        //     tx,
+        //     compensation.id,
+        //     dto.allowances,
+        //   )
+        // }
       }
 
       // ----------------------------------
@@ -202,7 +204,7 @@ export const OnboardingService = {
         movement,
         appointment,
         compensation,
-        allowances,
+        //allowances: compensation?.allowances ?? [],
         credentials,
       }
     })

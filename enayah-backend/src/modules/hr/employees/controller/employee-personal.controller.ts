@@ -1,5 +1,3 @@
-// src/modules/hr/employees/controller/employee-personal.controller.ts
-
 import { Request, Response } from 'express'
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
 import { EmployeeIdSchema } from '../dto/employee.request'

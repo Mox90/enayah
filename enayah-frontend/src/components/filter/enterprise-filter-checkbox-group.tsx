@@ -4,10 +4,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 
 interface Props {
   values: string[]
-
   options: {
     value: string
-
     label: string
   }[]
 

@@ -48,6 +48,10 @@ export const employmentIdSchema = z.object({
   id: z.uuid(),
 })
 
+export const employeeIdParamSchema = z.object({
+  employeeId: z.uuid(),
+})
+
 export type CreateEmploymentDto = z.infer<typeof createEmploymentSchema>
 export type UpdateEmploymentDto = z.infer<typeof updateEmploymentSchema>
 export type TerminateEmploymentDto = z.infer<typeof terminateEmploymentSchema>

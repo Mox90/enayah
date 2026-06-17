@@ -1,5 +1,3 @@
-// src/modules/hr/employees/routes/employee-personal.routes.ts
-
 import { Router } from 'express'
 import { requireAuth } from '../../../../core/middleware/auth.middleware'
 import {
