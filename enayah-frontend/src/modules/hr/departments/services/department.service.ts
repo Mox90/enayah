@@ -1,5 +1,8 @@
 import { api } from '@/lib/api/client'
-import { CreateDepartmentFormValues } from '../schemas/department.schema'
+import {
+  CreateDepartmentFormValues,
+  UpdateDepartmentFormValues,
+} from '../schemas/department.schema'
 import { Department, DepartmentListResponse } from '../types/department.types'
 import { API_ENDPOINTS } from '@/lib/api/endpoints'
 import { number } from 'zod'
@@ -34,7 +37,7 @@ export const departmentService = {
     return response.data
   },
 
-  update: async (id: string, data: CreateDepartmentFormValues) => {
+  update: async (id: string, data: UpdateDepartmentFormValues) => {
     const response = await api.put(
       `${API_ENDPOINTS.org.departments}/${id}`,
       data,

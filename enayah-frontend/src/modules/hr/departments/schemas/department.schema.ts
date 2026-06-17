@@ -7,4 +7,8 @@ export const createDepartmentSchema = z.object({
   parentDepartmentId: z.string().nullable().optional(),
 })
 
+export const updateDepartmentSchema = createDepartmentSchema.partial()
+
 export type CreateDepartmentFormValues = z.infer<typeof createDepartmentSchema>
+
+export type UpdateDepartmentFormValues = z.infer<typeof updateDepartmentSchema>

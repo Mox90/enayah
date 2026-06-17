@@ -50,9 +50,9 @@ interface DataTableProps<TData extends { id: string }, TValue> {
   onSearchChange: (value: string) => void
 
   onSortChange: (sortBy: string, sortOrder: 'asc' | 'desc') => void
-  rowSelection: RowSelectionState
+  rowSelection?: RowSelectionState
 
-  onRowSelectionChange: OnChangeFn<RowSelectionState>
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>
 }
 
 export function DataTable<TData extends { id: string }, TValue>({
@@ -76,6 +76,8 @@ export function DataTable<TData extends { id: string }, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
+  const [internalRowSelection, setInternalRowSelection] =
+    React.useState<RowSelectionState>({})
 
   //const [rowSelection, setRowSelection] = React.useState({})
 
@@ -93,7 +95,7 @@ export function DataTable<TData extends { id: string }, TValue>({
     state: {
       sorting,
       columnVisibility,
-      rowSelection: rowSelection ?? {},
+      rowSelection: rowSelection ?? internalRowSelection,
     },
     enableRowSelection: true,
     enableSortingRemoval: false,
@@ -109,9 +111,8 @@ export function DataTable<TData extends { id: string }, TValue>({
         onSortChange(newSorting[0].id, newSorting[0].desc ? 'desc' : 'asc')
       }
     },
-
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange,
+    onRowSelectionChange: onRowSelectionChange ?? setInternalRowSelection,
     getCoreRowModel: getCoreRowModel(),
   })
   const locale = useLocale()

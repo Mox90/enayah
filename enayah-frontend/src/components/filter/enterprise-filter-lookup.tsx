@@ -9,6 +9,17 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { api } from '@/lib/api/client'
 import { useQuery } from '@tanstack/react-query'
 
+type LookupRow = Record<string, unknown>
+
+type LookupResponse = {
+  data: LookupRow[]
+}
+
+type LookupOption = {
+  value: string
+  label: string
+}
+
 interface Props {
   endpoint: string
   valueField: string
@@ -25,10 +36,10 @@ export function EnterpriseFilterLookup({
   onChange,
 }: Props) {
   const [search, setSearch] = useState('')
-  const { data } = useQuery({
+  const { data = [] } = useQuery<LookupRow[]>({
     queryKey: [endpoint, search],
     queryFn: async () => {
-      const res = await api.get(endpoint, {
+      const res = await api.get<LookupResponse>(endpoint, {
         params: {
           page: 1,
           limit: 50,
@@ -37,13 +48,28 @@ export function EnterpriseFilterLookup({
       })
       return res.data.data
     },
+    enabled: !!endpoint,
   })
 
-  const options = useMemo(() => {
-    return (data ?? []).map((e: any) => ({
-      value: e[valueField],
-      label: e[labelField],
-    }))
+  const options = useMemo<LookupOption[]>(() => {
+    return data
+
+      .map((row) => {
+        const rawValue = row[valueField]
+        const rawLabel = row[labelField]
+        if (typeof rawValue !== 'string') {
+          return null
+        }
+
+        return {
+          value: rawValue,
+          label:
+            typeof rawLabel === 'string' || typeof rawLabel === 'number'
+              ? String(rawLabel)
+              : rawValue,
+        }
+      })
+      .filter((option): option is LookupOption => option !== null)
   }, [data, valueField, labelField])
 
   function toggle(id: string) {
