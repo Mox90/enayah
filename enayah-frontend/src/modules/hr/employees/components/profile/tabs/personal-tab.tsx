@@ -38,27 +38,32 @@ export interface EmployeePersonal {
 
   gender: Gender
 
-  countryId: string
+  countryId?: string
 
-  createdAt: string
-  createdBy: string | null
+  // createdAt: string
+  // createdBy: string | null
 
-  updatedAt: string
-  updatedBy: string | null
+  // updatedAt: string
+  // updatedBy: string | null
 
-  isDeleted: boolean
-  deletedAt: string | null
-  deletedBy: string | null
+  // isDeleted: boolean
+  // deletedAt: string | null
+  // deletedBy: string | null
 
-  version: number
-  nationality: EmployeeNationality
+  //version: number
+  nationality: EmployeeNationality | null
 }
 
 interface Props {
   personal: EmployeePersonal
 }
 
-function Field({ label, value }: { label: string; value: any }) {
+interface FieldProps {
+  label: string
+  value: React.ReactNode
+}
+
+function Field({ label, value }: FieldProps) {
   return (
     <div className='space-y-1'>
       <div className='text-xs text-muted-foreground'>{label}</div>

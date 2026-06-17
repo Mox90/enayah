@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { PhoneCodeCombobox } from '@/modules/countries/components/phone-code'
 import { HireEmployeePayload } from '@/modules/hr/onboarding/types/onboarding.types'
+import { useTranslations } from 'next-intl'
 //import { HireEmployeePayload } from '../types/hire.types'
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export function EmployeeContactInformation({ value, onChange }: Props) {
+  const et = useTranslations('employees')
   const email = value.personal?.emails?.[0]
   const phone = value.personal?.phoneNumbers?.[0]
 
@@ -69,7 +71,7 @@ export function EmployeeContactInformation({ value, onChange }: Props) {
   }
 
   function updatePhone(phoneValue: string) {
-    const normalized = phoneValue.replace(/^0+/, '')
+    const normalized = normalizePhone(phoneValue) //phoneValue.replace(/^0+/, '')
 
     onChange({
       ...value,
@@ -93,15 +95,13 @@ export function EmployeeContactInformation({ value, onChange }: Props) {
   return (
     <section className='space-y-4'>
       <div>
-        <h3 className='text-lg font-semibold'>Contact Information</h3>
-        <p className='text-sm text-muted-foreground'>
-          Primary email and phone number.
-        </p>
+        <h3 className='text-lg font-semibold'>{et('contactInfo')}</h3>
+        <p className='text-sm text-muted-foreground'>{et('contactInfoSub')}</p>
       </div>
 
       <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
         <div className='space-y-2'>
-          <Label>Primary Email</Label>
+          <Label>{et('primaryEmail')}</Label>
           <Input
             type='email'
             value={email?.email ?? ''}
@@ -111,7 +111,7 @@ export function EmployeeContactInformation({ value, onChange }: Props) {
         </div>
 
         <div className='space-y-2'>
-          <Label>Primary Mobile</Label>
+          <Label>{et('primaryMobile')}</Label>
 
           <div className='flex h-10 overflow-hidden rounded-md border border-input bg-background'>
             <PhoneCodeCombobox

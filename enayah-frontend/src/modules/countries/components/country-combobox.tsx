@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/command'
 
 import { useCountries } from '../hooks/use-countries'
+import { useLocale, useTranslations } from 'next-intl'
 
 interface Props {
   value?: string | null
@@ -28,8 +29,10 @@ interface Props {
 }
 
 export function CountryCombobox({ value, onChange }: Props) {
+  const t = useTranslations('employees')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
   const [open, setOpen] = useState(false)
-
   const [search, setSearch] = useState('')
 
   const { data, isLoading, error } = useCountries({
@@ -48,7 +51,7 @@ export function CountryCombobox({ value, onChange }: Props) {
           role='combobox'
           className='w-full justify-between'
         >
-          {selected ? selected.name : 'Select nationality'}
+          {selected ? selected.name : t('selectNationality')}
 
           <ChevronsUpDown className='ml-2 h-4 w-4 opacity-50' />
         </Button>
@@ -57,19 +60,23 @@ export function CountryCombobox({ value, onChange }: Props) {
       <PopoverContent className='w-[350px] p-0'>
         <Command>
           <CommandInput
-            placeholder='Search nationality...'
+            placeholder={t('searchNat')}
             value={search}
             onValueChange={setSearch}
           />
 
           <CommandList>
-            <CommandEmpty>No country found.</CommandEmpty>
+            <CommandEmpty>{t('noCountryFound')}</CommandEmpty>
 
             <CommandGroup>
               {data?.items.map((country) => (
                 <CommandItem
                   key={country.id}
-                  value={`${country.name} ${country.nationalityEn}`}
+                  value={
+                    isRtl
+                      ? `${country.nameAr} ${country.nationalityAr}`
+                      : `${country.name} ${country.nationalityEn}`
+                  }
                   onSelect={() => {
                     onChange(country.id)
                     setOpen(false)
@@ -82,10 +89,14 @@ export function CountryCombobox({ value, onChange }: Props) {
                   />
 
                   <div className='flex flex-col'>
-                    <span>{country.name}</span>
+                    <span>
+                      {isRtl ? (country.nameAr ?? country.name) : country.name}
+                    </span>
 
                     <span className='text-xs text-muted-foreground'>
-                      {country.nationalityEn}
+                      {isRtl
+                        ? (country.nationalityAr ?? country.nationalityEn)
+                        : country.nationalityEn}
                     </span>
                   </div>
                 </CommandItem>

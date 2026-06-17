@@ -17,19 +17,20 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { VerificationBadge } from '@/components/badges/verification-badge'
+import { BoardInput } from '@/modules/hr/onboarding/types/onboarding.types'
 
-interface Board {
-  id: string
-  boardName: string
-  issuingBody: string | null
-  specialty: string | null
-  issueDate: string | null
-  expiryDate: string | null
-  isVerified: boolean
-}
+// interface Board {
+//   id: string
+//   boardName: string
+//   issuingBody: string | null
+//   specialty: string | null
+//   issueDate: string | null
+//   expiryDate: string | null
+//   isVerified: boolean
+// }
 
 interface Props {
-  boards: Board[]
+  boards: BoardInput[]
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
@@ -54,8 +55,11 @@ export function CredentialBoards({ boards, onAdd, onEdit, onDelete }: Props) {
           </div>
         )}
 
-        {boards.map((board) => (
-          <div key={board.id} className='rounded-lg border p-4'>
+        {boards.map((board, index) => (
+          <div
+            key={board.id ?? `${board.boardName}-${index}`}
+            className='rounded-lg border p-4'
+          >
             <div className='flex justify-between'>
               <div className='space-y-1'>
                 <div className='font-semibold'>{board.boardName}</div>
@@ -96,16 +100,28 @@ export function CredentialBoards({ boards, onAdd, onEdit, onDelete }: Props) {
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent align='end'>
-                    <DropdownMenuItem onClick={() => onEdit?.(board.id)}>
-                      Edit
-                    </DropdownMenuItem>
+                    {onEdit && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          if (!board.id) return
+                          onEdit(board.id)
+                        }}
+                      >
+                        Edit
+                      </DropdownMenuItem>
+                    )}
 
-                    <DropdownMenuItem
-                      className='text-red-600'
-                      onClick={() => onDelete?.(board.id)}
-                    >
-                      Delete
-                    </DropdownMenuItem>
+                    {onDelete && (
+                      <DropdownMenuItem
+                        className='text-red-600'
+                        onClick={() => {
+                          if (!board.id) return
+                          onDelete(board.id)
+                        }}
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

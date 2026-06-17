@@ -23,12 +23,19 @@ import {
 
 import { usePositions } from '@/modules/hr/positions/hooks/use-positions'
 
-interface Props {
-  value?: string | null
-  onChange: (position: any) => void
+interface PositionLookupItem {
+  id: string
+  titleEn: string
+  titleAr?: string | null
 }
 
-export function PositionCombobox({ value, onChange }: Props) {
+interface Props {
+  value?: string | null
+  selectedLabel?: string
+  onChange: (position: PositionLookupItem) => void
+}
+
+export function PositionCombobox({ value, onChange, selectedLabel }: Props) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
@@ -38,9 +45,9 @@ export function PositionCombobox({ value, onChange }: Props) {
     search,
   })
 
-  const items = data?.data ?? data?.items ?? []
-
-  const selected = items.find((item: any) => item.id === value)
+  //const items = data?.data ?? data?.items ?? []
+  const items = data?.data ?? []
+  const selected = items.find((item: PositionLookupItem) => item.id === value)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -51,7 +58,7 @@ export function PositionCombobox({ value, onChange }: Props) {
           role='combobox'
           className='w-full justify-between'
         >
-          {selected ? selected.titleEn : 'Select position'}
+          {selected ? selected.titleEn : (selectedLabel ?? 'Select position')}
 
           <ChevronsUpDown className='ml-2 h-4 w-4 opacity-50' />
         </Button>
@@ -71,7 +78,7 @@ export function PositionCombobox({ value, onChange }: Props) {
             <CommandEmpty>No position found.</CommandEmpty>
 
             <CommandGroup>
-              {items.map((position: any) => (
+              {items.map((position: PositionLookupItem) => (
                 <CommandItem
                   key={position.id}
                   value={`${position.titleEn ?? ''} ${position.titleAr ?? ''}`}

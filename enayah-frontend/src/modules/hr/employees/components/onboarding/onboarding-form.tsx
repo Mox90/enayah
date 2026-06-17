@@ -10,6 +10,8 @@ import { EmploymentStep } from './steps/employment-step'
 import { ContractStep } from './steps/contract-step'
 import { EmploymentContractAssignmentStep } from './steps/employment-contract-assignment-step'
 import { useTranslations } from 'next-intl'
+import { CompensationStep } from './steps/compensation-step'
+import { CredentialsStep } from './steps/credentials-step'
 
 type Step =
   | 'personal'
@@ -50,7 +52,7 @@ export function OnboardingForm({ onCancel }: Props) {
     { key: 'review', label: t('review') },
   ]
 
-  const [hire, setHire] = useState<HireEmployeePayload>({
+  const [onboard, setOnboard] = useState<HireEmployeePayload>({
     employee: {
       employeeNumber: '',
       firstNameEn: '',
@@ -139,7 +141,7 @@ export function OnboardingForm({ onCancel }: Props) {
   const [personalErrors, setPersonalErrors] = useState<PersonalErrors>({})
 
   function validatePersonalStep() {
-    const e = hire.employee
+    const e = onboard.employee
 
     const nextErrors: PersonalErrors = {}
 
@@ -208,6 +210,34 @@ export function OnboardingForm({ onCancel }: Props) {
     // TODO: Call onboarding mutation with hire payload
     // const result = await submitOnboarding(hire)
     // if (result.success) onCancel()
+    // const payload = {
+    //   ...onboard,
+    //   credentials: {
+    //     ...onboard.credentials,
+    //     degrees: onboard.credentials?.degrees?.map(
+    //       ({ clientId, ...degree }) => degree,
+    //     ),
+    //     boards: onboard.credentials?.boards?.map(
+    //       ({ clientId, ...board }) => board,
+    //     ),
+    //     fellowships: onboard.credentials?.fellowships?.map(
+    //       ({ clientId, ...fellowship }) => fellowship,
+    //     ),
+    //     memberships: onboard.credentials?.memberships?.map(
+    //       ({ clientId, ...membership }) => membership,
+    //     ),
+    //     licenses: onboard.credentials?.licenses?.map(
+    //       ({ clientId, ...license }) => license,
+    //     ),
+    //     lifeSupport: onboard.credentials?.lifeSupport?.map(
+    //       ({ clientId, ...lifeSupport }) => lifeSupport,
+    //     ),
+    //     malpractice: onboard.credentials?.malpractice?.map(
+    //       ({ clientId, ...malpractice }) => malpractice,
+    //     ),
+    //   },
+    // }
+    // hireMutation.mutate(payload)
   }
 
   return (
@@ -321,14 +351,17 @@ export function OnboardingForm({ onCancel }: Props) {
         <CardContent>
           {currentStep === 'personal' && (
             <PersonalStep
-              value={hire}
-              onChange={setHire}
+              value={onboard}
+              onChange={setOnboard}
               personalErrors={personalErrors}
             />
           )}
 
           {currentStep === 'employmentContractAssignment' && (
-            <EmploymentContractAssignmentStep value={hire} onChange={setHire} />
+            <EmploymentContractAssignmentStep
+              value={onboard}
+              onChange={setOnboard}
+            />
           )}
 
           {/* {currentStep === 'employment' && (
@@ -352,15 +385,17 @@ export function OnboardingForm({ onCancel }: Props) {
           )} */}
 
           {currentStep === 'compensation' && (
-            <div className='text-sm text-muted-foreground'>
-              Compensation form will be here.
-            </div>
+            // <div className='text-sm text-muted-foreground'>
+            //   Compensation form will be here.
+            // </div>
+            <CompensationStep value={onboard} onChange={setOnboard} />
           )}
 
           {currentStep === 'credentials' && (
-            <div className='text-sm text-muted-foreground'>
-              Credentials form will be here.
-            </div>
+            // <div className='text-sm text-muted-foreground'>
+            //   Credentials form will be here.
+            // </div>
+            <CredentialsStep value={onboard} onChange={setOnboard} />
           )}
 
           {currentStep === 'review' && (

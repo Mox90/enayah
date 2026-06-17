@@ -10,7 +10,6 @@ export interface Department {
 
 export interface PaginatedDepartments {
   data: Department[]
-
   meta: {
     page: number
     limit: number

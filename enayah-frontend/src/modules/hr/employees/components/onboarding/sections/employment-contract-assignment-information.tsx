@@ -16,6 +16,16 @@ import { DepartmentCombobox } from '@/modules/hr/departments/components/departme
 import { HireEmployeePayload } from '@/modules/hr/onboarding/types/onboarding.types'
 import { PositionItemCombobox } from '@/modules/hr/positions-items/components/position-item-combobox'
 import { PositionCombobox } from '@/modules/hr/positions/components/position-combobox'
+import { useTranslations } from 'next-intl'
+
+type EmploymentInput = HireEmployeePayload['employment']
+type ContractInput = HireEmployeePayload['contract']
+type MovementInput = HireEmployeePayload['movement']
+type AppointmentInput = NonNullable<HireEmployeePayload['appointment']>
+type EmploymentType = HireEmployeePayload['employment']['employmentType']
+type StaffCategory = HireEmployeePayload['employment']['staffCategory']
+type ContractType = HireEmployeePayload['contract']['contractType']
+type AppointmentType = AppointmentInput['appointmentType']
 
 interface Props {
   value: HireEmployeePayload
@@ -26,10 +36,15 @@ export function EmploymentContractAssignmentInformation({
   value,
   onChange,
 }: Props) {
+  const t = useTranslations('contracts')
   const employment = value.employment
   const contract = value.contract
   const movement = value.movement
   const appointment = value.appointment ?? {
+    actualDepartmentNameEn: null,
+    actualDepartmentNameAr: null,
+    actualPositionTitleEn: null,
+    actualPositionTitleAr: null,
     actualDepartmentId: null,
     actualPositionId: null,
     managerId: null,
@@ -89,7 +104,10 @@ export function EmploymentContractAssignmentInformation({
     })
   }
 
-  function updateEmployment(field: keyof typeof employment, fieldValue: any) {
+  function updateEmployment<K extends keyof EmploymentInput>(
+    field: K,
+    fieldValue: EmploymentInput[K],
+  ) {
     onChange({
       ...value,
       employment: {
@@ -99,7 +117,10 @@ export function EmploymentContractAssignmentInformation({
     })
   }
 
-  function updateContract(field: keyof typeof contract, fieldValue: any) {
+  function updateContract<K extends keyof ContractInput>(
+    field: K,
+    fieldValue: ContractInput[K],
+  ) {
     onChange({
       ...value,
       contract: {
@@ -109,7 +130,10 @@ export function EmploymentContractAssignmentInformation({
     })
   }
 
-  function updateMovement(field: keyof typeof movement, fieldValue: any) {
+  function updateMovement<K extends keyof MovementInput>(
+    field: K,
+    fieldValue: MovementInput[K],
+  ) {
     onChange({
       ...value,
       movement: {
@@ -119,7 +143,10 @@ export function EmploymentContractAssignmentInformation({
     })
   }
 
-  function updateAppointment(field: string, fieldValue: any) {
+  function updateAppointment<K extends keyof AppointmentInput>(
+    field: K,
+    fieldValue: AppointmentInput[K],
+  ) {
     onChange({
       ...value,
       appointment: {
@@ -132,19 +159,14 @@ export function EmploymentContractAssignmentInformation({
   return (
     <section className='space-y-8'>
       <div>
-        <h3 className='text-lg font-semibold'>
-          Employment, Contract & Assignment
-        </h3>
+        <h3 className='text-lg font-semibold'>{t('eca')}</h3>
 
-        <p className='text-sm text-muted-foreground'>
-          Initial employment record, first contract, legal PCN assignment, and
-          actual appointment.
-        </p>
+        <p className='text-sm text-muted-foreground'>{t('ecaSub')}</p>
       </div>
 
       <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
         <div className='space-y-2'>
-          <Label>Hire Date *</Label>
+          <Label>{t('hireDate')}</Label>
 
           <Input
             type='date'
@@ -154,7 +176,7 @@ export function EmploymentContractAssignmentInformation({
         </div>
 
         <div className='space-y-2'>
-          <Label>End Date *</Label>
+          <Label>{t('endDate')}</Label>
 
           <Input
             type='date'
@@ -164,60 +186,66 @@ export function EmploymentContractAssignmentInformation({
         </div>
 
         <div className='space-y-2'>
-          <Label>Employment Type</Label>
+          <Label>{t('employmentType')}</Label>
 
           <Select
             value={employment.employmentType}
-            onValueChange={(v) => updateEmployment('employmentType', v)}
+            onValueChange={(v) =>
+              updateEmployment('employmentType', v as EmploymentType)
+            }
           >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value='full_time'>Full Time</SelectItem>
-              <SelectItem value='part_time'>Part Time</SelectItem>
-              <SelectItem value='contract'>Contract</SelectItem>
-              <SelectItem value='temporary'>Temporary</SelectItem>
-              <SelectItem value='locum'>Locum</SelectItem>
+              <SelectItem value='full_time'>{t('fullTime')}</SelectItem>
+              <SelectItem value='part_time'>{t('partTime')}</SelectItem>
+              {/* <SelectItem value='contract'>Contract</SelectItem> */}
+              {/* <SelectItem value='temporary'>Temporary</SelectItem> */}
+              <SelectItem value='locum'>{t('locum')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className='space-y-2'>
-          <Label>Staff Category</Label>
+          <Label>{t('staffCategory')}</Label>
 
           <Select
             value={employment.staffCategory}
-            onValueChange={(v) => updateEmployment('staffCategory', v)}
+            onValueChange={(v) =>
+              updateEmployment('staffCategory', v as StaffCategory)
+            }
           >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value='civilian'>Civilian</SelectItem>
-              <SelectItem value='military'>Military</SelectItem>
-              <SelectItem value='contractual'>Contractual</SelectItem>
+              <SelectItem value='civilian'>{t('civilian')}</SelectItem>
+              <SelectItem value='military'>{t('military')}</SelectItem>
+              <SelectItem value='contractual'>{t('contractual')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className='space-y-2'>
-          <Label>Contract Type</Label>
+          <Label>{t('contractType')}</Label>
 
           <Select
             value={contract.contractType ?? 'initial'}
-            onValueChange={(v) => updateContract('contractType', v)}
+            onValueChange={(v) =>
+              updateContract('contractType', v as ContractType)
+            }
           >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value='initial'>Initial</SelectItem>
-              <SelectItem value='renewal'>Renewal</SelectItem>
-              <SelectItem value='amendment'>Amendment</SelectItem>
+              <SelectItem value='initial'>{t('initial')}</SelectItem>
+              <SelectItem value='renewal'>{t('renewal')}</SelectItem>
+              <SelectItem value='amendment'>{t('amendment')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -235,15 +263,15 @@ export function EmploymentContractAssignmentInformation({
 
       <div className='rounded-lg border p-4 space-y-4'>
         <div>
-          <h4 className='font-semibold'>Legal Assignment / PCN</h4>
+          <h4 className='font-semibold'>{t('legalAssignment')}</h4>
           <p className='text-sm text-muted-foreground'>
-            Select the vacant position item that will fund this employee.
+            {t('legalAssignmentSub')}
           </p>
         </div>
 
         <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
           <div className='space-y-2'>
-            <Label>Position Item ID *</Label>
+            <Label>{t('pcnLabel')}</Label>
 
             {/* <Input
               value={movement.positionItemId ?? ''}
@@ -263,11 +291,18 @@ export function EmploymentContractAssignmentInformation({
                   },
 
                   appointment: {
-                    ...(value.appointment ?? {}),
+                    //...(value.appointment ?? {}),
+                    ...appointment,
 
                     // default from PCN, but user can override later
                     actualDepartmentId: item.departmentId,
                     actualPositionId: item.positionId,
+
+                    actualDepartmentNameEn: item.departmentNameEn ?? null,
+                    actualDepartmentNameAr: item.departmentNameAr ?? null,
+
+                    actualPositionTitleEn: item.positionTitleEn ?? null,
+                    actualPositionTitleAr: item.positionTitleAr ?? null,
 
                     startDate:
                       value.appointment?.startDate ??
@@ -288,7 +323,7 @@ export function EmploymentContractAssignmentInformation({
           </div>
 
           <div className='space-y-2'>
-            <Label>Movement Remarks</Label>
+            <Label>{t('movementRemarks')}</Label>
 
             <Input
               value={movement.remarks ?? ''}
@@ -300,19 +335,19 @@ export function EmploymentContractAssignmentInformation({
 
       <div className='rounded-lg border p-4 space-y-4'>
         <div>
-          <h4 className='font-semibold'>Actual Appointment</h4>
+          <h4 className='font-semibold'>{t('actualDepartmentLabel')}</h4>
           <p className='text-sm text-muted-foreground'>
-            Optional. If left blank, backend will default actual department and
-            position from the selected PCN.
+            {t('actualAppointmentSub')}
           </p>
         </div>
 
         <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
           <div className='space-y-2'>
-            <Label>Actual Department</Label>
+            <Label>{t('actualDepartmentLabel')}</Label>
 
             <DepartmentCombobox
               value={appointment.actualDepartmentId ?? null}
+              selectedLabel={appointment.actualDepartmentNameEn ?? undefined}
               onChange={(department) =>
                 updateAppointment('actualDepartmentId', department.id)
               }
@@ -320,10 +355,11 @@ export function EmploymentContractAssignmentInformation({
           </div>
 
           <div className='space-y-2'>
-            <Label>Actual Position</Label>
+            <Label>{t('actualPositionLabel')}</Label>
 
             <PositionCombobox
               value={appointment.actualPositionId ?? null}
+              selectedLabel={appointment.actualPositionTitleEn ?? undefined}
               onChange={(position) =>
                 updateAppointment('actualPositionId', position.id)
               }
@@ -331,10 +367,10 @@ export function EmploymentContractAssignmentInformation({
           </div>
 
           <div className='space-y-2'>
-            <Label>Manager ID</Label>
+            <Label>{t('managerId')}</Label>
 
             <Input
-              value={(appointment as any).managerId ?? ''}
+              value={appointment.managerId ?? ''}
               onChange={(e) =>
                 updateAppointment('managerId', e.target.value || null)
               }
@@ -343,25 +379,27 @@ export function EmploymentContractAssignmentInformation({
           </div>
 
           <div className='space-y-2'>
-            <Label>Appointment Type</Label>
+            <Label>{t('appointmentTypeLabel')}</Label>
 
             <Select
-              value={(appointment as any).appointmentType ?? 'primary'}
-              onValueChange={(v) => updateAppointment('appointmentType', v)}
+              value={appointment.appointmentType ?? 'primary'}
+              onValueChange={(v) =>
+                updateAppointment('appointmentType', v as AppointmentType)
+              }
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value='primary'>Primary</SelectItem>
-                <SelectItem value='acting'>Acting</SelectItem>
-                <SelectItem value='temporary'>Temporary</SelectItem>
-                <SelectItem value='rotation'>Rotation</SelectItem>
-                <SelectItem value='secondment'>Secondment</SelectItem>
-                <SelectItem value='concurrent'>Concurrent</SelectItem>
+                <SelectItem value='primary'>{t('primary')}</SelectItem>
+                <SelectItem value='acting'>{t('primary')}</SelectItem>
+                <SelectItem value='temporary'>{t('temporary')}</SelectItem>
+                <SelectItem value='rotation'>{t('rotation')}</SelectItem>
+                <SelectItem value='secondment'>{t('secondment')}</SelectItem>
+                <SelectItem value='concurrent'>{t('concurrent')}</SelectItem>
                 <SelectItem value='permanent_transfer'>
-                  Permanent Transfer
+                  {t('permanent')}
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -369,10 +407,10 @@ export function EmploymentContractAssignmentInformation({
         </div>
 
         <div className='space-y-2'>
-          <Label>Appointment Remarks</Label>
+          <Label>{t('appointmentRemarks')}</Label>
 
           <Textarea
-            value={(appointment as any).remarks ?? ''}
+            value={appointment.remarks ?? ''}
             onChange={(e) => updateAppointment('remarks', e.target.value)}
             rows={3}
           />

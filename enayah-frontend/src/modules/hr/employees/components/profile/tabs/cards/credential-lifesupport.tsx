@@ -13,21 +13,22 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { VerificationBadge } from '@/components/badges/verification-badge'
+import { LifeSupportInput } from '@/modules/hr/onboarding/types/onboarding.types'
 
 //import { VerificationBadge } from '@/components/common/verification-badge'
 
-interface LifeSupport {
-  id: string
-  type: string
-  provider: string
-  certificateNumber: string | null
-  issueDate: string | null
-  expiryDate: string | null
-  isVerified: boolean
-}
+// interface LifeSupport {
+//   id: string
+//   type: string
+//   provider: string
+//   certificateNumber: string | null
+//   issueDate: string | null
+//   expiryDate: string | null
+//   isVerified: boolean
+// }
 
 interface Props {
-  lifeSupports: LifeSupport[]
+  lifeSupports: LifeSupportInput[]
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
@@ -60,8 +61,13 @@ export function CredentialLifeSupport({
           </div>
         )}
 
-        {lifeSupports.map((x) => (
-          <div key={x.id} className='rounded-lg border p-4'>
+        {lifeSupports.map((x, index) => (
+          <div
+            key={
+              x.id ?? `${x.certificateNumber}-${x.certificateNumber}-${index}`
+            }
+            className='rounded-lg border p-4'
+          >
             <div className='flex justify-between'>
               <div className='space-y-1'>
                 <div className='font-semibold uppercase'>
@@ -103,7 +109,12 @@ export function CredentialLifeSupport({
 
                   <DropdownMenuContent>
                     {onEdit && (
-                      <DropdownMenuItem onClick={() => onEdit(x.id)}>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          if (!x.id) return
+                          onEdit(x.id)
+                        }}
+                      >
                         Edit
                       </DropdownMenuItem>
                     )}
@@ -111,7 +122,10 @@ export function CredentialLifeSupport({
                     {onDelete && (
                       <DropdownMenuItem
                         className='text-red-600'
-                        onClick={() => onDelete(x.id)}
+                        onClick={() => {
+                          if (!x.id) return
+                          onDelete(x.id)
+                        }}
                       >
                         Delete
                       </DropdownMenuItem>

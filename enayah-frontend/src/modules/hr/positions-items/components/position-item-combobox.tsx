@@ -25,6 +25,7 @@ import { usePositionItemLookup } from '../hooks/use-position-item-lookup'
 
 interface Props {
   value?: string | null
+  //selectedLabel?: string
   onChange: (item: PositionItemLookupItem) => void
 }
 

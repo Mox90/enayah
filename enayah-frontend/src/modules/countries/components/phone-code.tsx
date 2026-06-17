@@ -32,7 +32,17 @@ export function PhoneCodeCombobox({ value, onChange, className }: Props) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
-  const filtered = countries.filter(
+  const uniqueCountries = Object.values(
+    countries.reduce(
+      (acc, c) => {
+        if (!acc[c.dialCode]) acc[c.dialCode] = c
+        return acc
+      },
+      {} as Record<string, (typeof countries)[number]>,
+    ),
+  )
+
+  const filtered = uniqueCountries.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.code.toLowerCase().includes(search.toLowerCase()) ||
@@ -40,8 +50,10 @@ export function PhoneCodeCombobox({ value, onChange, className }: Props) {
   )
 
   const selected =
-    countries.find((c) => c.dialCode === value) ??
-    countries.find((c) => c.code === 'SA')
+    // countries.find((c) => c.dialCode === value) ??
+    // countries.find((c) => c.code === 'SA')
+    uniqueCountries.find((c) => c.dialCode === value) ??
+    uniqueCountries.find((c) => c.code === 'SA')
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
