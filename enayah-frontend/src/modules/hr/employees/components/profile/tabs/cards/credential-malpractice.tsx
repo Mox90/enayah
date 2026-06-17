@@ -13,21 +13,22 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { VerificationBadge } from '@/components/badges/verification-badge'
+import { MalpracticeInput } from '@/modules/hr/onboarding/types/onboarding.types'
 
 //import { VerificationBadge } from '@/components/common/verification-badge'
 
-interface Malpractice {
-  id: string
-  insuranceCompany: string
-  policyNumber: string
-  coverageAmount: string | number | null
-  startDate: string | null
-  expiryDate: string | null
-  isVerified: boolean
-}
+// interface Malpractice {
+//   id: string
+//   insuranceCompany: string
+//   policyNumber: string
+//   coverageAmount: string | number | null
+//   startDate: string | null
+//   expiryDate: string | null
+//   isVerified: boolean
+// }
 
 interface Props {
-  malpractice: Malpractice[]
+  malpractice: MalpracticeInput[]
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
@@ -99,7 +100,12 @@ export function CredentialMalpractice({
 
                   <DropdownMenuContent>
                     {onEdit && (
-                      <DropdownMenuItem onClick={() => onEdit(x.id)}>
+                      <DropdownMenuItem
+                        onClick={() => {
+                          if (!x.id) return
+                          onEdit(x.id)
+                        }}
+                      >
                         Edit
                       </DropdownMenuItem>
                     )}
@@ -107,7 +113,10 @@ export function CredentialMalpractice({
                     {onDelete && (
                       <DropdownMenuItem
                         className='text-red-600'
-                        onClick={() => onDelete(x.id)}
+                        onClick={() => {
+                          if (!x.id) return
+                          onDelete(x.id)
+                        }}
                       >
                         Delete
                       </DropdownMenuItem>

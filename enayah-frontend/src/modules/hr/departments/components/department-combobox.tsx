@@ -20,12 +20,20 @@ import {
 
 import { useDepartments } from '@/modules/hr/departments/hooks/use-departments'
 
-interface Props {
-  value?: string | null
-  onChange: (department: any) => void
+interface DepartmentLookupItem {
+  id: string
+  code?: string | null
+  nameEn: string
+  nameAr?: string | null
 }
 
-export function DepartmentCombobox({ value, onChange }: Props) {
+interface Props {
+  value?: string | null
+  selectedLabel?: string
+  onChange: (department: DepartmentLookupItem) => void
+}
+
+export function DepartmentCombobox({ value, onChange, selectedLabel }: Props) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
@@ -35,8 +43,9 @@ export function DepartmentCombobox({ value, onChange }: Props) {
     search,
   })
 
-  const items = data?.data ?? data?.items ?? []
-  const selected = items.find((item: any) => item.id === value)
+  //const items = data?.data ?? data?.items ?? []
+  const items = data?.data ?? []
+  const selected = items.find((item: DepartmentLookupItem) => item.id === value)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -47,7 +56,7 @@ export function DepartmentCombobox({ value, onChange }: Props) {
           role='combobox'
           className='w-full justify-between'
         >
-          {selected ? selected.nameEn : 'Select department'}
+          {selected ? selected.nameEn : (selectedLabel ?? 'Select department')}
 
           <ChevronsUpDown className='ml-2 h-4 w-4 opacity-50' />
         </Button>
@@ -67,7 +76,7 @@ export function DepartmentCombobox({ value, onChange }: Props) {
             <CommandEmpty>No department found.</CommandEmpty>
 
             <CommandGroup>
-              {items.map((department: any) => (
+              {items.map((department: DepartmentLookupItem) => (
                 <CommandItem
                   key={department.id}
                   value={`${department.code ?? ''} ${department.nameEn ?? ''} ${

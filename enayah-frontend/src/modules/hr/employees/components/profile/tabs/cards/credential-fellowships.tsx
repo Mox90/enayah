@@ -15,23 +15,24 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { VerificationBadge } from '@/components/badges/verification-badge'
+import { FellowshipInput } from '@/modules/hr/onboarding/types/onboarding.types'
 
-interface Fellowship {
-  id: string
-  fellowshipName: string
-  fellowshipNumber?: string
-  abbreviation?: string
-  issuingBody: string
-  specialty?: string
-  //startDate?: string
-  issueDate?: string
-  expiryDate?: string
-  //status: string
-  isVerified: boolean
-}
+// interface Fellowship {
+//   id: string
+//   fellowshipName: string
+//   fellowshipNumber?: string
+//   abbreviation?: string
+//   issuingBody: string
+//   specialty?: string
+//   //startDate?: string
+//   issueDate?: string
+//   expiryDate?: string
+//   //status: string
+//   isVerified: boolean
+// }
 
 interface Props {
-  fellowships: Fellowship[]
+  fellowships: FellowshipInput[]
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
@@ -59,8 +60,11 @@ export function CredentialFellowships({
           <div className='text-muted-foreground'>No Fellowship Records</div>
         )}
 
-        {fellowships.map((x) => (
-          <div key={x.id} className='border rounded-lg p-4'>
+        {fellowships.map((x, index) => (
+          <div
+            key={x.id ?? `${x.fellowshipNumber}-${index}`}
+            className='border rounded-lg p-4'
+          >
             <div className='flex justify-between'>
               <div>
                 <div className='font-semibold'>{x.fellowshipName}</div>
@@ -96,16 +100,28 @@ export function CredentialFellowships({
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => onEdit?.(x.id)}>
-                      Edit
-                    </DropdownMenuItem>
+                    {onEdit && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          if (!x.id) return
+                          onEdit(x.id)
+                        }}
+                      >
+                        Edit
+                      </DropdownMenuItem>
+                    )}
 
-                    <DropdownMenuItem
-                      className='text-red-600'
-                      onClick={() => onDelete?.(x.id)}
-                    >
-                      Delete
-                    </DropdownMenuItem>
+                    {onDelete && (
+                      <DropdownMenuItem
+                        className='text-red-600'
+                        onClick={() => {
+                          if (!x.id) return
+                          onDelete(x.id)
+                        }}
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

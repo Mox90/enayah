@@ -14,6 +14,8 @@ import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 type EnterpriseFilterValues = Record<string, string[]>
+//type EnterpriseFilterValue = string[] | string | undefined
+//type EnterpriseFilterValues = Record<string, EnterpriseFilterValue>
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void

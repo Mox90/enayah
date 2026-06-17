@@ -13,6 +13,7 @@ import {
   HireEmployeePayload,
   IdentificationInput,
 } from '@/modules/hr/onboarding/types/onboarding.types'
+import { useTranslations } from 'next-intl'
 //import { HireEmployeePayload } from '../types/hire.types'
 
 interface Props {
@@ -21,6 +22,8 @@ interface Props {
 }
 
 export function EmployeeIdentificationInformation({ value, onChange }: Props) {
+  const t = useTranslations('employees')
+  const ct = useTranslations('common')
   const identification = value.personal?.identifications?.[0]
 
   function updateIdentification<K extends keyof IdentificationInput>(
@@ -51,15 +54,15 @@ export function EmployeeIdentificationInformation({ value, onChange }: Props) {
   return (
     <section className='space-y-4'>
       <div>
-        <h3 className='text-lg font-semibold'>Identification</h3>
+        <h3 className='text-lg font-semibold'>{t('identification')}</h3>
         <p className='text-sm text-muted-foreground'>
-          National ID, Iqama, Passport, GCC ID, or other identification.
+          {t('identificationInfo')}
         </p>
       </div>
 
       <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
         <div className='space-y-2'>
-          <Label>Identification Type</Label>
+          <Label>{t('idType')}</Label>
           <Select
             value={identification?.type ?? 'iqama'}
             onValueChange={(v) =>
@@ -71,17 +74,17 @@ export function EmployeeIdentificationInformation({ value, onChange }: Props) {
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value='national_id'>National ID</SelectItem>
-              <SelectItem value='iqama'>Iqama</SelectItem>
-              <SelectItem value='gcc_id'>GCC ID</SelectItem>
-              <SelectItem value='passport'>Passport</SelectItem>
-              <SelectItem value='other'>Other</SelectItem>
+              <SelectItem value='national_id'>{t('nationalId')}</SelectItem>
+              <SelectItem value='iqama'>{t('iqama')}</SelectItem>
+              <SelectItem value='gcc_id'>{t('gccId')}</SelectItem>
+              <SelectItem value='passport'>{t('passport')}</SelectItem>
+              <SelectItem value='other'>{t('other')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className='space-y-2'>
-          <Label>Identification Number</Label>
+          <Label>{t('idNumber')}</Label>
           <Input
             value={identification?.identificationNumber ?? ''}
             onChange={(e) =>
@@ -91,7 +94,7 @@ export function EmployeeIdentificationInformation({ value, onChange }: Props) {
         </div>
 
         <div className='space-y-2'>
-          <Label>Issue Date</Label>
+          <Label>{ct('issueDate')}</Label>
           <Input
             type='date'
             value={identification?.issueDate ?? ''}
@@ -102,7 +105,7 @@ export function EmployeeIdentificationInformation({ value, onChange }: Props) {
         </div>
 
         <div className='space-y-2'>
-          <Label>Expiry Date</Label>
+          <Label>{ct('expiryDate')}</Label>
           <Input
             type='date'
             value={identification?.expiryDate ?? ''}

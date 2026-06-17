@@ -1,3 +1,6 @@
+import { AllowanceType } from '../../compensations/types/allowance.types'
+//import { DegreeInput } from '../../employees/components/onboarding/types/onboarding.types'
+
 export type EmployeeEmailInput = {
   type: 'work' | 'personal' | 'secondary' | 'other'
   email: string
@@ -63,6 +66,107 @@ export type VisaInput = {
   visaType?: string | null
   issueDate?: string | null
   expiryDate?: string | null
+}
+
+export type DegreeInput = {
+  id?: string
+  degreeName: string
+  degreeType:
+    | 'diploma'
+    | 'associate'
+    | 'bachelor'
+    | 'master'
+    | 'doctorate'
+    | 'other'
+  major?: string | null
+  institution: string
+  countryId?: string | null
+  startDate?: string | null
+  endDate?: string | null
+  graduationDate?: string | null
+  documentFileId?: string | null
+  isVerified?: boolean
+  verifiedAt?: string | null
+  verifiedBy?: string | null
+  verificationRemarks?: string | null
+}
+
+export type BoardInput = {
+  id?: string
+  boardName: string
+  issuingBody: string | null
+  specialty: string | null
+  issueDate: string | null
+  expiryDate: string | null
+  isVerified: boolean
+}
+
+export type FellowshipInput = {
+  id?: string
+  fellowshipName: string
+  fellowshipNumber?: string
+  abbreviation?: string
+  issuingBody: string
+  specialty?: string
+  //startDate?: string
+  issueDate?: string
+  expiryDate?: string
+  //status: string
+  isVerified: boolean
+}
+
+export type MembershipInput = {
+  id?: string
+  organization: string
+  membershipNumber?: string
+  membershipLevel?: string
+  startDate?: string
+  issueDate?: string
+  expiryDate?: string
+  status: string
+  isVerified: boolean
+}
+
+export type LicenseInput = {
+  id?: string
+  authority: string
+  licenseNumber: string
+  profession: string
+  specialty?: string
+  issueDate?: string
+  expiryDate?: string
+  status: string
+  isVerified: boolean
+}
+
+export type LifeSupportInput = {
+  id?: string
+  type: string
+  provider: string
+  certificateNumber: string | null
+  issueDate: string | null
+  expiryDate: string | null
+  isVerified: boolean
+}
+
+export type MalpracticeInput = {
+  id?: string
+  insuranceCompany: string
+  policyNumber: string
+  coverageAmount: string | number | null
+  startDate: string | null
+  expiryDate: string | null
+  isVerified: boolean
+}
+
+export type EmployeeCredentialsResponse = {
+  degrees: DegreeInput[]
+  boards: BoardInput[]
+  fellowships: FellowshipInput[]
+  memberships: MembershipInput[]
+  licenses: LicenseInput[]
+  lifeSupport: LifeSupportInput[]
+  malpractice: MalpracticeInput[]
 }
 
 export interface HireEmployeePayload {
@@ -140,6 +244,10 @@ export interface HireEmployeePayload {
   appointment?: {
     actualDepartmentId?: string | null
     actualPositionId?: string | null
+    actualDepartmentNameEn?: string | null
+    actualDepartmentNameAr?: string | null
+    actualPositionTitleEn?: string | null
+    actualPositionTitleAr?: string | null
     startDate?: string | null
     endDate?: string | null
     managerId?: string | null
@@ -173,17 +281,17 @@ export interface HireEmployeePayload {
   }
 
   allowances?: {
-    type: string
+    type: AllowanceType | string
     amount: number
   }[]
 
   credentials?: {
-    degrees?: Record<string, unknown>[]
-    boards?: Record<string, unknown>[]
-    fellowships?: Record<string, unknown>[]
-    memberships?: Record<string, unknown>[]
-    licenses?: Record<string, unknown>[]
-    lifeSupport?: Record<string, unknown>[]
-    malpractice?: Record<string, unknown>[]
+    degrees?: DegreeInput[] //Record<string, unknown>[]
+    boards?: BoardInput[] //Record<string, unknown>[]
+    fellowships?: FellowshipInput[] //Record<string, unknown>[]
+    memberships?: MembershipInput[] //Record<string, unknown>[]
+    licenses?: LicenseInput[] //Record<string, unknown>[]
+    lifeSupport?: LifeSupportInput[] //Record<string, unknown>[]
+    malpractice?: MalpracticeInput[] //Record<string, unknown>[]
   }
 }

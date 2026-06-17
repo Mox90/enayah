@@ -13,6 +13,7 @@ import { CountryCombobox } from '@/modules/countries/components/country-combobox
 import { CountryLookup } from '@/modules/countries/components/country-lookup'
 import { PersonalErrors } from '@/modules/hr/onboarding/types/onboarding-errors.types'
 import { HireEmployeePayload } from '@/modules/hr/onboarding/types/onboarding.types'
+import { useTranslations } from 'next-intl'
 //import { HireEmployeePayload } from '../types/hire.types'
 
 interface Props {
@@ -27,6 +28,7 @@ export function EmployeeBasicInformation({
   personalErrors,
 }: Props) {
   const employee = value.employee
+  const et = useTranslations('employees')
 
   function updateEmployee(field: keyof typeof employee, fieldValue: any) {
     onChange({
@@ -41,10 +43,8 @@ export function EmployeeBasicInformation({
   return (
     <section className='space-y-4'>
       <div>
-        <h3 className='text-lg font-semibold'>Basic Information</h3>
-        <p className='text-sm text-muted-foreground'>
-          Employee master record information.
-        </p>
+        <h3 className='text-lg font-semibold'>{et('basicInfo')}</h3>
+        <p className='text-sm text-muted-foreground'>{et('masterRecord')}</p>
       </div>
 
       <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
@@ -52,7 +52,7 @@ export function EmployeeBasicInformation({
           <Label
             className={`${personalErrors.employeeNumber ? 'text-destructive' : ''}`}
           >
-            Employee Number *
+            {et('employeeNumberRequired')}
           </Label>
           <Input
             value={employee.employeeNumber ?? ''}
@@ -66,7 +66,7 @@ export function EmployeeBasicInformation({
         </div>
 
         <div className='space-y-2'>
-          <Label>Nationality / Country ID</Label>
+          <Label>{et('nationality')}</Label>
           <CountryCombobox
             value={employee.countryId}
             onChange={(id) => updateEmployee('countryId', id)}
@@ -77,7 +77,7 @@ export function EmployeeBasicInformation({
           <Label
             className={`${personalErrors.firstNameEn ? 'text-destructive' : ''}`}
           >
-            First Name EN *
+            {et('firstNameEn')}
           </Label>
           <Input
             value={employee.firstNameEn ?? ''}
@@ -91,10 +91,26 @@ export function EmployeeBasicInformation({
         </div>
 
         <div className='space-y-2'>
+          <Label>{et('secondNameEn')}</Label>
+          <Input
+            value={employee.secondNameEn ?? ''}
+            onChange={(e) => updateEmployee('secondNameEn', e.target.value)}
+          />
+        </div>
+
+        <div className='space-y-2'>
+          <Label>{et('thirdNameEn')}</Label>
+          <Input
+            value={employee.thirdNameEn ?? ''}
+            onChange={(e) => updateEmployee('thirdNameEn', e.target.value)}
+          />
+        </div>
+
+        <div className='space-y-2'>
           <Label
             className={`${personalErrors.familyNameEn ? 'text-destructive' : ''}`}
           >
-            Family Name EN *
+            {et('familyNameEn')}
           </Label>
           <Input
             value={employee.familyNameEn ?? ''}
@@ -108,26 +124,10 @@ export function EmployeeBasicInformation({
         </div>
 
         <div className='space-y-2'>
-          <Label>Second Name EN</Label>
-          <Input
-            value={employee.secondNameEn ?? ''}
-            onChange={(e) => updateEmployee('secondNameEn', e.target.value)}
-          />
-        </div>
-
-        <div className='space-y-2'>
-          <Label>Third Name EN</Label>
-          <Input
-            value={employee.thirdNameEn ?? ''}
-            onChange={(e) => updateEmployee('thirdNameEn', e.target.value)}
-          />
-        </div>
-
-        <div className='space-y-2'>
           <Label
             className={`${personalErrors.firstNameAr ? 'text-destructive' : ''}`}
           >
-            First Name AR *
+            {et('firstNameAr')}
           </Label>
           <Input
             value={employee.firstNameAr ?? ''}
@@ -142,10 +142,28 @@ export function EmployeeBasicInformation({
         </div>
 
         <div className='space-y-2'>
+          <Label>{et('secondNameAr')}</Label>
+          <Input
+            value={employee.secondNameAr ?? ''}
+            onChange={(e) => updateEmployee('secondNameAr', e.target.value)}
+            dir='rtl'
+          />
+        </div>
+
+        <div className='space-y-2'>
+          <Label>{et('thirdNameAr')}</Label>
+          <Input
+            value={employee.thirdNameAr ?? ''}
+            onChange={(e) => updateEmployee('thirdNameAr', e.target.value)}
+            dir='rtl'
+          />
+        </div>
+
+        <div className='space-y-2'>
           <Label
             className={`${personalErrors.familyNameAr ? 'text-destructive' : ''}`}
           >
-            Family Name AR *
+            {et('familyNameAr')}
           </Label>
           <Input
             value={employee.familyNameAr ?? ''}
@@ -160,25 +178,7 @@ export function EmployeeBasicInformation({
         </div>
 
         <div className='space-y-2'>
-          <Label>Second Name AR</Label>
-          <Input
-            value={employee.secondNameAr ?? ''}
-            onChange={(e) => updateEmployee('secondNameAr', e.target.value)}
-            dir='rtl'
-          />
-        </div>
-
-        <div className='space-y-2'>
-          <Label>Third Name AR</Label>
-          <Input
-            value={employee.thirdNameAr ?? ''}
-            onChange={(e) => updateEmployee('thirdNameAr', e.target.value)}
-            dir='rtl'
-          />
-        </div>
-
-        <div className='space-y-2'>
-          <Label>Gender</Label>
+          <Label>{et('gender')}</Label>
           <Select
             value={employee.gender}
             onValueChange={(v) => updateEmployee('gender', v)}
@@ -188,14 +188,14 @@ export function EmployeeBasicInformation({
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value='male'>Male</SelectItem>
-              <SelectItem value='female'>Female</SelectItem>
+              <SelectItem value='male'>{et('male')}</SelectItem>
+              <SelectItem value='female'>{et('female')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className='space-y-2'>
-          <Label>Date of Birth</Label>
+          <Label>{et('dateOfBirth')}</Label>
           <Input
             type='date'
             value={employee.dateOfBirth ?? ''}

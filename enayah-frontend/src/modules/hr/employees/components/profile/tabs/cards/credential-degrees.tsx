@@ -1,12 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-
-import { MoreHorizontal, MoreVertical, Plus } from 'lucide-react'
-
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import {
@@ -16,19 +11,21 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { VerificationBadge } from '@/components/badges/verification-badge'
+import { DegreeInput } from '@/modules/hr/onboarding/types/onboarding.types'
+import { MoreVertical, Plus } from 'lucide-react'
 
-interface Degree {
-  id: string
-  degreeType: string
-  degreeName: string
-  major: string | null
-  institution: string
-  graduationDate: string | null
-  isVerified: boolean
-}
+// interface Degree {
+//   id: string
+//   degreeType: string
+//   degreeName: string
+//   major?: string | null
+//   institution: string
+//   graduationDate: string | null
+//   isVerified?: boolean
+// }
 
 interface Props {
-  degrees: Degree[]
+  degrees: DegreeInput[] //Degree[]
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
@@ -43,14 +40,14 @@ const degreeTypeLabel: Record<string, string> = {
   other: 'Other',
 }
 
-const statusClass: Record<string, string> = {
-  active: 'bg-green-100 text-green-700 border-green-200',
-  on_leave: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  transferred: 'bg-blue-100 text-blue-700 border-blue-200',
-  resigned: 'bg-orange-100 text-orange-700 border-orange-200',
-  eoc: 'bg-purple-100 text-purple-700 border-purple-200',
-  terminated: 'bg-red-100 text-red-700 border-red-200',
-}
+// const statusClass: Record<string, string> = {
+//   active: 'bg-green-100 text-green-700 border-green-200',
+//   on_leave: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+//   transferred: 'bg-blue-100 text-blue-700 border-blue-200',
+//   resigned: 'bg-orange-100 text-orange-700 border-orange-200',
+//   eoc: 'bg-purple-100 text-purple-700 border-purple-200',
+//   terminated: 'bg-red-100 text-red-700 border-red-200',
+// }
 
 export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
   //console.log(degrees)
@@ -70,8 +67,11 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
           <div className='text-sm text-muted-foreground'>No Degree Records</div>
         )}
 
-        {degrees.map((degree) => (
-          <div key={degree.id} className='rounded-lg border p-4'>
+        {degrees.map((degree, index) => (
+          <div
+            key={degree.id ?? `${degree.degreeName}-${index}`}
+            className='rounded-lg border p-4'
+          >
             <div className='flex justify-between'>
               <div className='space-y-1'>
                 <div className='font-semibold'>{degree.degreeName}</div>
@@ -97,7 +97,7 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
                     degree.degreeType.replace('_', ' ')}
                 </div>
 
-                <VerificationBadge verified={degree.isVerified} />
+                <VerificationBadge verified={degree.isVerified ?? false} />
               </div>
 
               <div className='flex flex-col items-end gap-2'>
@@ -113,13 +113,21 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent align='end'>
-                    <DropdownMenuItem onClick={() => onEdit?.(degree.id)}>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        if (!degree.id) return
+                        onEdit?.(degree.id)
+                      }}
+                    >
                       Edit
                     </DropdownMenuItem>
 
                     <DropdownMenuItem
                       className='text-red-600'
-                      onClick={() => onDelete?.(degree.id)}
+                      onClick={() => {
+                        if (!degree.id) return
+                        onDelete?.(degree.id)
+                      }}
                     >
                       Delete
                     </DropdownMenuItem>

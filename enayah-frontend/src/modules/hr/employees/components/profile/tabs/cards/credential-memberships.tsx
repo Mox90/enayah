@@ -14,26 +14,27 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { MembershipInput } from '@/modules/hr/onboarding/types/onboarding.types'
 
 const verifyClass = {
   verified: 'bg-green-100 text-green-700 border-green-200',
   unverified: 'bg-yellow-100 text-yellow-700 border-yellow-200',
 }
 
-interface Membership {
-  id: string
-  organization: string
-  membershipNumber?: string
-  membershipLevel?: string
-  startDate?: string
-  issueDate?: string
-  expiryDate?: string
-  status: string
-  isVerified: boolean
-}
+// interface Membership {
+//   id: string
+//   organization: string
+//   membershipNumber?: string
+//   membershipLevel?: string
+//   startDate?: string
+//   issueDate?: string
+//   expiryDate?: string
+//   status: string
+//   isVerified: boolean
+// }
 
 interface Props {
-  memberships: Membership[]
+  memberships: MembershipInput[]
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
@@ -106,16 +107,28 @@ export function CredentialMemberships({
                   </DropdownMenuTrigger>
 
                   <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => onEdit?.(x.id)}>
-                      Edit
-                    </DropdownMenuItem>
+                    {onEdit && (
+                      <DropdownMenuItem
+                        onClick={() => {
+                          if (!x.id) return
+                          onEdit(x.id)
+                        }}
+                      >
+                        Edit
+                      </DropdownMenuItem>
+                    )}
 
-                    <DropdownMenuItem
-                      className='text-red-600'
-                      onClick={() => onDelete?.(x.id)}
-                    >
-                      Delete
-                    </DropdownMenuItem>
+                    {onDelete && (
+                      <DropdownMenuItem
+                        className='text-red-600'
+                        onClick={() => {
+                          if (!x.id) return
+                          onDelete(x.id)
+                        }}
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

@@ -107,9 +107,10 @@ export function useEmployeeColumns(
       header: t('category'),
       cell: ({ row }) => (
         <Badge variant='secondary'>
-          {row.original.categoryCode !== null
+          {/* {row.original.categoryCode !== null
             ? row.original.categoryCode
-            : 'N/A'}
+            : 'N/A'} */}
+          {row.original.categoryCode !== null ? row.original.categoryCode : '-'}
         </Badge>
       ),
     },
@@ -152,10 +153,17 @@ export function useEmployeeColumns(
         label: t('hireDate'),
       },
       header: t('hireDate'),
-      cell: ({ row }) =>
-        row.original.hireDate
-          ? format(new Date(row.original.hireDate), 'dd-MMM-yyyy')
-          : '-',
+      // cell: ({ row }) =>
+      //   row.original.hireDate ? format(new Date(row.original.hireDate), 'dd-MMM-yyyy')
+      //     : '-',
+      cell: ({ row }) => {
+        const raw = row.original.hireDate
+        if (!raw) return '-'
+        const parsed = new Date(raw)
+        return Number.isNaN(parsed.getTime())
+          ? '-'
+          : format(parsed, 'dd-MMM-yyyy')
+      },
     },
 
     {
