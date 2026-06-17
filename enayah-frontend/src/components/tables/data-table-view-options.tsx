@@ -12,18 +12,20 @@ import {
 import { Button } from '@/components/ui/button'
 
 import { Settings2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface Props<TData> {
   table: Table<TData>
 }
 
 export function DataTableViewOptions<TData>({ table }: Props<TData>) {
+  const t = useTranslations('common')
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant='outline' size='sm'>
           <Settings2 className='mr-2 h-4 w-4' />
-          View
+          {t('view')}
         </Button>
       </DropdownMenuTrigger>
 

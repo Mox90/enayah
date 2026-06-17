@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 //import axios from 'axios'
 // import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api/client'
+import { useQuery } from '@tanstack/react-query'
 
 interface Props {
   endpoint: string

@@ -87,7 +87,11 @@ export const OnboardingService = {
         throw new AppError('Position item is required for assignment', 400)
       }
 
-      const positionItem = await PositionItemRepository.findById(
+      // const positionItem = await PositionItemRepository.findById(
+      //   tx,
+      //   dto.movement.positionItemId,
+      // )
+      const positionItem = await PositionItemRepository.assignIfAvailable(
         tx,
         dto.movement.positionItemId,
       )
@@ -112,7 +116,7 @@ export const OnboardingService = {
         remarks: dto.movement.remarks ?? null,
       })
 
-      await PositionItemRepository.updateStatus(tx, positionItem.id, 'filled')
+      //await PositionItemRepository.updateStatus(tx, positionItem.id, 'filled')
 
       // ----------------------------------
       // 6. Appointment / Actual Assignment

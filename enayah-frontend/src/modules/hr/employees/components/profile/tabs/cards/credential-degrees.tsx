@@ -53,7 +53,7 @@ const statusClass: Record<string, string> = {
 }
 
 export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
-  console.log(degrees)
+  //console.log(degrees)
   return (
     <Card>
       <CardHeader className='flex flex-row items-center justify-between'>

@@ -2,6 +2,7 @@
 
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { PhoneCodeCombobox } from '@/modules/countries/components/phone-code'
 import { HireEmployeePayload } from '@/modules/hr/onboarding/types/onboarding.types'
 //import { HireEmployeePayload } from '../types/hire.types'
 
@@ -33,19 +34,55 @@ export function EmployeeContactInformation({ value, onChange }: Props) {
     })
   }
 
-  function updatePhone(phoneValue: string) {
+  function normalizePhone(phone: string) {
+    return phone.replace(/^0+/, '')
+  }
+
+  function updatePhoneCode(countryCode: string) {
+    const currentPhone = phone?.phoneNumber ?? ''
+
     onChange({
       ...value,
       personal: {
         ...value.personal,
-        phoneNumbers: phoneValue
+        phoneNumbers: currentPhone
           ? [
               {
+                type: phone?.type ?? 'mobile',
+                countryCode,
+                phoneNumber: currentPhone,
+                isPrimary: phone?.isPrimary ?? true,
+                isWhatsapp: phone?.isWhatsapp ?? false,
+              },
+            ]
+          : [
+              {
                 type: 'mobile',
-                countryCode: '+966',
-                phoneNumber: phoneValue,
+                countryCode,
+                phoneNumber: '',
                 isPrimary: true,
                 isWhatsapp: false,
+              },
+            ],
+      },
+    })
+  }
+
+  function updatePhone(phoneValue: string) {
+    const normalized = phoneValue.replace(/^0+/, '')
+
+    onChange({
+      ...value,
+      personal: {
+        ...value.personal,
+        phoneNumbers: normalized
+          ? [
+              {
+                type: phone?.type ?? 'mobile',
+                countryCode: phone?.countryCode ?? '+966',
+                phoneNumber: normalized,
+                isPrimary: true,
+                isWhatsapp: phone?.isWhatsapp ?? false,
               },
             ]
           : [],
@@ -75,11 +112,21 @@ export function EmployeeContactInformation({ value, onChange }: Props) {
 
         <div className='space-y-2'>
           <Label>Primary Mobile</Label>
-          <Input
-            value={phone?.phoneNumber ?? ''}
-            onChange={(e) => updatePhone(e.target.value)}
-            placeholder='512345678'
-          />
+
+          <div className='flex h-10 overflow-hidden rounded-md border border-input bg-background'>
+            <PhoneCodeCombobox
+              value={phone?.countryCode ?? '+966'}
+              onChange={updatePhoneCode}
+              className='border-0 border-r rounded-none'
+            />
+
+            <Input
+              className='!border-0 !shadow-none !bg-transparent !rounded-none focus-visible:ring-0 focus-visible:ring-offset-0'
+              value={phone?.phoneNumber ?? ''}
+              onChange={(e) => updatePhone(e.target.value)}
+              placeholder='512345678'
+            />
+          </div>
         </div>
       </div>
     </section>

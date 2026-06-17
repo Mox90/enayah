@@ -9,6 +9,7 @@ import { PersonalErrors } from '@/modules/hr/onboarding/types/onboarding-errors.
 import { EmploymentStep } from './steps/employment-step'
 import { ContractStep } from './steps/contract-step'
 import { EmploymentContractAssignmentStep } from './steps/employment-contract-assignment-step'
+import { useTranslations } from 'next-intl'
 
 type Step =
   | 'personal'
@@ -23,18 +24,31 @@ interface Props {
   onCancel: () => void
 }
 
-const steps: { key: Step; label: string }[] = [
-  { key: 'personal', label: 'Personal' },
-  { key: 'employmentContractAssignment', label: 'Employment & Assignment' },
-  // { key: 'contract', label: 'Contract' },
-  // { key: 'assignment', label: 'Assignment' },
-  { key: 'compensation', label: 'Compensation' },
-  { key: 'credentials', label: 'Credentials' },
-  { key: 'review', label: 'Review' },
-]
+// const steps: { key: Step; label: string }[] = [
+//   { key: 'personal', label: 'Personal' },
+//   { key: 'employmentContractAssignment', label: 'Employment & Assignment' },
+//   { key: 'contract', label: 'Contract' },
+//   { key: 'assignment', label: 'Assignment' },
+//   { key: 'compensation', label: 'Compensation' },
+//   { key: 'credentials', label: 'Credentials' },
+//   { key: 'review', label: 'Review' },
+// ]
 
 export function OnboardingForm({ onCancel }: Props) {
   const [currentStep, setCurrentStep] = useState<Step>('personal')
+  const t = useTranslations('employees')
+  const ct = useTranslations('common')
+  const et = useTranslations('errors')
+
+  const steps: { key: Step; label: string }[] = [
+    { key: 'personal', label: t('personal') },
+    { key: 'employmentContractAssignment', label: t('employmentAssignment') },
+    // { key: 'contract', label: 'Contract' },
+    // { key: 'assignment', label: 'Assignment' },
+    { key: 'compensation', label: t('compensation') },
+    { key: 'credentials', label: t('credentials') },
+    { key: 'review', label: t('review') },
+  ]
 
   const [hire, setHire] = useState<HireEmployeePayload>({
     employee: {
@@ -89,7 +103,7 @@ export function OnboardingForm({ onCancel }: Props) {
       officialPositionId: '',
       endDate: '',
       sequenceNumber: '',
-      movementType: '' as HireEmployeePayload['movement']['movementType'],
+      movementType: 'initial', //'' as HireEmployeePayload['movement']['movementType'],
     },
 
     appointment: {
@@ -130,7 +144,7 @@ export function OnboardingForm({ onCancel }: Props) {
     const nextErrors: PersonalErrors = {}
 
     if (!e.employeeNumber?.trim()) {
-      nextErrors.employeeNumber = 'Employee Number is required.'
+      nextErrors.employeeNumber = et('employeeNumberRequiredError')
     }
 
     // if (!e.countryId) {
@@ -138,19 +152,19 @@ export function OnboardingForm({ onCancel }: Props) {
     // }
 
     if (!e.firstNameEn?.trim()) {
-      nextErrors.firstNameEn = 'First Name (EN) is required.'
+      nextErrors.firstNameEn = et('firstNameEnRequiredError')
     }
 
     if (!e.familyNameEn?.trim()) {
-      nextErrors.familyNameEn = 'Family Name (EN) is required.'
+      nextErrors.familyNameEn = et('familyNameEnRequiredError')
     }
 
     if (!e.firstNameAr?.trim()) {
-      nextErrors.firstNameAr = 'First Name (AR) is required.'
+      nextErrors.firstNameAr = et('firstNameArRequiredError')
     }
 
     if (!e.familyNameAr?.trim()) {
-      nextErrors.familyNameAr = 'Family Name (AR) is required.'
+      nextErrors.familyNameAr = et('familyNameArRequiredError')
     }
 
     // if (!e.gender) {
@@ -190,18 +204,24 @@ export function OnboardingForm({ onCancel }: Props) {
     }
   }
 
+  async function handleSubmit() {
+    // TODO: Call onboarding mutation with hire payload
+    // const result = await submitOnboarding(hire)
+    // if (result.success) onCancel()
+  }
+
   return (
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
         <div>
-          <h1 className='text-2xl font-bold'>Hire Employee</h1>
+          <h1 className='text-2xl font-bold'>{t('hireEmployee')}</h1>
           <p className='text-sm text-muted-foreground'>
-            Complete the employee onboarding process step by step.
+            {t('onboardingProcess')}
           </p>
         </div>
 
         <Button variant='outline' onClick={onCancel}>
-          Cancel
+          {ct('cancel')}
         </Button>
       </div>
 
@@ -353,14 +373,16 @@ export function OnboardingForm({ onCancel }: Props) {
 
       <div className='flex justify-between'>
         <Button variant='outline' onClick={goBack} disabled={isFirst}>
-          Back
+          {ct('back')}
         </Button>
 
         {isLast ? (
-          <Button type='button'>Submit Onboarding</Button>
+          <Button type='button' onClick={handleSubmit}>
+            Submit Onboarding
+          </Button>
         ) : (
           <Button type='button' onClick={goNext}>
-            Next
+            {ct('next')}
           </Button>
         )}
       </div>

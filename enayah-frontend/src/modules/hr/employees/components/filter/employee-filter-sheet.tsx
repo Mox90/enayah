@@ -21,6 +21,7 @@ import { PositionLookup } from '@/modules/hr/positions/components/position-looku
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { DatePicker } from '@/components/dialogs/date-picker'
+import { useTranslations } from 'next-intl'
 
 interface EmployeeFilters {
   departmentIds: string[]
@@ -53,6 +54,8 @@ export function EmployeeFilterSheet({
   onReset,
 }: Props) {
   const [local, setLocal] = useState<EmployeeFilters>({ ...values })
+  const et = useTranslations('employees')
+  const ct = useTranslations('common')
 
   return (
     <Sheet
@@ -67,7 +70,7 @@ export function EmployeeFilterSheet({
     >
       <SheetContent className=' w-[450px] overflow-y-auto'>
         <SheetHeader>
-          <SheetTitle>Employee Filters</SheetTitle>
+          <SheetTitle>{et('filterEmployees')}</SheetTitle>
         </SheetHeader>
 
         <div className='space-y-8 mt-6 mx-4'>
@@ -93,23 +96,23 @@ export function EmployeeFilterSheet({
           />
 
           <div className='rounded-lg border p-4 space-y-4'>
-            <h3 className='text-lg font-semibold'>Date Filters</h3>
+            <h3 className='text-lg font-semibold'>{et('dateFilters')}</h3>
 
             {/* Hire Date */}
-
             <div className='space-y-2'>
-              <Label>Hire Date</Label>
+              <Label>{et('hireDate')}</Label>
 
               <div className='grid grid-cols-2 gap-3'>
                 <div className='space-y-1'>
-                  <div className='text-xs text-muted-foreground'>From</div>
+                  <div className='text-xs text-muted-foreground'>
+                    {et('from')}
+                  </div>
 
                   <DatePicker
                     value={local.hireDateFrom}
                     onChange={(value) =>
                       setLocal({
                         ...local,
-
                         hireDateFrom: value,
                       })
                     }
@@ -117,13 +120,14 @@ export function EmployeeFilterSheet({
                 </div>
 
                 <div className='space-y-1'>
-                  <div className='text-xs text-muted-foreground'>To</div>
+                  <div className='text-xs text-muted-foreground'>
+                    {et('to')}
+                  </div>
                   <DatePicker
                     value={local.hireDateTo}
                     onChange={(value) =>
                       setLocal({
                         ...local,
-
                         hireDateTo: value,
                       })
                     }
@@ -133,13 +137,14 @@ export function EmployeeFilterSheet({
             </div>
 
             {/* Contract End Date */}
-
             <div className='space-y-2'>
-              <Label>Contract End Date</Label>
+              <Label>{et('ced')}</Label>
 
               <div className='grid grid-cols-2 gap-3'>
                 <div className='space-y-1'>
-                  <div className='text-xs text-muted-foreground'>From</div>
+                  <div className='text-xs text-muted-foreground'>
+                    {et('from')}
+                  </div>
 
                   <DatePicker
                     value={local.contractEndDateFrom}
@@ -153,7 +158,9 @@ export function EmployeeFilterSheet({
                 </div>
 
                 <div className='space-y-1'>
-                  <div className='text-xs text-muted-foreground'>To</div>
+                  <div className='text-xs text-muted-foreground'>
+                    {et('to')}
+                  </div>
 
                   <DatePicker
                     value={local.contractEndDateTo}
@@ -170,18 +177,20 @@ export function EmployeeFilterSheet({
           </div>
 
           {/* CountryLookup */}
+          {/* //TODO: Apply Nationality Lookup */}
 
-          <div className='text-lg font-medium'>Gender</div>
+          {/* Gender */}
+          <div className='text-lg font-medium'>{et('gender')}</div>
           <EnterpriseFilterCheckboxGroup
             values={local.genders}
             options={[
               {
                 value: 'male',
-                label: 'Male',
+                label: et('male'),
               },
               {
                 value: 'female',
-                label: 'Female',
+                label: et('female'),
               },
             ]}
             onChange={(genders) =>
@@ -192,41 +201,40 @@ export function EmployeeFilterSheet({
             }
           />
 
-          <div className='text-lg font-medium'>Category</div>
-
+          {/* Category */}
+          <div className='text-lg font-medium'>{et('category')}</div>
           <EnterpriseFilterCheckboxGroup
             values={local.categoryCodes.map(String)}
             options={[
-              { value: '1000', label: 'Physician' },
-              { value: '2000', label: 'Nurse' },
-              { value: '3000', label: 'Allied Health' },
-              { value: '4000', label: 'Administrative' },
-              { value: '5000', label: 'Support Services' },
+              { value: '1000', label: et('physician') },
+              { value: '2000', label: et('nurse') },
+              { value: '3000', label: et('allied') },
+              { value: '4000', label: et('admin') },
+              { value: '5000', label: et('support') },
             ]}
             onChange={(values) =>
               setLocal({
                 ...local,
-
                 categoryCodes: values.map(Number),
               })
             }
           />
 
-          <div className='text-lg font-medium'>Status</div>
+          <div className='text-lg font-medium'>{et('status')}</div>
           <EnterpriseFilterCheckboxGroup
             values={local.employmentStatuses}
             options={[
               {
                 value: 'active',
-                label: 'Active',
+                label: et('active'),
               },
-              {
-                value: 'leave',
-                label: 'Leave',
-              },
+              // {
+              //   value: 'leave',
+              //   label: 'Leave',
+              // },
               {
                 value: 'terminated',
-                label: 'Terminated',
+                label: et('terminated'),
               },
             ]}
             onChange={(employmentStatuses) =>
@@ -258,7 +266,7 @@ export function EmployeeFilterSheet({
               onReset()
             }}
           >
-            Reset
+            {ct('reset')}
           </Button>
 
           <Button
@@ -268,7 +276,7 @@ export function EmployeeFilterSheet({
               onOpenChange(false)
             }}
           >
-            Apply
+            {ct('apply')}
           </Button>
         </div>
       </SheetContent>

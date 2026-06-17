@@ -5,8 +5,10 @@ import { RowSelectionState, OnChangeFn } from '@tanstack/react-table'
 import { DataTable } from '@/components/tables'
 
 import { EmployeeDirectoryResponse } from '../../types/employee-directory.types'
+import { useEmployeeColumns } from './use-employee-columns'
+import { useTranslations } from 'next-intl'
 
-import { employeeColumns } from './employee-columns'
+//import { employeeColumns } from './employee-columns'
 
 interface Props {
   data?: EmployeeDirectoryResponse
@@ -39,9 +41,10 @@ export function EmployeesTable({
   onSearchChange,
   onSortChange,
 }: Props) {
+  const t = useTranslations('employees')
   return (
     <DataTable
-      columns={employeeColumns(sortBy, sortOrder)}
+      columns={useEmployeeColumns(sortBy, sortOrder)}
       data={data?.items ?? []}
       total={data?.total ?? 0}
       pageCount={limit > 0 ? Math.ceil((data?.total ?? 0) / limit) : 0}
@@ -53,7 +56,7 @@ export function EmployeesTable({
       sortOrder={sortOrder}
       rowSelection={rowSelection}
       onRowSelectionChange={onRowSelectionChange}
-      searchPlaceholder='Search employee...'
+      searchPlaceholder={t('searchEmployee')}
       onPageChange={onPageChange}
       onLimitChange={onLimitChange}
       onSearchChange={onSearchChange}

@@ -11,18 +11,23 @@ import { PositionItemRepository } from '../../position-items/repository/position
 export const ContractMovementService = {
   create: async (dto: CreateContractMovementDto) => {
     return db.transaction(async (tx) => {
-      const positionItem = await PositionItemRepository.findById(
+      // const positionItem = await PositionItemRepository.findById(
+      //   tx,
+      //   dto.positionItemId,
+      // )
+
+      // if (!positionItem) {
+      //   throw new AppError('Position item not found', 404)
+      // }
+
+      // if (positionItem.status !== 'vacant') {
+      //   throw new AppError('Position item is not vacant', 400)
+      // }
+
+      const positionItem = await PositionItemRepository.assignIfAvailable(
         tx,
         dto.positionItemId,
       )
-
-      if (!positionItem) {
-        throw new AppError('Position item not found', 404)
-      }
-
-      if (positionItem.status !== 'vacant') {
-        throw new AppError('Position item is not vacant', 400)
-      }
 
       const sequenceNumber =
         dto.sequenceNumber ??
@@ -39,7 +44,7 @@ export const ContractMovementService = {
         sequenceNumber,
       })
 
-      await PositionItemRepository.updateStatus(tx, positionItem.id, 'filled')
+      //await PositionItemRepository.updateStatus(tx, positionItem.id, 'filled')
 
       return movement
     })

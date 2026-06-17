@@ -1,18 +1,21 @@
 'use client'
 
 import { ColumnDef } from '@tanstack/react-table'
-import { Checkbox } from '@/components/ui/checkbox'
-//import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header'
 import { EmployeeDirectoryRow } from '../../types/employee-directory.types'
+import { useLocale, useTranslations } from 'next-intl'
+import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/tables'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 
-export function employeeColumns(
+export function useEmployeeColumns(
   sortBy: string,
   sortOrder: 'asc' | 'desc',
 ): ColumnDef<EmployeeDirectoryRow>[] {
-  //const et = useTranslations('employees')
+  const t = useTranslations('employees')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
+
   return [
     {
       id: 'select',
@@ -24,7 +27,6 @@ export function employeeColumns(
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         />
       ),
-
       cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
@@ -32,60 +34,77 @@ export function employeeColumns(
         />
       ),
     },
+
     {
       accessorKey: 'employeeNumber',
       meta: {
-        label: 'Employee #',
+        label: t('employeeNumber'),
       },
       header: ({ column }) => (
-        <DataTableColumnHeader
-          column={column}
-          title='Employee #'
-          sortBy={sortBy}
-          sortOrder={sortOrder}
-        />
+        <div className={isRtl ? 'text-right' : 'text-left'}>
+          <DataTableColumnHeader
+            column={column}
+            title={t('employeeNumber')}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+          />
+        </div>
       ),
     },
+
     {
       id: 'fullName',
       meta: {
-        label: 'Full Name',
+        label: t('fullName'),
       },
-      header: 'Full Name',
+      header: t('fullName'),
       cell: ({ row }) => {
         const e = row.original
-        return [e.firstNameEn, e.secondNameEn, e.thirdNameEn, e.familyNameEn]
-          .filter(Boolean)
-          .join(' ')
+        const name = isRtl
+          ? [e.firstNameAr, e.secondNameAr, e.thirdNameAr, e.familyNameAr]
+          : [e.firstNameEn, e.secondNameEn, e.thirdNameEn, e.familyNameEn]
+        return name.filter(Boolean).join(' ')
       },
     },
+
     {
-      accessorKey: 'departmentNameEn',
+      //accessorKey: 'departmentNameEn',
+      accessorFn: (row) =>
+        isRtl
+          ? (row.departmentNameAr ?? row.departmentNameEn)
+          : row.departmentNameEn,
       meta: {
-        label: 'Department',
+        label: t('department'),
       },
-      header: 'Department',
+      header: t('department'),
     },
+
     {
-      accessorKey: 'positionTitleEn',
+      //accessorKey: 'positionTitleEn',
+      accessorFn: (row) =>
+        isRtl
+          ? (row.positionTitleAr ?? row.positionTitleEn)
+          : row.positionTitleEn,
       meta: {
-        label: 'Position',
+        label: t('position'),
       },
-      header: 'Position',
+      header: t('position'),
     },
+
     {
       accessorKey: 'pcn',
       meta: {
-        label: 'PCN',
+        label: t('pcn'),
       },
-      header: 'PCN',
+      header: t('pcn'),
     },
+
     {
       accessorKey: 'categoryCode',
       meta: {
-        label: 'Category',
+        label: t('category'),
       },
-      header: 'Category',
+      header: t('category'),
       cell: ({ row }) => (
         <Badge variant='secondary'>
           {row.original.categoryCode !== null
@@ -94,13 +113,13 @@ export function employeeColumns(
         </Badge>
       ),
     },
+
     {
       accessorKey: 'gender',
       meta: {
-        label: 'Gender',
+        label: t('gender'),
       },
-      header: 'Gender',
-
+      header: t('gender'),
       cell: ({ row }) => {
         const gender = row.original.gender
 
@@ -111,44 +130,42 @@ export function employeeColumns(
 
         return (
           <Badge variant='outline' className={genderClass[gender] ?? ''}>
-            {gender.charAt(0).toUpperCase() + gender.slice(1)}
+            {gender === 'male' ? t('male') : t('female')}
           </Badge>
         )
       },
     },
+
     {
-      accessorKey: 'nationalityEn',
+      //accessorKey: 'nationalityEn',
+      accessorFn: (row) =>
+        isRtl ? (row.nationalityAr ?? row.nationalityEn) : row.nationalityEn,
       meta: {
-        label: 'Nationality',
+        label: t('nationality'),
       },
-      header: 'Nationality',
+      header: t('nationality'),
     },
+
     {
       accessorKey: 'hireDate',
       meta: {
-        label: 'Hire Date',
+        label: t('hireDate'),
       },
-      header: 'Hire Date',
-
-      cell: ({ row }) => {
-        return row.original.hireDate
+      header: t('hireDate'),
+      cell: ({ row }) =>
+        row.original.hireDate
           ? format(new Date(row.original.hireDate), 'dd-MMM-yyyy')
-          : '-'
-      },
+          : '-',
     },
+
     {
       accessorKey: 'employmentStatus',
       meta: {
-        label: 'Status',
+        label: t('status'),
       },
-      header: 'Status',
-
+      header: t('status'),
       cell: ({ row }) => {
         const status = row.original.employmentStatus
-
-        // if (!status) {
-        //   return <Badge variant='outline'>N/A</Badge>
-        // }
 
         const statusClass: Record<string, string> = {
           active: 'bg-green-100 text-green-700 border-green-200',

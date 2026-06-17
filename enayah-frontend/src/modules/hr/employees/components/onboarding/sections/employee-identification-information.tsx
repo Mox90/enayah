@@ -9,7 +9,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { HireEmployeePayload } from '@/modules/hr/onboarding/types/onboarding.types'
+import {
+  HireEmployeePayload,
+  IdentificationInput,
+} from '@/modules/hr/onboarding/types/onboarding.types'
 //import { HireEmployeePayload } from '../types/hire.types'
 
 interface Props {
@@ -20,7 +23,10 @@ interface Props {
 export function EmployeeIdentificationInformation({ value, onChange }: Props) {
   const identification = value.personal?.identifications?.[0]
 
-  function updateIdentification(field: string, fieldValue: any) {
+  function updateIdentification<K extends keyof IdentificationInput>(
+    field: K,
+    fieldValue: IdentificationInput[K],
+  ) {
     const nextIdentification = {
       type: identification?.type ?? 'iqama',
       identificationNumber: identification?.identificationNumber ?? '',
@@ -56,7 +62,9 @@ export function EmployeeIdentificationInformation({ value, onChange }: Props) {
           <Label>Identification Type</Label>
           <Select
             value={identification?.type ?? 'iqama'}
-            onValueChange={(v) => updateIdentification('type', v)}
+            onValueChange={(v) =>
+              updateIdentification('type', v as IdentificationInput['type'])
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder='Select type' />

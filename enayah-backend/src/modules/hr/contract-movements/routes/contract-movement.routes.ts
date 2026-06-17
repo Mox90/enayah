@@ -33,6 +33,9 @@ router.post(
 router.post(
   '/',
   requirePermission('employee.update'),
+  audit('CONTRACT_MOVEMENT_CREATE', {
+    resource: 'CONTRACT_MOVEMENT',
+  }),
   ContractMovementController.create,
 )
 
@@ -45,12 +48,20 @@ router.get(
 router.patch(
   '/:id',
   requirePermission('employee.update'),
+  audit('CONTRACT_MOVEMENT_UPDATE', {
+    resource: 'CONTRACT_MOVEMENT',
+    getResourceId: (req) => getParam(req.params.id),
+  }),
   ContractMovementController.update,
 )
 
 router.delete(
   '/:id',
   requirePermission('employee.update'),
+  audit('CONTRACT_MOVEMENT_DELETE', {
+    resource: 'CONTRACT_MOVEMENT',
+    getResourceId: (req) => getParam(req.params.id),
+  }),
   ContractMovementController.softDelete,
 )
 

@@ -54,43 +54,58 @@ function assertExists<T>(value: T | undefined, msg: string, status = 500): T {
 }
 
 export const PositionItemRepository = {
-  assignIfAvailable: async (id: string, tx = db) => {
-    const result = await tx
+  // assignIfAvailable: async (id: string, tx = db) => {
+  //   const result = await tx
+  //     .update(positionItems)
+  //     .set({ status: 'filled', updatedAt: new Date() }) // Update the status to 'filled' and set the updatedAt field
+  //     .where(
+  //       and(
+  //         eq(positionItems.id, id),
+  //         inArray(positionItems.status, ['vacant']), // or 'open'
+  //       ),
+  //     )
+  //     .returning()
+
+  //   if (result.length === 0) {
+  //     throw new AppError('Position item not available', 400)
+  //   }
+
+  //   return result[0]
+  // },
+
+  assignIfAvailable: async (tx: DB, id: string) => {
+    const [row] = await tx
       .update(positionItems)
-      .set({ status: 'filled', updatedAt: new Date() }) // Update the status to 'filled' and set the updatedAt field
+      .set({
+        status: 'filled',
+        updatedAt: new Date(),
+        version: sql`${positionItems.version} + 1`,
+      })
       .where(
         and(
           eq(positionItems.id, id),
-          inArray(positionItems.status, ['vacant']), // or 'open'
+          eq(positionItems.isDeleted, false),
+          isNull(positionItems.deletedAt),
+          eq(positionItems.status, 'vacant'),
         ),
       )
-      .returning()
+      .returning({
+        id: positionItems.id,
+        itemNumber: positionItems.itemNumber,
+        departmentId: positionItems.departmentId,
+        positionId: positionItems.positionId,
+        status: positionItems.status,
+        categoryCode: positionItems.categoryCode,
+        workforceCategory: positionItems.workforceCategory,
+      })
 
-    if (result.length === 0) {
-      throw new AppError('Position item not available', 400)
+    if (!row) {
+      throw new AppError('Position item is not available', 400)
     }
 
-    return result[0]
+    return row
   },
 
-  /*create: async (tx: DB, data: CreatePositionItemDTO) => {
-    const insertPayload = {
-      ...toPositionItemDB(data),
-      workforceCategory: data.workforceCategory,
-    }
-
-    const [row] = await tx
-      .insert(positionItems)
-      .values({
-        ...toPositionItemDB(data),
-        workforceCategory: data.workforceCategory,
-      })
-      .returning()
-
-    const created = assertExists(row, 'Failed to create position item')
-
-    return findByIdOrThrow(tx, created.id)
-  },*/
   create: async (tx: DB, data: CreatePositionItemDTO) => {
     const [row] = await tx
       .insert(positionItems)

@@ -12,8 +12,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { DepartmentCombobox } from '@/modules/hr/departments/components/department-combobox'
 import { HireEmployeePayload } from '@/modules/hr/onboarding/types/onboarding.types'
 import { PositionItemCombobox } from '@/modules/hr/positions-items/components/position-item-combobox'
+import { PositionCombobox } from '@/modules/hr/positions/components/position-combobox'
 
 interface Props {
   value: HireEmployeePayload
@@ -262,10 +264,20 @@ export function EmploymentContractAssignmentInformation({
 
                   appointment: {
                     ...(value.appointment ?? {}),
+
+                    // default from PCN, but user can override later
                     actualDepartmentId: item.departmentId,
                     actualPositionId: item.positionId,
+
+                    startDate:
+                      value.appointment?.startDate ??
+                      movement.startDate ??
+                      value.contract.startDate ??
+                      null,
+
                     appointmentType:
                       value.appointment?.appointmentType ?? 'primary',
+
                     assignmentReason:
                       value.appointment?.assignmentReason ??
                       'management_decision',
@@ -297,26 +309,24 @@ export function EmploymentContractAssignmentInformation({
 
         <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
           <div className='space-y-2'>
-            <Label>Actual Department ID</Label>
+            <Label>Actual Department</Label>
 
-            <Input
-              value={(appointment as any).actualDepartmentId ?? ''}
-              onChange={(e) =>
-                updateAppointment('actualDepartmentId', e.target.value || null)
+            <DepartmentCombobox
+              value={appointment.actualDepartmentId ?? null}
+              onChange={(department) =>
+                updateAppointment('actualDepartmentId', department.id)
               }
-              placeholder='optional'
             />
           </div>
 
           <div className='space-y-2'>
-            <Label>Actual Position ID</Label>
+            <Label>Actual Position</Label>
 
-            <Input
-              value={(appointment as any).actualPositionId ?? ''}
-              onChange={(e) =>
-                updateAppointment('actualPositionId', e.target.value || null)
+            <PositionCombobox
+              value={appointment.actualPositionId ?? null}
+              onChange={(position) =>
+                updateAppointment('actualPositionId', position.id)
               }
-              placeholder='optional'
             />
           </div>
 

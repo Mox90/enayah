@@ -1,3 +1,70 @@
+export type EmployeeEmailInput = {
+  type: 'work' | 'personal' | 'secondary' | 'other'
+  email: string
+  isPrimary: boolean
+  isVerified: boolean
+}
+
+export type EmployeePhoneInput = {
+  type: 'mobile' | 'work' | 'home' | 'fax' | 'other'
+  countryCode: string
+  phoneNumber: string
+  extension?: string | null
+  isPrimary: boolean
+  isWhatsapp: boolean
+}
+
+export type IdentificationInput = {
+  type: 'national_id' | 'iqama' | 'gcc_id' | 'passport' | 'other'
+  identificationNumber: string
+  issueDate?: string | null
+  expiryDate?: string | null
+  sponsor?: string | null
+  issuingAuthority?: string | null
+  occupation?: string | null
+  isCurrent: boolean
+  fileId?: string | null
+}
+
+export type DependentInput = {
+  firstNameEn: string
+  secondNameEn?: string | null
+  thirdNameEn?: string | null
+  familyNameEn: string
+
+  firstNameAr: string
+  secondNameAr?: string | null
+  thirdNameAr?: string | null
+  familyNameAr: string
+  relationship: 'spouse' | 'child' | 'father' | 'mother' | 'other'
+  gender: 'male' | 'female' | 'not_specified'
+}
+
+export type AddressInput = {
+  addressType: 'home' | 'mailing'
+  countryId?: string | null
+  district?: string | null
+  street?: string | null
+  building?: string | null
+  postalCode?: string | null
+  additionalNumber?: string | null
+}
+
+export type EmergencyContactInput = {
+  name: string
+  relationship?: string | null
+  mobile?: string | null
+  alternateMobile?: string | null
+  address?: string | null
+}
+
+export type VisaInput = {
+  visaNumber: string
+  visaType?: string | null
+  issueDate?: string | null
+  expiryDate?: string | null
+}
+
 export interface HireEmployeePayload {
   employee: {
     employeeNumber: string
@@ -15,13 +82,13 @@ export interface HireEmployeePayload {
   }
 
   personal?: {
-    identifications?: Record<string, unknown>[]
-    emails?: Record<string, unknown>[]
-    phoneNumbers?: Record<string, unknown>[]
-    dependents?: Record<string, unknown>[]
-    addresses?: Record<string, unknown>[]
-    emergencyContacts?: Record<string, unknown>[]
-    visas?: Record<string, unknown>[]
+    identifications?: IdentificationInput[]
+    emails?: EmployeeEmailInput[] //Record<string, unknown>[]
+    phoneNumbers?: EmployeePhoneInput[] //Record<string, unknown>[]
+    dependents?: DependentInput[]
+    addresses?: AddressInput[]
+    emergencyContacts?: EmergencyContactInput[]
+    visas?: VisaInput[]
   }
 
   employment: {

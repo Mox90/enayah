@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 import { useDepartments } from '../hooks/use-departments'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 interface Props {
   value: string[]
@@ -18,6 +18,7 @@ export function DepartmentLookup({ value, onChange }: Props) {
   const locale = useLocale()
   const [search, setSearch] = useState('')
   const isRtl = locale === 'ar' // Example check for RTL languages
+  const dt = useTranslations('departments')
 
   const { data } = useDepartments({
     page: 1,
@@ -36,7 +37,7 @@ export function DepartmentLookup({ value, onChange }: Props) {
   return (
     <div className='space-y-3'>
       <Input
-        placeholder='Search department...'
+        placeholder={dt('searchDepartment')}
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
@@ -50,7 +51,11 @@ export function DepartmentLookup({ value, onChange }: Props) {
                 onCheckedChange={() => toggle(department.id)}
               />
 
-              <span>{isRtl ? department.nameAr : department.nameEn}</span>
+              <span>
+                {isRtl
+                  ? (department.nameAr ?? department.nameEn)
+                  : department.nameEn}
+              </span>
             </div>
           ))}
         </div>
