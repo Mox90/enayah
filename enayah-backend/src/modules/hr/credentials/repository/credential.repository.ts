@@ -1,6 +1,6 @@
 // src/modules/hr/credentials/repository/credential.repository.ts
 
-import { and, eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
 import {
   DB,
@@ -47,9 +47,14 @@ type LifeSupportInsert = typeof employeeLifeSupportCertifications.$inferInsert
 type MalpracticeInsert = typeof employeeMalpracticeInsurance.$inferInsert
 
 async function findOneOrThrow(tx: DB, table: any, id: string, name: string) {
-  const row = await tx.query[table._.name].findFirst({
-    where: and(eq(table.id, id), eq(table.isDeleted, false)),
-  })
+  // const row = await tx.query[table._.name].findFirst({
+  //   where: and(eq(table.id, id), eq(table.isDeleted, false)),
+  // })
+  const [row] = await tx
+    .select()
+    .from(table)
+    .where(and(eq(table.id, id), eq(table.isDeleted, false)))
+    .limit(1)
 
   if (!row) throw new AppError(`${name} not found`, 404)
 
@@ -114,6 +119,21 @@ export const CredentialRepository = {
           eq(employeeDegrees.employeeId, employeeId),
           eq(employeeDegrees.isDeleted, false),
         ),
+        orderBy: (a, { desc }) => [
+          //desc(a.graduationDate),
+          sql`${a.graduationDate} DESC NULLS LAST`,
+          sql`
+            CASE ${a.degreeType} 
+              WHEN 'doctorate' THEN 1 
+              WHEN 'master' THEN 2 
+              WHEN 'bachelor' THEN 3 
+              WHEN 'diploma' THEN 4 
+              WHEN 'associate' THEN 5 
+              WHEN 'other' THEN 6 
+              ELSE 7 
+            END ASC
+          `,
+        ],
       }),
 
       tx.query.employeeBoards.findMany({
@@ -121,6 +141,10 @@ export const CredentialRepository = {
           eq(employeeBoards.employeeId, employeeId),
           eq(employeeBoards.isDeleted, false),
         ),
+        orderBy: (a, { desc }) => [
+          //desc(a.issueDate)
+          sql`${a.issueDate} DESC NULLS LAST`,
+        ],
       }),
 
       tx.query.employeeFellowships.findMany({
@@ -128,6 +152,7 @@ export const CredentialRepository = {
           eq(employeeFellowships.employeeId, employeeId),
           eq(employeeFellowships.isDeleted, false),
         ),
+        orderBy: (a) => [sql`${a.issueDate} DESC NULLS LAST`],
       }),
 
       tx.query.employeeMemberships.findMany({
@@ -135,6 +160,7 @@ export const CredentialRepository = {
           eq(employeeMemberships.employeeId, employeeId),
           eq(employeeMemberships.isDeleted, false),
         ),
+        orderBy: (a) => [sql`${a.startDate} DESC NULLS LAST`],
       }),
 
       tx.query.employeeLicenses.findMany({
@@ -142,6 +168,7 @@ export const CredentialRepository = {
           eq(employeeLicenses.employeeId, employeeId),
           eq(employeeLicenses.isDeleted, false),
         ),
+        orderBy: (a) => [sql`${a.issueDate} DESC NULLS LAST`],
       }),
 
       tx.query.employeeLifeSupportCertifications.findMany({
@@ -149,6 +176,14 @@ export const CredentialRepository = {
           eq(employeeLifeSupportCertifications.employeeId, employeeId),
           eq(employeeLifeSupportCertifications.isDeleted, false),
         ),
+        orderBy: (a) => [
+          sql`
+            CASE ${a.type}
+              WHEN 'bls' THEN 1
+              WHEN 'acls' THEN 2
+            END ASC
+          `,
+        ],
       }),
 
       tx.query.employeeMalpracticeInsurance.findMany({

@@ -304,6 +304,14 @@
     "permanent": "Permanent Transfer",
     "appointmentRemarks": "Appointment Remarks"
   },
+  "credentials": {
+    "createSuccess": "{name} has been created.",
+    "createError": "Unable to create {name}.",
+    "updateSuccess": "{name} has been updated.",
+    "updateError": "Unable to update {name}",
+    "deleteSuccess": "{name} has been deleted.",
+    "deleteError": "Unable to delete {name}."
+  },
   "payroll": {},
   "attendance": {},
   "recruitment": {},
