@@ -94,10 +94,11 @@ export type DegreeInput = {
 export type BoardInput = {
   id?: string
   boardName: string
-  issuingBody: string | null
+  issuingBody: string
   specialty: string | null
   issueDate: string | null
   expiryDate: string | null
+  isLifetime?: boolean | null
   isVerified: boolean
 }
 

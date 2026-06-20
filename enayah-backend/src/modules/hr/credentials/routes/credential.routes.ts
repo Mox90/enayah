@@ -19,6 +19,10 @@ router.get(
   CredentialController.findByEmployeeId,
 )
 
+// -----------------------------------------------
+// ALL CREATE
+// -----------------------------------------------
+
 router.post(
   '/employee/:employeeId',
   requirePermission('employee.credentials.update'),
@@ -67,6 +71,10 @@ router.post(
   CredentialController.createMalpractice,
 )
 
+// -----------------------------------------------
+// ALL EDIT/UPDATE
+// -----------------------------------------------
+
 router.patch(
   '/degrees/:id',
   requirePermission('employee.credentials.update'),
@@ -108,6 +116,10 @@ router.patch(
   requirePermission('employee.credentials.update'),
   CredentialController.updateMalpractice,
 )
+
+// -----------------------------------------------
+// ALL DELETE
+// -----------------------------------------------
 
 router.delete(
   '/degrees/:id',

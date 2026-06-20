@@ -95,7 +95,7 @@ function DegreeDialogContent({
       major: form.major || null,
       graduationDate: form.graduationDate || null,
     })
-
+    //console.log('DATA INPUT IS ', form)
     onOpenChange(false)
   }
 

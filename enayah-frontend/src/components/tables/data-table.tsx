@@ -28,7 +28,15 @@ import { DataTableEmpty } from './data-table-empty'
 import { DataTableSkeleton } from './data-table-skeleton'
 import { useLocale } from 'next-intl'
 
-interface DataTableProps<TData extends { id: string }, TValue> {
+interface DataTableSelectionProps {
+  rowSelection?: RowSelectionState
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>
+}
+
+interface DataTableProps<
+  TData extends { id: string },
+  TValue,
+> extends DataTableSelectionProps {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 
@@ -50,9 +58,7 @@ interface DataTableProps<TData extends { id: string }, TValue> {
   onSearchChange: (value: string) => void
 
   onSortChange: (sortBy: string, sortOrder: 'asc' | 'desc') => void
-  rowSelection: RowSelectionState
-
-  onRowSelectionChange: OnChangeFn<RowSelectionState>
+  // rowSelection and onRowSelectionChange are provided by DataTableSelectionProps
 }
 
 export function DataTable<TData extends { id: string }, TValue>({
@@ -76,6 +82,8 @@ export function DataTable<TData extends { id: string }, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
+  const [internalRowSelection, setInternalRowSelection] =
+    React.useState<RowSelectionState>({})
 
   //const [rowSelection, setRowSelection] = React.useState({})
 
@@ -93,7 +101,7 @@ export function DataTable<TData extends { id: string }, TValue>({
     state: {
       sorting,
       columnVisibility,
-      rowSelection: rowSelection ?? {},
+      rowSelection: rowSelection ?? internalRowSelection,
     },
     enableRowSelection: true,
     enableSortingRemoval: false,
@@ -109,9 +117,8 @@ export function DataTable<TData extends { id: string }, TValue>({
         onSortChange(newSorting[0].id, newSorting[0].desc ? 'desc' : 'asc')
       }
     },
-
     onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange,
+    onRowSelectionChange: onRowSelectionChange ?? setInternalRowSelection,
     getCoreRowModel: getCoreRowModel(),
   })
   const locale = useLocale()

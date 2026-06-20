@@ -70,20 +70,14 @@ export const AppointmentRepository = {
     return tx.query.appointments.findFirst({
       where: and(
         eq(appointments.employmentId, employmentId),
-
         eq(appointments.endDate, null as any),
-
         isActive,
       ),
-
       with: {
         department: true,
-
         position: true,
-
         manager: true,
       },
-
       orderBy: (a, { desc }) => [desc(a.startDate)],
     })
   },

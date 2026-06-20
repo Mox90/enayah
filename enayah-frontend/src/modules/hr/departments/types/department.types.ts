@@ -20,4 +20,10 @@ export interface PaginatedDepartments {
 
 export interface DepartmentListResponse {
   data: Department[]
+  meta: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
 }

@@ -305,6 +305,14 @@
     "permanent": "نقل دائم",
     "appointmentRemarks": "ملاحظات التعيين"
   },
+  "credentials": {
+    "createSuccess": "تم إنشاء {name}.",
+    "createError": "تعذر إنشاء {name}.",
+    "updateSuccess": "تم تحديث {name}.",
+    "updateError": "تعذر تحديث {name}.",
+    "deleteSuccess": "تم حذف {name}.",
+    "deleteError": "تعذر حذف {name}."
+  },
   "payroll": {},
   "attendance": {},
   "recruitment": {},

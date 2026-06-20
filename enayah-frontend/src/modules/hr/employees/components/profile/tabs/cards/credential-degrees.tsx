@@ -40,6 +40,15 @@ const degreeTypeLabel: Record<string, string> = {
   other: 'Other',
 }
 
+const degreeTypeColors: Record<string, string> = {
+  doctorate: 'bg-purple-100 text-purple-800 border-purple-200',
+  master: 'bg-blue-100 text-blue-800 border-blue-200',
+  bachelor: 'bg-green-100 text-green-800 border-green-200',
+  diploma: 'bg-amber-100 text-amber-800 border-amber-200',
+  associate: 'bg-orange-100 text-orange-800 border-orange-200',
+  other: 'bg-gray-100 text-gray-700 border-gray-200',
+}
+
 // const statusClass: Record<string, string> = {
 //   active: 'bg-green-100 text-green-700 border-green-200',
 //   on_leave: 'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -66,7 +75,9 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
         {degrees.length === 0 && (
           <div className='text-sm text-muted-foreground'>No Degree Records</div>
         )}
-
+        <div className='text-sm text-muted-foreground'>
+          Highest Educational Degree is arranged from most recent oldest
+        </div>
         {degrees.map((degree, index) => (
           <div
             key={degree.id ?? `${degree.degreeName}-${index}`}
@@ -95,6 +106,17 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
                   Type:{' '}
                   {degreeTypeLabel[degree.degreeType.replace('_', ' ') ?? ''] ??
                     degree.degreeType.replace('_', ' ')}
+                  {/* <span
+                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${
+                      degreeTypeColors[degree.degreeType] ??
+                      'bg-gray-100 text-gray-700 border-gray-200'
+                    }`}
+                  >
+                    Type:{' '}
+                    {degreeTypeLabel[
+                      degree.degreeType.replace('_', ' ') ?? ''
+                    ] ?? degree.degreeType.replace('_', ' ')}
+                  </span> */}
                 </div>
 
                 <VerificationBadge verified={degree.isVerified ?? false} />
