@@ -76,7 +76,7 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
           <div className='text-sm text-muted-foreground'>No Degree Records</div>
         )}
         <div className='text-sm text-muted-foreground'>
-          Highest Educational Degree is arranged from the most recent to the old
+          Highest Educational Degree is arranged from most recent oldest
         </div>
         {degrees.map((degree, index) => (
           <div
