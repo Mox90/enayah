@@ -155,7 +155,7 @@ function DegreeDialogContent({
           <Input
             value={form.institution}
             onChange={(e) => update('institution', e.target.value)}
-            placeholder='University Name'
+            placeholder='University Name (Please do not abbreviate)'
           />
         </div>
 

@@ -1,5 +1,3 @@
-// src/modules/hr/credentials/hooks/use-degree-mutations.ts
-
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   credentialDegreeService,

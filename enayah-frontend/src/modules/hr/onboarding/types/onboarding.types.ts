@@ -105,26 +105,23 @@ export type BoardInput = {
 export type FellowshipInput = {
   id?: string
   fellowshipName: string
-  fellowshipNumber?: string
-  abbreviation?: string
+  abbreviation?: string | null
   issuingBody: string
-  specialty?: string
-  //startDate?: string
-  issueDate?: string
-  expiryDate?: string
-  //status: string
+  specialty?: string | null
+  issueDate?: string | null
+  expiryDate?: string | null
+  documentFileId?: string | null
   isVerified: boolean
 }
 
 export type MembershipInput = {
   id?: string
   organization: string
-  membershipNumber?: string
-  membershipLevel?: string
-  startDate?: string
-  issueDate?: string
-  expiryDate?: string
-  status: string
+  membershipNumber?: string | null
+  membershipLevel?: string | null
+  startDate?: string | null
+  expiryDate?: string | null
+  documentFileId?: string | null
   isVerified: boolean
 }
 
@@ -133,31 +130,49 @@ export type LicenseInput = {
   authority: string
   licenseNumber: string
   profession: string
-  specialty?: string
-  issueDate?: string
-  expiryDate?: string
-  status: string
-  isVerified: boolean
+  specialty?: string | null
+  issueDate?: string | null
+  expiryDate: string
+  status: 'active' | 'expired' | 'suspended' | 'revoked'
+  isPrimary: boolean
 }
 
 export type LifeSupportInput = {
   id?: string
-  type: string
+  type:
+    | 'bls'
+    | 'acls'
+    | 'pals'
+    | 'atls'
+    | 'stls'
+    | 'nrp'
+    | 'itls'
+    | 'blso'
+    | 'atcn'
+    | 'also'
+    | 'tncc'
+    | 'enpc'
+    | 'asls'
+    | 'esls'
+    | 'pfccs'
+    | 'other'
   provider: string
-  certificateNumber: string | null
-  issueDate: string | null
-  expiryDate: string | null
-  isVerified: boolean
+  certificateNumber?: string | null
+  issueDate?: string | null
+  expiryDate: string
+  isVerified?: boolean
+  documentFileId?: string | null
 }
 
 export type MalpracticeInput = {
   id?: string
   insuranceCompany: string
   policyNumber: string
-  coverageAmount: string | number | null
-  startDate: string | null
-  expiryDate: string | null
-  isVerified: boolean
+  coverageAmount?: string | number | null
+  startDate?: string | null
+  expiryDate?: string | null
+  documentFileId?: string | null
+  isVerified?: boolean
 }
 
 export type EmployeeCredentialsResponse = {

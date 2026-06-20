@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { MoreHorizontal, MoreVertical } from 'lucide-react'
+import { MoreHorizontal, MoreVertical, Plus } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -45,11 +45,10 @@ export function CredentialMalpractice({
       <CardHeader className='flex flex-row items-center justify-between'>
         <CardTitle>🛡️ Malpractice Insurance ({malpractice.length})</CardTitle>
 
-        {onAdd && (
-          <Button size='sm' onClick={onAdd}>
-            Add
-          </Button>
-        )}
+        <Button size='sm' onClick={onAdd}>
+          <Plus className='mr-2 h-4 w-4' />
+          Add Malpractice
+        </Button>
       </CardHeader>
 
       <CardContent className='space-y-4'>
@@ -87,7 +86,7 @@ export function CredentialMalpractice({
                   </div>
                 )}
 
-                <VerificationBadge verified={x.isVerified} />
+                <VerificationBadge verified={x.isVerified ?? false} />
               </div>
 
               <div className='flex flex-col items-end gap-2'>

@@ -82,6 +82,7 @@ export const lifeSupportTypeEnum = pgEnum('life_support_type', [
   'acls', // Advanced Cardiovascular Life Support
   'pals', // Pediatric Advanced Life Support
   'atls', // Advanced Trauma Life Support
+  'stls', // Saudi Trauma Life Support
   'nrp', // Neonatal Resuscitation Program
   'itls', // International Trauma Life Support
   'blso', // Basic Life Support in Obstetrics
