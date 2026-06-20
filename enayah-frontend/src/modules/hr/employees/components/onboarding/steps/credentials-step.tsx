@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  BoardInput,
   DegreeInput,
   HireEmployeePayload,
 } from '@/modules/hr/onboarding/types/onboarding.types'
@@ -17,6 +18,7 @@ import {
 } from '@/components/dialogs/degree-dialog'
 import { useState } from 'react'
 import { ValueOf } from 'next/constants'
+import { BoardDialog, BoardFormValue } from '@/components/dialogs/board-dialog'
 
 // import { CredentialDegrees } from '@/modules/hr/credentials/components/cards/credential-degrees'
 // import { CredentialBoards } from '@/modules/hr/credentials/components/cards/credential-boards'
@@ -32,14 +34,26 @@ interface Props {
 }
 
 export function CredentialsStep({ value, onChange }: Props) {
-  const [degreeDialogOpen, setDegreeDialogOpen] = useState(false)
+  //const [degreeDialogOpen, setDegreeDialogOpen] = useState(false)
+  const [activeDialog, setActiveDialog] = useState<
+    | 'degree'
+    | 'board'
+    | 'license'
+    | 'fellowship'
+    | 'membership'
+    | 'life_support'
+    | 'malpractice'
+    | null
+  >(null)
 
   const [editingDegree, setEditingDegree] = useState<DegreeFormValue | null>(
     null,
   )
+  const [editingBoard, setEditingBoard] = useState<BoardFormValue | null>(null)
 
   //const degrees = value.credentials?.degrees ?? []
   const degrees = value.credentials?.degrees ?? []
+  const boards = value.credentials?.boards ?? []
 
   function saveDegree(degree: DegreeFormValue) {
     const exists = degrees.some((item: DegreeInput) => item.id === degree.id)
@@ -69,13 +83,40 @@ export function CredentialsStep({ value, onChange }: Props) {
     })
   }
 
+  function saveBoard(board: BoardFormValue) {
+    const exists = boards.some((item: BoardInput) => item.id === board.id)
+
+    const nextBoards = exists
+      ? boards.map((item: BoardInput) => (item.id === board.id ? board : item))
+      : [...boards, board]
+
+    onChange({
+      ...value,
+      credentials: {
+        ...(value.credentials ?? {}),
+        boards: nextBoards,
+      },
+    })
+  }
+
+  function deleteBoard(id: string) {
+    onChange({
+      ...value,
+      credentials: {
+        ...(value.credentials ?? {}),
+        boards: boards.filter((item: BoardInput) => item.id !== id),
+      },
+    })
+  }
+
   return (
     <div className='space-y-6'>
       <CredentialDegrees
         degrees={degrees}
         onAdd={() => {
           setEditingDegree(null)
-          setDegreeDialogOpen(true)
+          //setDegreeDialogOpen(true)
+          setActiveDialog('degree')
         }}
         onEdit={(id) => {
           //const degree = degrees.find((item: DegreeInput) => item.id === id)
@@ -90,22 +131,57 @@ export function CredentialsStep({ value, onChange }: Props) {
             graduationDate: degree.graduationDate,
             isVerified: degree.isVerified,
           })
-          setDegreeDialogOpen(true)
+          //setDegreeDialogOpen(true)
+          setActiveDialog('degree')
         }}
         onDelete={deleteDegree}
       />
 
       <DegreeDialog
-        open={degreeDialogOpen}
-        onOpenChange={setDegreeDialogOpen}
+        open={activeDialog === 'degree'}
+        onOpenChange={(open) => {
+          if (!open) setActiveDialog(null)
+        }}
         initialValue={editingDegree}
         onSubmit={saveDegree}
         generateId={true}
       />
 
-      {/* <CredentialBoards boards={credentials.boards ?? []} />
+      <CredentialBoards
+        boards={boards}
+        onAdd={() => {
+          setEditingBoard(null)
+          setActiveDialog('board')
+        }}
+        onEdit={(id) => {
+          const board = boards.find((item) => item.id === id)
+          if (!board) return
+          setEditingBoard({
+            id: board.id,
+            boardName: board.boardName,
+            specialty: board.specialty ?? null,
+            issuingBody: board.issuingBody,
+            issueDate: board.issueDate ?? null,
+            expiryDate: board.expiryDate ?? null,
+            isLifetime: board.isLifetime ?? false,
+            isVerified: board.isVerified ?? false,
+          })
+          setActiveDialog('board')
+        }}
+        onDelete={deleteBoard}
+      />
 
-      <CredentialLicenses licenses={credentials.licenses ?? []} />
+      <BoardDialog
+        open={activeDialog === 'board'}
+        onOpenChange={(open) => {
+          if (!open) setActiveDialog(null)
+        }}
+        initialValue={editingBoard}
+        onSubmit={saveBoard}
+        generateId={true}
+      />
+
+      {/* <CredentialLicenses licenses={credentials.licenses ?? []} />
 
       <CredentialFellowships fellowships={credentials.fellowships ?? []} />
 

@@ -26,7 +26,7 @@ export type BoardFormValue = {
   issueDate?: string | null
   expiryDate?: string | null
   isLifetime?: boolean | null
-  isVerified?: boolean | false
+  isVerified?: boolean
 }
 
 interface Props {
