@@ -9,10 +9,16 @@ export type CreateBoardPayload = {
   issueDate?: string | null
   expiryDate?: string | null
   isLifetime?: boolean
-  isVerified?: boolean | false
+  isVerified?: boolean
 }
 
-export type UpdateBoardPayload = Partial<CreateBoardPayload> & {
+// export type UpdateBoardPayload = Partial<CreateBoardPayload> & {
+//   id: string
+// }
+export type UpdateBoardPayload = Omit<
+  Partial<CreateBoardPayload>,
+  'employeeId'
+> & {
   id: string
 }
 

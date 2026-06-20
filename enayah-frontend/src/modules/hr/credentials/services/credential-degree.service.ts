@@ -19,7 +19,10 @@ export type CreateDegreePayload = {
   isVerified?: boolean
 }
 
-export type UpdateDegreePayload = Partial<CreateDegreePayload> & {
+export type UpdateDegreePayload = Omit<
+  Partial<CreateDegreePayload>,
+  'employeeId'
+> & {
   id: string
 }
 

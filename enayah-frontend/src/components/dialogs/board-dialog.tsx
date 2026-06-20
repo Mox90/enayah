@@ -59,6 +59,7 @@ function BoardDialogContent({
   generateId: boolean
 }) {
   const [form, setForm] = useState<BoardFormValue>(initialValue ?? emptyValue)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   function update<K extends keyof BoardFormValue>(
     field: K,
@@ -79,18 +80,26 @@ function BoardDialogContent({
   }
 
   async function handleSubmit() {
+    if (isSubmitting) return
     if (!form.boardName.trim()) return
     if (!form.issuingBody.trim()) return
 
-    await onSubmit({
-      ...form,
-      id: form.id ?? (generateId ? createClientId() : undefined),
-      specialty: form.specialty || null,
-      issueDate: form.issueDate || null,
-      expiryDate: form.expiryDate || null,
-    })
+    setIsSubmitting(true)
+    try {
+      await onSubmit({
+        ...form,
+        id: form.id ?? (generateId ? createClientId() : undefined),
+        specialty: form.specialty || null,
+        issueDate: form.issueDate || null,
+        expiryDate: form.expiryDate || null,
+      })
 
-    onOpenChange(false)
+      onOpenChange(false)
+    } catch (error) {
+      // keep dialog open; upstream mutation hook can surface toast/error UI
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -158,7 +167,7 @@ function BoardDialogContent({
           Cancel
         </Button>
 
-        <Button type='button' onClick={handleSubmit}>
+        <Button type='button' onClick={handleSubmit} disabled={isSubmitting}>
           Save Board
         </Button>
       </DialogFooter>

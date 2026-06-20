@@ -28,7 +28,15 @@ import { DataTableEmpty } from './data-table-empty'
 import { DataTableSkeleton } from './data-table-skeleton'
 import { useLocale } from 'next-intl'
 
-interface DataTableProps<TData extends { id: string }, TValue> {
+interface DataTableSelectionProps {
+  rowSelection?: RowSelectionState
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>
+}
+
+interface DataTableProps<
+  TData extends { id: string },
+  TValue,
+> extends DataTableSelectionProps {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 
@@ -50,9 +58,7 @@ interface DataTableProps<TData extends { id: string }, TValue> {
   onSearchChange: (value: string) => void
 
   onSortChange: (sortBy: string, sortOrder: 'asc' | 'desc') => void
-  rowSelection?: RowSelectionState
-
-  onRowSelectionChange?: OnChangeFn<RowSelectionState>
+  // rowSelection and onRowSelectionChange are provided by DataTableSelectionProps
 }
 
 export function DataTable<TData extends { id: string }, TValue>({
