@@ -20,10 +20,10 @@ export function useCreateLifeSupport(employeeId: string) {
       queryClient.invalidateQueries({
         queryKey: ['employee-credentials', employeeId],
       })
-      toast.success(t.rich('createSuccess', { name: 'License' }))
+      toast.success(t.rich('createSuccess', { name: 'Life Support' }))
     },
     onError: () => {
-      toast.error(t.rich('createError', { name: 'license' }))
+      toast.error(t.rich('createError', { name: 'life support' }))
     },
   })
 }

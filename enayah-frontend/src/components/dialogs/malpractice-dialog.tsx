@@ -83,7 +83,13 @@ function MalpracticeDialogContent({
     await onSubmit({
       ...form,
       id: form.id ?? (generateId ? createClientId() : undefined),
-      coverageAmount: form.coverageAmount || null,
+      //coverageAmount: form.coverageAmount || null,
+      coverageAmount:
+        form.coverageAmount === '' ||
+        form.coverageAmount === null ||
+        form.coverageAmount === undefined
+          ? null
+          : form.coverageAmount,
       startDate: form.startDate || null,
       expiryDate: form.expiryDate || null,
       documentFileId: form.documentFileId || null,

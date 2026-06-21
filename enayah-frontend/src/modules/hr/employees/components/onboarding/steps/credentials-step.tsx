@@ -360,7 +360,7 @@ export function CredentialsStep({ value, onChange }: Props) {
       <CredentialLicenses
         licenses={licenses}
         onAdd={() => {
-          setEditingBoard(null)
+          setEditingLicense(null)
           setActiveDialog('license')
         }}
         onEdit={(id) => {
@@ -446,7 +446,7 @@ export function CredentialsStep({ value, onChange }: Props) {
             membershipLevel: membership.membershipLevel ?? null,
             startDate: membership.startDate ?? null,
             expiryDate: membership.expiryDate ?? null,
-            //documentFileId: membership.documentFileId ?? null,
+            documentFileId: membership.documentFileId ?? null,
             isVerified: membership.isVerified ?? false,
           })
 

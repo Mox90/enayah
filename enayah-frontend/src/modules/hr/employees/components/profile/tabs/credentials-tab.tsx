@@ -274,7 +274,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
       <CredentialLicenses
         licenses={data?.licenses ?? []}
         onAdd={() => {
-          setEditingBoard(null)
+          setEditingLicense(null)
           //setOpen(true)
           setActiveDialog('license')
         }}
@@ -336,7 +336,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
       <CredentialFellowships
         fellowships={data?.fellowships ?? []}
         onAdd={() => {
-          setEditingBoard(null)
+          setEditingFellowship(null)
           //setOpen(true)
           setActiveDialog('fellowship')
         }}
@@ -352,7 +352,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
             specialty: fellowship.specialty ?? null,
             issueDate: fellowship.issueDate ?? null,
             expiryDate: fellowship.expiryDate ?? null,
-            //documentFileId: fellowship.documentFileId ?? null,
+            documentFileId: fellowship.documentFileId ?? null,
             isVerified: fellowship.isVerified ?? false,
           })
 

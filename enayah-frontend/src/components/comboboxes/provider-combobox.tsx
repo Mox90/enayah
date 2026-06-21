@@ -42,14 +42,20 @@ export function ProviderCombobox({ value, options, onChange }: Props) {
       option.value.toLowerCase().includes(search.toLowerCase()),
   )
 
+  const normalizedSearch = search.trim().toLowerCase()
+
   const canAddCustom =
-    search.trim() &&
+    //search.trim() &&
+    normalizedSearch &&
     !options.some(
       (option) =>
-        option.value.toLowerCase() === search.toLowerCase() ||
-        option.label.toLowerCase() === search.toLowerCase(),
+        // option.value.toLowerCase() === search.toLowerCase() ||
+        // option.label.toLowerCase() === search.toLowerCase(),
+        option.value.trim().toLowerCase() === normalizedSearch ||
+        option.label.trim().toLowerCase() === normalizedSearch,
     ) &&
-    value.toLowerCase() !== search.toLowerCase()
+    //value.toLowerCase() !== search.toLowerCase()
+    value.trim().toLowerCase() !== normalizedSearch
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

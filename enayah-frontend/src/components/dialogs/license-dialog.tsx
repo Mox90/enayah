@@ -87,6 +87,7 @@ function LicenseDialogContent({
     if (!form.authority.trim()) return
     if (!form.licenseNumber.trim()) return
     if (!form.profession.trim()) return
+    if (!form.issueDate?.trim()) return
     if (!form.expiryDate.trim()) return
 
     await onSubmit({
@@ -95,14 +96,16 @@ function LicenseDialogContent({
       specialty: form.specialty || null,
       issueDate: form.issueDate || null,
     })
-    //console.log('DATA INPUT IS ', form)
+
     onOpenChange(false)
   }
 
   return (
     <DialogContent className='max-w-2xl'>
       <DialogHeader>
-        <DialogTitle>{initialValue ? 'Edit Degree' : 'Add Degree'}</DialogTitle>
+        <DialogTitle>
+          {initialValue ? 'Edit License' : 'Add License'}
+        </DialogTitle>
         <DialogDescription>
           Enter the employee&apos;s obtained license details.
         </DialogDescription>
@@ -163,6 +166,35 @@ function LicenseDialogContent({
             onChange={(e) => update('expiryDate', e.target.value)}
           />
         </div>
+
+        {/* <div className='space-y-2'>
+          <Label>Status *</Label>
+          <Select
+            value={form.status}
+            onValueChange={(v) =>
+              update('status', v as LicenseFormValue['status'])
+            }
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='active'>Active</SelectItem>
+              <SelectItem value='expired'>Expired</SelectItem>
+              <SelectItem value='suspended'>Suspended</SelectItem>
+              <SelectItem value='revoked'>Revoked</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className='space-y-2'>
+          <Label>Primary License</Label>
+          <input
+            type='checkbox'
+            checked={form.isPrimary}
+            onChange={(e) => update('isPrimary', e.target.checked)}
+          />
+        </div> */}
       </div>
 
       <DialogFooter>
@@ -175,7 +207,7 @@ function LicenseDialogContent({
         </Button>
 
         <Button type='button' onClick={handleSubmit}>
-          Save Degree
+          Save License
         </Button>
       </DialogFooter>
     </DialogContent>
