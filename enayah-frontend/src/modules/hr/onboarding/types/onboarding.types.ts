@@ -199,6 +199,8 @@ export interface HireEmployeePayload {
     gender: 'male' | 'female'
     dateOfBirth?: string | null
     countryId?: string | null
+    countryNameEn?: string | null
+    countryNameAr?: string | null
   }
 
   personal?: {
@@ -237,6 +239,7 @@ export interface HireEmployeePayload {
 
   movement: {
     positionItemId: string
+    itemNumber?: string | null
 
     startDate?: string
     endDate: string | null

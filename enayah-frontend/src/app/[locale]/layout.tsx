@@ -82,7 +82,7 @@ export default async function LocaleLayout({
           <QueryProvider>
             <ThemeProvider>
               <AuthProvider>{children}</AuthProvider>
-              <Toaster richColors />
+              <Toaster richColors duration={10000} />
             </ThemeProvider>
           </QueryProvider>
         </NextIntlClientProvider>

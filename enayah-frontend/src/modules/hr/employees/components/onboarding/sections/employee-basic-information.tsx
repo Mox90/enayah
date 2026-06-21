@@ -22,6 +22,9 @@ interface Props {
   personalErrors: PersonalErrors
 }
 
+type Employee = HireEmployeePayload['employee']
+type EmployeeGender = Employee['gender'] //HireEmployeePayload['employee']['gender']
+
 export function EmployeeBasicInformation({
   value,
   onChange,
@@ -30,7 +33,10 @@ export function EmployeeBasicInformation({
   const employee = value.employee
   const et = useTranslations('employees')
 
-  function updateEmployee(field: keyof typeof employee, fieldValue: any) {
+  function updateEmployee<K extends keyof Employee>(
+    field: K,
+    fieldValue: Employee[K],
+  ) {
     onChange({
       ...value,
       employee: {
@@ -67,9 +73,23 @@ export function EmployeeBasicInformation({
 
         <div className='space-y-2'>
           <Label>{et('nationality')}</Label>
-          <CountryCombobox
+          {/* <CountryCombobox
             value={employee.countryId}
             onChange={(id) => updateEmployee('countryId', id)}
+          /> */}
+          <CountryCombobox
+            value={employee.countryId}
+            onChange={(country) => {
+              onChange({
+                ...value,
+                employee: {
+                  ...employee,
+                  countryId: country.id,
+                  countryNameEn: country.name,
+                  countryNameAr: country.nameAr,
+                },
+              })
+            }}
           />
         </div>
 
@@ -181,7 +201,7 @@ export function EmployeeBasicInformation({
           <Label>{et('gender')}</Label>
           <Select
             value={employee.gender}
-            onValueChange={(v) => updateEmployee('gender', v)}
+            onValueChange={(v) => updateEmployee('gender', v as EmployeeGender)}
           >
             <SelectTrigger>
               <SelectValue placeholder='Select gender' />

@@ -22,10 +22,11 @@ import {
 
 import { useCountries } from '../hooks/use-countries'
 import { useLocale, useTranslations } from 'next-intl'
+import { CountryLookupItem } from '../services/countries.service'
 
 interface Props {
   value?: string | null
-  onChange: (id: string) => void
+  onChange: (country: CountryLookupItem) => void
 }
 
 export function CountryCombobox({ value, onChange }: Props) {
@@ -78,7 +79,7 @@ export function CountryCombobox({ value, onChange }: Props) {
                       : `${country.name} ${country.nationalityEn}`
                   }
                   onSelect={() => {
-                    onChange(country.id)
+                    onChange(country)
                     setOpen(false)
                   }}
                 >

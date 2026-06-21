@@ -9,9 +9,14 @@ import { PersonalErrors } from '@/modules/hr/onboarding/types/onboarding-errors.
 import { EmploymentStep } from './steps/employment-step'
 import { ContractStep } from './steps/contract-step'
 import { EmploymentContractAssignmentStep } from './steps/employment-contract-assignment-step'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { CompensationStep } from './steps/compensation-step'
 import { CredentialsStep } from './steps/credentials-step'
+import { ReviewStep } from './steps/review-step'
+import { useRouter } from '../../../../../../i18n/navigation'
+import { useOnboardEmployee } from '@/modules/hr/onboarding/hooks/use-onboarding'
+import { toast } from 'sonner'
+import { AxiosError } from 'axios'
 
 type Step =
   | 'personal'
@@ -41,6 +46,9 @@ export function OnboardingForm({ onCancel }: Props) {
   const t = useTranslations('employees')
   const ct = useTranslations('common')
   const et = useTranslations('errors')
+  const router = useRouter()
+  const locale = useLocale()
+  const onboardMutation = useOnboardEmployee()
 
   const steps: { key: Step; label: string }[] = [
     { key: 'personal', label: t('personal') },
@@ -66,6 +74,8 @@ export function OnboardingForm({ onCancel }: Props) {
       gender: 'male',
       dateOfBirth: null,
       countryId: null,
+      countryNameEn: '',
+      countryNameAr: '',
     },
 
     personal: {
@@ -99,6 +109,7 @@ export function OnboardingForm({ onCancel }: Props) {
 
     movement: {
       positionItemId: '',
+      itemNumber: null,
       startDate: '',
       remarks: '',
       officialDepartmentId: '',
@@ -208,6 +219,85 @@ export function OnboardingForm({ onCancel }: Props) {
 
   async function handleSubmit() {
     // TODO: Call onboarding mutation with hire payload
+    const { contractNumber, ...contractWithoutNumber } = onboard.contract
+
+    const payload: HireEmployeePayload = {
+      ...onboard,
+
+      contract: contractNumber ? onboard.contract : contractWithoutNumber,
+
+      employee: {
+        ...onboard.employee,
+        countryNameEn: undefined,
+        countryNameAr: undefined,
+      },
+
+      movement: {
+        ...onboard.movement,
+        itemNumber: undefined,
+        officialDepartmentId: onboard.movement.officialDepartmentId || '',
+        officialPositionId: onboard.movement.officialPositionId || '',
+        sequenceNumber: onboard.movement.sequenceNumber || '',
+      },
+
+      appointment: onboard.appointment
+        ? {
+            ...onboard.appointment,
+            actualDepartmentNameEn: undefined,
+            actualDepartmentNameAr: undefined,
+            actualPositionTitleEn: undefined,
+            actualPositionTitleAr: undefined,
+          }
+        : undefined,
+
+      credentials: {
+        degrees:
+          onboard.credentials?.degrees?.map(({ id, ...degree }) => degree) ??
+          [],
+
+        boards:
+          onboard.credentials?.boards?.map(({ id, ...board }) => board) ?? [],
+
+        fellowships:
+          onboard.credentials?.fellowships?.map(
+            ({ id, ...fellowship }) => fellowship,
+          ) ?? [],
+
+        memberships:
+          onboard.credentials?.memberships?.map(
+            ({ id, ...membership }) => membership,
+          ) ?? [],
+
+        licenses:
+          onboard.credentials?.licenses?.map(({ id, ...license }) => license) ??
+          [],
+
+        lifeSupport:
+          onboard.credentials?.lifeSupport?.map(
+            ({ id, ...lifeSupport }) => lifeSupport,
+          ) ?? [],
+
+        malpractice:
+          onboard.credentials?.malpractice?.map(
+            ({ id, ...malpractice }) => malpractice,
+          ) ?? [],
+      },
+    }
+    onboardMutation.mutate(payload, {
+      onSuccess: (result) => {
+        toast.success('Employee onboarded successfully')
+
+        router.push(`/employees/${result.employee.id}/profile`)
+      },
+
+      onError: (error) => {
+        const axiosError = error as AxiosError<{ message?: string }>
+        //toast.error('Failed to onboard employee')
+        toast.error(
+          axiosError.response?.data?.message ?? 'Failed to onboard employee',
+        )
+      },
+    })
     // const result = await submitOnboarding(hire)
     // if (result.success) onCancel()
     // const payload = {
@@ -399,9 +489,10 @@ export function OnboardingForm({ onCancel }: Props) {
           )}
 
           {currentStep === 'review' && (
-            <div className='text-sm text-muted-foreground'>
-              Review and submit form will be here.
-            </div>
+            // <div className='text-sm text-muted-foreground'>
+            //   Review and submit form will be here.
+            // </div>
+            <ReviewStep value={onboard} />
           )}
         </CardContent>
       </Card>
@@ -412,8 +503,12 @@ export function OnboardingForm({ onCancel }: Props) {
         </Button>
 
         {isLast ? (
-          <Button type='button' onClick={handleSubmit}>
-            Submit Onboarding
+          <Button
+            type='button'
+            onClick={handleSubmit}
+            disabled={onboardMutation.isPending}
+          >
+            {onboardMutation.isPending ? 'Submitting...' : 'Submit Onboarding'}
           </Button>
         ) : (
           <Button type='button' onClick={goNext}>

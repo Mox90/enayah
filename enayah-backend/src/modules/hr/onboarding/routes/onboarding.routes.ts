@@ -1,12 +1,16 @@
 import { Router } from 'express'
 //import { HiringController } from '../controller/onboarding.controller'
 import { requireAuth } from '../../../../core/middleware/auth.middleware'
-import { requirePermission } from '../../../../core/middleware/permission.middleware'
+import {
+  attachPermissions,
+  requirePermission,
+} from '../../../../core/middleware/permission.middleware'
 import { audit } from '../../../../core/middleware/audit.middleware'
 import { OnboardingController } from '../controller/onboarding.controller'
 
 const router = Router()
 router.use(requireAuth)
+router.use(attachPermissions)
 
 router.get('/', (req, res) => {
   //console.log('Testing onboarding routes...')
