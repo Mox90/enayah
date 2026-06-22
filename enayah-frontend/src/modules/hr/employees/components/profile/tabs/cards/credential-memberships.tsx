@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { MembershipInput } from '@/modules/hr/onboarding/types/onboarding.types'
+import { VerificationBadge } from '@/components/badges/verification-badge'
 
 const verifyClass = {
   verified: 'bg-green-100 text-green-700 border-green-200',
@@ -74,9 +75,9 @@ export function CredentialMemberships({
 
                 {/* {x.specialty && <div>Specialty: {x.specialty}</div>} */}
 
-                {x.issueDate && (
+                {x.startDate && (
                   <div>
-                    Issued: {format(new Date(x.issueDate), 'dd-MMM-yyyy')}
+                    Issued: {format(new Date(x.startDate), 'dd-MMM-yyyy')}
                   </div>
                 )}
 
@@ -85,19 +86,12 @@ export function CredentialMemberships({
                     Expiry: {format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
                   </div>
                 )}
+
+                <VerificationBadge verified={x.isVerified ?? false} />
               </div>
 
               <div className='flex flex-col gap-2'>
-                <Badge
-                  variant='outline'
-                  className={
-                    x.isVerified ? verifyClass.verified : verifyClass.unverified
-                  }
-                >
-                  {x.isVerified ? 'Verified' : 'Unverified'}
-                </Badge>
-
-                <Badge>{x.status}</Badge>
+                {/* <Badge>{x.status}</Badge> */}
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

@@ -62,7 +62,7 @@ export function CredentialFellowships({
 
         {fellowships.map((x, index) => (
           <div
-            key={x.id ?? `${x.fellowshipNumber}-${index}`}
+            key={x.id ?? `${x.fellowshipName}-${index}`}
             className='border rounded-lg p-4'
           >
             <div className='flex justify-between'>
@@ -87,7 +87,7 @@ export function CredentialFellowships({
                   </div>
                 )}
 
-                <VerificationBadge verified={x.isVerified} />
+                <VerificationBadge verified={x.isVerified ?? false} />
                 {/* <Badge>{x.status}</Badge> */}
               </div>
 

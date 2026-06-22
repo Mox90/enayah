@@ -1,4 +1,8 @@
+'use client'
+
 import { useState } from 'react'
+
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -6,64 +10,59 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog'
-import { Label } from '../ui/label'
-import { Input } from '../ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select'
-import { Button } from '../ui/button'
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
-export type BoardFormValue = {
+export type FellowshipFormValue = {
   id?: string
-  boardName: string
-  specialty?: string | null
+  fellowshipName: string
+  abbreviation?: string | null
   issuingBody: string
+  specialty?: string | null
   issueDate?: string | null
   expiryDate?: string | null
-  isLifetime?: boolean | null
-  isVerified?: boolean
+  documentFileId?: string | null
+  isVerified: boolean
 }
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
-  initialValue?: BoardFormValue | null
-  onSubmit: (value: BoardFormValue) => void | Promise<void>
+  initialValue?: FellowshipFormValue | null
+  onSubmit: (value: FellowshipFormValue) => void | Promise<void>
   generateId?: boolean
 }
 
-const emptyValue: BoardFormValue = {
-  boardName: '',
-  specialty: null,
+const emptyValue: FellowshipFormValue = {
+  fellowshipName: '',
+  abbreviation: null,
   issuingBody: '',
+  specialty: null,
   issueDate: null,
   expiryDate: null,
-  isLifetime: false,
+  documentFileId: null,
   isVerified: false,
 }
 
-function BoardDialogContent({
+function FellowshipDialogContent({
   initialValue,
   onOpenChange,
   onSubmit,
   generateId,
 }: {
-  initialValue?: BoardFormValue | null
+  initialValue?: FellowshipFormValue | null
   onOpenChange: (open: boolean) => void
-  onSubmit: (value: BoardFormValue) => void | Promise<void>
+  onSubmit: (value: FellowshipFormValue) => void | Promise<void>
   generateId: boolean
 }) {
-  const [form, setForm] = useState<BoardFormValue>(initialValue ?? emptyValue)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [form, setForm] = useState<FellowshipFormValue>(
+    initialValue ?? emptyValue,
+  )
 
-  function update<K extends keyof BoardFormValue>(
+  function update<K extends keyof FellowshipFormValue>(
     field: K,
-    value: BoardFormValue[K],
+    value: FellowshipFormValue[K],
   ) {
     setForm((prev) => ({
       ...prev,
@@ -76,57 +75,54 @@ function BoardDialogContent({
       return crypto.randomUUID()
     }
 
-    return `board-${Date.now()}-${Math.random().toString(36).slice(2)}`
+    return `fellowship-${Date.now()}-${Math.random().toString(36).slice(2)}`
   }
 
   async function handleSubmit() {
-    if (isSubmitting) return
-    if (!form.boardName.trim()) return
+    if (!form.fellowshipName.trim()) return
     if (!form.issuingBody.trim()) return
 
-    setIsSubmitting(true)
-    try {
-      await onSubmit({
-        ...form,
-        id: form.id ?? (generateId ? createClientId() : undefined),
-        specialty: form.specialty || null,
-        issueDate: form.issueDate || null,
-        expiryDate: form.expiryDate || null,
-      })
+    await onSubmit({
+      ...form,
+      id: form.id ?? (generateId ? createClientId() : undefined),
+      abbreviation: form.abbreviation || null,
+      specialty: form.specialty || null,
+      issueDate: form.issueDate || null,
+      expiryDate: form.expiryDate || null,
+      documentFileId: form.documentFileId || null,
+      isVerified: form.isVerified ?? false,
+    })
 
-      onOpenChange(false)
-    } catch (error) {
-      // keep dialog open; upstream mutation hook can surface toast/error UI
-    } finally {
-      setIsSubmitting(false)
-    }
+    onOpenChange(false)
   }
 
   return (
     <DialogContent className='max-w-2xl'>
       <DialogHeader>
-        <DialogTitle>{initialValue ? 'Edit Board' : 'Add Board'}</DialogTitle>
+        <DialogTitle>
+          {initialValue ? 'Edit Fellowship' : 'Add Fellowship'}
+        </DialogTitle>
         <DialogDescription>
-          Enter the employee&apos;s board qualification details.
+          Enter the employee&apos;s fellowship qualification details.
         </DialogDescription>
       </DialogHeader>
 
       <div className='grid grid-cols-1 gap-4'>
         <div className='space-y-2'>
-          <Label>Board Name *</Label>
+          <Label>Fellowship Name *</Label>
           <Input
-            value={form.boardName}
-            onChange={(e) => update('boardName', e.target.value)}
-            placeholder='Saudi Board in General Surgery'
+            value={form.fellowshipName}
+            onChange={(e) => update('fellowshipName', e.target.value)}
+            placeholder='Fellowship in Cardiology'
           />
         </div>
 
         <div className='space-y-2'>
-          <Label>Specialty</Label>
+          <Label>Abbreviation</Label>
           <Input
-            value={form.specialty ?? ''}
-            onChange={(e) => update('specialty', e.target.value || null)}
-            placeholder='General Surgery'
+            value={form.abbreviation ?? ''}
+            onChange={(e) => update('abbreviation', e.target.value || null)}
+            placeholder='FACC'
           />
         </div>
 
@@ -135,7 +131,16 @@ function BoardDialogContent({
           <Input
             value={form.issuingBody}
             onChange={(e) => update('issuingBody', e.target.value)}
-            placeholder='Saudi Commission for Health Specialties'
+            placeholder='American College of Cardiology'
+          />
+        </div>
+
+        <div className='space-y-2'>
+          <Label>Specialty</Label>
+          <Input
+            value={form.specialty ?? ''}
+            onChange={(e) => update('specialty', e.target.value || null)}
+            placeholder='Cardiology'
           />
         </div>
 
@@ -167,27 +172,27 @@ function BoardDialogContent({
           Cancel
         </Button>
 
-        <Button type='button' onClick={handleSubmit} disabled={isSubmitting}>
-          Save Board
+        <Button type='button' onClick={handleSubmit}>
+          Save Fellowship
         </Button>
       </DialogFooter>
     </DialogContent>
   )
 }
 
-export function BoardDialog({
+export function FellowshipDialog({
   open,
   onOpenChange,
   initialValue,
   onSubmit,
   generateId = false,
 }: Props) {
-  const dialogKey = initialValue?.id ?? (open ? 'add-board' : 'closed')
+  const dialogKey = initialValue?.id ?? (open ? 'add-fellowship' : 'closed')
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {open && (
-        <BoardDialogContent
+        <FellowshipDialogContent
           key={dialogKey}
           initialValue={initialValue}
           onOpenChange={onOpenChange}

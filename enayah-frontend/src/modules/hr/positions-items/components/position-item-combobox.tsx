@@ -25,11 +25,15 @@ import { usePositionItemLookup } from '../hooks/use-position-item-lookup'
 
 interface Props {
   value?: string | null
-  //selectedLabel?: string
+  selectedLabel?: string | null
   onChange: (item: PositionItemLookupItem) => void
 }
 
-export function PositionItemCombobox({ value, onChange }: Props) {
+export function PositionItemCombobox({
+  value,
+  selectedLabel,
+  onChange,
+}: Props) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
@@ -49,9 +53,16 @@ export function PositionItemCombobox({ value, onChange }: Props) {
           role='combobox'
           className='w-full justify-between'
         >
-          {selected
+          {/* {selected
             ? `${selected.itemNumber} — ${selected.positionTitleEn ?? ''}`
-            : 'Select vacant PCN'}
+            : 'Select vacant PCN'} */}
+          {selected
+            ? `${selected.itemNumber} - ${selected.departmentNameEn ?? ''} / ${
+                selected.positionTitleEn ?? ''
+              }`
+            : selectedLabel
+              ? selectedLabel
+              : 'Select Vacant Position'}
 
           <ChevronsUpDown className='ml-2 h-4 w-4 opacity-50' />
         </Button>

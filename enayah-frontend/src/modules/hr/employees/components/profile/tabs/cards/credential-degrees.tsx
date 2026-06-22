@@ -63,7 +63,9 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
   return (
     <Card>
       <CardHeader className='flex flex-row items-center justify-between'>
-        <CardTitle>🎓 Degrees ({degrees.length})</CardTitle>
+        <CardTitle>
+          🎓 Highest Educational Attainment ({degrees.length})
+        </CardTitle>
 
         <Button size='sm' onClick={onAdd}>
           <Plus className='mr-2 h-4 w-4' />
@@ -76,7 +78,7 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
           <div className='text-sm text-muted-foreground'>No Degree Records</div>
         )}
         <div className='text-sm text-muted-foreground'>
-          Highest Educational Degree is arranged from most recent oldest
+          Highest Educational Attainment is arranged from most recent to oldest
         </div>
         {degrees.map((degree, index) => (
           <div

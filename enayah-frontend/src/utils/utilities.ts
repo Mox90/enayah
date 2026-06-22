@@ -55,3 +55,9 @@ export function getEmployeeFullName(
     .filter(Boolean)
     .join(' ')
 }
+
+export function humanize(value?: string | null) {
+  if (!value) return '-'
+
+  return value.replaceAll('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+}

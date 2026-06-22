@@ -97,12 +97,15 @@ export const OnboardingService = {
       )
 
       if (!positionItem) {
-        throw new AppError('Position item not found', 404)
+        throw new AppError(
+          'Position item not found or is no longer vacant',
+          404,
+        )
       }
 
-      if (positionItem.status !== 'vacant') {
-        throw new AppError('Position item is not vacant', 400)
-      }
+      // if (positionItem.status !== 'vacant') {
+      //   throw new AppError('Position item is not vacant', 400)
+      // }
 
       const movement = await ContractMovementRepository.create(tx, {
         contractId: contract.id,

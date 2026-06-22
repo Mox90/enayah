@@ -1,8 +1,13 @@
 'use client'
 
 import {
+  BoardInput,
   DegreeInput,
   HireEmployeePayload,
+  LicenseInput,
+  LifeSupportInput,
+  MembershipInput,
+  MalpracticeInput,
 } from '@/modules/hr/onboarding/types/onboarding.types'
 import { CredentialDegrees } from '../../profile/tabs/cards/credential-degrees'
 import { CredentialBoards } from '../../profile/tabs/cards/credential-boards'
@@ -16,15 +21,27 @@ import {
   DegreeFormValue,
 } from '@/components/dialogs/degree-dialog'
 import { useState } from 'react'
-import { ValueOf } from 'next/constants'
-
-// import { CredentialDegrees } from '@/modules/hr/credentials/components/cards/credential-degrees'
-// import { CredentialBoards } from '@/modules/hr/credentials/components/cards/credential-boards'
-// import { CredentialLicenses } from '@/modules/hr/credentials/components/cards/credential-licenses'
-// import { CredentialFellowships } from '@/modules/hr/credentials/components/cards/credential-fellowships'
-// import { CredentialMemberships } from '@/modules/hr/credentials/components/cards/credential-memberships'
-// import { CredentialLifeSupport } from '@/modules/hr/credentials/components/cards/credential-lifesupport'
-// import { CredentialMalpractice } from '@/modules/hr/credentials/components/cards/credential-malpractice'
+import { BoardDialog, BoardFormValue } from '@/components/dialogs/board-dialog'
+import {
+  LicenseDialog,
+  LicenseFormValue,
+} from '@/components/dialogs/license-dialog'
+import {
+  FellowshipDialog,
+  FellowshipFormValue,
+} from '@/components/dialogs/fellowship-dialog'
+import {
+  LifeSupportDialog,
+  LifeSupportFormValue,
+} from '@/components/dialogs/life-support-dialog'
+import {
+  MembershipDialog,
+  MembershipFormValue,
+} from '@/components/dialogs/membership-dialog'
+import {
+  MalpracticeDialog,
+  MalpracticeFormValue,
+} from '@/components/dialogs/malpractice-dialog'
 
 interface Props {
   value: HireEmployeePayload
@@ -32,14 +49,42 @@ interface Props {
 }
 
 export function CredentialsStep({ value, onChange }: Props) {
-  const [degreeDialogOpen, setDegreeDialogOpen] = useState(false)
+  //const [degreeDialogOpen, setDegreeDialogOpen] = useState(false)
+  const [activeDialog, setActiveDialog] = useState<
+    | 'degree'
+    | 'board'
+    | 'license'
+    | 'fellowship'
+    | 'membership'
+    | 'life_support'
+    | 'malpractice'
+    | null
+  >(null)
 
   const [editingDegree, setEditingDegree] = useState<DegreeFormValue | null>(
     null,
   )
+  const [editingBoard, setEditingBoard] = useState<BoardFormValue | null>(null)
+  const [editingLicense, setEditingLicense] = useState<LicenseFormValue | null>(
+    null,
+  )
+  const [editingFellowship, setEditingFellowship] =
+    useState<FellowshipFormValue | null>(null)
+  const [editingLifeSupport, setEditingLifeSupport] =
+    useState<LifeSupportFormValue | null>(null)
+  const [editingMembership, setEditingMembership] =
+    useState<MembershipFormValue | null>(null)
+  const [editingMalpractice, setEditingMalpractice] =
+    useState<MalpracticeFormValue | null>(null)
 
   //const degrees = value.credentials?.degrees ?? []
   const degrees = value.credentials?.degrees ?? []
+  const boards = value.credentials?.boards ?? []
+  const licenses = value.credentials?.licenses ?? []
+  const fellowships = value.credentials?.fellowships ?? []
+  const lifeSupports = value.credentials?.lifeSupport ?? []
+  const memberships = value.credentials?.memberships ?? []
+  const malpractice = value.credentials?.malpractice ?? []
 
   function saveDegree(degree: DegreeFormValue) {
     const exists = degrees.some((item: DegreeInput) => item.id === degree.id)
@@ -69,13 +114,185 @@ export function CredentialsStep({ value, onChange }: Props) {
     })
   }
 
+  function saveBoard(board: BoardFormValue) {
+    const exists = boards.some((item: BoardInput) => item.id === board.id)
+
+    const nextBoards = exists
+      ? boards.map((item: BoardInput) => (item.id === board.id ? board : item))
+      : [...boards, board]
+
+    onChange({
+      ...value,
+      credentials: {
+        ...(value.credentials ?? {}),
+        boards: nextBoards,
+      },
+    })
+  }
+
+  function deleteBoard(id: string) {
+    onChange({
+      ...value,
+      credentials: {
+        ...(value.credentials ?? {}),
+        boards: boards.filter((item: BoardInput) => item.id !== id),
+      },
+    })
+  }
+
+  function saveLicense(license: LicenseFormValue) {
+    const exists = licenses.some((item: LicenseInput) => item.id === license.id)
+
+    const nextLicenses = exists
+      ? licenses.map((item: LicenseInput) =>
+          item.id === license.id ? license : item,
+        )
+      : [...licenses, license]
+
+    onChange({
+      ...value,
+      credentials: {
+        ...(value.credentials ?? {}),
+        licenses: nextLicenses,
+      },
+    })
+  }
+
+  function deleteLicense(id: string) {
+    onChange({
+      ...value,
+      credentials: {
+        ...(value.credentials ?? {}),
+        licenses: licenses.filter((item: LicenseInput) => item.id !== id),
+      },
+    })
+  }
+
+  function saveFellowship(fellowship: FellowshipFormValue) {
+    const exists = fellowships.some((item) => item.id === fellowship.id)
+    const nextFellowships = exists
+      ? fellowships.map((item) =>
+          item.id === fellowship.id ? fellowship : item,
+        )
+      : [...fellowships, fellowship]
+
+    onChange({
+      ...value,
+      credentials: {
+        ...(value.credentials ?? {}),
+        fellowships: nextFellowships,
+      },
+    })
+  }
+
+  function deleteFellowship(id: string) {
+    onChange({
+      ...value,
+      credentials: {
+        ...(value.credentials ?? {}),
+        fellowships: fellowships.filter((item) => item.id !== id),
+      },
+    })
+  }
+
+  function saveLifeSupport(lifeSupport: LifeSupportFormValue) {
+    const exists = lifeSupports.some(
+      (item: LifeSupportInput) => item.id === lifeSupport.id,
+    )
+
+    const nextLifeSupports: LifeSupportInput[] = exists
+      ? lifeSupports.map((item: LifeSupportInput) =>
+          item.id === lifeSupport.id ? lifeSupport : item,
+        )
+      : [...lifeSupports, lifeSupport]
+
+    onChange({
+      ...value,
+      credentials: {
+        ...(value.credentials ?? {}),
+        lifeSupport: nextLifeSupports,
+      },
+    })
+  }
+
+  function deleteLifeSupport(id: string) {
+    onChange({
+      ...value,
+      credentials: {
+        ...(value.credentials ?? {}),
+        lifeSupport: lifeSupports.filter(
+          (item: LifeSupportInput) => item.id !== id,
+        ),
+      },
+    })
+  }
+
+  function saveMembership(membership: MembershipFormValue) {
+    const exists = memberships.some(
+      (item: MembershipInput) => item.id === membership.id,
+    )
+
+    const nextMemberships: MembershipInput[] = exists
+      ? memberships.map((item: MembershipInput) =>
+          item.id === membership.id ? membership : item,
+        )
+      : [...memberships, membership]
+
+    onChange({
+      ...value,
+      credentials: {
+        ...(value.credentials ?? {}),
+        memberships: nextMemberships,
+      },
+    })
+  }
+
+  function deleteMembership(id: string) {
+    onChange({
+      ...value,
+      credentials: {
+        ...(value.credentials ?? {}),
+        memberships: memberships.filter(
+          (item: MembershipInput) => item.id !== id,
+        ),
+      },
+    })
+  }
+
+  function saveMalpractice(item: MalpracticeFormValue) {
+    const exists = malpractice.some((x: MalpracticeInput) => x.id === item.id)
+
+    const nextMalpractice: MalpracticeInput[] = exists
+      ? malpractice.map((x: MalpracticeInput) => (x.id === item.id ? item : x))
+      : [...malpractice, item]
+
+    onChange({
+      ...value,
+      credentials: {
+        ...(value.credentials ?? {}),
+        malpractice: nextMalpractice,
+      },
+    })
+  }
+
+  function deleteMalpractice(id: string) {
+    onChange({
+      ...value,
+      credentials: {
+        ...(value.credentials ?? {}),
+        malpractice: malpractice.filter((x: MalpracticeInput) => x.id !== id),
+      },
+    })
+  }
+
   return (
     <div className='space-y-6'>
       <CredentialDegrees
         degrees={degrees}
         onAdd={() => {
           setEditingDegree(null)
-          setDegreeDialogOpen(true)
+          //setDegreeDialogOpen(true)
+          setActiveDialog('degree')
         }}
         onEdit={(id) => {
           //const degree = degrees.find((item: DegreeInput) => item.id === id)
@@ -90,30 +307,235 @@ export function CredentialsStep({ value, onChange }: Props) {
             graduationDate: degree.graduationDate,
             isVerified: degree.isVerified,
           })
-          setDegreeDialogOpen(true)
+          //setDegreeDialogOpen(true)
+          setActiveDialog('degree')
         }}
         onDelete={deleteDegree}
       />
 
       <DegreeDialog
-        open={degreeDialogOpen}
-        onOpenChange={setDegreeDialogOpen}
+        open={activeDialog === 'degree'}
+        onOpenChange={(open) => {
+          if (!open) setActiveDialog(null)
+        }}
         initialValue={editingDegree}
         onSubmit={saveDegree}
         generateId={true}
       />
 
-      {/* <CredentialBoards boards={credentials.boards ?? []} />
+      <CredentialBoards
+        boards={boards}
+        onAdd={() => {
+          setEditingBoard(null)
+          setActiveDialog('board')
+        }}
+        onEdit={(id) => {
+          const board = boards.find((item) => item.id === id)
+          if (!board) return
+          setEditingBoard({
+            id: board.id,
+            boardName: board.boardName,
+            specialty: board.specialty ?? null,
+            issuingBody: board.issuingBody,
+            issueDate: board.issueDate ?? null,
+            expiryDate: board.expiryDate ?? null,
+            isLifetime: board.isLifetime ?? false,
+            isVerified: board.isVerified ?? false,
+          })
+          setActiveDialog('board')
+        }}
+        onDelete={deleteBoard}
+      />
 
-      <CredentialLicenses licenses={credentials.licenses ?? []} />
+      <BoardDialog
+        open={activeDialog === 'board'}
+        onOpenChange={(open) => {
+          if (!open) setActiveDialog(null)
+        }}
+        initialValue={editingBoard}
+        onSubmit={saveBoard}
+        generateId={true}
+      />
 
-      <CredentialFellowships fellowships={credentials.fellowships ?? []} />
+      <CredentialLicenses
+        licenses={licenses}
+        onAdd={() => {
+          setEditingLicense(null)
+          setActiveDialog('license')
+        }}
+        onEdit={(id) => {
+          const license = licenses.find((item) => item.id === id)
+          if (!license) return
+          setEditingLicense({
+            id: license.id,
+            licenseNumber: license.licenseNumber,
+            authority: license.authority,
+            profession: license.profession,
+            specialty: license.specialty ?? null,
+            issueDate: license.issueDate ?? null,
+            expiryDate: license.expiryDate,
+            status: license.status ?? 'active',
+            isPrimary: license.isPrimary ?? false,
+          })
+          setActiveDialog('license')
+        }}
+        onDelete={deleteLicense}
+      />
 
-      <CredentialMemberships memberships={credentials.memberships ?? []} />
+      <LicenseDialog
+        open={activeDialog === 'license'}
+        onOpenChange={(open) => {
+          if (!open) setActiveDialog(null)
+        }}
+        initialValue={editingLicense}
+        onSubmit={saveLicense}
+        generateId={true}
+      />
 
-      <CredentialLifeSupport lifeSupports={credentials.lifeSupport ?? []} />
+      <CredentialFellowships
+        fellowships={fellowships}
+        onAdd={() => {
+          setEditingFellowship(null)
+          setActiveDialog('fellowship')
+        }}
+        onEdit={(id) => {
+          const fellowship = fellowships.find((item) => item.id === id)
+          if (!fellowship) return
 
-      <CredentialMalpractice malpractice={credentials.malpractice ?? []} /> */}
+          setEditingFellowship({
+            id: fellowship.id,
+            fellowshipName: fellowship.fellowshipName,
+            abbreviation: fellowship.abbreviation ?? null,
+            issuingBody: fellowship.issuingBody,
+            specialty: fellowship.specialty ?? null,
+            issueDate: fellowship.issueDate ?? null,
+            expiryDate: fellowship.expiryDate ?? null,
+            documentFileId: fellowship.documentFileId ?? null,
+            isVerified: fellowship.isVerified ?? false,
+          })
+
+          setActiveDialog('fellowship')
+        }}
+        onDelete={deleteFellowship}
+      />
+
+      <FellowshipDialog
+        open={activeDialog === 'fellowship'}
+        onOpenChange={(open) => {
+          if (!open) setActiveDialog(null)
+        }}
+        initialValue={editingFellowship}
+        onSubmit={saveFellowship}
+        generateId={true}
+      />
+
+      <CredentialMemberships
+        memberships={memberships}
+        onAdd={() => {
+          setEditingMembership(null)
+          setActiveDialog('membership')
+        }}
+        onEdit={(id) => {
+          const membership = memberships.find((item) => item.id === id)
+          if (!membership) return
+
+          setEditingMembership({
+            id: membership.id,
+            organization: membership.organization,
+            membershipNumber: membership.membershipNumber ?? null,
+            membershipLevel: membership.membershipLevel ?? null,
+            startDate: membership.startDate ?? null,
+            expiryDate: membership.expiryDate ?? null,
+            documentFileId: membership.documentFileId ?? null,
+            isVerified: membership.isVerified ?? false,
+          })
+
+          setActiveDialog('membership')
+        }}
+        onDelete={deleteMembership}
+      />
+
+      <MembershipDialog
+        open={activeDialog === 'membership'}
+        onOpenChange={(open) => {
+          if (!open) setActiveDialog(null)
+        }}
+        initialValue={editingMembership}
+        onSubmit={saveMembership}
+        generateId={true}
+      />
+
+      <CredentialLifeSupport
+        lifeSupports={lifeSupports}
+        onAdd={() => {
+          setEditingLifeSupport(null)
+          setActiveDialog('life_support')
+        }}
+        onEdit={(id) => {
+          const lifeSupport = lifeSupports.find((item) => item.id === id)
+          if (!lifeSupport) return
+
+          setEditingLifeSupport({
+            id: lifeSupport.id,
+            type: lifeSupport.type,
+            provider: lifeSupport.provider,
+            certificateNumber: lifeSupport.certificateNumber ?? null,
+            issueDate: lifeSupport.issueDate ?? null,
+            expiryDate: lifeSupport.expiryDate,
+            documentFileId: lifeSupport.documentFileId ?? null,
+            isVerified: lifeSupport.isVerified ?? false,
+          })
+
+          setActiveDialog('life_support')
+        }}
+        onDelete={deleteLifeSupport}
+      />
+
+      <LifeSupportDialog
+        open={activeDialog === 'life_support'}
+        onOpenChange={(open) => {
+          if (!open) setActiveDialog(null)
+        }}
+        initialValue={editingLifeSupport}
+        onSubmit={saveLifeSupport}
+        generateId={true}
+      />
+
+      <CredentialMalpractice
+        malpractice={malpractice}
+        onAdd={() => {
+          setEditingMalpractice(null)
+          setActiveDialog('malpractice')
+        }}
+        onEdit={(id) => {
+          const item = malpractice.find((x) => x.id === id)
+          if (!item) return
+
+          setEditingMalpractice({
+            id: item.id,
+            insuranceCompany: item.insuranceCompany,
+            policyNumber: item.policyNumber,
+            coverageAmount: item.coverageAmount ?? null,
+            startDate: item.startDate ?? null,
+            expiryDate: item.expiryDate ?? null,
+            documentFileId: item.documentFileId ?? null,
+            isVerified: item.isVerified ?? false,
+          })
+
+          setActiveDialog('malpractice')
+        }}
+        onDelete={deleteMalpractice}
+      />
+
+      <MalpracticeDialog
+        open={activeDialog === 'malpractice'}
+        onOpenChange={(open) => {
+          if (!open) setActiveDialog(null)
+        }}
+        initialValue={editingMalpractice}
+        onSubmit={saveMalpractice}
+        generateId={true}
+      />
     </div>
   )
 }

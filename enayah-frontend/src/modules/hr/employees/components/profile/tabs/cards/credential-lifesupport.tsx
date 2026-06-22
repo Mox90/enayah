@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { MoreHorizontal, MoreVertical } from 'lucide-react'
+import { MoreHorizontal, MoreVertical, Plus } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { VerificationBadge } from '@/components/badges/verification-badge'
 import { LifeSupportInput } from '@/modules/hr/onboarding/types/onboarding.types'
+import { useTranslations } from 'next-intl'
 
 //import { VerificationBadge } from '@/components/common/verification-badge'
 
@@ -40,6 +41,40 @@ export function CredentialLifeSupport({
   onEdit,
   onDelete,
 }: Props) {
+  const t = useTranslations('credentials')
+
+  function translateCredentialValue(value: string) {
+    const knownKeys = [
+      'aha',
+      'sha',
+      'bls',
+      'acls',
+      'pals',
+      'atls',
+      'stls',
+      'nrp',
+      'itls',
+      'blso',
+      'atcn',
+      'also',
+      'tncc',
+      'enpc',
+      'asls',
+      'esls',
+      'pfccs',
+      'other',
+    ]
+
+    try {
+      //return t(value).replace(/\s*\([^)]+\)$/, '')
+      return knownKeys.includes(value)
+        ? t(value).replace(/\s*\([^)]+\)$/, '')
+        : value
+    } catch {
+      return value
+    }
+  }
+
   return (
     <Card>
       <CardHeader className='flex flex-row items-center justify-between'>
@@ -49,7 +84,8 @@ export function CredentialLifeSupport({
 
         {onAdd && (
           <Button size='sm' onClick={onAdd}>
-            Add
+            <Plus className='mr-2 h-4 w-4' />
+            Add Life Support
           </Button>
         )}
       </CardHeader>
@@ -70,12 +106,14 @@ export function CredentialLifeSupport({
           >
             <div className='flex justify-between'>
               <div className='space-y-1'>
-                <div className='font-semibold uppercase'>
-                  {x.type.replaceAll('_', ' ')}
+                <div className='font-semibold'>
+                  {/* {x.type.replaceAll('_', ' ')} */}
+                  {translateCredentialValue(x.type)}
                 </div>
 
                 <div className='text-sm text-muted-foreground'>
-                  {x.provider}
+                  {/* {x.provider} */}
+                  {translateCredentialValue(x.provider)}
                 </div>
 
                 {x.certificateNumber && (
@@ -96,7 +134,7 @@ export function CredentialLifeSupport({
                   </div>
                 )}
 
-                <VerificationBadge verified={x.isVerified} />
+                {/* <VerificationBadge verified={x.isVerified ?? false} /> */}
               </div>
 
               <div className='flex flex-col items-end gap-2'>

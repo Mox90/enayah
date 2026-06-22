@@ -175,14 +175,16 @@ export function CompensationStep({ value, onChange }: Props) {
         </div>
 
         <div className='space-y-3'>
-          <div className='grid grid-cols-[1fr_160px_40px] items-end gap-3'>
-            <div className='space-y-2'>
-              <Label>Allowance Type</Label>
+          {(value.allowances?.length ?? 0) > 0 && (
+            <div className='grid grid-cols-[1fr_160px_40px] items-end gap-3'>
+              <div className='space-y-2'>
+                <Label>Allowance Type</Label>
+              </div>
+              <div className='space-y-2'>
+                <Label>Amount</Label>
+              </div>
             </div>
-            <div className='space-y-2'>
-              <Label>Amount</Label>
-            </div>
-          </div>
+          )}
 
           {(value.allowances ?? []).map((allowance, index) => (
             <div

@@ -280,6 +280,7 @@ export function EmploymentContractAssignmentInformation({
             /> */}
             <PositionItemCombobox
               value={movement.positionItemId}
+              selectedLabel={movement.itemNumber}
               onChange={(item) => {
                 onChange({
                   ...value,
@@ -287,6 +288,7 @@ export function EmploymentContractAssignmentInformation({
                   movement: {
                     ...movement,
                     positionItemId: item.id,
+                    itemNumber: item.itemNumber,
                     startDate: movement.startDate || value.contract.startDate,
                   },
 
