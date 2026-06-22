@@ -1,3 +1,5 @@
+import { format } from 'date-fns'
+
 export const getStatusVariant = (status: string) => {
   switch (status) {
     case 'vacant':
@@ -60,4 +62,18 @@ export function humanize(value?: string | null) {
   if (!value) return '-'
 
   return value.replaceAll('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+}
+
+export function formatDate(value?: string | null) {
+  return value ? format(new Date(value), 'dd-MMM-yyyy') : '-'
+}
+
+export function toArabic(date: string) {
+  const arabicDate = new Intl.DateTimeFormat('ar', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(date))
+
+  return arabicDate
 }

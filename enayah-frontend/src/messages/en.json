@@ -302,7 +302,10 @@
     "secondment": "Secondment",
     "concurrent": "Concurrent",
     "permanent": "Permanent Transfer",
-    "appointmentRemarks": "Appointment Remarks"
+    "appointmentRemarks": "Appointment Remarks",
+    "superseded": "Superseded",
+    "active": "Active",
+    "contractTimeline": "Contract Timeline {length}"
   },
   "credentials": {
     "createSuccess": "{name} has been created.",

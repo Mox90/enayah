@@ -90,4 +90,11 @@ export const EmploymentController = {
 
     res.status(204).send()
   }),
+
+  getEmploymentTimeline: asyncHandler(async (req: Request, res: Response) => {
+    const { employeeId } = employeeIdParamSchema.parse(req.params)
+    const result = await EmploymentService.getTimelineByEmployeeId(employeeId)
+
+    res.json(result)
+  }),
 }

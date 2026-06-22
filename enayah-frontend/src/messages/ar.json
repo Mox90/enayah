@@ -303,7 +303,10 @@
     "secondment": "إعارة",
     "concurrent": "متزامن",
     "permanent": "نقل دائم",
-    "appointmentRemarks": "ملاحظات التعيين"
+    "appointmentRemarks": "ملاحظات التعيين",
+    "superseded": "تم استبداله",
+    "active": "نشيط",
+    "contractTimeline": "الجدول الزمني للعقد {length}"
   },
   "credentials": {
     "createSuccess": "تم إنشاء {name}.",
