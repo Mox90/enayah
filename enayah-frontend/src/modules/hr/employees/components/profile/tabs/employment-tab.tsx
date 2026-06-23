@@ -3,7 +3,12 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useEmploymentTimeline } from '@/modules/hr/employments/hooks/use-employment-timeline'
-import { formatDate, humanize, toArabic } from '@/utils/utilities'
+import {
+  formatDate,
+  humanize,
+  toArabic,
+  toPersianDigits,
+} from '@/utils/utilities'
 import { useLocale, useTranslations } from 'next-intl'
 
 type ContractMovement = {
@@ -82,22 +87,22 @@ const EmploymentTab = ({ employeeId }: Props) => {
   const ct = useTranslations('contracts')
 
   if (isLoading) {
-    return <div>Loading employment timeline...</div>
+    return <div>{ct('loadingTimeline')}</div>
   }
 
   if (error) {
-    return <div>Failed to load employment timeline.</div>
+    return <div>{ct('loadTimelineFailed')}</div>
   }
 
   const employments = data ?? []
   const employment = employments[0]
 
-  console.log(data)
+  //console.log(data)
 
   if (!employment) {
     return (
       <div className='rounded-lg border p-6 text-sm text-muted-foreground'>
-        No employment timeline found.
+        {ct('emptyTimeline')}
       </div>
     )
   }
@@ -246,7 +251,7 @@ const EmploymentTab = ({ employeeId }: Props) => {
         <CardHeader>
           <CardTitle>
             {ct.rich('contractTimeline', {
-              length: `(${contracts.length})`,
+              length: `(${isRtl ? toPersianDigits(contracts.length) : contracts.length})`,
             })}{' '}
           </CardTitle>
         </CardHeader>
@@ -296,19 +301,14 @@ const EmploymentTab = ({ employeeId }: Props) => {
                       <div className='space-y-1'>
                         <div className='text-sm text-muted-foreground'>
                           {isRtl
-                            ? toArabic(movement.startDate)
+                            ? toArabic(movement.startDate, 1)
                             : formatDate(movement.startDate)}{' '}
                           {isRtl ? '←' : '→'}{' '}
                           {movement.endDate
                             ? isRtl
-                              ? toArabic(movement.endDate)
+                              ? toArabic(movement.endDate, 1)
                               : formatDate(movement.endDate)
                             : '-'}
-                        </div>
-
-                        <div className='font-medium'>
-                          {positionTitle ?? '-'}
-
                           {movement.movementType !== 'initial' && (
                             <span
                               className={
@@ -320,6 +320,10 @@ const EmploymentTab = ({ employeeId }: Props) => {
                               ({humanize(ct(movement.movementType))})
                             </span>
                           )}
+                        </div>
+
+                        <div className='font-medium'>
+                          {positionTitle ?? '-'}
                         </div>
 
                         <div className='text-sm text-muted-foreground'>

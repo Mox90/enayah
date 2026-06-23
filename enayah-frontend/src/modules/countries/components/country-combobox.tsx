@@ -52,7 +52,11 @@ export function CountryCombobox({ value, onChange }: Props) {
           role='combobox'
           className='w-full justify-between'
         >
-          {selected ? selected.name : t('selectNationality')}
+          {selected
+            ? isRtl
+              ? selected.nameAr
+              : selected.name
+            : t('selectNationality')}
 
           <ChevronsUpDown className='ml-2 h-4 w-4 opacity-50' />
         </Button>

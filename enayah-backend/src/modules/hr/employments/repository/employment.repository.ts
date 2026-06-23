@@ -158,6 +158,11 @@ export const EmploymentRepository = {
   findTimelineByEmployeeId: async (tx: DB, employeeId: string) => {
     return tx.query.employments.findMany({
       where: and(eq(employments.employeeId, employeeId), isActive),
+      // where: and(
+      //   eq(employments.employeeId, employeeId),
+      //   eq(employments.status, 'active'),
+      //   isActive,
+      // ),
       orderBy: (e, { desc }) => [desc(e.startDate)],
       with: {
         contracts: {

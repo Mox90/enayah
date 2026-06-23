@@ -68,12 +68,43 @@ export function formatDate(value?: string | null) {
   return value ? format(new Date(value), 'dd-MMM-yyyy') : '-'
 }
 
-export function toArabic(date: string) {
-  const arabicDate = new Intl.DateTimeFormat('ar', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date(date))
+export function toArabic(date: string, indicator: number) {
+  let arabicDate = ''
+  switch (indicator) {
+    case 1:
+      arabicDate = new Intl.DateTimeFormat('ar-SA-u-nu-arab', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }).format(new Date(date))
+      break
+    case 2:
+      arabicDate = date.replace(/\d/g, (d) => Number(d).toLocaleString('ar-SA'))
+      break
+    case 3:
+      arabicDate = new Intl.DateTimeFormat('ar-SA-u-nu-arab', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date(date))
+      break
+    default:
+      arabicDate = date
+  }
 
   return arabicDate
+}
+
+export function toPersianDigits(
+  value: string | number | null | undefined,
+): string {
+  if (value == null) return ''
+  return String(value).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)])
+}
+
+export function toArabicDigits(
+  value: string | number | null | undefined,
+): string {
+  if (value == null) return ''
+  return String(value).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)])
 }

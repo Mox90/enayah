@@ -13,6 +13,9 @@ import {
 import { VerificationBadge } from '@/components/badges/verification-badge'
 import { DegreeInput } from '@/modules/hr/onboarding/types/onboarding.types'
 import { MoreVertical, Plus } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
+import { toArabic, toPersianDigits } from '@/utils/utilities'
+import { cn } from '@/lib/utils'
 
 // interface Degree {
 //   id: string
@@ -60,25 +63,32 @@ const degreeTypeColors: Record<string, string> = {
 
 export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
   //console.log(degrees)
+  const ct = useTranslations('credentials')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
   return (
     <Card>
       <CardHeader className='flex flex-row items-center justify-between'>
         <CardTitle>
-          🎓 Highest Educational Attainment ({degrees.length})
+          🎓 {ct('highestEducationalLabel')} (
+          {isRtl ? toPersianDigits(degrees.length) : degrees.length})
         </CardTitle>
 
         <Button size='sm' onClick={onAdd}>
-          <Plus className='mr-2 h-4 w-4' />
-          Add Degree
+          {/* <Plus className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4`} /> */}
+          <Plus className={cn('h-4 w-4', isRtl ? 'ml-2' : 'mr-4')} />
+          {ct('addDegree')}
         </Button>
       </CardHeader>
 
       <CardContent className='space-y-4'>
         {degrees.length === 0 && (
-          <div className='text-sm text-muted-foreground'>No Degree Records</div>
+          <div className='text-sm text-muted-foreground'>
+            {ct.rich('noRecFound', { item: isRtl ? 'تعليم' : 'Education' })}
+          </div>
         )}
         <div className='text-sm text-muted-foreground'>
-          Highest Educational Attainment is arranged from most recent to oldest
+          {ct('highestEducationalSub')}
         </div>
         {degrees.map((degree, index) => (
           <div
@@ -94,20 +104,25 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
                 </div>
 
                 {degree.major && (
-                  <div className='text-sm'>Major: {degree.major}</div>
+                  <div className='text-sm'>
+                    {ct('major')}: {degree.major}
+                  </div>
                 )}
 
                 {degree.graduationDate && (
                   <div className='text-sm'>
-                    Graduated:{' '}
-                    {format(new Date(degree.graduationDate), 'dd-MMM-yyyy')}
+                    {ct('graduated')}:{' '}
+                    {isRtl
+                      ? toArabic(degree.graduationDate, 1)
+                      : format(new Date(degree.graduationDate), 'dd-MMM-yyyy')}
                   </div>
                 )}
 
                 <div className='text-sm'>
-                  Type:{' '}
-                  {degreeTypeLabel[degree.degreeType.replace('_', ' ') ?? ''] ??
-                    degree.degreeType.replace('_', ' ')}
+                  {ct('type')}:{' '}
+                  {/* {degreeTypeLabel[degree.degreeType.replace('_', ' ') ?? ''] ??
+                    degree.degreeType.replace('_', ' ')} */}
+                  {ct(degree.degreeType)}
                   {/* <span
                     className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${
                       degreeTypeColors[degree.degreeType] ??
@@ -136,25 +151,38 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
                     </Button>
                   </DropdownMenuTrigger>
 
-                  <DropdownMenuContent align='end'>
-                    <DropdownMenuItem
-                      onClick={() => {
-                        if (!degree.id) return
-                        onEdit?.(degree.id)
-                      }}
-                    >
-                      Edit
-                    </DropdownMenuItem>
+                  <DropdownMenuContent>
+                    {onEdit && (
+                      <DropdownMenuItem
+                        className={
+                          isRtl
+                            ? 'justify-end text-right'
+                            : 'justify-start text-left'
+                        }
+                        onClick={() => {
+                          if (!degree.id) return
+                          onEdit(degree.id)
+                        }}
+                      >
+                        {ct('edit')}
+                      </DropdownMenuItem>
+                    )}
 
-                    <DropdownMenuItem
-                      className='text-red-600'
-                      onClick={() => {
-                        if (!degree.id) return
-                        onDelete?.(degree.id)
-                      }}
-                    >
-                      Delete
-                    </DropdownMenuItem>
+                    {onDelete && (
+                      <DropdownMenuItem
+                        className={`text-red-600 ${
+                          isRtl
+                            ? 'justify-end text-right'
+                            : 'justify-start text-left'
+                        }`}
+                        onClick={() => {
+                          if (!degree.id) return
+                          onDelete(degree.id)
+                        }}
+                      >
+                        {ct('delete')}
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

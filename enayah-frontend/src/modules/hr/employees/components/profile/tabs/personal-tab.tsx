@@ -5,6 +5,8 @@ import { Pencil } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { useLocale, useTranslations } from 'next-intl'
+import { humanize, toArabic } from '@/utils/utilities'
 
 export type Gender = 'male' | 'female'
 
@@ -74,6 +76,11 @@ function Field({ label, value }: FieldProps) {
 }
 
 const PersonalTab = ({ personal }: Props) => {
+  const at = useTranslations('auth')
+  const et = useTranslations('employees')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
+
   return (
     <div className='space-y-6'>
       {/* ---------------------------- */}
@@ -82,7 +89,7 @@ const PersonalTab = ({ personal }: Props) => {
 
       <Card>
         <CardHeader className='flex flex-row items-center justify-between'>
-          <CardTitle>Personal Information</CardTitle>
+          <CardTitle>{et('personalInfo')}</CardTitle>
 
           {/* <Button size='sm' variant='outline'>
             <Pencil className='mr-2 h-4 w-4' />
@@ -92,26 +99,26 @@ const PersonalTab = ({ personal }: Props) => {
 
         <CardContent>
           <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
-            <Field label='Employee Number' value={personal.employeeNumber} />
+            <Field
+              label={at('employeeNumber')}
+              value={personal.employeeNumber}
+            />
 
             <Field
-              label='Date of Birth'
+              label={et('dateOfBirth')}
               value={
                 personal.dateOfBirth
-                  ? format(new Date(personal.dateOfBirth), 'dd-MMM-yyyy')
+                  ? isRtl
+                    ? toArabic(personal.dateOfBirth, 1)
+                    : format(new Date(personal.dateOfBirth), 'dd-MMM-yyyy')
                   : '-'
               }
             />
 
-            <Field
-              label='Gender'
-              value={personal.gender
-                ?.replaceAll('_', ' ')
-                ?.replace(/\b\w/g, (c: string) => c.toUpperCase())}
-            />
+            <Field label={et('gender')} value={et(personal.gender)} />
 
             <Field
-              label='English Name'
+              label={et('englishName')}
               value={[
                 personal.firstNameEn,
                 personal.secondNameEn,
@@ -123,7 +130,7 @@ const PersonalTab = ({ personal }: Props) => {
             />
 
             <Field
-              label='Arabic Name'
+              label={et('arabicName')}
               value={[
                 personal.firstNameAr,
                 personal.secondNameAr,
@@ -135,7 +142,7 @@ const PersonalTab = ({ personal }: Props) => {
             />
 
             <Field
-              label='Nationality'
+              label={et('nationality')}
               value={personal.nationality?.nationalityEn}
             />
           </div>
@@ -148,7 +155,7 @@ const PersonalTab = ({ personal }: Props) => {
 
       <Card>
         <CardHeader className='flex flex-row items-center justify-between'>
-          <CardTitle>Country Information</CardTitle>
+          <CardTitle>{et('countryInfo')}</CardTitle>
 
           {/* <Button size='sm' variant='outline'>
             <Pencil className='mr-2 h-4 w-4' />
@@ -158,19 +165,19 @@ const PersonalTab = ({ personal }: Props) => {
 
         <CardContent>
           <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-4'>
-            <Field label='Country' value={personal.nationality?.name} />
+            <Field label={et('country')} value={personal.nationality?.name} />
 
             <Field
-              label='Nationality'
+              label={et('country')}
               value={personal.nationality?.nationalityEn}
             />
 
-            <Field label='ISO Alpha-2' value={personal.nationality?.alpha2} />
+            <Field label={et('alpha2')} value={personal.nationality?.alpha2} />
 
-            <Field label='ISO Alpha-3' value={personal.nationality?.alpha3} />
+            <Field label={et('alpha3')} value={personal.nationality?.alpha3} />
 
             <Field
-              label='Numeric Code'
+              label={et('numericCode')}
               value={personal.nationality?.numericCode}
             />
           </div>

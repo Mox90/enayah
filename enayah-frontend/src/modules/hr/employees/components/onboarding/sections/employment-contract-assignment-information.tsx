@@ -16,7 +16,7 @@ import { DepartmentCombobox } from '@/modules/hr/departments/components/departme
 import { HireEmployeePayload } from '@/modules/hr/onboarding/types/onboarding.types'
 import { PositionItemCombobox } from '@/modules/hr/positions-items/components/position-item-combobox'
 import { PositionCombobox } from '@/modules/hr/positions/components/position-combobox'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 type EmploymentInput = HireEmployeePayload['employment']
 type ContractInput = HireEmployeePayload['contract']
@@ -56,6 +56,8 @@ export function EmploymentContractAssignmentInformation({
     approvedBy: null,
     approvedAt: null,
   }
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
 
   function updateEffectiveDate(date: string) {
     onChange({
@@ -189,6 +191,7 @@ export function EmploymentContractAssignmentInformation({
           <Label>{t('employmentType')}</Label>
 
           <Select
+            dir={isRtl ? 'rtl' : 'ltr'}
             value={employment.employmentType}
             onValueChange={(v) =>
               updateEmployment('employmentType', v as EmploymentType)
@@ -212,6 +215,7 @@ export function EmploymentContractAssignmentInformation({
           <Label>{t('staffCategory')}</Label>
 
           <Select
+            dir={isRtl ? 'rtl' : 'ltr'}
             value={employment.staffCategory}
             onValueChange={(v) =>
               updateEmployment('staffCategory', v as StaffCategory)
@@ -233,6 +237,7 @@ export function EmploymentContractAssignmentInformation({
           <Label>{t('contractType')}</Label>
 
           <Select
+            dir={isRtl ? 'rtl' : 'ltr'}
             value={contract.contractType ?? 'initial'}
             onValueChange={(v) =>
               updateContract('contractType', v as ContractType)
@@ -349,7 +354,13 @@ export function EmploymentContractAssignmentInformation({
 
             <DepartmentCombobox
               value={appointment.actualDepartmentId ?? null}
-              selectedLabel={appointment.actualDepartmentNameEn ?? undefined}
+              selectedLabel={
+                isRtl
+                  ? (appointment.actualDepartmentNameAr ??
+                    appointment.actualDepartmentNameEn ??
+                    undefined)
+                  : (appointment.actualDepartmentNameEn ?? undefined)
+              }
               onChange={(department) =>
                 updateAppointment('actualDepartmentId', department.id)
               }
@@ -361,7 +372,13 @@ export function EmploymentContractAssignmentInformation({
 
             <PositionCombobox
               value={appointment.actualPositionId ?? null}
-              selectedLabel={appointment.actualPositionTitleEn ?? undefined}
+              selectedLabel={
+                isRtl
+                  ? (appointment.actualPositionTitleAr ??
+                    appointment.actualPositionTitleEn ??
+                    undefined)
+                  : (appointment.actualPositionTitleEn ?? undefined)
+              }
               onChange={(position) =>
                 updateAppointment('actualPositionId', position.id)
               }
@@ -384,6 +401,7 @@ export function EmploymentContractAssignmentInformation({
             <Label>{t('appointmentTypeLabel')}</Label>
 
             <Select
+              dir={isRtl ? 'rtl' : 'ltr'}
               value={appointment.appointmentType ?? 'primary'}
               onValueChange={(v) =>
                 updateAppointment('appointmentType', v as AppointmentType)
@@ -394,7 +412,7 @@ export function EmploymentContractAssignmentInformation({
               </SelectTrigger>
 
               <SelectContent>
-                <SelectItem value='primary'>{t('primary')}</SelectItem>
+                {/* <SelectItem value='primary'>{t('primary')}</SelectItem> */}
                 <SelectItem value='acting'>{t('primary')}</SelectItem>
                 <SelectItem value='temporary'>{t('temporary')}</SelectItem>
                 <SelectItem value='rotation'>{t('rotation')}</SelectItem>

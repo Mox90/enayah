@@ -26,6 +26,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useLocale, useTranslations } from 'next-intl'
 import { EmployeeProfile } from '../../types/employee-profile.types'
+import { StatusBadge } from '@/components/badges/status-badge'
+import { toArabic, toPersianDigits } from '@/utils/utilities'
 
 const statusClass: Record<string, string> = {
   active: 'bg-green-100 text-green-700 border-green-200',
@@ -45,13 +47,13 @@ const statusLabel: Record<string, string> = {
   terminated: 'Terminated',
 }
 
-const workforceLabel: Record<string, string> = {
-  physician: 'Physician', // 1000
-  nurse: 'Nurse', // 2000
-  allied_health: 'Allied Health/Technician', // 3000
-  administrative: 'Administrative', // 4000
-  support_service: 'Support Service', //5000
-}
+// const workforceLabel: Record<string, string> = {
+//   physician: 'Physician', // 1000
+//   nurse: 'Nurse', // 2000
+//   allied_health: 'Allied Health/Technician', // 3000
+//   administrative: 'Administrative', // 4000
+//   support_service: 'Support Service', //5000
+// }
 
 interface Props {
   profile: EmployeeProfile
@@ -69,6 +71,8 @@ export function EmployeeProfileHeader({ profile }: Props) {
   const name = isRtl
     ? [p.firstNameAr, p.secondNameAr, p.thirdNameAr, p.familyNameAr]
     : [p.firstNameEn, p.secondNameEn, p.thirdNameEn, p.familyNameEn]
+
+  const wf = e?.movement.positionItem.workforceCategory ?? ''
 
   return (
     <div className='rounded-xl border bg-background p-6'>
@@ -149,17 +153,18 @@ export function EmployeeProfileHeader({ profile }: Props) {
                 e?.movement.officialDepartment.nameEn)
               : e?.movement.officialDepartment.nameEn}
           </div>
-          <Badge
+          {/* <Badge
             variant={'outline'}
             className={statusClass[e?.status ?? ''] ?? ''}
           >
             {statusLabel[e?.status ?? ''] ?? e?.status}
-          </Badge>
+          </Badge> */}
+          <StatusBadge status={e?.status} />
           <div className='grid grid-cols-2 gap-x-10 gap-y-2 pt-5'>
             <div>
               <strong>{et('hireDate')}</strong>
               <br />
-              {e?.hireDate}
+              {isRtl ? toArabic(e?.hireDate, 3) : e?.hireDate}
             </div>
             <div>
               <strong>{et('pcnText')}</strong>
@@ -169,14 +174,17 @@ export function EmployeeProfileHeader({ profile }: Props) {
             <div>
               <strong>{et('category')}</strong>
               <br />
-              {e?.movement.positionItem.categoryCode}
+              {isRtl
+                ? toPersianDigits(e?.movement.positionItem.categoryCode)
+                : e?.movement.positionItem.categoryCode}
             </div>
             <div>
               <strong>{et('workforce')}</strong>
               <br />
-              {workforceLabel[
+              {/* {workforceLabel[
                 e?.movement.positionItem.workforceCategory ?? ''
-              ] ?? e?.movement.positionItem.workforceCategory}
+              ] ?? e?.movement.positionItem.workforceCategory} */}
+              {et(wf)}
             </div>
           </div>
         </div>

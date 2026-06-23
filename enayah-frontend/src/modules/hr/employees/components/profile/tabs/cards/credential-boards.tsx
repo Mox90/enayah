@@ -14,6 +14,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { VerificationBadge } from '@/components/badges/verification-badge'
 import { BoardInput } from '@/modules/hr/onboarding/types/onboarding.types'
+import { useLocale, useTranslations } from 'next-intl'
+import { cn } from '@/lib/utils'
+import { toArabic, toPersianDigits } from '@/utils/utilities'
 
 // interface Board {
 //   id: string
@@ -33,21 +36,29 @@ interface Props {
 }
 
 export function CredentialBoards({ boards, onAdd, onEdit, onDelete }: Props) {
+  const locale = useLocale()
+  const ct = useTranslations('credentials')
+  const isRtl = locale === 'ar'
   return (
     <Card>
       <CardHeader className='flex flex-row items-center justify-between'>
-        <CardTitle>📜 Board Certifications ({boards.length})</CardTitle>
+        <CardTitle>
+          📜 {ct('boardCertificationLabel')} (
+          {isRtl ? toPersianDigits(boards.length) : boards.length})
+        </CardTitle>
 
         <Button size='sm' onClick={onAdd}>
-          <Plus className='mr-2 h-4 w-4' />
-          Add Board
+          <Plus className={cn('h-4 w-4', isRtl ? 'ml-2' : 'mr-2')} />
+          {ct('addBoard')}
         </Button>
       </CardHeader>
 
       <CardContent className='space-y-4'>
         {boards.length === 0 && (
           <div className='text-sm text-muted-foreground'>
-            No Board Certifications
+            {ct.rich('noRecFound', {
+              item: isRtl ? 'شهادات المجلس' : 'Board Certifications',
+            })}
           </div>
         )}
 
@@ -62,29 +73,35 @@ export function CredentialBoards({ boards, onAdd, onEdit, onDelete }: Props) {
 
                 {board.issuingBody && (
                   <div className='text-sm text-muted-foreground'>
-                    Issuing Body: {board.issuingBody}
+                    {ct('issuingBody')}: {board.issuingBody}
                   </div>
                 )}
 
                 {board.specialty && (
                   <div className='text-sm text-muted-foreground'>
-                    Specialty: {board.specialty}
+                    {ct('specialty')}: {board.specialty}
                   </div>
                 )}
 
                 {board.issueDate && (
                   <div className='text-sm'>
-                    Issued: {format(new Date(board.issueDate), 'dd-MMM-yyyy')}
+                    {ct('issued')}:{' '}
+                    {isRtl
+                      ? toArabic(board.issueDate, 1)
+                      : format(new Date(board.issueDate), 'dd-MMM-yyyy')}
                   </div>
                 )}
 
                 {board.expiryDate && (
                   <div className='text-sm'>
-                    Expires: {format(new Date(board.expiryDate), 'dd-MMM-yyyy')}
+                    {ct('expires')}:{' '}
+                    {isRtl
+                      ? toArabic(board.expiryDate, 1)
+                      : format(new Date(board.expiryDate), 'dd-MMM-yyyy')}
                   </div>
                 )}
 
-                <VerificationBadge verified={board.isVerified} />
+                <VerificationBadge verified={board.isVerified ?? false} />
               </div>
 
               <div className='flex flex-col items-end gap-2'>
@@ -95,27 +112,36 @@ export function CredentialBoards({ boards, onAdd, onEdit, onDelete }: Props) {
                     </Button>
                   </DropdownMenuTrigger>
 
-                  <DropdownMenuContent align='end'>
+                  <DropdownMenuContent>
                     {onEdit && (
                       <DropdownMenuItem
+                        className={
+                          isRtl
+                            ? 'justify-end text-right'
+                            : 'justify-start text-left'
+                        }
                         onClick={() => {
                           if (!board.id) return
                           onEdit(board.id)
                         }}
                       >
-                        Edit
+                        {ct('edit')}
                       </DropdownMenuItem>
                     )}
 
                     {onDelete && (
                       <DropdownMenuItem
-                        className='text-red-600'
+                        className={`text-red-600 ${
+                          isRtl
+                            ? 'justify-end text-right'
+                            : 'justify-start text-left'
+                        }`}
                         onClick={() => {
                           if (!board.id) return
                           onDelete(board.id)
                         }}
                       >
-                        Delete
+                        {ct('delete')}
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>

@@ -16,6 +16,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { VerificationBadge } from '@/components/badges/verification-badge'
 import { FellowshipInput } from '@/modules/hr/onboarding/types/onboarding.types'
+import { useLocale, useTranslations } from 'next-intl'
+import { toArabic, toPersianDigits } from '@/utils/utilities'
+import { cn } from '@/lib/utils'
 
 // interface Fellowship {
 //   id: string
@@ -44,20 +47,28 @@ export function CredentialFellowships({
   onEdit,
   onDelete,
 }: Props) {
+  const locale = useLocale()
+  const ct = useTranslations('credentials')
+  const isRtl = locale === 'ar'
   return (
     <Card>
       <CardHeader className='flex flex-row justify-between'>
-        <CardTitle>🏅 Fellowships ({fellowships.length})</CardTitle>
+        <CardTitle>
+          🏅 {ct('fellowLabel')} (
+          {isRtl ? toPersianDigits(fellowships.length) : fellowships.length})
+        </CardTitle>
 
         <Button size='sm' onClick={onAdd}>
-          <Plus className='mr-2 h-4 w-4' />
-          Add Fellowship
+          <Plus className={cn('h-4 w-4', isRtl ? 'ml-2' : 'mr-2')} />
+          {ct('addFellow')}
         </Button>
       </CardHeader>
 
       <CardContent className='space-y-4'>
         {fellowships.length === 0 && (
-          <div className='text-muted-foreground'>No Fellowship Records</div>
+          <div className='text-muted-foreground'>
+            {ct('noRecFound', { item: isRtl ? 'الزمالة' : 'Fellowship' })}
+          </div>
         )}
 
         {fellowships.map((x, index) => (
@@ -71,19 +82,31 @@ export function CredentialFellowships({
 
                 <div>{x.abbreviation}</div>
 
-                <div>Issuing Body: {x.issuingBody}</div>
+                <div>
+                  {ct('issuingBody')}: {x.issuingBody}
+                </div>
 
-                {x.specialty && <div>Specialty: {x.specialty}</div>}
+                {x.specialty && (
+                  <div>
+                    {ct('specialty')}: {x.specialty}
+                  </div>
+                )}
 
                 {x.issueDate && (
                   <div>
-                    Issued: {format(new Date(x.issueDate), 'dd-MMM-yyyy')}
+                    {ct('issued')}:{' '}
+                    {isRtl
+                      ? toArabic(x.issueDate, 1)
+                      : format(new Date(x.issueDate), 'dd-MMM-yyyy')}
                   </div>
                 )}
 
                 {x.expiryDate && (
                   <div>
-                    Expiry: {format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
+                    {ct('expires')}:{' '}
+                    {isRtl
+                      ? toArabic(x.expiryDate, 1)
+                      : format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
                   </div>
                 )}
 
@@ -102,24 +125,33 @@ export function CredentialFellowships({
                   <DropdownMenuContent>
                     {onEdit && (
                       <DropdownMenuItem
+                        className={
+                          isRtl
+                            ? 'justify-end text-right'
+                            : 'justify-start text-left'
+                        }
                         onClick={() => {
                           if (!x.id) return
                           onEdit(x.id)
                         }}
                       >
-                        Edit
+                        {ct('edit')}
                       </DropdownMenuItem>
                     )}
 
                     {onDelete && (
                       <DropdownMenuItem
-                        className='text-red-600'
+                        className={`text-red-600 ${
+                          isRtl
+                            ? 'justify-end text-right'
+                            : 'justify-start text-left'
+                        }`}
                         onClick={() => {
                           if (!x.id) return
                           onDelete(x.id)
                         }}
                       >
-                        Delete
+                        {ct('delete')}
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>

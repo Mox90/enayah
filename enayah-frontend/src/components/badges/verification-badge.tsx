@@ -1,6 +1,7 @@
 // components/common/verification-badge.tsx
 
 import { Badge } from '@/components/ui/badge'
+import { useTranslations } from 'next-intl'
 
 const verificationClass: Record<string, string> = {
   verified: 'bg-green-100 text-green-700 border-green-200',
@@ -12,11 +13,12 @@ interface Props {
 }
 
 export function VerificationBadge({ verified }: Props) {
+  const ct = useTranslations('credentials')
   const status = verified ? 'verified' : 'unverified'
 
   return (
     <Badge variant='outline' className={verificationClass[status]}>
-      {verified ? 'Verified' : 'Unverified'}
+      {ct(status)}
     </Badge>
   )
 }

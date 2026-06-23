@@ -135,6 +135,7 @@ export type LicenseInput = {
   expiryDate: string
   status: 'active' | 'expired' | 'suspended' | 'revoked'
   isPrimary: boolean
+  isVerified?: boolean
 }
 
 export type LifeSupportInput = {

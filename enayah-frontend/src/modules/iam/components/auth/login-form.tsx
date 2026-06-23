@@ -17,11 +17,13 @@ import { usePermissionStore } from '../../stores/permission.store'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
 
 const Login = () => {
   const t = useTranslations('auth')
   const locale = useLocale()
   const router = useRouter()
+  const isRtl = locale === 'ar'
 
   const login = useAuthStore((state) => state.login)
   const setPermissions = usePermissionStore((state) => state.setPermissions)
@@ -101,13 +103,16 @@ const Login = () => {
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className='pr-10'
+              className={isRtl ? 'pl-10' : 'pr-10'}
             />
 
             <button
               type='button'
               onClick={() => setShowPassword(!showPassword)}
-              className='absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground'
+              className={cn(
+                'absolute top-1/2 -translate-y-1/2 text-muted-foreground',
+                isRtl ? 'left-3' : 'right-3',
+              )}
             >
               {showPassword ? (
                 <EyeOff className='h-4 w-4' />
