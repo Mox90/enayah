@@ -262,7 +262,9 @@ const EmploymentTab = ({ employeeId }: Props) => {
               {/* Contract */}
               <div className='font-semibold'>
                 🗓️ {humanize(ct(contract.contractType))}{' '}
-                {new Date(contract.startDate).getFullYear()}
+                {isRtl
+                  ? toPersianDigits(new Date(contract.startDate).getFullYear())
+                  : new Date(contract.startDate).getFullYear()}
                 <span
                   className={
                     isRtl

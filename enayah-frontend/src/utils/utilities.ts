@@ -68,25 +68,30 @@ export function formatDate(value?: string | null) {
   return value ? format(new Date(value), 'dd-MMM-yyyy') : '-'
 }
 
-export function toArabic(date: string, indicator: number) {
+export function toArabic(date: string | null | undefined, indicator: number) {
+  if (!date) return ''
+  const parsedDate = new Date(date)
+  const isInvalidDate = Number.isNaN(parsedDate.getTime())
   let arabicDate = ''
   switch (indicator) {
     case 1:
+      if (isInvalidDate) return ''
       arabicDate = new Intl.DateTimeFormat('ar-SA-u-nu-arab', {
         day: 'numeric',
         month: 'long',
         year: 'numeric',
-      }).format(new Date(date))
+      }).format(parsedDate)
       break
     case 2:
       arabicDate = date.replace(/\d/g, (d) => Number(d).toLocaleString('ar-SA'))
       break
     case 3:
+      if (isInvalidDate) return ''
       arabicDate = new Intl.DateTimeFormat('ar-SA-u-nu-arab', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
-      }).format(new Date(date))
+      }).format(parsedDate)
       break
     default:
       arabicDate = date
