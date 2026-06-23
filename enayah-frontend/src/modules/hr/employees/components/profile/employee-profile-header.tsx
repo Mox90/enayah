@@ -11,6 +11,7 @@ import {
   UserMinus,
   UserX,
   ArrowRight,
+  MoveLeft,
 } from 'lucide-react'
 
 import {
@@ -88,7 +89,7 @@ export function EmployeeProfileHeader({ profile }: Props) {
           </Button>
         </Link>
 
-        <DropdownMenu>
+        <DropdownMenu dir={isRtl ? 'rtl' : 'ltr'}>
           <DropdownMenuTrigger asChild>
             <Button variant='ghost' size='icon'>
               <MoreVertical className='h-5 w-5' />
@@ -109,7 +110,11 @@ export function EmployeeProfileHeader({ profile }: Props) {
             </DropdownMenuItem>
 
             <DropdownMenuItem>
-              <MoveRight className='mr-2 h-4 w-4' />
+              {isRtl ? (
+                <MoveLeft className='mr-2 h-4 w-4' />
+              ) : (
+                <MoveRight className='mr-2 h-4 w-4' />
+              )}
               {cont('transfer')}
             </DropdownMenuItem>
 

@@ -13,6 +13,7 @@ import {
 } from '../types/employee-request.types'
 import { Employee } from '../types/employee.types'
 import { EmployeeProfile } from '../types/employee-profile.types'
+import { EmployeePersonalDetails } from '../types/employee-personal-details.types'
 
 //import { Employee } from '../types/employee.types'
 
@@ -43,6 +44,14 @@ export const employeeService = {
   getProfile: async (id: string): Promise<EmployeeProfile> => {
     const response = await api.get(
       `${API_ENDPOINTS.hr.employees}/${id}/profile`,
+    )
+
+    return response.data
+  },
+
+  getPersonal: async (id: string): Promise<EmployeePersonalDetails> => {
+    const response = await api.get(
+      `${API_ENDPOINTS.hr.employees}/${id}/personal`,
     )
 
     return response.data
