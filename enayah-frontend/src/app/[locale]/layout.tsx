@@ -4,6 +4,7 @@ import '@/app/globals.css'
 
 //import { Inter, Cairo, Geist, Geist_Mono } from 'next/font/google'
 import { Cairo } from 'next/font/google'
+//import { IBM_Plex_Sans_Arabic } from 'next/font/google'
 
 import { ThemeProvider } from '@/components/providers/theme-provider'
 
@@ -31,8 +32,15 @@ const geistMono = Geist_Mono({
 
 const cairo = Cairo({
   subsets: ['arabic'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-cairo',
 })
+
+// const arabicFont = IBM_Plex_Sans_Arabic({
+//   subsets: ['arabic'],
+//   weight: ['400', '500', '600', '700'],
+//   variable: '--font-arabic',
+// })
 
 export async function generateMetadata({
   params,
@@ -75,7 +83,7 @@ export default async function LocaleLayout({
           text-foreground
           antialiased
           ${cairo.variable}
-          ${locale === 'ar' ? 'font-[var(--font-cairo)]' : 'font-sans'}
+          
         `}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>

@@ -31,6 +31,7 @@ export type LicenseFormValue = {
   expiryDate: string
   status: 'active' | 'expired' | 'suspended' | 'revoked'
   isPrimary: boolean
+  isVerified?: boolean
 }
 
 interface Props {

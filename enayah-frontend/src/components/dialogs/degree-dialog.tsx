@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useLocale, useTranslations } from 'next-intl'
 
 export type DegreeFormValue = {
   id?: string
@@ -65,6 +66,10 @@ function DegreeDialogContent({
   onSubmit: (value: DegreeFormValue) => void | Promise<void>
   generateId: boolean
 }) {
+  const t = useTranslations('credentials')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
+
   const [form, setForm] = useState<DegreeFormValue>(initialValue ?? emptyValue)
 
   function update<K extends keyof DegreeFormValue>(
@@ -102,25 +107,34 @@ function DegreeDialogContent({
   return (
     <DialogContent className='max-w-2xl'>
       <DialogHeader>
-        <DialogTitle>{initialValue ? 'Edit Degree' : 'Add Degree'}</DialogTitle>
+        <DialogTitle>
+          {initialValue
+            ? t.rich('update', { item: isRtl ? 'شهادة' : 'Degree' })
+            : t.rich('add', { item: isRtl ? 'شهادة' : 'Degree' })}
+        </DialogTitle>
         <DialogDescription>
-          Enter the employee&apos;s educational qualification details.
+          {t.rich('dialogDes', {
+            item: isRtl
+              ? `المؤهلات التعليمية للموظف`
+              : `employee's educational qualification`,
+          })}
         </DialogDescription>
       </DialogHeader>
 
       <div className='grid grid-cols-1 gap-4'>
         <div className='space-y-2'>
-          <Label>Degree Name *</Label>
+          <Label>{t('degreeNameLabel')}</Label>
           <Input
             value={form.degreeName}
             onChange={(e) => update('degreeName', e.target.value)}
-            placeholder='Bachelor of Science in Nursing'
+            placeholder={t('degreePlaceHolder')}
           />
         </div>
 
         <div className='space-y-2'>
-          <Label>Degree Type *</Label>
+          <Label>{t('degreeTypeLabel')}</Label>
           <Select
+            dir={isRtl ? 'rtl' : 'ltr'}
             value={form.degreeType}
             onValueChange={(v) =>
               update('degreeType', v as DegreeFormValue['degreeType'])
@@ -131,36 +145,78 @@ function DegreeDialogContent({
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value='diploma'>Diploma</SelectItem>
-              <SelectItem value='associate'>Associate</SelectItem>
-              <SelectItem value='bachelor'>Bachelor</SelectItem>
-              <SelectItem value='master'>Master</SelectItem>
-              <SelectItem value='doctorate'>Doctorate</SelectItem>
-              <SelectItem value='other'>Other</SelectItem>
+              <SelectItem
+                className={
+                  isRtl ? 'justify-start text-right' : 'justify-end text-left'
+                }
+                value='diploma'
+              >
+                {t('diploma')}
+              </SelectItem>
+              <SelectItem
+                className={
+                  isRtl ? 'justify-start text-right' : 'justify-end text-left'
+                }
+                value='associate'
+              >
+                {t('associate')}
+              </SelectItem>
+              <SelectItem
+                className={
+                  isRtl ? 'justify-start text-right' : 'justify-end text-left'
+                }
+                value='bachelor'
+              >
+                {t('bachelor')}
+              </SelectItem>
+              <SelectItem
+                className={
+                  isRtl ? 'justify-start text-right' : 'justify-end text-left'
+                }
+                value='master'
+              >
+                {t('master')}
+              </SelectItem>
+              <SelectItem
+                className={
+                  isRtl ? 'justify-start text-right' : 'justify-end text-left'
+                }
+                value='doctorate'
+              >
+                {t('doctorate')}
+              </SelectItem>
+              <SelectItem
+                className={
+                  isRtl ? 'justify-start text-right' : 'justify-end text-left'
+                }
+                value='other'
+              >
+                {t('other')}
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className='space-y-2'>
-          <Label>Major</Label>
+          <Label>{t('major')}</Label>
           <Input
             value={form.major ?? ''}
             onChange={(e) => update('major', e.target.value || null)}
-            placeholder='Nursing'
+            placeholder={t('majorPlaceHolder')}
           />
         </div>
 
         <div className='space-y-2'>
-          <Label>Institution *</Label>
+          <Label>{t('institutionNameLabel')}</Label>
           <Input
             value={form.institution}
             onChange={(e) => update('institution', e.target.value)}
-            placeholder='University Name (Please do not abbreviate)'
+            placeholder={t('institutionPlaceHolder')}
           />
         </div>
 
         <div className='space-y-2'>
-          <Label>Graduation Date</Label>
+          <Label>{t('graduationDateLabel')}</Label>
           <Input
             type='date'
             value={form.graduationDate ?? ''}
@@ -175,11 +231,11 @@ function DegreeDialogContent({
           variant='outline'
           onClick={() => onOpenChange(false)}
         >
-          Cancel
+          {t('cancel')}
         </Button>
 
         <Button type='button' onClick={handleSubmit}>
-          Save Degree
+          {t.rich('save', { item: isRtl ? 'شهادة' : 'Degree' })}
         </Button>
       </DialogFooter>
     </DialogContent>

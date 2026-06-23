@@ -17,6 +17,9 @@ import {
 import { VerificationBadge } from '@/components/badges/verification-badge'
 import { StatusBadge } from '@/components/badges/status-badge'
 import { LicenseInput } from '@/modules/hr/onboarding/types/onboarding.types'
+import { useLocale, useTranslations } from 'next-intl'
+import { cn } from '@/lib/utils'
+import { toPersianDigits } from '@/utils/utilities'
 
 const verifyClass = {
   verified: 'bg-green-100 text-green-700 border-green-200',
@@ -48,20 +51,28 @@ export function CredentialLicenses({
   onEdit,
   onDelete,
 }: Props) {
+  const ct = useTranslations('credentials')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
   return (
     <Card>
       <CardHeader className='flex flex-row justify-between'>
-        <CardTitle>📄 Licenses ({licenses.length})</CardTitle>
+        <CardTitle>
+          📄 {ct('licenseLabel')} (
+          {isRtl ? toPersianDigits(licenses.length) : licenses.length})
+        </CardTitle>
 
         <Button size='sm' onClick={onAdd}>
-          <Plus className='mr-2 h-4 w-4' />
-          Add License
+          <Plus className={cn('h-4 w-4', isRtl ? 'ml-2' : 'mr-2')} />
+          {ct('addLicense')}
         </Button>
       </CardHeader>
 
       <CardContent className='space-y-4'>
         {licenses.length === 0 && (
-          <div className='text-muted-foreground'>No License Records</div>
+          <div className='text-muted-foreground'>
+            {ct('noRecFound', { item: isRtl ? 'التراخيص' : 'License' })}
+          </div>
         )}
 
         {licenses.map((x) => (
@@ -69,20 +80,30 @@ export function CredentialLicenses({
             <div className='flex justify-between'>
               <div>
                 <div className='font-semibold'>{x.profession}</div>
-                <div>Issuing Authority: {x.authority}</div>
-                <div>License #: {x.licenseNumber}</div>
-                {x.specialty && <div>Specialty: {x.specialty}</div>}
+                <div>
+                  {ct('issuingAuthority')}: {x.authority}
+                </div>
+                <div>
+                  {ct('licenseNum')}: {x.licenseNumber}
+                </div>
+                {x.specialty && (
+                  <div>
+                    {ct('specialty')}: {x.specialty}
+                  </div>
+                )}
                 {x.issueDate && (
                   <div>
-                    Issued: {format(new Date(x.issueDate), 'dd-MMM-yyyy')}
+                    {ct('issued')}:{' '}
+                    {format(new Date(x.issueDate), 'dd-MMM-yyyy')}
                   </div>
                 )}
                 {x.expiryDate && (
                   <div>
-                    Expiry: {format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
+                    {ct('expires')}:{' '}
+                    {format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
                   </div>
                 )}
-                <VerificationBadge verified={x.isVerified} />{' '}
+                <VerificationBadge verified={x.isVerified ?? false} />{' '}
                 <StatusBadge status={x.status} />
               </div>
 
@@ -97,24 +118,33 @@ export function CredentialLicenses({
                   <DropdownMenuContent>
                     {onEdit && (
                       <DropdownMenuItem
+                        className={
+                          isRtl
+                            ? 'justify-end text-right'
+                            : 'justify-start text-left'
+                        }
                         onClick={() => {
                           if (!x.id) return
                           onEdit(x.id)
                         }}
                       >
-                        Edit
+                        {ct('edit')}
                       </DropdownMenuItem>
                     )}
 
                     {onDelete && (
                       <DropdownMenuItem
-                        className='text-red-600'
+                        className={`text-red-600 ${
+                          isRtl
+                            ? 'justify-end text-right'
+                            : 'justify-start text-left'
+                        }`}
                         onClick={() => {
                           if (!x.id) return
                           onDelete(x.id)
                         }}
                       >
-                        Delete
+                        {ct('delete')}
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>

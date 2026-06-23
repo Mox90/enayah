@@ -14,6 +14,12 @@ router.use(requireAuth)
 router.use(attachPermissions)
 
 router.get(
+  '/employee/:employeeId',
+  requirePermission('employee.view'),
+  EmploymentController.getEmploymentTimeline,
+)
+
+router.get(
   '/',
   requirePermission('employee.view'),
   EmploymentController.findAll,

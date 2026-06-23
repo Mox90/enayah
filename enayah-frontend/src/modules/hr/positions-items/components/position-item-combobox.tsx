@@ -19,6 +19,8 @@ import {
 } from '@/components/ui/popover'
 import { PositionItemLookupItem } from '../services/position-item-lookup.service'
 import { usePositionItemLookup } from '../hooks/use-position-item-lookup'
+import { useLocale, useTranslations } from 'next-intl'
+import { toArabicDigits } from '@/utils/utilities'
 
 //import { PositionItemLookupItem } from '@/modules/hr/onboarding/services/position-item-lookup.service'
 //import { usePositionItemLookup } from '@/modules/hr/onboarding/hooks/use-position-item-lookup'
@@ -44,6 +46,12 @@ export function PositionItemCombobox({
 
   const items = data?.items ?? []
   const selected = items.find((item) => item.id === value)
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
+  const pt = useTranslations('positionItems')
+  const et = useTranslations('employees')
+
+  //console.log('isRtl ?' + isRtl)
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -57,12 +65,14 @@ export function PositionItemCombobox({
             ? `${selected.itemNumber} — ${selected.positionTitleEn ?? ''}`
             : 'Select vacant PCN'} */}
           {selected
-            ? `${selected.itemNumber} - ${selected.departmentNameEn ?? ''} / ${
-                selected.positionTitleEn ?? ''
+            ? `${selected.itemNumber} - ${isRtl ? selected.departmentNameAr : (selected.departmentNameEn ?? '')} - ${
+                isRtl
+                  ? (selected.positionTitleAr ?? selected.positionTitleEn ?? '')
+                  : (selected.positionTitleEn ?? '')
               }`
             : selectedLabel
               ? selectedLabel
-              : 'Select Vacant Position'}
+              : pt('selectVacant')}
 
           <ChevronsUpDown className='ml-2 h-4 w-4 opacity-50' />
         </Button>
@@ -71,7 +81,7 @@ export function PositionItemCombobox({
       <PopoverContent className='w-[520px] p-0'>
         <Command shouldFilter={false}>
           <CommandInput
-            placeholder='Search PCN, department, position...'
+            placeholder={pt('searchPcnCombo')}
             value={search}
             onValueChange={setSearch}
           />
@@ -79,7 +89,7 @@ export function PositionItemCombobox({
           <CommandList>
             {isLoading && <CommandItem disabled>Loading...</CommandItem>}
 
-            <CommandEmpty>No vacant position item found.</CommandEmpty>
+            <CommandEmpty>{pt('noVacantFound')}</CommandEmpty>
 
             <CommandGroup>
               {items.map((item) => (
@@ -99,12 +109,20 @@ export function PositionItemCombobox({
 
                   <div className='flex flex-col'>
                     <span className='font-medium'>
-                      {item.itemNumber} — {item.positionTitleEn}
+                      {item.itemNumber} —{' '}
+                      {isRtl
+                        ? (item.positionTitleAr ?? item.positionTitleEn)
+                        : item.positionTitleEn}
                     </span>
 
                     <span className='text-xs text-muted-foreground'>
-                      {item.departmentNameEn} · Category {item.categoryCode} ·{' '}
-                      {item.workforceCategory}
+                      {isRtl ? item.departmentNameAr : item.departmentNameEn} ·{' '}
+                      {isRtl ? 'فئة' : 'Category'}{' '}
+                      {isRtl
+                        ? toArabicDigits(item.categoryCode)
+                        : (item.categoryCode ?? '')}{' '}
+                      ·{' '}
+                      {item.workforceCategory ? et(item.workforceCategory) : ''}
                     </span>
                   </div>
                 </CommandItem>

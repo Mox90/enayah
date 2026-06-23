@@ -87,4 +87,17 @@ export const EmploymentService = {
       return existing
     })
   },
+
+  getTimelineByEmployeeId: async (employeeId: string) => {
+    const timeline = await EmploymentRepository.findTimelineByEmployeeId(
+      db,
+      employeeId,
+    )
+
+    if (!timeline.length) {
+      throw new AppError('Employment timeline not found', 404)
+    }
+
+    return timeline
+  },
 }

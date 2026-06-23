@@ -1,6 +1,12 @@
 import { and, eq, sql } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
-import { DB, employments } from '../../../../db'
+import {
+  appointments,
+  contractMovements,
+  contracts,
+  DB,
+  employments,
+} from '../../../../db'
 import {
   CreateEmploymentDto,
   UpdateEmploymentDto,
@@ -146,6 +152,39 @@ export const EmploymentRepository = {
         isActive,
       ),
       orderBy: (e, { desc }) => [desc(e.startDate)],
+    })
+  },
+
+  findTimelineByEmployeeId: async (tx: DB, employeeId: string) => {
+    return tx.query.employments.findMany({
+      where: and(eq(employments.employeeId, employeeId), isActive),
+      // where: and(
+      //   eq(employments.employeeId, employeeId),
+      //   eq(employments.status, 'active'),
+      //   isActive,
+      // ),
+      orderBy: (e, { desc }) => [desc(e.startDate)],
+      with: {
+        contracts: {
+          where: eq(contracts.isDeleted, false),
+          orderBy: (c, { desc }) => [desc(c.startDate)],
+          with: {
+            movements: {
+              where: eq(contractMovements.isDeleted, false),
+              orderBy: (m, { asc }) => [asc(m.sequenceNumber)],
+              with: {
+                positionItem: true,
+                department: true,
+                position: true,
+              },
+            },
+          },
+        },
+        appointments: {
+          where: eq(appointments.isDeleted, false),
+          orderBy: (a, { desc }) => [desc(a.startDate)],
+        },
+      },
     })
   },
 }

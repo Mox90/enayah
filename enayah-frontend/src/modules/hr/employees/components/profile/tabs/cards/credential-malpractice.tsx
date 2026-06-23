@@ -14,6 +14,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { VerificationBadge } from '@/components/badges/verification-badge'
 import { MalpracticeInput } from '@/modules/hr/onboarding/types/onboarding.types'
+import { useLocale, useTranslations } from 'next-intl'
+import { cn } from '@/lib/utils'
+import { toArabic, toArabicDigits, toPersianDigits } from '@/utils/utilities'
 
 //import { VerificationBadge } from '@/components/common/verification-badge'
 
@@ -40,21 +43,27 @@ export function CredentialMalpractice({
   onEdit,
   onDelete,
 }: Props) {
+  const locale = useLocale()
+  const ct = useTranslations('credentials')
+  const isRtl = locale === 'ar'
   return (
     <Card>
       <CardHeader className='flex flex-row items-center justify-between'>
-        <CardTitle>🛡️ Malpractice Insurance ({malpractice.length})</CardTitle>
+        <CardTitle>
+          🛡️ {ct('malpracticeLabel')} (
+          {isRtl ? toPersianDigits(malpractice.length) : malpractice.length})
+        </CardTitle>
 
         <Button size='sm' onClick={onAdd}>
-          <Plus className='mr-2 h-4 w-4' />
-          Add Malpractice
+          <Plus className={cn('h-4 w-4', isRtl ? 'ml-2' : 'mr-2')} />
+          {ct('addMalpractice')}
         </Button>
       </CardHeader>
 
       <CardContent className='space-y-4'>
         {malpractice.length === 0 && (
           <div className='text-sm text-muted-foreground'>
-            No Malpractice Insurance
+            {ct('noRecFound', { item: 'Malpractice Insurance' })}
           </div>
         )}
 
@@ -65,24 +74,30 @@ export function CredentialMalpractice({
                 <div className='font-semibold'>{x.insuranceCompany}</div>
 
                 <div className='text-sm text-muted-foreground'>
-                  Policy #: {x.policyNumber}
+                  {ct('policyNum')}: {x.policyNumber}
                 </div>
 
                 {x.coverageAmount && (
                   <div className='text-sm'>
-                    Coverage Amount: {x.coverageAmount}
+                    {ct('amount')}: {x.coverageAmount}
                   </div>
                 )}
 
                 {x.startDate && (
                   <div className='text-sm'>
-                    Start Date: {format(new Date(x.startDate), 'dd-MMM-yyyy')}
+                    {ct('startDate')}:{' '}
+                    {isRtl
+                      ? toArabic(x.startDate, 1)
+                      : format(new Date(x.startDate), 'dd-MMM-yyyy')}
                   </div>
                 )}
 
                 {x.expiryDate && (
                   <div className='text-sm'>
-                    Expiry Date: {format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
+                    {ct('expires')}:{' '}
+                    {isRtl
+                      ? toArabic(x.expiryDate, 1)
+                      : format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
                   </div>
                 )}
 
@@ -100,24 +115,33 @@ export function CredentialMalpractice({
                   <DropdownMenuContent>
                     {onEdit && (
                       <DropdownMenuItem
+                        className={
+                          isRtl
+                            ? 'justify-end text-right'
+                            : 'justify-start text-left'
+                        }
                         onClick={() => {
                           if (!x.id) return
                           onEdit(x.id)
                         }}
                       >
-                        Edit
+                        {ct('edit')}
                       </DropdownMenuItem>
                     )}
 
                     {onDelete && (
                       <DropdownMenuItem
-                        className='text-red-600'
+                        className={`text-red-600 ${
+                          isRtl
+                            ? 'justify-end text-right'
+                            : 'justify-start text-left'
+                        }`}
                         onClick={() => {
                           if (!x.id) return
                           onDelete(x.id)
                         }}
                       >
-                        Delete
+                        {ct('delete')}
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>

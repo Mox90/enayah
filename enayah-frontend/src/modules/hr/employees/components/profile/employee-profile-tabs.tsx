@@ -44,7 +44,7 @@ export function EmployeeProfileTabs({ employeeId, profile }: Props) {
         </TabsContent>
 
         <TabsContent value='employment'>
-          <EmploymentTab employment={profile.employment} />
+          <EmploymentTab employeeId={employeeId} />
         </TabsContent>
 
         <TabsContent value='credentials'>

@@ -16,6 +16,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { MembershipInput } from '@/modules/hr/onboarding/types/onboarding.types'
 import { VerificationBadge } from '@/components/badges/verification-badge'
+import { useLocale, useTranslations } from 'next-intl'
+import { cn } from '@/lib/utils'
+import { toPersianDigits } from '@/utils/utilities'
 
 const verifyClass = {
   verified: 'bg-green-100 text-green-700 border-green-200',
@@ -47,20 +50,28 @@ export function CredentialMemberships({
   onEdit,
   onDelete,
 }: Props) {
+  const locale = useLocale()
+  const ct = useTranslations('credentials')
+  const isRtl = locale === 'ar'
   return (
     <Card>
       <CardHeader className='flex flex-row justify-between'>
-        <CardTitle>🤝 Memberships ({memberships.length})</CardTitle>
+        <CardTitle>
+          🤝 {ct('memberLabel')} (
+          {isRtl ? toPersianDigits(memberships.length) : memberships.length})
+        </CardTitle>
 
         <Button size='sm' onClick={onAdd}>
-          <Plus className='mr-2 h-4 w-4' />
-          Add Membership
+          <Plus className={cn('h-4 w-4', isRtl ? 'ml-2' : 'mr-2')} />
+          {ct('addMember')}
         </Button>
       </CardHeader>
 
       <CardContent className='space-y-4'>
         {memberships.length === 0 && (
-          <div className='text-muted-foreground'>No Membership Records</div>
+          <div className='text-muted-foreground'>
+            {ct('noRecFound', { item: isRtl ? 'عضوية' : 'Membership' })}
+          </div>
         )}
 
         {memberships.map((x) => (
@@ -77,13 +88,15 @@ export function CredentialMemberships({
 
                 {x.startDate && (
                   <div>
-                    Issued: {format(new Date(x.startDate), 'dd-MMM-yyyy')}
+                    {ct('issued')}:{' '}
+                    {format(new Date(x.startDate), 'dd-MMM-yyyy')}
                   </div>
                 )}
 
                 {x.expiryDate && (
                   <div>
-                    Expiry: {format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
+                    {ct('expires')}:{' '}
+                    {format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
                   </div>
                 )}
 
@@ -103,24 +116,33 @@ export function CredentialMemberships({
                   <DropdownMenuContent>
                     {onEdit && (
                       <DropdownMenuItem
+                        className={
+                          isRtl
+                            ? 'justify-end text-right'
+                            : 'justify-start text-left'
+                        }
                         onClick={() => {
                           if (!x.id) return
                           onEdit(x.id)
                         }}
                       >
-                        Edit
+                        {ct('edit')}
                       </DropdownMenuItem>
                     )}
 
                     {onDelete && (
                       <DropdownMenuItem
-                        className='text-red-600'
+                        className={`text-red-600 ${
+                          isRtl
+                            ? 'justify-end text-right'
+                            : 'justify-start text-left'
+                        }`}
                         onClick={() => {
                           if (!x.id) return
                           onDelete(x.id)
                         }}
                       >
-                        Delete
+                        {ct('delete')}
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>

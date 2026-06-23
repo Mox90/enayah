@@ -13,7 +13,7 @@ import { CountryCombobox } from '@/modules/countries/components/country-combobox
 import { CountryLookup } from '@/modules/countries/components/country-lookup'
 import { PersonalErrors } from '@/modules/hr/onboarding/types/onboarding-errors.types'
 import { HireEmployeePayload } from '@/modules/hr/onboarding/types/onboarding.types'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 //import { HireEmployeePayload } from '../types/hire.types'
 
 interface Props {
@@ -32,6 +32,8 @@ export function EmployeeBasicInformation({
 }: Props) {
   const employee = value.employee
   const et = useTranslations('employees')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
 
   function updateEmployee<K extends keyof Employee>(
     field: K,
@@ -200,6 +202,7 @@ export function EmployeeBasicInformation({
         <div className='space-y-2'>
           <Label>{et('gender')}</Label>
           <Select
+            dir={isRtl ? 'rtl' : 'ltr'}
             value={employee.gender}
             onValueChange={(v) => updateEmployee('gender', v as EmployeeGender)}
           >

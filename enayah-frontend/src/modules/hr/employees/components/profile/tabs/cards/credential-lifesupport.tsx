@@ -14,7 +14,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { VerificationBadge } from '@/components/badges/verification-badge'
 import { LifeSupportInput } from '@/modules/hr/onboarding/types/onboarding.types'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
+import { cn } from '@/lib/utils'
+import { toArabic, toPersianDigits } from '@/utils/utilities'
 
 //import { VerificationBadge } from '@/components/common/verification-badge'
 
@@ -42,6 +44,8 @@ export function CredentialLifeSupport({
   onDelete,
 }: Props) {
   const t = useTranslations('credentials')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
 
   function translateCredentialValue(value: string) {
     const knownKeys = [
@@ -79,13 +83,14 @@ export function CredentialLifeSupport({
     <Card>
       <CardHeader className='flex flex-row items-center justify-between'>
         <CardTitle>
-          ❤️ Life Support Certifications ({lifeSupports.length})
+          ❤️ {t('lifeSupportLabel')} (
+          {isRtl ? toPersianDigits(lifeSupports.length) : lifeSupports.length})
         </CardTitle>
 
         {onAdd && (
           <Button size='sm' onClick={onAdd}>
-            <Plus className='mr-2 h-4 w-4' />
-            Add Life Support
+            <Plus className={cn('h-4 w-4', isRtl ? 'ml-2' : 'mr-2')} />
+            {t('addLifeSupport')}
           </Button>
         )}
       </CardHeader>
@@ -93,7 +98,9 @@ export function CredentialLifeSupport({
       <CardContent className='space-y-4'>
         {lifeSupports.length === 0 && (
           <div className='text-sm text-muted-foreground'>
-            No Life Support Certifications
+            {t('noRecFound', {
+              item: isRtl ? 'شهادات دعم الحياة' : 'Life Support Certifications',
+            })}
           </div>
         )}
 
@@ -118,19 +125,25 @@ export function CredentialLifeSupport({
 
                 {x.certificateNumber && (
                   <div className='text-sm'>
-                    Certificate #: {x.certificateNumber}
+                    {t('certificateNum')}: {x.certificateNumber}
                   </div>
                 )}
 
                 {x.issueDate && (
                   <div className='text-sm'>
-                    Issue Date: {format(new Date(x.issueDate), 'dd-MMM-yyyy')}
+                    {t('issued')}:{' '}
+                    {isRtl
+                      ? toArabic(x.issueDate, 1)
+                      : format(new Date(x.issueDate), 'dd-MMM-yyyy')}
                   </div>
                 )}
 
                 {x.expiryDate && (
                   <div className='text-sm'>
-                    Expiry Date: {format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
+                    {t('expires')}:{' '}
+                    {isRtl
+                      ? toArabic(x.expiryDate, 1)
+                      : format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
                   </div>
                 )}
 
@@ -148,24 +161,33 @@ export function CredentialLifeSupport({
                   <DropdownMenuContent>
                     {onEdit && (
                       <DropdownMenuItem
+                        className={
+                          isRtl
+                            ? 'justify-end text-right'
+                            : 'justify-start text-left'
+                        }
                         onClick={() => {
                           if (!x.id) return
                           onEdit(x.id)
                         }}
                       >
-                        Edit
+                        {t('edit')}
                       </DropdownMenuItem>
                     )}
 
                     {onDelete && (
                       <DropdownMenuItem
-                        className='text-red-600'
+                        className={`text-red-600 ${
+                          isRtl
+                            ? 'justify-end text-right'
+                            : 'justify-start text-left'
+                        }`}
                         onClick={() => {
                           if (!x.id) return
                           onDelete(x.id)
                         }}
                       >
-                        Delete
+                        {t('delete')}
                       </DropdownMenuItem>
                     )}
                   </DropdownMenuContent>
