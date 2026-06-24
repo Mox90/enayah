@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { FormDialog } from '../forms'
 
 export type FellowshipFormValue = {
   id?: string
@@ -97,86 +98,115 @@ function FellowshipDialogContent({
   }
 
   return (
-    <DialogContent className='max-w-2xl'>
-      <DialogHeader>
-        <DialogTitle>
-          {initialValue ? 'Edit Fellowship' : 'Add Fellowship'}
-        </DialogTitle>
-        <DialogDescription>
-          Enter the employee&apos;s fellowship qualification details.
-        </DialogDescription>
-      </DialogHeader>
+    <>
+      <div className='space-y-6 px-6 py-1'>
+        <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+          <div className='mb-4'>
+            <h3 className='text-sm font-semibold text-foreground'>
+              Fellowship Qualification
+            </h3>
+            <p className='text-xs text-muted-foreground'>
+              Enter the fellowship name, abbreviation, specialty, and issuing
+              body.
+            </p>
+          </div>
 
-      <div className='grid grid-cols-1 gap-4'>
-        <div className='space-y-2'>
-          <Label>Fellowship Name *</Label>
-          <Input
-            value={form.fellowshipName}
-            onChange={(e) => update('fellowshipName', e.target.value)}
-            placeholder='Fellowship in Cardiology'
-          />
-        </div>
+          <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
+            <div className='space-y-2 xl:col-span-2'>
+              <Label>Fellowship Name *</Label>
+              <Input
+                className='h-11'
+                value={form.fellowshipName}
+                onChange={(e) => update('fellowshipName', e.target.value)}
+                placeholder='Fellowship in Cardiology'
+              />
+            </div>
 
-        <div className='space-y-2'>
-          <Label>Abbreviation</Label>
-          <Input
-            value={form.abbreviation ?? ''}
-            onChange={(e) => update('abbreviation', e.target.value || null)}
-            placeholder='FACC'
-          />
-        </div>
+            <div className='space-y-2'>
+              <Label>Abbreviation</Label>
+              <Input
+                className='h-11'
+                value={form.abbreviation ?? ''}
+                onChange={(e) => update('abbreviation', e.target.value || null)}
+                placeholder='FACC'
+              />
+            </div>
 
-        <div className='space-y-2'>
-          <Label>Issuing Body *</Label>
-          <Input
-            value={form.issuingBody}
-            onChange={(e) => update('issuingBody', e.target.value)}
-            placeholder='American College of Cardiology'
-          />
-        </div>
+            <div className='space-y-2'>
+              <Label>Specialty</Label>
+              <Input
+                className='h-11'
+                value={form.specialty ?? ''}
+                onChange={(e) => update('specialty', e.target.value || null)}
+                placeholder='Cardiology'
+              />
+            </div>
 
-        <div className='space-y-2'>
-          <Label>Specialty</Label>
-          <Input
-            value={form.specialty ?? ''}
-            onChange={(e) => update('specialty', e.target.value || null)}
-            placeholder='Cardiology'
-          />
-        </div>
+            <div className='space-y-2 xl:col-span-2'>
+              <Label>Issuing Body *</Label>
+              <Input
+                className='h-11'
+                value={form.issuingBody}
+                onChange={(e) => update('issuingBody', e.target.value)}
+                placeholder='American College of Cardiology'
+              />
+            </div>
+          </div>
+        </section>
 
-        <div className='space-y-2'>
-          <Label>Issue Date</Label>
-          <Input
-            type='date'
-            value={form.issueDate ?? ''}
-            onChange={(e) => update('issueDate', e.target.value || null)}
-          />
-        </div>
+        <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
+          <div className='mb-4'>
+            <h3 className='text-sm font-semibold text-foreground'>
+              Validity Period
+            </h3>
+            <p className='text-xs text-muted-foreground'>
+              Add the issue and expiry dates if available.
+            </p>
+          </div>
 
-        <div className='space-y-2'>
-          <Label>Expiry Date</Label>
-          <Input
-            type='date'
-            value={form.expiryDate ?? ''}
-            onChange={(e) => update('expiryDate', e.target.value || null)}
-          />
-        </div>
+          <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
+            <div className='space-y-2'>
+              <Label>Issue Date</Label>
+              <Input
+                type='date'
+                className='h-11 bg-background'
+                value={form.issueDate ?? ''}
+                onChange={(e) => update('issueDate', e.target.value || null)}
+              />
+            </div>
+
+            <div className='space-y-2'>
+              <Label>Expiry Date</Label>
+              <Input
+                type='date'
+                className='h-11 bg-background'
+                value={form.expiryDate ?? ''}
+                onChange={(e) => update('expiryDate', e.target.value || null)}
+              />
+            </div>
+          </div>
+        </section>
       </div>
 
-      <DialogFooter>
+      <DialogFooter className='border-t bg-muted/40 px-6 py-6'>
         <Button
           type='button'
+          className='p-4'
           variant='outline'
           onClick={() => onOpenChange(false)}
         >
           Cancel
         </Button>
 
-        <Button type='button' onClick={handleSubmit}>
+        <Button
+          type='button'
+          className='bg-slate-950 p-4 text-white hover:bg-slate-800'
+          onClick={handleSubmit}
+        >
           Save Fellowship
         </Button>
       </DialogFooter>
-    </DialogContent>
+    </>
   )
 }
 
@@ -190,7 +220,14 @@ export function FellowshipDialog({
   const dialogKey = initialValue?.id ?? (open ? 'add-fellowship' : 'closed')
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={initialValue ? 'Edit Fellowship' : 'Add Fellowship'}
+      description="Enter the employee's fellowship qualification details."
+      className='w-[95vw] max-w-4xl overflow-hidden p-0'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+    >
       {open && (
         <FellowshipDialogContent
           key={dialogKey}
@@ -200,6 +237,6 @@ export function FellowshipDialog({
           generateId={generateId}
         />
       )}
-    </Dialog>
+    </FormDialog>
   )
 }

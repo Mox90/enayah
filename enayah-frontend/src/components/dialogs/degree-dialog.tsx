@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useLocale, useTranslations } from 'next-intl'
+import { FormDialog } from '../forms'
 
 export type DegreeFormValue = {
   id?: string
@@ -105,140 +106,124 @@ function DegreeDialogContent({
   }
 
   return (
-    <DialogContent className='max-w-2xl'>
-      <DialogHeader>
-        <DialogTitle>
-          {initialValue
-            ? t.rich('update', { item: isRtl ? 'شهادة' : 'Degree' })
-            : t.rich('add', { item: isRtl ? 'شهادة' : 'Degree' })}
-        </DialogTitle>
-        <DialogDescription>
-          {t.rich('dialogDes', {
-            item: isRtl
-              ? `المؤهلات التعليمية للموظف`
-              : `employee's educational qualification`,
-          })}
-        </DialogDescription>
-      </DialogHeader>
+    <>
+      <div className='space-y-6 px-6 py-1 '>
+        <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+          <div className='mb-4'>
+            <h3 className='text-sm font-semibold text-foreground'>
+              {t('highestEducationalLabel')}
+            </h3>
+            <p className='text-xs text-muted-foreground'>
+              {t.rich('dialogDes', {
+                item: isRtl
+                  ? 'المؤهلات التعليمية للموظف'
+                  : "employee's educational qualification",
+              })}
+            </p>
+          </div>
 
-      <div className='grid grid-cols-1 gap-4'>
-        <div className='space-y-2'>
-          <Label>{t('degreeNameLabel')}</Label>
-          <Input
-            value={form.degreeName}
-            onChange={(e) => update('degreeName', e.target.value)}
-            placeholder={t('degreePlaceHolder')}
-          />
-        </div>
+          <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
+            <div className='space-y-2 xl:col-span-2'>
+              <Label>{t('degreeNameLabel')}</Label>
+              <Input
+                className='h-11'
+                value={form.degreeName}
+                onChange={(e) => update('degreeName', e.target.value)}
+                placeholder={t('degreePlaceHolder')}
+              />
+            </div>
 
-        <div className='space-y-2'>
-          <Label>{t('degreeTypeLabel')}</Label>
-          <Select
-            dir={isRtl ? 'rtl' : 'ltr'}
-            value={form.degreeType}
-            onValueChange={(v) =>
-              update('degreeType', v as DegreeFormValue['degreeType'])
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
+            <div className='space-y-2'>
+              <Label>{t('degreeTypeLabel')}</Label>
+              <Select
+                dir={isRtl ? 'rtl' : 'ltr'}
+                value={form.degreeType}
+                onValueChange={(v) =>
+                  update('degreeType', v as DegreeFormValue['degreeType'])
+                }
+              >
+                <SelectTrigger className='h-11'>
+                  <SelectValue />
+                </SelectTrigger>
 
-            <SelectContent>
-              <SelectItem
-                className={
-                  isRtl ? 'justify-start text-right' : 'justify-end text-left'
-                }
-                value='diploma'
-              >
-                {t('diploma')}
-              </SelectItem>
-              <SelectItem
-                className={
-                  isRtl ? 'justify-start text-right' : 'justify-end text-left'
-                }
-                value='associate'
-              >
-                {t('associate')}
-              </SelectItem>
-              <SelectItem
-                className={
-                  isRtl ? 'justify-start text-right' : 'justify-end text-left'
-                }
-                value='bachelor'
-              >
-                {t('bachelor')}
-              </SelectItem>
-              <SelectItem
-                className={
-                  isRtl ? 'justify-start text-right' : 'justify-end text-left'
-                }
-                value='master'
-              >
-                {t('master')}
-              </SelectItem>
-              <SelectItem
-                className={
-                  isRtl ? 'justify-start text-right' : 'justify-end text-left'
-                }
-                value='doctorate'
-              >
-                {t('doctorate')}
-              </SelectItem>
-              <SelectItem
-                className={
-                  isRtl ? 'justify-start text-right' : 'justify-end text-left'
-                }
-                value='other'
-              >
-                {t('other')}
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+                <SelectContent>
+                  <SelectItem value='diploma'>{t('diploma')}</SelectItem>
+                  <SelectItem value='associate'>{t('associate')}</SelectItem>
+                  <SelectItem value='bachelor'>{t('bachelor')}</SelectItem>
+                  <SelectItem value='master'>{t('master')}</SelectItem>
+                  <SelectItem value='doctorate'>{t('doctorate')}</SelectItem>
+                  <SelectItem value='other'>{t('other')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-        <div className='space-y-2'>
-          <Label>{t('major')}</Label>
-          <Input
-            value={form.major ?? ''}
-            onChange={(e) => update('major', e.target.value || null)}
-            placeholder={t('majorPlaceHolder')}
-          />
-        </div>
+            <div className='space-y-2'>
+              <Label>{t('major')}</Label>
+              <Input
+                className='h-11'
+                value={form.major ?? ''}
+                onChange={(e) => update('major', e.target.value || null)}
+                placeholder={t('majorPlaceHolder')}
+              />
+            </div>
 
-        <div className='space-y-2'>
-          <Label>{t('institutionNameLabel')}</Label>
-          <Input
-            value={form.institution}
-            onChange={(e) => update('institution', e.target.value)}
-            placeholder={t('institutionPlaceHolder')}
-          />
-        </div>
+            <div className='space-y-2 xl:col-span-2'>
+              <Label>{t('institutionNameLabel')}</Label>
+              <Input
+                className='h-11'
+                value={form.institution}
+                onChange={(e) => update('institution', e.target.value)}
+                placeholder={t('institutionPlaceHolder')}
+              />
+            </div>
+          </div>
+        </section>
 
-        <div className='space-y-2'>
-          <Label>{t('graduationDateLabel')}</Label>
-          <Input
-            type='date'
-            value={form.graduationDate ?? ''}
-            onChange={(e) => update('graduationDate', e.target.value || null)}
-          />
-        </div>
+        <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
+          <div className='mb-4'>
+            <h3 className='text-sm font-semibold text-foreground'>
+              {t('graduationDateLabel')}
+            </h3>
+            <p className='text-xs text-muted-foreground'>
+              Graduation or completion date, if available.
+            </p>
+          </div>
+
+          <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
+            <div className='space-y-2'>
+              <Label>{t('graduationDateLabel')}</Label>
+              <Input
+                type='date'
+                className='h-11 bg-background'
+                value={form.graduationDate ?? ''}
+                onChange={(e) =>
+                  update('graduationDate', e.target.value || null)
+                }
+              />
+            </div>
+          </div>
+        </section>
       </div>
 
-      <DialogFooter>
+      <DialogFooter className='border-t bg-muted/40 px-6 py-6'>
         <Button
           type='button'
+          className='p-4'
           variant='outline'
           onClick={() => onOpenChange(false)}
         >
           {t('cancel')}
         </Button>
 
-        <Button type='button' onClick={handleSubmit}>
+        <Button
+          type='button'
+          className='bg-slate-950 p-4 text-white hover:bg-slate-800'
+          onClick={handleSubmit}
+        >
           {t.rich('save', { item: isRtl ? 'شهادة' : 'Degree' })}
         </Button>
       </DialogFooter>
-    </DialogContent>
+    </>
   )
 }
 
@@ -252,7 +237,14 @@ export function DegreeDialog({
   const dialogKey = initialValue?.id ?? (open ? 'add-degree' : 'closed')
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={initialValue ? 'Edit Degree' : 'Add Degree'}
+      description="Enter the employee's board qualification details."
+      className='w-[95vw] max-w-10xl overflow-hidden p-0'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+    >
       {open && (
         <DegreeDialogContent
           key={dialogKey}
@@ -262,6 +254,6 @@ export function DegreeDialog({
           generateId={generateId}
         />
       )}
-    </Dialog>
+    </FormDialog>
   )
 }

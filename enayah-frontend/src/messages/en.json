@@ -33,7 +33,13 @@
     "active": "Active",
     "revoked": "Revoked",
     "expired": "Expired",
-    "suspended": "Suspended"
+    "suspended": "Suspended",
+    "createSuccess": "{name} has been created.",
+    "createError": "Unable to create {name}.",
+    "updateSuccess": "{name} has been updated.",
+    "updateError": "Unable to update {name}.",
+    "deleteSuccess": "{name} has been deleted.",
+    "deleteError": "Unable to delete {name}."
   },
   "auth": {
     "loginTitle": "Login to Your Account",
@@ -145,7 +151,7 @@
     "thirdNameAr": "Third Name AR",
     "male": "Male",
     "female": "Female",
-    "dateOfBirth": "Date of Birth",
+    "dateOfBirth": "Date of Birth *",
     "contactInfo": "Contact Information",
     "contactInfoSub": "Primary email and phone number.",
     "primaryEmail": "Primary Email",
@@ -415,7 +421,8 @@
     "firstNameEnRequiredError": "First Name (EN) is required.",
     "familyNameEnRequiredError": "Family Name (EN) is required.",
     "firstNameArRequiredError": "First Name (AR) is required.",
-    "familyNameArRequiredError": "Family Name (AR) is required."
+    "familyNameArRequiredError": "Family Name (AR) is required.",
+    "dobRequiredError": "Date of Birth is required."
   },
   "allowanceTypes": {
     "housing": "Housing Allowance",

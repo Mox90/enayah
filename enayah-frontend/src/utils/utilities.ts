@@ -107,9 +107,107 @@ export function toPersianDigits(
   return String(value).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)])
 }
 
+// export function toPersianDigits(
+//   value: string | number | null | undefined,
+// ): string {
+//   if (value == null) return ''
+
+//   const stringValue = String(value)
+//   const hasPlus = stringValue.startsWith('+')
+
+//   // Clean the string to process only digits
+//   const cleanValue = hasPlus ? stringValue.slice(1) : stringValue
+//   const converted = cleanValue.replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)])
+
+//   // \u200E forces the '+' to stay on the left in RTL layouts
+//   return hasPlus ? `\u200E+${converted}` : converted
+// }
+
 export function toArabicDigits(
   value: string | number | null | undefined,
 ): string {
   if (value == null) return ''
   return String(value).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)])
+}
+
+export const getExpiryStatus = (
+  expiryDateStr: string | null | undefined,
+  isRtl: boolean,
+) => {
+  const fallback = {
+    bgClass: 'bg-gradient-to-b from-card to-muted/10',
+    borderClass: isRtl ? 'border-r-primary/70' : 'border-l-primary/70',
+    pulseClass: '',
+    diffDays: null as number | null, // Added this line
+  }
+
+  if (!expiryDateStr) return fallback
+
+  const now = new Date()
+  const expiry = new Date(expiryDateStr)
+
+  if (Number.isNaN(expiry.getTime())) return fallback
+
+  const diffTime = expiry.getTime() - now.getTime()
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+  if (diffDays < 0) {
+    return {
+      bgClass: 'bg-red-500/5 dark:bg-red-500/10',
+      borderClass: isRtl
+        ? 'border-r-red-600 border-red-500/30'
+        : 'border-l-red-600 border-red-500/30',
+      pulseClass:
+        'animate-[pulse_1.5s_infinite] shadow-[0_0_15px_rgba(239,68,68,0.2)]',
+      diffDays,
+    }
+  }
+  if (diffDays <= 30) {
+    return {
+      bgClass: 'bg-red-500/5 dark:bg-red-500/10',
+      borderClass: isRtl
+        ? 'border-r-red-500 border-red-500/20'
+        : 'border-l-red-500 border-red-500/20',
+      pulseClass: 'animate-pulse',
+      diffDays,
+    }
+  }
+  if (diffDays <= 60) {
+    return {
+      bgClass: 'bg-amber-500/5 dark:bg-amber-500/10',
+      borderClass: isRtl
+        ? 'border-r-amber-500 border-amber-500/20'
+        : 'border-l-amber-500 border-amber-500/20',
+      pulseClass: 'animate-pulse',
+      diffDays,
+    }
+  }
+  if (diffDays <= 90) {
+    return {
+      bgClass: 'bg-yellow-500/5 dark:bg-yellow-500/10',
+      borderClass: isRtl
+        ? 'border-r-yellow-500 border-yellow-500/20'
+        : 'border-l-yellow-500 border-yellow-500/20',
+      pulseClass: 'animate-pulse',
+      diffDays,
+    }
+  }
+  return {
+    bgClass: 'bg-emerald-500/5 dark:bg-emerald-500/10',
+    borderClass: isRtl
+      ? 'border-r-emerald-500 border-emerald-500/20'
+      : 'border-l-emerald-500 border-emerald-500/20',
+    pulseClass: '',
+    diffDays,
+  }
+}
+
+// export function emptyToNull(value: unknown) {
+//   return value === '' ? null : value
+// }
+
+export function emptyToUndefined<T>(
+  value: T | '' | null | undefined,
+): T | undefined {
+  return value === '' || value === null ? undefined : value
 }

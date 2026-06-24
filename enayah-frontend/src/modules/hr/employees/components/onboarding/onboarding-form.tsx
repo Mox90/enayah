@@ -17,6 +17,7 @@ import { useRouter } from '../../../../../../i18n/navigation'
 import { useOnboardEmployee } from '@/modules/hr/onboarding/hooks/use-onboarding'
 import { toast } from 'sonner'
 import { AxiosError } from 'axios'
+import { emptyToUndefined } from '@/utils/utilities'
 
 type Step =
   | 'personal'
@@ -184,6 +185,10 @@ export function OnboardingForm({ onCancel }: Props) {
     //   nextErrors.gender = 'Gender is required.'
     // }
 
+    if (!e.dateOfBirth?.trim()) {
+      nextErrors.dateOfBirth = et('dobRequiredError')
+    }
+
     setPersonalErrors(nextErrors)
 
     return Object.keys(nextErrors).length === 0
@@ -228,8 +233,10 @@ export function OnboardingForm({ onCancel }: Props) {
 
       employee: {
         ...onboard.employee,
+        //dateOfBirth: emptyToUndefined(onboard.employee.dateOfBirth),
         countryNameEn: undefined,
         countryNameAr: undefined,
+        //endDate: emptyToUndefined(onboard.employment.endDate),
       },
 
       movement: {
@@ -237,6 +244,7 @@ export function OnboardingForm({ onCancel }: Props) {
         itemNumber: undefined,
         officialDepartmentId: onboard.movement.officialDepartmentId || '',
         officialPositionId: onboard.movement.officialPositionId || '',
+        //endDate: emptyToUndefined(onboard.movement.endDate || ''),
         sequenceNumber: onboard.movement.sequenceNumber || '',
       },
 

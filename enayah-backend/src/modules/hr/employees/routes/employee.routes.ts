@@ -73,6 +73,19 @@ router.get(
   EmployeeController.findById,
 )
 
+// router.patch(
+//   '/:id/personal',
+//   requirePermission('employee.update'),
+//   audit('EMPLOYEE_UPDATE', {
+//     resource: 'EMPLOYEE',
+//     getResourceId: (req) => getParam(req.params.id),
+//     // sanitize: {
+//     //   redactFields: ['email', 'phone'],
+//     // },
+//   }),
+//   EmployeeController.update,
+// )
+
 router.patch(
   '/:id',
   requirePermission('employee.update'),

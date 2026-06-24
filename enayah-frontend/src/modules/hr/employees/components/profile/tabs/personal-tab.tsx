@@ -1,12 +1,25 @@
 'use client'
 
 import { format } from 'date-fns'
-import { Pencil } from 'lucide-react'
+import {
+  Calendar,
+  Earth,
+  Globe,
+  Hash,
+  IdCard,
+  IdCardLanyard,
+  Layers,
+  Pencil,
+  User,
+} from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useLocale, useTranslations } from 'next-intl'
-import { humanize, toArabic } from '@/utils/utilities'
+import { humanize, toArabic, toPersianDigits } from '@/utils/utilities'
+import { useEmployeePersonal } from '../../../hooks/use-employee-personal-details'
+import { PersonalDetailsCards } from './cards/personal-details'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export type Gender = 'male' | 'female'
 
@@ -42,17 +55,6 @@ export interface EmployeePersonal {
 
   countryId?: string
 
-  // createdAt: string
-  // createdBy: string | null
-
-  // updatedAt: string
-  // updatedBy: string | null
-
-  // isDeleted: boolean
-  // deletedAt: string | null
-  // deletedBy: string | null
-
-  //version: number
   nationality: EmployeeNationality | null
 }
 
@@ -63,14 +65,15 @@ interface Props {
 interface FieldProps {
   label: string
   value: React.ReactNode
+  isRtl?: boolean
 }
 
-function Field({ label, value }: FieldProps) {
+function Field({ label, value, isRtl = false }: FieldProps) {
   return (
     <div className='space-y-1'>
       <div className='text-xs text-muted-foreground'>{label}</div>
 
-      <div className='font-medium'>{value ?? '-'}</div>
+      <div className={isRtl ? '' : 'font-medium'}>{value ?? '-'}</div>
     </div>
   )
 }
@@ -80,6 +83,11 @@ const PersonalTab = ({ personal }: Props) => {
   const et = useTranslations('employees')
   const locale = useLocale()
   const isRtl = locale === 'ar'
+  const {
+    data: personalDetails,
+    isLoading,
+    error,
+  } = useEmployeePersonal(personal.id)
 
   return (
     <div className='space-y-6'>
@@ -89,7 +97,10 @@ const PersonalTab = ({ personal }: Props) => {
 
       <Card>
         <CardHeader className='flex flex-row items-center justify-between'>
-          <CardTitle>{et('personalInfo')}</CardTitle>
+          <CardTitle className='flex items-center gap-2'>
+            <IdCardLanyard className='h-5 w-5' />
+            {et('personalInfo')}
+          </CardTitle>
 
           {/* <Button size='sm' variant='outline'>
             <Pencil className='mr-2 h-4 w-4' />
@@ -139,11 +150,17 @@ const PersonalTab = ({ personal }: Props) => {
               ]
                 .filter(Boolean)
                 .join(' ')}
+              isRtl
             />
 
             <Field
               label={et('nationality')}
-              value={personal.nationality?.nationalityEn}
+              value={
+                isRtl
+                  ? (personal.nationality?.nationalityAr ??
+                    personal.nationality?.nationalityEn)
+                  : personal.nationality?.nationalityEn
+              }
             />
           </div>
         </CardContent>
@@ -155,7 +172,10 @@ const PersonalTab = ({ personal }: Props) => {
 
       <Card>
         <CardHeader className='flex flex-row items-center justify-between'>
-          <CardTitle>{et('countryInfo')}</CardTitle>
+          <CardTitle className='flex items-center gap-2'>
+            <Earth className='h-5 w-5' />
+            {et('countryInfo')}
+          </CardTitle>
 
           {/* <Button size='sm' variant='outline'>
             <Pencil className='mr-2 h-4 w-4' />
@@ -165,11 +185,23 @@ const PersonalTab = ({ personal }: Props) => {
 
         <CardContent>
           <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-4'>
-            <Field label={et('country')} value={personal.nationality?.name} />
-
             <Field
               label={et('country')}
-              value={personal.nationality?.nationalityEn}
+              value={
+                isRtl
+                  ? (personal.nationality?.nameAr ?? personal.nationality?.name)
+                  : personal.nationality?.name
+              }
+            />
+
+            <Field
+              label={et('nationality')}
+              value={
+                isRtl
+                  ? (personal.nationality?.nationalityAr ??
+                    personal.nationality?.nationalityEn)
+                  : personal.nationality?.nationalityEn
+              }
             />
 
             <Field label={et('alpha2')} value={personal.nationality?.alpha2} />
@@ -178,11 +210,27 @@ const PersonalTab = ({ personal }: Props) => {
 
             <Field
               label={et('numericCode')}
-              value={personal.nationality?.numericCode}
+              value={
+                isRtl
+                  ? toPersianDigits(personal.nationality?.numericCode)
+                  : personal.nationality?.numericCode
+              }
             />
           </div>
         </CardContent>
       </Card>
+
+      {isLoading ? (
+        <div className='text-sm text-muted-foreground'>
+          Loading personal details...
+        </div>
+      ) : error ? (
+        <div className='text-sm text-destructive'>
+          Failed to load personal details. Please try again.
+        </div>
+      ) : (
+        <PersonalDetailsCards personalDetails={personalDetails} />
+      )}
     </div>
   )
 }

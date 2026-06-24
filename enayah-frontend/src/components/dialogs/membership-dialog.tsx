@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { FormDialog } from '../forms'
 
 export type MembershipFormValue = {
   id?: string
@@ -94,77 +95,96 @@ function MembershipDialogContent({
   }
 
   return (
-    <DialogContent className='max-w-2xl'>
-      <DialogHeader>
-        <DialogTitle>
-          {initialValue ? 'Edit Membership' : 'Add Membership'}
-        </DialogTitle>
-        <DialogDescription>
-          Enter the employee&apos;s professional membership details.
-        </DialogDescription>
-      </DialogHeader>
+    <>
+      <div className='space-y-6 px-6 py-1'>
+        <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+          <div className='mb-4'>
+            <h3 className='text-sm font-semibold text-foreground'>
+              Membership Details
+            </h3>
+            <p className='text-xs text-muted-foreground'>
+              Enter the professional organization and membership number.
+            </p>
+          </div>
 
-      <div className='grid grid-cols-1 gap-4'>
-        <div className='space-y-2'>
-          <Label>Organization *</Label>
-          <Input
-            value={form.organization}
-            onChange={(e) => update('organization', e.target.value)}
-            placeholder='Saudi Commission for Health Specialties'
-          />
-        </div>
+          <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
+            <div className='space-y-2 xl:col-span-2'>
+              <Label>Organization *</Label>
+              <Input
+                className='h-11'
+                value={form.organization}
+                onChange={(e) => update('organization', e.target.value)}
+                placeholder='Saudi Commission for Health Specialties'
+              />
+            </div>
 
-        <div className='space-y-2'>
-          <Label>Membership Number</Label>
-          <Input
-            value={form.membershipNumber ?? ''}
-            onChange={(e) => update('membershipNumber', e.target.value || null)}
-            placeholder='MEM-123456'
-          />
-        </div>
+            <div className='space-y-2 xl:col-span-2'>
+              <Label>Membership Number</Label>
+              <Input
+                className='h-11'
+                value={form.membershipNumber ?? ''}
+                onChange={(e) =>
+                  update('membershipNumber', e.target.value || null)
+                }
+                placeholder='MEM-123456'
+              />
+            </div>
+          </div>
+        </section>
 
-        {/* <div className='space-y-2'>
-          <Label>Membership Level</Label>
-          <Input
-            value={form.membershipLevel ?? ''}
-            onChange={(e) => update('membershipLevel', e.target.value || null)}
-            placeholder='Fellow / Member / Associate'
-          />
-        </div> */}
+        <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
+          <div className='mb-4'>
+            <h3 className='text-sm font-semibold text-foreground'>
+              Validity Period
+            </h3>
+            <p className='text-xs text-muted-foreground'>
+              Add the membership start and expiry dates if available.
+            </p>
+          </div>
 
-        <div className='space-y-2'>
-          <Label>Start Date</Label>
-          <Input
-            type='date'
-            value={form.startDate ?? ''}
-            onChange={(e) => update('startDate', e.target.value || null)}
-          />
-        </div>
+          <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
+            <div className='space-y-2'>
+              <Label>Start Date</Label>
+              <Input
+                type='date'
+                className='h-11 bg-background'
+                value={form.startDate ?? ''}
+                onChange={(e) => update('startDate', e.target.value || null)}
+              />
+            </div>
 
-        <div className='space-y-2'>
-          <Label>Expiry Date</Label>
-          <Input
-            type='date'
-            value={form.expiryDate ?? ''}
-            onChange={(e) => update('expiryDate', e.target.value || null)}
-          />
-        </div>
+            <div className='space-y-2'>
+              <Label>Expiry Date</Label>
+              <Input
+                type='date'
+                className='h-11 bg-background'
+                value={form.expiryDate ?? ''}
+                onChange={(e) => update('expiryDate', e.target.value || null)}
+              />
+            </div>
+          </div>
+        </section>
       </div>
 
-      <DialogFooter>
+      <DialogFooter className='border-t bg-muted/40 px-6 py-6'>
         <Button
           type='button'
+          className='p-4'
           variant='outline'
           onClick={() => onOpenChange(false)}
         >
           Cancel
         </Button>
 
-        <Button type='button' onClick={handleSubmit}>
+        <Button
+          type='button'
+          className='bg-slate-950 p-4 text-white hover:bg-slate-800'
+          onClick={handleSubmit}
+        >
           Save Membership
         </Button>
       </DialogFooter>
-    </DialogContent>
+    </>
   )
 }
 
@@ -178,7 +198,14 @@ export function MembershipDialog({
   const dialogKey = initialValue?.id ?? (open ? 'add-membership' : 'closed')
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={initialValue ? 'Edit Membership' : 'Add Membership'}
+      description="Enter the employee's professional membership details."
+      className='w-[95vw] max-w-4xl overflow-hidden p-0'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+    >
       {open && (
         <MembershipDialogContent
           key={dialogKey}
@@ -188,6 +215,6 @@ export function MembershipDialog({
           generateId={generateId}
         />
       )}
-    </Dialog>
+    </FormDialog>
   )
 }

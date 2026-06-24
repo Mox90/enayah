@@ -27,7 +27,7 @@ function formatDate(value?: string | null) {
 }
 
 export function ReviewStep({ value }: Props) {
-  console.log(value)
+  //console.log(value)
   const locale = useLocale()
   const isRtl = locale === 'ar'
   const employee = value.employee

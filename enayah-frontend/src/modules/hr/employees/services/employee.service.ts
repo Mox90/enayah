@@ -13,6 +13,7 @@ import {
 } from '../types/employee-request.types'
 import { Employee } from '../types/employee.types'
 import { EmployeeProfile } from '../types/employee-profile.types'
+import { EmployeePersonalDetails } from '../types/employee-personal-details.types'
 
 //import { Employee } from '../types/employee.types'
 
@@ -44,6 +45,15 @@ export const employeeService = {
     const response = await api.get(
       `${API_ENDPOINTS.hr.employees}/${id}/profile`,
     )
+    //console.log('data is')
+    //console.log(response.data)
+    return response.data
+  },
+
+  getPersonal: async (id: string): Promise<EmployeePersonalDetails> => {
+    const response = await api.get(
+      `${API_ENDPOINTS.hr.employees}/${id}/personal`,
+    )
 
     return response.data
   },
@@ -59,7 +69,9 @@ export const employeeService = {
   //----------------------------------
 
   update: async (id: string, dto: UpdateEmployeeDto): Promise<Employee> => {
-    const response = await api.put(`${API_ENDPOINTS.hr.employees}/${id}`, dto)
+    //console.log('ID >>>>>> ' + id)
+    //console.log(dto)
+    const response = await api.patch(`${API_ENDPOINTS.hr.employees}/${id}`, dto)
 
     return response.data
   },

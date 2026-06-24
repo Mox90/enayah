@@ -10,6 +10,7 @@ export function EmployeeProfileWorkspace() {
   const params = useParams()
   const id = params.id as string
   const { data, isLoading, error, isError } = useEmployeeProfile(id)
+  //console.log('Version received from backend is ' + data?.personal.version)
 
   if (isLoading) {
     return <>Loading...</>

@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 //import { DB } from '../../../../db'
 import {
   employeeAddresses,
@@ -117,6 +117,18 @@ export const EmployeePersonalRepository = {
           eq(employeeIdentifications.employeeId, employeeId),
           eq(employeeIdentifications.isDeleted, false),
         ),
+        orderBy: (a) => [
+          sql`
+            CASE ${a.type}
+              WHEN 'iqama' THEN 1
+              WHEN 'national_id' THEN 2
+              WHEN 'passport' THEN 3
+              WHEN 'gcc_id' THEN 4
+              WHEN 'other' THEN 5
+              ELSE 6
+            END ASC
+          `,
+        ],
       }),
 
       tx.query.employeeEmails.findMany({

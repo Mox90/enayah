@@ -83,7 +83,6 @@ export default async function LocaleLayout({
           text-foreground
           antialiased
           ${cairo.variable}
-          
         `}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>

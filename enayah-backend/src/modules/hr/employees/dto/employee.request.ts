@@ -60,7 +60,7 @@ export const CreateEmployeeSchema = z.object({
   familyNameAr: z.string().trim().min(1).max(100),
 
   gender: z.enum(['male', 'female']),
-  dateOfBirth: z.iso.date().optional(), //z.string().optional(),
+  dateOfBirth: z.iso.date().nullable().optional(), //z.string().optional(),
 
   countryId: z.uuid().nullable().optional(),
 })

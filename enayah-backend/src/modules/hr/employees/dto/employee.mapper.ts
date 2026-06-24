@@ -6,6 +6,7 @@ import {
 import { CreateEmployeeDto, UpdateEmployeeDto } from './employee.request'
 import { InferSelectModel } from 'drizzle-orm'
 import { employees } from '../../../../db'
+import { version } from 'node:os'
 
 type EmployeeSelect = InferSelectModel<typeof employees>
 
@@ -174,6 +175,7 @@ export function toEmployeeProfileResponse(employee: any) {
       dateOfBirth: employee.dateOfBirth,
 
       nationality: employee.nationality?.id ? employee.nationality : null,
+      version: employee.version,
     },
 
     employment: employee.employmentId

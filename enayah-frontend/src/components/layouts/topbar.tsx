@@ -20,6 +20,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import MobileSidebar from './mobile-sidebar'
 import { api } from '@/lib/api/client'
 import { Link, useRouter } from '../../../i18n/navigation'
+import { transform } from 'zod'
 //import { router } from 'next/client'
 
 const Topbar = () => {
@@ -29,6 +30,7 @@ const Topbar = () => {
   const user = useAuthStore((state) => state.user)
   const logout = useAuthStore((state) => state.logout)
   const { resolvedTheme, setTheme } = useTheme()
+  const isRtl = locale === 'ar'
 
   const handleLogout = async () => {
     try {
@@ -43,19 +45,19 @@ const Topbar = () => {
     }
   }
 
-  const fullName =
-    locale === 'ar' ? user?.employee?.fullNameAr : user?.employee?.fullNameEn
+  const fullName = isRtl
+    ? user?.employee?.fullNameAr
+    : user?.employee?.fullNameEn
 
-  const initials =
-    locale === 'ar'
-      ? `${user?.employee?.firstNameAr?.slice(0, 1) ?? ''}${
-          user?.employee?.familyNameAr?.slice(0, 1) ?? ''
-        }`
-      : `${user?.employee?.firstNameEn?.slice(0, 1) ?? ''}${
-          user?.employee?.familyNameEn?.slice(0, 1) ?? ''
-        }`
+  const initials = isRtl
+    ? `${user?.employee?.firstNameAr?.slice(0, 1) ?? ''}${
+        user?.employee?.familyNameAr?.slice(0, 1) ?? ''
+      }`
+    : `${user?.employee?.firstNameEn?.slice(0, 1) ?? ''}${
+        user?.employee?.familyNameEn?.slice(0, 1) ?? ''
+      }`
 
-  const displayInitials = locale === 'ar' ? initials : initials.toUpperCase()
+  const displayInitials = isRtl ? initials : initials.toUpperCase()
 
   return (
     <header className='flex h-16 items-center justify-between border-b bg-background px-6'>
@@ -79,7 +81,7 @@ const Topbar = () => {
 
           <h1
             className={`hidden min-[370px]:block truncate text-2xl font-bold ${
-              locale === 'ar' ? 'pr-2' : 'pl-2'
+              isRtl ? 'pr-2' : 'pl-2'
             }`}
           >
             NAFH
@@ -114,7 +116,7 @@ const Topbar = () => {
         </Button>
 
         {/* PROFILE */}
-        <DropdownMenu>
+        <DropdownMenu dir={isRtl ? 'rtl' : 'ltr'}>
           <DropdownMenuTrigger>
             <div className='cursor-pointer'>
               <Avatar className='h-10 w-10 border'>
@@ -147,7 +149,10 @@ const Topbar = () => {
             <DropdownMenuSeparator />
 
             <DropdownMenuItem onClick={handleLogout} className='text-red-500'>
-              <LogOut className='mr-2 h-4 w-4' />
+              <LogOut
+                className='mr-2 h-4 w-4'
+                style={isRtl ? { transform: 'scaleX(-1)' } : {}}
+              />
               {t('logout')}
             </DropdownMenuItem>
           </DropdownMenuContent>

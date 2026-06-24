@@ -1,3 +1,4 @@
+import { version } from 'node:os'
 import { AppError } from '../../../../core/errors/AppError'
 import { latestContractMovement } from '../../../../core/utils/current-assignment.query'
 
@@ -60,6 +61,7 @@ export const EmployeeProfileRepository = {
           alpha3: countries.alpha3,
           numericCode: countries.numericCode,
         },
+        version: employees.version,
 
         // ---------------------
         // Employment

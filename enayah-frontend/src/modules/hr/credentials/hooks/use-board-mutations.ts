@@ -42,7 +42,7 @@ export function useUpdateBoard(employeeId: string) {
 
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ['employee_credentials', employeeId],
+        queryKey: ['employee-credentials', employeeId],
       })
       toast.success(
         t.rich('updateSuccess', {
@@ -74,7 +74,7 @@ export function useDeleteBoard(employeeId: string) {
     mutationFn: (id: string) => credentialBoardService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['employee_credentials', employeeId],
+        queryKey: ['employee-credentials', employeeId],
       })
       toast.success(t.rich('deleteSuccess', { name: isRtl ? 'مجلس' : 'Board' }))
     },
