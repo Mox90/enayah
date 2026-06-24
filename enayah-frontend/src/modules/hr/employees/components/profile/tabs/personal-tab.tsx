@@ -83,7 +83,11 @@ const PersonalTab = ({ personal }: Props) => {
   const et = useTranslations('employees')
   const locale = useLocale()
   const isRtl = locale === 'ar'
-  const { data: personalDetails, isLoading } = useEmployeePersonal(personal.id)
+  const {
+    data: personalDetails,
+    isLoading,
+    error,
+  } = useEmployeePersonal(personal.id)
 
   return (
     <div className='space-y-6'>
@@ -219,6 +223,10 @@ const PersonalTab = ({ personal }: Props) => {
       {isLoading ? (
         <div className='text-sm text-muted-foreground'>
           Loading personal details...
+        </div>
+      ) : error ? (
+        <div className='text-sm text-destructive'>
+          Failed to load personal details. Please try again.
         </div>
       ) : (
         <PersonalDetailsCards personalDetails={personalDetails} />

@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { FormDialog } from '../forms'
 
 export type LicenseFormValue = {
   id?: string
@@ -102,116 +103,115 @@ function LicenseDialogContent({
   }
 
   return (
-    <DialogContent className='max-w-2xl'>
-      <DialogHeader>
-        <DialogTitle>
-          {initialValue ? 'Edit License' : 'Add License'}
-        </DialogTitle>
-        <DialogDescription>
-          Enter the employee&apos;s obtained license details.
-        </DialogDescription>
-      </DialogHeader>
+    <>
+      <div className='space-y-6 px-6 py-1'>
+        <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+          <div className='mb-4'>
+            <h3 className='text-sm font-semibold text-foreground'>
+              License Details
+            </h3>
+            <p className='text-xs text-muted-foreground'>
+              Enter the professional license number, authority, profession, and
+              specialty.
+            </p>
+          </div>
 
-      <div className='grid grid-cols-1 gap-4'>
-        <div className='space-y-2'>
-          <Label>License Number *</Label>
-          <Input
-            value={form.licenseNumber}
-            onChange={(e) => update('licenseNumber', e.target.value)}
-            placeholder='2626912923'
-          />
-        </div>
+          <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
+            <div className='space-y-2'>
+              <Label>License Number *</Label>
+              <Input
+                className='h-11'
+                value={form.licenseNumber}
+                onChange={(e) => update('licenseNumber', e.target.value)}
+                placeholder='2626912923'
+              />
+            </div>
 
-        <div className='space-y-2'>
-          <Label>Issuing Authority *</Label>
-          <Input
-            value={form.authority}
-            onChange={(e) => update('authority', e.target.value)}
-            placeholder='Saudi Commission for Health Specialties'
-          />
-        </div>
+            <div className='space-y-2'>
+              <Label>Issuing Authority *</Label>
+              <Input
+                className='h-11'
+                value={form.authority}
+                onChange={(e) => update('authority', e.target.value)}
+                placeholder='Saudi Commission for Health Specialties'
+              />
+            </div>
 
-        <div className='space-y-2'>
-          <Label>Profession</Label>
-          <Input
-            value={form.profession ?? ''}
-            onChange={(e) => update('profession', e.target.value)}
-            placeholder='Nurse'
-          />
-        </div>
+            <div className='space-y-2'>
+              <Label>Profession *</Label>
+              <Input
+                className='h-11'
+                value={form.profession ?? ''}
+                onChange={(e) => update('profession', e.target.value)}
+                placeholder='Nurse'
+              />
+            </div>
 
-        <div className='space-y-2'>
-          <Label>Specialty</Label>
-          <Input
-            value={form.specialty ?? ''}
-            onChange={(e) => update('specialty', e.target.value)}
-            placeholder='Nurse'
-          />
-        </div>
+            <div className='space-y-2'>
+              <Label>Specialty</Label>
+              <Input
+                className='h-11'
+                value={form.specialty ?? ''}
+                onChange={(e) => update('specialty', e.target.value || null)}
+                placeholder='Emergency Nursing'
+              />
+            </div>
+          </div>
+        </section>
 
-        <div className='space-y-2'>
-          <Label>Issue Date *</Label>
-          <Input
-            type='date'
-            value={form.issueDate ?? ''}
-            onChange={(e) => update('issueDate', e.target.value)}
-            placeholder='University Name'
-          />
-        </div>
+        <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
+          <div className='mb-4'>
+            <h3 className='text-sm font-semibold text-foreground'>
+              Validity Period
+            </h3>
+            <p className='text-xs text-muted-foreground'>
+              Add the license issue and expiry dates.
+            </p>
+          </div>
 
-        <div className='space-y-2'>
-          <Label>Expiry Date *</Label>
-          <Input
-            type='date'
-            value={form.expiryDate ?? ''}
-            onChange={(e) => update('expiryDate', e.target.value)}
-          />
-        </div>
+          <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
+            <div className='space-y-2'>
+              <Label>Issue Date *</Label>
+              <Input
+                type='date'
+                className='h-11 bg-background'
+                value={form.issueDate ?? ''}
+                onChange={(e) => update('issueDate', e.target.value)}
+              />
+            </div>
 
-        {/* <div className='space-y-2'>
-          <Label>Status *</Label>
-          <Select
-            value={form.status}
-            onValueChange={(v) =>
-              update('status', v as LicenseFormValue['status'])
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='active'>Active</SelectItem>
-              <SelectItem value='expired'>Expired</SelectItem>
-              <SelectItem value='suspended'>Suspended</SelectItem>
-              <SelectItem value='revoked'>Revoked</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className='space-y-2'>
-          <Label>Primary License</Label>
-          <input
-            type='checkbox'
-            checked={form.isPrimary}
-            onChange={(e) => update('isPrimary', e.target.checked)}
-          />
-        </div> */}
+            <div className='space-y-2'>
+              <Label>Expiry Date *</Label>
+              <Input
+                type='date'
+                className='h-11 bg-background'
+                value={form.expiryDate ?? ''}
+                onChange={(e) => update('expiryDate', e.target.value)}
+              />
+            </div>
+          </div>
+        </section>
       </div>
 
-      <DialogFooter>
+      <DialogFooter className='border-t bg-muted/40 px-6 py-6'>
         <Button
           type='button'
+          className='p-4'
           variant='outline'
           onClick={() => onOpenChange(false)}
         >
           Cancel
         </Button>
 
-        <Button type='button' onClick={handleSubmit}>
+        <Button
+          type='button'
+          className='bg-slate-950 p-4 text-white hover:bg-slate-800'
+          onClick={handleSubmit}
+        >
           Save License
         </Button>
       </DialogFooter>
-    </DialogContent>
+    </>
   )
 }
 
@@ -225,7 +225,14 @@ export function LicenseDialog({
   const dialogKey = initialValue?.id ?? (open ? 'add-license' : 'closed')
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={initialValue ? 'Edit License' : 'Add License'}
+      description="Enter the employee's obtained license details."
+      className='w-[95vw] max-w-4xl overflow-hidden p-0'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+    >
       {open && (
         <LicenseDialogContent
           key={dialogKey}
@@ -235,6 +242,6 @@ export function LicenseDialog({
           generateId={generateId}
         />
       )}
-    </Dialog>
+    </FormDialog>
   )
 }

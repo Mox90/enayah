@@ -218,12 +218,21 @@ export function EmployeeBasicInformation({
         </div>
 
         <div className='space-y-2'>
-          <Label>{et('dateOfBirth')}</Label>
+          <Label
+            className={`${personalErrors.dateOfBirth ? 'text-destructive' : ''}`}
+          >
+            {et('dateOfBirth')}
+          </Label>
           <Input
             type='date'
             value={employee.dateOfBirth ?? ''}
             onChange={(e) => updateEmployee('dateOfBirth', e.target.value)}
           />
+          {personalErrors.dateOfBirth && (
+            <p className='text-sm text-destructive'>
+              {personalErrors.dateOfBirth}
+            </p>
+          )}
         </div>
       </div>
     </section>

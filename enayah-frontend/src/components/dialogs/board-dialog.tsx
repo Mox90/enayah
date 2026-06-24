@@ -1,22 +1,9 @@
 import { useState } from 'react'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '../ui/dialog'
+import { DialogFooter } from '../ui/dialog'
 import { Label } from '../ui/label'
 import { Input } from '../ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select'
 import { Button } from '../ui/button'
+import { FormDialog } from '../forms'
 
 export type BoardFormValue = {
   id?: string
@@ -26,7 +13,7 @@ export type BoardFormValue = {
   issueDate?: string | null
   expiryDate?: string | null
   isLifetime?: boolean | null
-  isVerified?: boolean
+  isVerified?: boolean | false
 }
 
 interface Props {
@@ -103,75 +90,112 @@ function BoardDialogContent({
   }
 
   return (
-    <DialogContent className='max-w-2xl'>
-      <DialogHeader>
-        <DialogTitle>{initialValue ? 'Edit Board' : 'Add Board'}</DialogTitle>
-        <DialogDescription>
-          Enter the employee&apos;s board qualification details.
-        </DialogDescription>
-      </DialogHeader>
+    <>
+      <div className='space-y-6 px-6 py-1'>
+        <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+          <div className='mb-4'>
+            <h3 className='text-sm font-semibold text-foreground'>
+              Board Qualification
+            </h3>
 
-      <div className='grid grid-cols-1 gap-4'>
-        <div className='space-y-2'>
-          <Label>Board Name *</Label>
-          <Input
-            value={form.boardName}
-            onChange={(e) => update('boardName', e.target.value)}
-            placeholder='Saudi Board in General Surgery'
-          />
-        </div>
+            <p className='text-xs text-muted-foreground'>
+              Enter the board name, specialty, and issuing authority.
+            </p>
+          </div>
 
-        <div className='space-y-2'>
-          <Label>Specialty</Label>
-          <Input
-            value={form.specialty ?? ''}
-            onChange={(e) => update('specialty', e.target.value || null)}
-            placeholder='General Surgery'
-          />
-        </div>
+          <div className='grid grid-cols-1 gap-4'>
+            <div className='space-y-2 xl:col-span-2'>
+              <Label>Board Name *</Label>
 
-        <div className='space-y-2'>
-          <Label>Issuing Body *</Label>
-          <Input
-            value={form.issuingBody}
-            onChange={(e) => update('issuingBody', e.target.value)}
-            placeholder='Saudi Commission for Health Specialties'
-          />
-        </div>
+              <Input
+                className='h-11'
+                value={form.boardName}
+                onChange={(e) => update('boardName', e.target.value)}
+                placeholder='Saudi Board in General Surgery'
+              />
+            </div>
 
-        <div className='space-y-2'>
-          <Label>Issue Date</Label>
-          <Input
-            type='date'
-            value={form.issueDate ?? ''}
-            onChange={(e) => update('issueDate', e.target.value || null)}
-          />
-        </div>
+            <div className='space-y-2 xl:col-span-2'>
+              <Label>Specialty</Label>
 
-        <div className='space-y-2'>
-          <Label>Expiry Date</Label>
-          <Input
-            type='date'
-            value={form.expiryDate ?? ''}
-            onChange={(e) => update('expiryDate', e.target.value || null)}
-          />
-        </div>
+              <Input
+                className='h-11'
+                value={form.specialty ?? ''}
+                onChange={(e) => update('specialty', e.target.value || null)}
+                placeholder='General Surgery'
+              />
+            </div>
+
+            <div className='space-y-2 xl:col-span-2'>
+              <Label>Issuing Body *</Label>
+
+              <Input
+                className='h-11'
+                value={form.issuingBody}
+                onChange={(e) => update('issuingBody', e.target.value)}
+                placeholder='Saudi Commission for Health Specialties'
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
+          <div className='mb-4'>
+            <h3 className='text-sm font-semibold text-foreground'>
+              Validity Period
+            </h3>
+
+            <p className='text-xs text-muted-foreground'>
+              Add the issue and expiry dates if available.
+            </p>
+          </div>
+
+          <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
+            <div className='space-y-2'>
+              <Label>Issue Date</Label>
+
+              <Input
+                type='date'
+                className='h-11 bg-background'
+                value={form.issueDate ?? ''}
+                onChange={(e) => update('issueDate', e.target.value || null)}
+              />
+            </div>
+
+            <div className='space-y-2'>
+              <Label>Expiry Date</Label>
+
+              <Input
+                type='date'
+                className='h-11 bg-background'
+                value={form.expiryDate ?? ''}
+                onChange={(e) => update('expiryDate', e.target.value || null)}
+              />
+            </div>
+          </div>
+        </section>
       </div>
 
-      <DialogFooter>
+      <DialogFooter className='border-t bg-muted/40 px-6 py-6'>
         <Button
           type='button'
+          className='p-4'
           variant='outline'
           onClick={() => onOpenChange(false)}
         >
           Cancel
         </Button>
 
-        <Button type='button' onClick={handleSubmit} disabled={isSubmitting}>
+        <Button
+          type='button'
+          className='bg-slate-950 p-4 text-white hover:bg-slate-800'
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+        >
           Save Board
         </Button>
       </DialogFooter>
-    </DialogContent>
+    </>
   )
 }
 
@@ -185,7 +209,14 @@ export function BoardDialog({
   const dialogKey = initialValue?.id ?? (open ? 'add-board' : 'closed')
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={initialValue ? 'Edit Board' : 'Add Board'}
+      description="Enter the employee's board qualification details."
+      className='w-[95vw] max-w-10xl overflow-hidden p-0'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+    >
       {open && (
         <BoardDialogContent
           key={dialogKey}
@@ -195,6 +226,6 @@ export function BoardDialog({
           generateId={generateId}
         />
       )}
-    </Dialog>
+    </FormDialog>
   )
 }

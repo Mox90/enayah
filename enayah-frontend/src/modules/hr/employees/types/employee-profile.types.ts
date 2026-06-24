@@ -31,6 +31,9 @@ export interface EmployeeProfile {
       alpha3: string
       numericCode: string
     } | null
+
+    version: number
+    avatar?: string | null
   }
 
   employment: {

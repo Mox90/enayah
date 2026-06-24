@@ -9,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { cn } from '@/lib/utils'
 
 interface Props {
   open: boolean
@@ -16,6 +17,8 @@ interface Props {
   title: string
   description?: string
   children: ReactNode
+  className?: string
+  headerClassName?: string
 }
 
 export function FormDialog({
@@ -24,11 +27,15 @@ export function FormDialog({
   title,
   description,
   children,
+  className,
+  headerClassName,
 }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-lg'>
-        <DialogHeader>
+      <DialogContent
+        className={cn('sm:max-w-lg [&>button>svg]:text-rose-400', className)}
+      >
+        <DialogHeader className={headerClassName}>
           <DialogTitle>{title}</DialogTitle>
 
           {description && (

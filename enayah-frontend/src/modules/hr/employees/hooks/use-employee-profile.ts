@@ -7,3 +7,10 @@ export function useEmployeeProfile(id: string) {
     queryFn: () => employeeService.getProfile(id!),
   })
 }
+
+// export function updateEmployeeProfile(id: string) {
+//   return useQuery({
+//     queryKey: ['employee-profile', id],
+//     queryFn: () => employeeService.update(id!),
+//   })
+// }

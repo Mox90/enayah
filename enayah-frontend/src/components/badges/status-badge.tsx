@@ -1,6 +1,7 @@
 // components/common/license-status-badge.tsx
 
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
 
 const statusClass: Record<string, string> = {
@@ -19,16 +20,18 @@ const statusLabel: Record<string, string> = {
 
 interface Props {
   status: 'active' | 'revoked' | 'expired' | 'suspended' | string
+  className?: string
 }
 
-export function StatusBadge({ status }: Props) {
+export function StatusBadge({ status, className }: Props) {
   const ct = useTranslations('common')
   return (
     <Badge
       variant='outline'
-      className={
-        statusClass[status] ?? 'bg-gray-100 text-gray-700 border-gray-200'
-      }
+      className={cn(
+        statusClass[status] ?? 'bg-gray-100 text-gray-700 border-gray-200',
+        className,
+      )}
     >
       {ct.has(status) ? ct(status) : status}
     </Badge>

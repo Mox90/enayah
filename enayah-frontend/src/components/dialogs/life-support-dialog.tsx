@@ -23,6 +23,7 @@ import {
 import { useLocale, useTranslations } from 'next-intl'
 import { useProviderOptions } from '@/modules/hr/compensations/utils/provider-options'
 import { ProviderCombobox } from '../comboboxes/provider-combobox'
+import { FormDialog } from '../forms'
 
 export type LifeSupportType =
   | 'bls'
@@ -136,107 +137,127 @@ function LifeSupportDialogContent({
   // }
 
   return (
-    <DialogContent className='max-w-2xl'>
-      <DialogHeader>
-        <DialogTitle>
-          {initialValue ? 'Edit Life Support' : 'Add Life Support'}
-        </DialogTitle>
-        <DialogDescription>
-          Enter the employee&apos;s life support certification details.
-        </DialogDescription>
-      </DialogHeader>
+    <>
+      <div className='space-y-6 px-6 py-1'>
+        <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+          <div className='mb-4'>
+            <h3 className='text-sm font-semibold text-foreground'>
+              Certification Details
+            </h3>
+            <p className='text-xs text-muted-foreground'>
+              Enter the life support type, provider, and certificate number.
+            </p>
+          </div>
 
-      <div className='grid grid-cols-1 gap-4'>
-        <div className='space-y-2'>
-          <Label>Type *</Label>
-          <Select
-            dir={isRtl ? 'rtl' : 'ltr'}
-            value={form.type}
-            onValueChange={(v) => update('type', v as LifeSupportType)}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
+          <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
+            <div className='space-y-2'>
+              <Label>Type *</Label>
+              <Select
+                dir={isRtl ? 'rtl' : 'ltr'}
+                value={form.type}
+                onValueChange={(v) => update('type', v as LifeSupportType)}
+              >
+                <SelectTrigger className='h-11'>
+                  <SelectValue />
+                </SelectTrigger>
 
-            <SelectContent dir={isRtl ? 'rtl' : 'ltr'}>
-              <SelectItem value='acls'>{crt('acls')}</SelectItem>
-              <SelectItem value='also'>{crt('also')}</SelectItem>
-              <SelectItem value='asls'>{crt('asls')}</SelectItem>
-              <SelectItem value='atcn'>{crt('atcn')}</SelectItem>
-              <SelectItem value='atls'>{crt('atls')}</SelectItem>
-              <SelectItem value='bls'>{crt('bls')}</SelectItem>
-              <SelectItem value='blso'>{crt('blso')}</SelectItem>
-              <SelectItem value='enpc'>{crt('enpc')}</SelectItem>
-              <SelectItem value='esls'>{crt('esls')}</SelectItem>
-              <SelectItem value='itls'>{crt('itls')}</SelectItem>
-              <SelectItem value='nrp'>{crt('nrp')}</SelectItem>
-              <SelectItem value='pals'>{crt('pals')}</SelectItem>
-              <SelectItem value='pfccs'>{crt('pfccs')}</SelectItem>
-              <SelectItem value='stls'>{crt('stls')}</SelectItem>
-              <SelectItem value='tncc'>{crt('tncc')}</SelectItem>
-              <SelectItem value='other'>{crt('other')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+                <SelectContent dir={isRtl ? 'rtl' : 'ltr'}>
+                  <SelectItem value='acls'>{crt('acls')}</SelectItem>
+                  <SelectItem value='also'>{crt('also')}</SelectItem>
+                  <SelectItem value='asls'>{crt('asls')}</SelectItem>
+                  <SelectItem value='atcn'>{crt('atcn')}</SelectItem>
+                  <SelectItem value='atls'>{crt('atls')}</SelectItem>
+                  <SelectItem value='bls'>{crt('bls')}</SelectItem>
+                  <SelectItem value='blso'>{crt('blso')}</SelectItem>
+                  <SelectItem value='enpc'>{crt('enpc')}</SelectItem>
+                  <SelectItem value='esls'>{crt('esls')}</SelectItem>
+                  <SelectItem value='itls'>{crt('itls')}</SelectItem>
+                  <SelectItem value='nrp'>{crt('nrp')}</SelectItem>
+                  <SelectItem value='pals'>{crt('pals')}</SelectItem>
+                  <SelectItem value='pfccs'>{crt('pfccs')}</SelectItem>
+                  <SelectItem value='stls'>{crt('stls')}</SelectItem>
+                  <SelectItem value='tncc'>{crt('tncc')}</SelectItem>
+                  <SelectItem value='other'>{crt('other')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-        <div className='space-y-2'>
-          <Label>Provider *</Label>
-          {/* <Input
-            value={form.provider}
-            onChange={(e) => update('provider', e.target.value)}
-            placeholder='Saudi Heart Association'
-          /> */}
-          <ProviderCombobox
-            value={form.provider}
-            options={providerOptions}
-            onChange={(provider) => update('provider', provider)}
-          />
-        </div>
+            <div className='space-y-2'>
+              <Label>Provider *</Label>
+              <ProviderCombobox
+                value={form.provider}
+                options={providerOptions}
+                onChange={(provider) => update('provider', provider)}
+              />
+            </div>
 
-        <div className='space-y-2'>
-          <Label>Certificate Number</Label>
-          <Input
-            value={form.certificateNumber ?? ''}
-            onChange={(e) =>
-              update('certificateNumber', e.target.value || null)
-            }
-            placeholder='CERT-123456'
-          />
-        </div>
+            <div className='space-y-2 xl:col-span-2'>
+              <Label>Certificate Number</Label>
+              <Input
+                className='h-11'
+                value={form.certificateNumber ?? ''}
+                onChange={(e) =>
+                  update('certificateNumber', e.target.value || null)
+                }
+                placeholder='CERT-123456'
+              />
+            </div>
+          </div>
+        </section>
 
-        <div className='space-y-2'>
-          <Label>Issue Date</Label>
-          <Input
-            type='date'
-            value={form.issueDate ?? ''}
-            onChange={(e) => update('issueDate', e.target.value || null)}
-          />
-        </div>
+        <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
+          <div className='mb-4'>
+            <h3 className='text-sm font-semibold text-foreground'>
+              Validity Period
+            </h3>
+            <p className='text-xs text-muted-foreground'>
+              Add the certificate issue and expiry dates.
+            </p>
+          </div>
 
-        <div className='space-y-2'>
-          <Label>Expiry Date *</Label>
-          <Input
-            type='date'
-            value={form.expiryDate}
-            onChange={(e) => update('expiryDate', e.target.value)}
-          />
-        </div>
+          <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
+            <div className='space-y-2'>
+              <Label>Issue Date</Label>
+              <Input
+                type='date'
+                className='h-11 bg-background'
+                value={form.issueDate ?? ''}
+                onChange={(e) => update('issueDate', e.target.value || null)}
+              />
+            </div>
+
+            <div className='space-y-2'>
+              <Label>Expiry Date *</Label>
+              <Input
+                type='date'
+                className='h-11 bg-background'
+                value={form.expiryDate}
+                onChange={(e) => update('expiryDate', e.target.value)}
+              />
+            </div>
+          </div>
+        </section>
       </div>
 
-      <DialogFooter>
+      <DialogFooter className='border-t bg-muted/40 px-6 py-6'>
         <Button
           type='button'
+          className='p-4'
           variant='outline'
           onClick={() => onOpenChange(false)}
         >
           Cancel
         </Button>
 
-        <Button type='button' onClick={handleSubmit}>
+        <Button
+          type='button'
+          className='bg-slate-950 p-4 text-white hover:bg-slate-800'
+          onClick={handleSubmit}
+        >
           Save Life Support
         </Button>
       </DialogFooter>
-    </DialogContent>
+    </>
   )
 }
 
@@ -250,7 +271,14 @@ export function LifeSupportDialog({
   const dialogKey = initialValue?.id ?? (open ? 'add-life-support' : 'closed')
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={initialValue ? 'Edit Life Support' : 'Add Life Support'}
+      description="Enter the employee's life support certification details."
+      className='w-[95vw] max-w-4xl overflow-hidden p-0'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+    >
       {open && (
         <LifeSupportDialogContent
           key={dialogKey}
@@ -260,6 +288,6 @@ export function LifeSupportDialog({
           generateId={generateId}
         />
       )}
-    </Dialog>
+    </FormDialog>
   )
 }

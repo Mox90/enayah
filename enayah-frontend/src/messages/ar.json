@@ -33,7 +33,13 @@
     "active": "نشيط",
     "revoked": "تم إبطاله",
     "expired": "منتهي الصلاحية",
-    "suspended": "معلق"
+    "suspended": "معلق",
+    "createSuccess": "تم إنشاء {name}.",
+    "createError": "تعذر إنشاء {name}.",
+    "updateSuccess": "تم تحديث {name}.",
+    "updateError": "تعذر تحديث {name}.",
+    "deleteSuccess": "تم حذف {name}.",
+    "deleteError": "تعذر حذف {name}."
   },
 
   "auth": {
@@ -147,7 +153,7 @@
     "thirdNameAr": "الاسم الثالث باللغة العربية",
     "male": "ذكر",
     "female": "أنثى",
-    "dateOfBirth": "تاريخ الميلاد",
+    "dateOfBirth": "تاريخ الميلاد *",
     "contactInfo": "معلومات الاتصال",
     "contactInfoSub": "البريد الإلكتروني الأساسي ورقم الهاتف.",
     "primaryEmail": "البريد الإلكتروني الأساسي",
@@ -416,7 +422,8 @@
     "firstNameEnRequiredError": "الاسم الأول باللغة الإنجليزية مطلوب.",
     "familyNameEnRequiredError": "اسم العائلة باللغة الإنجليزية مطلوب.",
     "firstNameArRequiredError": "الاسم الأول باللغة العربية مطلوب.",
-    "familyNameArRequiredError": "اسم العائلة باللغة العربية مطلوب."
+    "familyNameArRequiredError": "اسم العائلة باللغة العربية مطلوب.",
+    "dobRequiredError": "تاريخ الميلاد مطلوب."
   },
   "allowanceTypes": {
     "housing": "بدل سكن",

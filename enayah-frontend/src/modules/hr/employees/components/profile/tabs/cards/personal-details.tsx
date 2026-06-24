@@ -104,7 +104,10 @@ export function PersonalDetailsCards({ personalDetails }: Props) {
               //     </div>
               //   </div>
               const status = getExpiryStatus(item.expiryDate, isRtl)
-              const isExpired = new Date(item.expiryDate) < new Date()
+              //const isExpired = new Date(item.expiryDate) < new Date()
+              const isExpired = item.expiryDate
+                ? new Date(item.expiryDate) < new Date()
+                : false
               return (
                 <div
                   key={item.id}

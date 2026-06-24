@@ -136,7 +136,7 @@ export const getExpiryStatus = (
 ) => {
   const fallback = {
     bgClass: 'bg-gradient-to-b from-card to-muted/10',
-    borderClass: 'border-l-primary/70',
+    borderClass: isRtl ? 'border-r-primary/70' : 'border-l-primary/70',
     pulseClass: '',
     diffDays: null as number | null, // Added this line
   }
@@ -200,4 +200,14 @@ export const getExpiryStatus = (
     pulseClass: '',
     diffDays,
   }
+}
+
+// export function emptyToNull(value: unknown) {
+//   return value === '' ? null : value
+// }
+
+export function emptyToUndefined<T>(
+  value: T | '' | null | undefined,
+): T | undefined {
+  return value === '' || value === null ? undefined : value
 }

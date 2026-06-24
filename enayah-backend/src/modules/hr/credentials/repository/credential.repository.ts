@@ -181,6 +181,21 @@ export const CredentialRepository = {
             CASE ${a.type}
               WHEN 'bls' THEN 1
               WHEN 'acls' THEN 2
+              WHEN 'pals' THEN 3
+              WHEN 'nrp' THEN 4
+              WHEN 'stls' THEN 5
+              WHEN 'atls' THEN 6
+              WHEN 'itls' THEN 7
+              WHEN 'blso' THEN 8
+              WHEN 'atcn' THEN 9
+              WHEN 'also' THEN 10
+              WHEN 'tncc' THEN 11
+              WHEN 'enpc' THEN 12
+              WHEN 'asls' THEN 13
+              WHEN 'esls' THEN 14
+              WHEN 'pfccs' THEN 15
+              WHEN 'other' THEN 16
+              ELSE 17
             END ASC
           `,
         ],
