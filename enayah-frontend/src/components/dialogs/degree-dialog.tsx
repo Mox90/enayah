@@ -242,7 +242,7 @@ export function DegreeDialog({
       onOpenChange={onOpenChange}
       title={initialValue ? 'Edit Degree' : 'Add Degree'}
       description="Enter the employee's board qualification details."
-      className='w-[95vw] max-w-10xl overflow-hidden p-0'
+      className='w-[95vw] max-w-4xl overflow-hidden p-0'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
     >
       {open && (

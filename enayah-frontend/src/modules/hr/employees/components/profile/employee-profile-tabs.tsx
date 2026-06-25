@@ -25,7 +25,12 @@ export function EmployeeProfileTabs({ employeeId, profile }: Props) {
   //console.log(profile.personal)
   //console.log(profile.employment)
   return (
-    <Tabs value={tab} onValueChange={setTab} dir={isRtl ? 'rtl' : 'ltr'}>
+    <Tabs
+      value={tab}
+      onValueChange={setTab}
+      dir={isRtl ? 'rtl' : 'ltr'}
+      // className='space-y-6'
+    >
       <TabsList>
         <TabsTrigger value='personal'>{et('personal')}</TabsTrigger>
 

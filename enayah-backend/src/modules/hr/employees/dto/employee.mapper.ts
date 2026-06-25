@@ -6,7 +6,7 @@ import {
 import { CreateEmployeeDto, UpdateEmployeeDto } from './employee.request'
 import { InferSelectModel } from 'drizzle-orm'
 import { employees } from '../../../../db'
-import { version } from 'node:os'
+//import { version } from 'node:os'
 
 type EmployeeSelect = InferSelectModel<typeof employees>
 

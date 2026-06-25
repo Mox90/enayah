@@ -33,7 +33,8 @@ export function FormDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={cn('sm:max-w-lg [&>button>svg]:text-rose-400', className)}
+        // className={cn('sm:max-w-lg [&>button>svg]:text-rose-400', className)}
+        className={cn('[&>button>svg]:text-rose-400', className)}
       >
         <DialogHeader className={headerClassName}>
           <DialogTitle>{title}</DialogTitle>
