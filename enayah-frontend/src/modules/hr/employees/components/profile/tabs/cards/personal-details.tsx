@@ -573,9 +573,9 @@ export function PersonalDetailsCards({
               <EmptyState />
             ) : (
               <div className='space-y-4'>
-                {dependents.map((dep) => (
+                {addresses.map((address) => (
                   <div
-                    key={dep.id}
+                    key={address.id}
                     className='relative rounded-xl border p-4 transition-all hover:shadow-sm'
                   >
                     <div
@@ -585,33 +585,37 @@ export function PersonalDetailsCards({
                       )}
                     >
                       <RowActions
-                        onEdit={() => onEditDependent?.(dep.id)}
-                        onDelete={() => onDeleteDependent?.(dep.id)}
+                        onEdit={() => onEditAddress?.(address.id)}
+                        onDelete={() => onDeleteAddress?.(address.id)}
                       />
                     </div>
 
-                    <div
-                      className={cn(
-                        'mb-4 font-semibold',
-                        isRtl ? 'pl-10' : 'pr-10',
-                      )}
-                    >
-                      {[
-                        dep.firstNameEn,
-                        dep.secondNameEn,
-                        dep.thirdNameEn,
-                        dep.familyNameEn,
-                      ]
-                        .filter(Boolean)
-                        .join(' ')}
+                    <div className={cn('mb-4', isRtl ? 'pl-10' : 'pr-10')}>
+                      <div className='font-semibold capitalize'>
+                        {address.addressType}
+                      </div>
+
+                      <div className='mt-2 text-sm leading-6 text-muted-foreground'>
+                        {[
+                          address.building && `Building ${address.building}`,
+                          address.street,
+                          address.district,
+                          address.city,
+                        ]
+                          .filter(Boolean)
+                          .join(', ')}
+                      </div>
                     </div>
 
-                    <div className='grid gap-3 md:grid-cols-2'>
-                      <InfoRow label='Relationship' value={dep.relationship} />
-                      <InfoRow label='Gender' value={dep.gender} />
+                    <div className='grid gap-4 md:grid-cols-2'>
                       <InfoRow
-                        label='Date of Birth'
-                        value={formatDate(dep.dateOfBirth, isRtl)}
+                        label='Postal Code'
+                        value={dash(address.postalCode)}
+                      />
+
+                      <InfoRow
+                        label='Additional No.'
+                        value={dash(address.additionalNumber)}
                       />
                     </div>
                   </div>
