@@ -15,6 +15,19 @@ const nextConfig = {
       : []),
   ],
 
+  // images: {
+  //   remotePatterns: [
+  //     {
+  //       protocol: 'http',
+  //       hostname: 'local',
+  //     },
+  //     {
+  //       protocol: 'http',
+  //       hostname: '192.168.3.6',
+  //     },
+  //   ],
+  // },
+
   devIndicators: false,
 }
 

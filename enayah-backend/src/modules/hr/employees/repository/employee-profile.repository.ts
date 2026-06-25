@@ -1,4 +1,4 @@
-import { version } from 'node:os'
+//import { version } from 'node:os'
 import { AppError } from '../../../../core/errors/AppError'
 import { latestContractMovement } from '../../../../core/utils/current-assignment.query'
 

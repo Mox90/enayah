@@ -2,11 +2,32 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Mail, Phone, IdCard, Users, MapPin, Siren, Plane } from 'lucide-react'
+import {
+  Mail,
+  Phone,
+  IdCard,
+  Users,
+  MapPin,
+  Siren,
+  Plane,
+  Plus,
+  Pencil,
+  MoreVertical,
+  Trash2,
+} from 'lucide-react'
 import { format } from 'date-fns'
 import { useLocale, useTranslations } from 'next-intl'
 import { getExpiryStatus, toArabic, toPersianDigits } from '@/utils/utilities'
 import { EmployeePersonalDetails } from '@/modules/hr/employees/types/employee-personal-details.types'
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu'
 
 function dash(value?: string | number | boolean | null) {
   if (value === true) return 'Yes'
@@ -28,6 +49,46 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   )
 }
 
+function SectionCard({
+  title,
+  icon,
+  children,
+  className,
+  spanClass,
+  onAdd,
+}: {
+  title: string
+  icon: React.ReactNode
+  children: React.ReactNode
+  className?: string
+  spanClass?: string
+  onAdd?: () => void
+}) {
+  return (
+    <Card className='overflow-hidden transition-all duration-200 hover:shadow-md'>
+      <CardHeader className='border-b bg-muted/20'>
+        <div className='flex items-center justify-between gap-4'>
+          <CardTitle className='flex items-center gap-3'>
+            <div className={className}>{icon}</div>
+            <span className={cn('text-base font-semibold', spanClass)}>
+              {title}
+            </span>
+          </CardTitle>
+
+          {/* {onAdd && ( */}
+          <Button size='sm' variant='outline' onClick={onAdd}>
+            <Plus className='mr-2 h-4 w-4' />
+            Add {title}
+          </Button>
+          {/* )} */}
+        </div>
+      </CardHeader>
+
+      <CardContent className='p-5'>{children}</CardContent>
+    </Card>
+  )
+}
+
 function EmptyState() {
   return (
     <div className='rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground'>
@@ -36,11 +97,104 @@ function EmptyState() {
   )
 }
 
-interface Props {
-  personalDetails?: EmployeePersonalDetails
+function RowActions({
+  onEdit,
+  onDelete,
+}: {
+  onEdit: () => void
+  onDelete: () => void
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button size='icon' variant='ghost'>
+          <MoreVertical className='h-4 w-4' />
+        </Button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent align='end'>
+        <DropdownMenuItem onClick={onEdit}>
+          <Pencil className='mr-2 h-4 w-4' />
+          Edit
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem
+          className='text-destructive focus:text-destructive'
+          onClick={onDelete}
+        >
+          <Trash2 className='mr-2 h-4 w-4' />
+          Delete
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
 }
 
-export function PersonalDetailsCards({ personalDetails }: Props) {
+interface Props {
+  personalDetails?: EmployeePersonalDetails
+
+  onAddIdentification?: () => void
+  onEditIdentification?: (id: string) => void
+  onDeleteIdentification?: (id: string) => void
+
+  onAddPhone?: () => void
+  onEditPhone?: (id: string) => void
+  onDeletePhone?: (id: string) => void
+
+  onAddEmail?: () => void
+  onEditEmail?: (id: string) => void
+  onDeleteEmail?: (id: string) => void
+
+  onAddEmergencyContact?: () => void
+  onEditEmergencyContact?: (id: string) => void
+  onDeleteEmergencyContact?: (id: string) => void
+
+  onAddDependent?: () => void
+  onEditDependent?: (id: string) => void
+  onDeleteDependent?: (id: string) => void
+
+  onAddAddress?: () => void
+  onEditAddress?: (id: string) => void
+  onDeleteAddress?: (id: string) => void
+
+  onAddVisa?: () => void
+  onEditVisa?: (id: string) => void
+  onDeleteVisa?: (id: string) => void
+}
+
+export function PersonalDetailsCards({
+  personalDetails,
+
+  onAddIdentification,
+  onEditIdentification,
+  onDeleteIdentification,
+
+  onAddPhone,
+  onEditPhone,
+  onDeletePhone,
+
+  onAddEmail,
+  onEditEmail,
+  onDeleteEmail,
+
+  onAddEmergencyContact,
+  onEditEmergencyContact,
+  onDeleteEmergencyContact,
+
+  onAddDependent,
+  onEditDependent,
+  onDeleteDependent,
+
+  onAddAddress,
+  onEditAddress,
+  onDeleteAddress,
+
+  onAddVisa,
+  onEditVisa,
+  onDeleteVisa,
+}: Props) {
   const et = useTranslations('employees')
   const locale = useLocale()
   const isRtl = locale === 'ar'
@@ -56,53 +210,28 @@ export function PersonalDetailsCards({ personalDetails }: Props) {
 
   return (
     <div className='space-y-6'>
-      <Card>
-        <CardHeader>
-          <CardTitle className='flex items-center gap-2'>
-            <IdCard className='h-5 w-5' />
-            Identifications
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent className='space-y-4'>
+      <SectionCard
+        title='Identifications'
+        //icon={<IdCard className='h-5 w-5 text-green-600' />}
+        icon={
+          <span
+            className={cn(
+              'inline-block text-3xl leading-none',
+              !isRtl ? 'transform -scale-x-100' : '',
+            )}
+          >
+            📇
+          </span>
+        }
+        className='flex h-10 w-10 items-center justify-center rounded-xl'
+        spanClass='text-green-600'
+        onAdd={onAddIdentification}
+      >
+        <div className='space-y-4'>
           {identifications.length === 0 ? (
             <EmptyState />
           ) : (
             identifications.map((item) => {
-              //   <div key={item.id} className='rounded-xl border bg-muted/20 p-4'>
-              //     <div className='mb-4 flex items-center justify-between'>
-              //       <div className='font-semibold capitalize'>
-              //         {item.type.replace('_', ' ')}
-              //       </div>
-
-              //       {item.isCurrent && (
-              //         <Badge
-              //           variant='outline'
-              //           className='bg-green-50 text-green-700'
-              //         >
-              //           Current
-              //         </Badge>
-              //       )}
-              //     </div>
-
-              //     <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
-              //       <InfoRow label='Number' value={item.identificationNumber} />
-              //       <InfoRow
-              //         label='Issue Date'
-              //         value={formatDate(item.issueDate, isRtl)}
-              //       />
-              //       <InfoRow
-              //         label='Expiry Date'
-              //         value={formatDate(item.expiryDate, isRtl)}
-              //       />
-              //       <InfoRow label='Occupation' value={dash(item.occupation)} />
-              //       <InfoRow label='Sponsor' value={dash(item.sponsor)} />
-              //       <InfoRow
-              //         label='Authority'
-              //         value={dash(item.issuingAuthority)}
-              //       />
-              //     </div>
-              //   </div>
               const status = getExpiryStatus(item.expiryDate, isRtl)
               //const isExpired = new Date(item.expiryDate) < new Date()
               const isExpired = item.expiryDate
@@ -114,63 +243,64 @@ export function PersonalDetailsCards({ personalDetails }: Props) {
                   className={`relative overflow-hidden rounded-xl border border-muted-foreground/10 p-5 shadow-sm transition-all hover:shadow-md ${isRtl ? 'border-r-4' : 'border-l-4'} ${status.bgClass} ${status.borderClass} ${status.pulseClass}`}
                 >
                   {/* Header Section */}
-                  <div className='mb-5 flex items-center justify-between border-b border-muted/50 pb-3'>
-                    <div className='text-base font-bold tracking-tight text-foreground capitalize'>
-                      {item.type.replace('_', ' ')}
-                    </div>
+                  <div className='mb-5 border-b border-muted/50 pb-3'>
+                    <div className='flex items-start justify-between gap-3'>
+                      <div className='min-w-0 text-base font-bold tracking-tight text-foreground capitalize'>
+                        {item.type.replace('_', ' ')}
+                      </div>
 
-                    <div className='flex gap-2'>
-                      {/* 1. Alreay Lapsed / Expired Block */}
-                      {isExpired && (
-                        <Badge
-                          variant='destructive'
-                          className='font-bold px-2.5 py-0.5 rounded-full text-xs animate-bounce shadow-sm'
-                        >
-                          Expired
-                        </Badge>
-                      )}
-
-                      {/* 2. Critical warning: Within 30 Days (Flashy Pulsing Deep Red) */}
-                      {!isExpired &&
-                        status.diffDays !== null &&
-                        status.diffDays > 0 &&
-                        status.diffDays <= 30 && (
-                          <Badge className='bg-red-600 hover:bg-red-600 text-white font-bold px-2.5 py-0.5 rounded-full text-xs tracking-wide shadow-sm animate-pulse border border-red-400'>
-                            ⚠️ Expiring in {status.diffDays} days!
+                      <div className='flex shrink-0 flex-wrap items-center justify-end gap-2'>
+                        {isExpired && (
+                          <Badge
+                            variant='destructive'
+                            className='rounded-full px-2.5 py-0.5 text-xs font-bold shadow-sm'
+                          >
+                            Expired
                           </Badge>
                         )}
 
-                      {/* 3. Urgent notice: Within 60 Days (Bright Flashy Orange) */}
-                      {!isExpired &&
-                        status.diffDays !== null &&
-                        status.diffDays > 30 &&
-                        status.diffDays <= 60 && (
-                          <Badge className='bg-orange-500 hover:bg-orange-500 text-white font-semibold px-2.5 py-0.5 rounded-full text-xs tracking-wide shadow-sm'>
-                            Expiring within {status.diffDays} days
+                        {!isExpired &&
+                          status.diffDays !== null &&
+                          status.diffDays > 0 &&
+                          status.diffDays <= 30 && (
+                            <Badge className='rounded-full border border-red-400 bg-red-600 px-2.5 py-0.5 text-xs font-bold tracking-wide text-white shadow-sm hover:bg-red-600'>
+                              ⚠️ Expiring in {status.diffDays} days!
+                            </Badge>
+                          )}
+
+                        {!isExpired &&
+                          status.diffDays !== null &&
+                          status.diffDays > 30 &&
+                          status.diffDays <= 60 && (
+                            <Badge className='rounded-full bg-orange-500 px-2.5 py-0.5 text-xs font-semibold tracking-wide text-white shadow-sm hover:bg-orange-500'>
+                              Expiring within {status.diffDays} days
+                            </Badge>
+                          )}
+
+                        {!isExpired &&
+                          status.diffDays !== null &&
+                          status.diffDays > 60 &&
+                          status.diffDays <= 90 && (
+                            <Badge className='rounded-full border border-yellow-500/40 bg-yellow-500/20 px-2.5 py-0.5 text-xs font-medium text-yellow-700 dark:text-yellow-400'>
+                              <span className='mr-1 inline-block'>⏰</span>
+                              Expires in {status.diffDays} days
+                            </Badge>
+                          )}
+
+                        {item.isCurrent && (
+                          <Badge
+                            variant='secondary'
+                            className='rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-600 shadow-sm dark:text-emerald-400'
+                          >
+                            Current
                           </Badge>
                         )}
 
-                      {/* 4. Attention flag: Within 90 Days (Catchy Yellow Outline with Glow) */}
-                      {!isExpired &&
-                        status.diffDays !== null &&
-                        status.diffDays > 60 &&
-                        status.diffDays <= 90 && (
-                          <Badge className='bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border border-yellow-500/40 font-medium px-2.5 py-0.5 rounded-full text-xs transition-transform'>
-                            <span className='inline-block animate-[shake_0.5s_ease-in-out_infinite] mr-1'>
-                              ⏰
-                            </span>
-                            Expires in {status.diffDays} days
-                          </Badge>
-                        )}
-
-                      {item.isCurrent && (
-                        <Badge
-                          variant='secondary'
-                          className='bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-medium px-2.5 py-0.5 rounded-full text-xs shadow-sm'
-                        >
-                          Current
-                        </Badge>
-                      )}
+                        <RowActions
+                          onEdit={() => onEditIdentification?.(item.id)}
+                          onDelete={() => onDeleteIdentification?.(item.id)}
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -196,19 +326,18 @@ export function PersonalDetailsCards({ personalDetails }: Props) {
               )
             })
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </SectionCard>
 
       <div className='grid gap-6 lg:grid-cols-2'>
-        <Card>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <Phone className='h-5 w-5' />
-              Phone Numbers
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent className='space-y-3'>
+        <SectionCard
+          title='Phone Numbers'
+          icon={<span className='text-3xl leading-none'>☎️</span>}
+          className='flex h-10 w-10 items-center justify-center rounded-xl'
+          spanClass='text-purple-400'
+          onAdd={onAddPhone}
+        >
+          <div className='space-y-3'>
             {phones.length === 0 ? (
               <EmptyState />
             ) : (
@@ -216,9 +345,10 @@ export function PersonalDetailsCards({ personalDetails }: Props) {
                 const number = isRtl
                   ? toPersianDigits(phone.countryCode + '' + phone.phoneNumber)
                   : phone.countryCode + '' + phone.phoneNumber
+
                 return (
                   <div key={phone.id} className='rounded-xl border p-4'>
-                    <div className='mb-3 flex items-center justify-between'>
+                    <div className='mb-3 flex items-center justify-between gap-3'>
                       <div
                         className='font-semibold'
                         dir={isRtl ? 'rtl' : 'ltr'}
@@ -226,11 +356,24 @@ export function PersonalDetailsCards({ personalDetails }: Props) {
                         {number}
                       </div>
 
-                      <div className='flex gap-2'>
+                      <div className='flex flex-wrap items-center justify-end gap-2'>
                         {phone.isPrimary && <Badge>Primary</Badge>}
+
                         {phone.isWhatsapp && (
                           <Badge variant='outline'>WhatsApp</Badge>
                         )}
+
+                        <div
+                          className={cn(
+                            'flex items-center',
+                            isRtl ? 'mr-1' : 'ml-1',
+                          )}
+                        >
+                          <RowActions
+                            onEdit={() => onEditPhone?.(phone.id)}
+                            onDelete={() => onDeletePhone?.(phone.id)}
+                          />
+                        </div>
                       </div>
                     </div>
 
@@ -245,56 +388,107 @@ export function PersonalDetailsCards({ personalDetails }: Props) {
                 )
               })
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </SectionCard>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <Mail className='h-5 w-5' />
-              Emails
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent className='space-y-3'>
+        <SectionCard
+          title='Emails'
+          // icon={<Mail className='h-5 w-5 text-teal-500' />}
+          icon={
+            <span
+              className={cn(
+                'inline-block text-3xl leading-none',
+                !isRtl ? 'transform -scale-x-100' : '',
+              )}
+            >
+              📬
+            </span>
+          }
+          className='flex h-10 w-10 items-center justify-center rounded-xl '
+          spanClass='text-teal-500'
+          onAdd={onAddEmail}
+        >
+          <div className='space-y-3'>
             {emails.length === 0 ? (
               <EmptyState />
             ) : (
               emails.map((email) => (
                 <div key={email.id} className='rounded-xl border p-4'>
-                  <div className='flex items-center justify-between'>
-                    <div>
-                      <div className='font-semibold'>{email.email}</div>
+                  <div className='flex items-start justify-between gap-3'>
+                    <div className='min-w-0'>
+                      <div className='truncate font-semibold'>
+                        {email.email}
+                      </div>
                       <div className='text-sm text-muted-foreground capitalize'>
                         {email.type}
                       </div>
                     </div>
 
-                    {email.isPrimary && <Badge>Primary</Badge>}
+                    <div className='flex shrink-0 items-center justify-end gap-2'>
+                      {email.isPrimary && <Badge>Primary</Badge>}
+
+                      <div
+                        className={cn(
+                          'flex items-center',
+                          isRtl ? 'mr-1' : 'ml-1',
+                        )}
+                      >
+                        <RowActions
+                          onEdit={() => onEditEmail?.(email.id)}
+                          onDelete={() => onDeleteEmail?.(email.id)}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </SectionCard>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className='flex items-center gap-2'>
-            <Siren className='h-5 w-5' />
-            Emergency Contacts
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent>
+      <SectionCard
+        title='Emergency Contacts'
+        //icon={<Siren className='h-5 w-5 text-red-500' />}
+        icon={<span className='text-3xl leading-none'>🚨</span>}
+        className='flex h-10 w-10 items-center justify-center rounded-xl'
+        spanClass='text-red-500'
+        onAdd={onAddEmergencyContact}
+      >
+        <div className='space-y-3'>
           {emergencyContacts.length === 0 ? (
             <EmptyState />
           ) : (
-            <div className='grid gap-4 md:grid-cols-2'>
+            <div
+              className={cn(
+                'grid gap-4',
+                emergencyContacts.length > 1 && 'xl:grid-cols-2',
+              )}
+            >
               {emergencyContacts.map((contact) => (
-                <div key={contact.id} className='rounded-xl border p-4'>
-                  <div className='mb-4 font-semibold'>{contact.name}</div>
+                <div
+                  key={contact.id}
+                  className='relative rounded-xl border p-4 transition-all hover:shadow-sm'
+                >
+                  <div
+                    className={cn(
+                      'absolute top-3 z-10',
+                      isRtl ? 'left-3' : 'right-3',
+                    )}
+                  >
+                    <RowActions
+                      onEdit={() => onEditEmergencyContact?.(contact.id)}
+                      onDelete={() => onDeleteEmergencyContact?.(contact.id)}
+                    />
+                  </div>
+                  <div
+                    className={cn(
+                      'mb-4 font-semibold',
+                      isRtl ? 'pl-10' : 'pr-10',
+                    )}
+                  >
+                    {contact.name}
+                  </div>
 
                   <div className='grid gap-3'>
                     <InfoRow
@@ -307,23 +501,24 @@ export function PersonalDetailsCards({ personalDetails }: Props) {
                       value={dash(contact.alternateMobile)}
                     />
                     <InfoRow label='Address' value={dash(contact.address)} />
+                    {/*Add  More vertical button that show Edit and Delete when click. */}
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </SectionCard>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className='flex items-center gap-2'>
-            <Users className='h-5 w-5' />
-            Dependents
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent>
+      <SectionCard
+        title='Dependents'
+        icon={<Users className='h-5 w-5 text-sky-400' />}
+        //icon={<span className='text-3xl leading-none'>🚨</span>}
+        className='flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10'
+        spanClass='text-sky-400'
+        onAdd={onAddDependent}
+      >
+        <div className='space-y-3'>
           {dependents.length === 0 ? (
             <EmptyState />
           ) : (
@@ -349,42 +544,75 @@ export function PersonalDetailsCards({ personalDetails }: Props) {
                       value={formatDate(dep.dateOfBirth, isRtl)}
                     />
                   </div>
+                  {/*Add  More vertical button that show Edit and Delete when click. When edit reuse the add dialog dependent */}
+                  <div className='flex justify-end align-start gap-2'>
+                    {/*Add  More vertical button that show Edit and Delete when click. */}
+                    <RowActions
+                      onEdit={() => onEditDependent?.(dep.id)}
+                      onDelete={() => onDeleteDependent?.(dep.id)}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </SectionCard>
 
       <div className='grid gap-6 lg:grid-cols-2'>
-        <Card>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <MapPin className='h-5 w-5' />
-              Addresses
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent>
+        <SectionCard
+          title='Addresses'
+          //icon={<MapPin className='h-5 w-5 text-pink-500' />}
+          icon={<span className='text-3xl leading-none'>🗺️</span>}
+          className='flex h-10 w-10 items-center justify-center rounded-xl'
+          spanClass='text-pink-500'
+          onAdd={onAddAddress}
+        >
+          <div className='space-y-3'>
             {addresses.length === 0 ? (
               <EmptyState />
             ) : (
               <div className='space-y-4'>
                 {addresses.map((address) => (
-                  <div key={address.id} className='rounded-xl border p-4'>
-                    <div className='mb-4 font-semibold capitalize'>
-                      {address.addressType}
+                  <div
+                    key={address.id}
+                    className='relative rounded-xl border p-4 transition-all hover:shadow-sm'
+                  >
+                    <div
+                      className={cn(
+                        'absolute top-3 z-10',
+                        isRtl ? 'left-3' : 'right-3',
+                      )}
+                    >
+                      <RowActions
+                        onEdit={() => onEditAddress?.(address.id)}
+                        onDelete={() => onDeleteAddress?.(address.id)}
+                      />
                     </div>
 
-                    <div className='grid gap-3 md:grid-cols-2'>
-                      <InfoRow label='City' value={address.city} />
-                      <InfoRow label='District' value={address.district} />
-                      <InfoRow label='Street' value={address.street} />
+                    <div className={cn('mb-4', isRtl ? 'pl-10' : 'pr-10')}>
+                      <div className='font-semibold capitalize'>
+                        {address.addressType}
+                      </div>
+
+                      <div className='mt-2 text-sm leading-6 text-muted-foreground'>
+                        {[
+                          address.building && `Building ${address.building}`,
+                          address.street,
+                          address.district,
+                          address.city,
+                        ]
+                          .filter(Boolean)
+                          .join(', ')}
+                      </div>
+                    </div>
+
+                    <div className='grid gap-4 md:grid-cols-2'>
                       <InfoRow
-                        label='Building'
-                        value={dash(address.building)}
+                        label='Postal Code'
+                        value={dash(address.postalCode)}
                       />
-                      <InfoRow label='Postal Code' value={address.postalCode} />
+
                       <InfoRow
                         label='Additional No.'
                         value={dash(address.additionalNumber)}
@@ -394,26 +622,56 @@ export function PersonalDetailsCards({ personalDetails }: Props) {
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </SectionCard>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className='flex items-center gap-2'>
-              <Plane className='h-5 w-5' />
-              Visas
-            </CardTitle>
-          </CardHeader>
-
-          <CardContent>
+        <SectionCard
+          title='Visas'
+          //icon={<Plane className='h-5 w-5 text-sky-400' />}
+          icon={
+            <span
+              className={cn(
+                'inline-block text-3xl leading-none',
+                isRtl ? 'transform -scale-x-100' : '',
+              )}
+            >
+              🛫
+            </span>
+          }
+          className='flex h-10 w-10 items-center justify-center rounded-xl'
+          spanClass='text-sky-400'
+          onAdd={onAddVisa}
+        >
+          <div className='space-y-3'>
             {visas.length === 0 ? (
               <EmptyState />
             ) : (
               <div className='space-y-4'>
                 {visas.map((visa) => (
-                  <div key={visa.id} className='rounded-xl border p-4'>
-                    <div className='mb-4 flex items-center justify-between'>
+                  <div
+                    key={visa.id}
+                    className='relative rounded-xl border p-4 transition-all hover:shadow-sm'
+                  >
+                    <div
+                      className={cn(
+                        'absolute top-3 z-10',
+                        isRtl ? 'left-3' : 'right-3',
+                      )}
+                    >
+                      <RowActions
+                        onEdit={() => onEditVisa?.(visa.id)}
+                        onDelete={() => onDeleteVisa?.(visa.id)}
+                      />
+                    </div>
+
+                    <div
+                      className={cn(
+                        'mb-4 flex items-center justify-between',
+                        isRtl ? 'pl-10' : 'pr-10',
+                      )}
+                    >
                       <div className='font-semibold'>{visa.visaNumber}</div>
+
                       {visa.isCurrent && <Badge>Current</Badge>}
                     </div>
 
@@ -432,8 +690,8 @@ export function PersonalDetailsCards({ personalDetails }: Props) {
                 ))}
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </SectionCard>
       </div>
     </div>
   )

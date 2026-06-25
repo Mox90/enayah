@@ -84,6 +84,9 @@ export function EmployeeProfileHeader({ profile }: Props) {
   const [editOpen, setEditOpen] = useState(false)
   const updatePersonalMutation = useUpdatePersonalMutation()
 
+  const avatar = profile.personal?.avatar
+  const fullName = name.filter(Boolean).join(' ') || 'Employee profile image'
+
   return (
     <div className='overflow-hidden rounded-2xl border bg-background shadow-sm'>
       <div className='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-4 text-white'>
@@ -156,7 +159,7 @@ export function EmployeeProfileHeader({ profile }: Props) {
           <div className='flex flex-col items-center gap-6 lg:flex-row lg:items-center'>
             {/* Avatar */}
             <div className='relative flex h-35 w-35 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-gradient-to-br from-slate-100 to-slate-200 text-6xl shadow-md dark:from-slate-800 dark:to-slate-900'>
-              {profile.personal?.avatar ? (
+              {/* {profile.personal?.avatar ? (
                 <Image
                   src={profile.personal?.avatar}
                   alt={name.filter(Boolean).join(' ')}
@@ -175,7 +178,15 @@ export function EmployeeProfileHeader({ profile }: Props) {
                   sizes='140px'
                   priority
                 />
-              )}
+              )} */}
+              <Image
+                src={avatar || '/MODHS3.png'}
+                alt={avatar ? fullName : 'Default profile image'}
+                fill
+                className='object-cover'
+                sizes='140px'
+                priority
+              />
             </div>
 
             {/* Identity */}

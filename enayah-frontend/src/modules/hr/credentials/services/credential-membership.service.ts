@@ -9,7 +9,7 @@ export type CreateMembershipPayload = {
   startDate?: string | null
   expiryDate?: string | null
   isPrimary?: boolean | false
-  isVerified?: boolean | false
+  isVerified?: boolean | null
   documentFileId?: string | null
 }
 

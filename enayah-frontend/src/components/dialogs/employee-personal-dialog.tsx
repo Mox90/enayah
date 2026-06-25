@@ -91,16 +91,20 @@ export function EmployeePersonalDialog({
   }
 
   async function handleSubmit() {
-    await onSubmit({
-      ...form,
-      secondNameEn: form.secondNameEn || null,
-      thirdNameEn: form.thirdNameEn || null,
-      secondNameAr: form.secondNameAr || null,
-      thirdNameAr: form.thirdNameAr || null,
-      dateOfBirth: form.dateOfBirth || null,
-    })
+    try {
+      await onSubmit({
+        ...form,
+        secondNameEn: form.secondNameEn || null,
+        thirdNameEn: form.thirdNameEn || null,
+        secondNameAr: form.secondNameAr || null,
+        thirdNameAr: form.thirdNameAr || null,
+        dateOfBirth: form.dateOfBirth || null,
+      })
 
-    onOpenChange(false)
+      onOpenChange(false)
+    } catch (error) {
+      // keep dialog open; error is surfaced via mutation onError
+    }
   }
 
   return (

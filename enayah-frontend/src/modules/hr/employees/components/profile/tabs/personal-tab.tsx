@@ -20,6 +20,7 @@ import { humanize, toArabic, toPersianDigits } from '@/utils/utilities'
 import { useEmployeePersonal } from '../../../hooks/use-employee-personal-details'
 import { PersonalDetailsCards } from './cards/personal-details'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 
 export type Gender = 'male' | 'female'
 
@@ -65,15 +66,21 @@ interface Props {
 interface FieldProps {
   label: string
   value: React.ReactNode
+  icon?: React.ReactNode
   isRtl?: boolean
 }
 
-function Field({ label, value, isRtl = false }: FieldProps) {
+function Field({ label, value, icon, isRtl = false }: FieldProps) {
   return (
-    <div className='space-y-1'>
-      <div className='text-xs text-muted-foreground'>{label}</div>
+    <div className='rounded-xl border bg-background p-4 transition-colors hover:bg-muted/30'>
+      <div className='mb-2 flex items-center gap-2 text-xs text-muted-foreground'>
+        {icon}
+        {label}
+      </div>
 
-      <div className={isRtl ? '' : 'font-medium'}>{value ?? '-'}</div>
+      <div className={cn('font-medium text-foreground', isRtl && 'text-right')}>
+        {value ?? '-'}
+      </div>
     </div>
   )
 }
@@ -95,10 +102,13 @@ const PersonalTab = ({ personal }: Props) => {
       {/* Personal Information */}
       {/* ---------------------------- */}
 
-      <Card>
+      <Card className='transition-all duration-200 hover:shadow-md'>
         <CardHeader className='flex flex-row items-center justify-between'>
-          <CardTitle className='flex items-center gap-2'>
-            <IdCardLanyard className='h-5 w-5' />
+          <CardTitle className='flex items-center gap-2 text-rose-400'>
+            <div className='flex h-10 w-10 items-center justify-center rounded-xl '>
+              {/* <IdCardLanyard className='h-5 w-5' /> */}
+              <span className='text-3xl'>🪪</span>
+            </div>
             {et('personalInfo')}
           </CardTitle>
 
@@ -109,14 +119,16 @@ const PersonalTab = ({ personal }: Props) => {
         </CardHeader>
 
         <CardContent>
-          <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
+          <div className='grid gap-2 md:grid-cols-2 lg:grid-cols-3'>
             <Field
+              icon={<Hash className='h-3.5 w-3.5' />}
               label={at('employeeNumber')}
               value={personal.employeeNumber}
             />
 
             <Field
-              label={et('dateOfBirth')}
+              icon={<Calendar className='h-3.5 w-3.5' />}
+              label={et('dateOfBirth').replace('*', '')}
               value={
                 personal.dateOfBirth
                   ? isRtl
@@ -126,7 +138,11 @@ const PersonalTab = ({ personal }: Props) => {
               }
             />
 
-            <Field label={et('gender')} value={et(personal.gender)} />
+            <Field
+              icon={<User className='h-3.5 w-3.5' />}
+              label={et('gender')}
+              value={et(personal.gender)}
+            />
 
             <Field
               label={et('englishName')}
@@ -170,10 +186,13 @@ const PersonalTab = ({ personal }: Props) => {
       {/* Country */}
       {/* ---------------------------- */}
 
-      <Card>
+      <Card className='transition-all duration-200 hover:shadow-md'>
         <CardHeader className='flex flex-row items-center justify-between'>
-          <CardTitle className='flex items-center gap-2'>
-            <Earth className='h-5 w-5' />
+          <CardTitle className='flex items-center gap-2 text-blue-600'>
+            <div className='flex h-10 w-10 items-center justify-center rounded-xl'>
+              {/* <Earth className='h-5 w-5' /> */}
+              <span className='text-3xl'>🌏</span>
+            </div>
             {et('countryInfo')}
           </CardTitle>
 
@@ -184,7 +203,7 @@ const PersonalTab = ({ personal }: Props) => {
         </CardHeader>
 
         <CardContent>
-          <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-4'>
+          <div className='grid gap-2 md:grid-cols-2 lg:grid-cols-4'>
             <Field
               label={et('country')}
               value={
@@ -222,7 +241,17 @@ const PersonalTab = ({ personal }: Props) => {
 
       {isLoading ? (
         <div className='text-sm text-muted-foreground'>
-          Loading personal details...
+          <Card className='transition-all duration-200 hover:shadow-md'>
+            <CardHeader>
+              <Skeleton className='h-6 w-56' />
+            </CardHeader>
+
+            <CardContent className='grid gap-4 md:grid-cols-2 xl:grid-cols-3'>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className='h-20 rounded-xl' />
+              ))}
+            </CardContent>
+          </Card>
         </div>
       ) : error ? (
         <div className='text-sm text-destructive'>
