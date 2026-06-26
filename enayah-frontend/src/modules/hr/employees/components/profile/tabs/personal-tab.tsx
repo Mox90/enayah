@@ -17,10 +17,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useLocale, useTranslations } from 'next-intl'
 import { humanize, toArabic, toPersianDigits } from '@/utils/utilities'
-import { useEmployeePersonal } from '../../../hooks/use-employee-personal-details'
+import {
+  useEmployeePersonal,
+  useEmployeePersonalMutations,
+} from '../../../hooks/use-employee-personal-details'
 import { PersonalDetailsCards } from './cards/personal-details'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import { EmployeePersonalDetails } from '../../../types/employee-personal-details.types'
+import { useState } from 'react'
 
 export type Gender = 'male' | 'female'
 
@@ -95,6 +100,23 @@ const PersonalTab = ({ personal }: Props) => {
     isLoading,
     error,
   } = useEmployeePersonal(personal.id)
+  const [identificationDialogOpen, setIdentificationDialogOpen] =
+    useState(false)
+  const [editingIdentification, setEditingIdentification] = useState<
+    EmployeePersonalDetails['identifications'][number] | null
+  >(null)
+
+  const [addressDialogOpen, setAddressDialogOpen] = useState(false)
+  const [editingAddress, setEditingAddress] = useState<
+    EmployeePersonalDetails['addresses'][number] | null
+  >(null)
+
+  const [visaDialogOpen, setVisaDialogOpen] = useState(false)
+  const [editingVisa, setEditingVisa] = useState<
+    EmployeePersonalDetails['visas'][number] | null
+  >(null)
+
+  const employeePersonal = useEmployeePersonalMutations(personal.id)
 
   return (
     <div className='space-y-6'>
@@ -258,7 +280,54 @@ const PersonalTab = ({ personal }: Props) => {
           Failed to load personal details. Please try again.
         </div>
       ) : (
-        <PersonalDetailsCards personalDetails={personalDetails} />
+        // <PersonalDetailsCards personalDetails={personalDetails} />
+        <PersonalDetailsCards
+          personalDetails={personalDetails}
+          onAddIdentification={() => {
+            setEditingIdentification(null)
+            setIdentificationDialogOpen(true)
+          }}
+          onEditIdentification={(id) => {
+            const item = personalDetails?.identifications.find(
+              (x) => x.id === id,
+            )
+            if (!item) return
+
+            setEditingIdentification(item)
+            setIdentificationDialogOpen(true)
+          }}
+          onDeleteIdentification={(id) => {
+            employeePersonal.deleteIdentification.mutate(id)
+          }}
+          onAddAddress={() => {
+            setEditingAddress(null)
+            setAddressDialogOpen(true)
+          }}
+          onEditAddress={(id) => {
+            const item = personalDetails?.addresses.find((x) => x.id === id)
+            if (!item) return
+
+            setEditingAddress(item)
+            setAddressDialogOpen(true)
+          }}
+          onDeleteAddress={(id) => {
+            employeePersonal.deleteAddress.mutate(id)
+          }}
+          onAddVisa={() => {
+            setEditingVisa(null)
+            setVisaDialogOpen(true)
+          }}
+          onEditVisa={(id) => {
+            const item = personalDetails?.visas.find((x) => x.id === id)
+            if (!item) return
+
+            setEditingVisa(item)
+            setVisaDialogOpen(true)
+          }}
+          onDeleteVisa={(id) => {
+            employeePersonal.deleteVisa.mutate(id)
+          }}
+        />
       )}
     </div>
   )

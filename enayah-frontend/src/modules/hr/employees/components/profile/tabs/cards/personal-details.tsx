@@ -75,12 +75,12 @@ function SectionCard({
             </span>
           </CardTitle>
 
-          {/* {onAdd && ( */}
-          <Button size='sm' variant='outline' onClick={onAdd}>
-            <Plus className='mr-2 h-4 w-4' />
-            Add {title}
-          </Button>
-          {/* )} */}
+          {onAdd && (
+            <Button size='sm' variant='outline' onClick={onAdd}>
+              <Plus className='mr-2 h-4 w-4' />
+              Add {title}
+            </Button>
+          )}
         </div>
       </CardHeader>
 
@@ -101,32 +101,45 @@ function RowActions({
   onEdit,
   onDelete,
 }: {
-  onEdit: () => void
-  onDelete: () => void
+  onEdit?: () => void
+  onDelete?: () => void
 }) {
+  if (!onEdit && !onDelete) return null
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size='icon' variant='ghost'>
+        <Button size='icon' variant='ghost' aria-label='Row actions'>
           <MoreVertical className='h-4 w-4' />
         </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align='end'>
-        <DropdownMenuItem onClick={onEdit}>
-          <Pencil className='mr-2 h-4 w-4' />
-          Edit
-        </DropdownMenuItem>
+        {onEdit && (
+          <DropdownMenuItem onClick={onEdit}>
+            <Pencil className='mr-2 h-4 w-4' />
+            Edit
+          </DropdownMenuItem>
+        )}
 
-        <DropdownMenuSeparator />
+        {/* <DropdownMenuSeparator /> */}
+        {onEdit && onDelete && <DropdownMenuSeparator />}
 
-        <DropdownMenuItem
+        {/* <DropdownMenuItem
           className='text-destructive focus:text-destructive'
           onClick={onDelete}
         >
           <Trash2 className='mr-2 h-4 w-4' />
           Delete
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
+        {onDelete && (
+          <DropdownMenuItem
+            className='text-destructive focus:text-destructive'
+            onClick={onDelete}
+          >
+            <Trash2 className='mr-2 h-4 w-4' />
+            Delete
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
