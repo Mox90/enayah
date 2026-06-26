@@ -26,6 +26,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { EmployeePersonalDetails } from '../../../types/employee-personal-details.types'
 import { useState } from 'react'
+import { useDialogState } from '@/hooks/useDialogState'
+import {
+  AddressDialog,
+  IdentificationDialog,
+  VisaDialog,
+} from '@/components/dialogs/personal-detail-dialogs'
 
 export type Gender = 'male' | 'female'
 
@@ -100,21 +106,23 @@ const PersonalTab = ({ personal }: Props) => {
     isLoading,
     error,
   } = useEmployeePersonal(personal.id)
-  const [identificationDialogOpen, setIdentificationDialogOpen] =
-    useState(false)
-  const [editingIdentification, setEditingIdentification] = useState<
-    EmployeePersonalDetails['identifications'][number] | null
-  >(null)
+  const identification =
+    useDialogState<EmployeePersonalDetails['identifications'][number]>()
 
-  const [addressDialogOpen, setAddressDialogOpen] = useState(false)
-  const [editingAddress, setEditingAddress] = useState<
-    EmployeePersonalDetails['addresses'][number] | null
-  >(null)
+  const phone =
+    useDialogState<EmployeePersonalDetails['phoneNumbers'][number]>()
 
-  const [visaDialogOpen, setVisaDialogOpen] = useState(false)
-  const [editingVisa, setEditingVisa] = useState<
-    EmployeePersonalDetails['visas'][number] | null
-  >(null)
+  const email = useDialogState<EmployeePersonalDetails['emails'][number]>()
+
+  const address = useDialogState<EmployeePersonalDetails['addresses'][number]>()
+
+  const dependent =
+    useDialogState<EmployeePersonalDetails['dependents'][number]>()
+
+  const emergencyContact =
+    useDialogState<EmployeePersonalDetails['emergencyContacts'][number]>()
+
+  const visa = useDialogState<EmployeePersonalDetails['visas'][number]>()
 
   const employeePersonal = useEmployeePersonalMutations(personal.id)
 
@@ -281,53 +289,137 @@ const PersonalTab = ({ personal }: Props) => {
         </div>
       ) : (
         // <PersonalDetailsCards personalDetails={personalDetails} />
-        <PersonalDetailsCards
-          personalDetails={personalDetails}
-          onAddIdentification={() => {
-            setEditingIdentification(null)
-            setIdentificationDialogOpen(true)
-          }}
-          onEditIdentification={(id) => {
-            const item = personalDetails?.identifications.find(
-              (x) => x.id === id,
-            )
-            if (!item) return
+        <>
+          <PersonalDetailsCards
+            personalDetails={personalDetails}
+            onAddIdentification={identification.add}
+            onEditIdentification={(id) => {
+              const item = personalDetails?.identifications.find(
+                (x) => x.id === id,
+              )
+              if (!item) return
+              identification.edit(item)
+            }}
+            onDeleteIdentification={(id) => {
+              employeePersonal.deleteIdentification.mutate(id)
+            }}
+            onAddPhone={phone.add}
+            onEditPhone={(id) => {
+              const item = personalDetails?.phoneNumbers.find(
+                (x) => x.id === id,
+              )
+              if (!item) return
+              phone.edit(item)
+            }}
+            onDeletePhone={(id) => {
+              employeePersonal.deletePhone.mutate(id)
+            }}
+            onAddEmail={email.add}
+            onEditEmail={(id) => {
+              const item = personalDetails?.emails.find((x) => x.id === id)
+              if (!item) return
+              email.edit(item)
+            }}
+            onDeleteEmail={(id) => {
+              employeePersonal.deleteEmail.mutate(id)
+            }}
+            onAddAddress={address.add}
+            onEditAddress={(id) => {
+              const item = personalDetails?.addresses.find((x) => x.id === id)
+              if (!item) return
+              address.edit(item)
+            }}
+            onDeleteAddress={(id) => {
+              employeePersonal.deleteAddress.mutate(id)
+            }}
+            onAddDependent={dependent.add}
+            onEditDependent={(id) => {
+              const item = personalDetails?.dependents.find((x) => x.id === id)
+              if (!item) return
+              dependent.edit(item)
+            }}
+            onDeleteDependent={(id) => {
+              employeePersonal.deleteDependent.mutate(id)
+            }}
+            onAddEmergencyContact={emergencyContact.add}
+            onEditEmergencyContact={(id) => {
+              const item = personalDetails?.emergencyContacts.find(
+                (x) => x.id === id,
+              )
+              if (!item) return
+              emergencyContact.edit(item)
+            }}
+            onDeleteEmergencyContact={(id) => {
+              employeePersonal.deleteEmergencyContact.mutate(id)
+            }}
+            onAddVisa={visa.add}
+            onEditVisa={(id) => {
+              const item = personalDetails?.visas.find((x) => x.id === id)
+              if (!item) return
+              visa.edit(item)
+            }}
+            onDeleteVisa={(id) => {
+              employeePersonal.deleteVisa.mutate(id)
+            }}
+          />
 
-            setEditingIdentification(item)
-            setIdentificationDialogOpen(true)
-          }}
-          onDeleteIdentification={(id) => {
-            employeePersonal.deleteIdentification.mutate(id)
-          }}
-          onAddAddress={() => {
-            setEditingAddress(null)
-            setAddressDialogOpen(true)
-          }}
-          onEditAddress={(id) => {
-            const item = personalDetails?.addresses.find((x) => x.id === id)
-            if (!item) return
+          <IdentificationDialog
+            open={identification.open}
+            onOpenChange={identification.setOpen}
+            initialValue={identification.editing}
+            onSubmit={(value) => {
+              if (identification.editing) {
+                employeePersonal.updateIdentification.mutate({
+                  id: identification.editing.id,
 
-            setEditingAddress(item)
-            setAddressDialogOpen(true)
-          }}
-          onDeleteAddress={(id) => {
-            employeePersonal.deleteAddress.mutate(id)
-          }}
-          onAddVisa={() => {
-            setEditingVisa(null)
-            setVisaDialogOpen(true)
-          }}
-          onEditVisa={(id) => {
-            const item = personalDetails?.visas.find((x) => x.id === id)
-            if (!item) return
+                  data: value,
+                })
+              } else {
+                employeePersonal.createIdentification.mutate(value)
+              }
 
-            setEditingVisa(item)
-            setVisaDialogOpen(true)
-          }}
-          onDeleteVisa={(id) => {
-            employeePersonal.deleteVisa.mutate(id)
-          }}
-        />
+              identification.close()
+            }}
+          />
+
+          <AddressDialog
+            open={address.open}
+            onOpenChange={address.setOpen}
+            initialValue={address.editing}
+            onSubmit={(value) => {
+              if (address.editing) {
+                employeePersonal.updateAddress.mutate({
+                  id: address.editing.id,
+
+                  data: value,
+                })
+              } else {
+                employeePersonal.createAddress.mutate(value)
+              }
+
+              address.close()
+            }}
+          />
+
+          <VisaDialog
+            open={visa.open}
+            onOpenChange={visa.setOpen}
+            initialValue={visa.editing}
+            onSubmit={(value) => {
+              if (visa.editing) {
+                employeePersonal.updateVisa.mutate({
+                  id: visa.editing.id,
+
+                  data: value,
+                })
+              } else {
+                employeePersonal.createVisa.mutate(value)
+              }
+
+              visa.close()
+            }}
+          />
+        </>
       )}
     </div>
   )
