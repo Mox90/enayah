@@ -16,6 +16,7 @@ import { EmployeeProfile } from '../types/employee-profile.types'
 import { EmployeePersonalDetails } from '../types/employee-personal-details.types'
 
 //import { Employee } from '../types/employee.types'
+const base = `${API_ENDPOINTS.hr.employees}/personal`
 
 export const employeeService = {
   //----------------------------------
@@ -128,4 +129,103 @@ export const employeeService = {
     )
     return response.data
   },*/
+  // ------------------------------------------------------------------
+
+  // IDENTIFICATIONS
+
+  // ------------------------------------------------------------------
+
+  createIdentification: async (employeeId: string, data: unknown) =>
+    api.post(`${base}/${employeeId}/identifications`, data),
+
+  updateIdentification: async (id: string, data: unknown) =>
+    api.put(`${base}/identifications/${id}`, data),
+
+  deleteIdentification: async (id: string) =>
+    api.delete(`${base}/identifications/${id}`),
+
+  // ------------------------------------------------------------------
+
+  // PHONE NUMBERS
+
+  // ------------------------------------------------------------------
+
+  createPhone: async (employeeId: string, data: unknown) =>
+    api.post(`${base}/${employeeId}/phones`, data),
+
+  updatePhone: async (id: string, data: unknown) =>
+    api.put(`${base}/phones/${id}`, data),
+
+  deletePhone: async (id: string) => api.delete(`${base}/phones/${id}`),
+
+  // ------------------------------------------------------------------
+
+  // EMAILS
+
+  // ------------------------------------------------------------------
+
+  createEmail: async (employeeId: string, data: unknown) =>
+    api.post(`${base}/${employeeId}/emails`, data),
+
+  updateEmail: async (id: string, data: unknown) =>
+    api.put(`${base}/emails/${id}`, data),
+
+  deleteEmail: async (id: string) => api.delete(`${base}/emails/${id}`),
+
+  // ------------------------------------------------------------------
+
+  // ADDRESSES
+
+  // ------------------------------------------------------------------
+
+  createAddress: async (employeeId: string, data: unknown) =>
+    api.post(`${base}/${employeeId}/addresses`, data),
+
+  updateAddress: async (id: string, data: unknown) =>
+    api.put(`${base}/addresses/${id}`, data),
+
+  deleteAddress: async (id: string) => api.delete(`${base}/addresses/${id}`),
+
+  // ------------------------------------------------------------------
+
+  // DEPENDENTS
+
+  // ------------------------------------------------------------------
+
+  createDependent: async (employeeId: string, data: unknown) =>
+    api.post(`${base}/${employeeId}/dependents`, data),
+
+  updateDependent: async (id: string, data: unknown) =>
+    api.put(`${base}/dependents/${id}`, data),
+
+  deleteDependent: async (id: string) => api.delete(`${base}/dependents/${id}`),
+
+  // ------------------------------------------------------------------
+
+  // EMERGENCY CONTACTS
+
+  // ------------------------------------------------------------------
+
+  createEmergencyContact: async (employeeId: string, data: unknown) =>
+    api.post(`${base}/${employeeId}/emergency-contacts`, data),
+
+  updateEmergencyContact: async (id: string, data: unknown) =>
+    api.put(`${base}/emergency-contacts/${id}`, data),
+
+  deleteEmergencyContact: async (id: string) =>
+    api.delete(`${base}/emergency-contacts/${id}`),
+
+  // ------------------------------------------------------------------
+
+  // VISAS
+
+  // ------------------------------------------------------------------
+
+  createVisa: async (employeeId: string, data: unknown) =>
+    api.post(`${base}/${employeeId}/visas`, data),
+
+  updateVisa: async (id: string, data: unknown) =>
+    api.put(`${base}/visas/${id}`, data),
+
+  deleteVisa: async (id: string) => api.delete(`${base}/visas/${id}`),
 }
