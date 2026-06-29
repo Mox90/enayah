@@ -131,7 +131,7 @@ export function IdentificationDialog({
       description='Enter employee identification details.'
       //className='w-[95vw] max-w-7xl overflow-hidden p-0'
       className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
     >
       {open && (
         <IdentificationDialogContent

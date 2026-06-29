@@ -256,7 +256,7 @@ export function EmployeePersonalDialog({
       </div>
 
       {/* 3. Ensure the footer remains fixed at the bottom and doesn't shrink */}
-      <DialogFooter className='border-t bg-muted/40 px-6 py-8'>
+      <DialogFooter className='border-t bg-muted/40 px-6 py-8 shrink-0'>
         <Button
           className='p-4'
           variant='outline'
