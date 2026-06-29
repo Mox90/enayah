@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -53,7 +53,7 @@ function Footer({
   label: string
 }) {
   return (
-    <DialogFooter className='border-t bg-muted/40 px-6 py-6'>
+    <DialogFooter className='border-t bg-muted/40 px-6 py-8 shrink-0'>
       <Button type='button' variant='outline' onClick={onCancel}>
         Cancel
       </Button>
@@ -92,6 +92,68 @@ export function IdentificationDialog({
   initialValue,
   onSubmit,
 }: DialogProps<Identification>) {
+  //console.log('initialValue is')
+  //console.log(initialValue)
+  //const dialogKey = initialValue?.id ?? (open ? 'add-identification' : 'closed')
+  // const [form, setForm] = useState<Identification>(
+  //   initialValue ?? emptyIdentification,
+  // )
+
+  // function update<K extends keyof Identification>(
+  //   field: K,
+  //   value: Identification[K],
+  // ) {
+  //   setForm((prev) => ({ ...prev, [field]: value }))
+  // }
+
+  // async function handleSubmit() {
+  //   if (!form.identificationNumber.trim()) return
+
+  //   await onSubmit({
+  //     ...form,
+  //     id: form.id || createClientId('identification'),
+  //     sponsor: form.sponsor || null,
+  //     issuingAuthority: form.issuingAuthority || null,
+  //     occupation: form.occupation || null,
+  //     fileId: form.fileId || null,
+  //   })
+
+  //   onOpenChange(false)
+  // }
+
+  const dialogKey = initialValue?.id ?? (open ? 'add-identification' : 'closed')
+
+  return (
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={initialValue ? 'Edit Identification' : 'Add Identification'}
+      description='Enter employee identification details.'
+      //className='w-[95vw] max-w-7xl overflow-hidden p-0'
+      className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+    >
+      {open && (
+        <IdentificationDialogContent
+          key={dialogKey}
+          initialValue={initialValue}
+          onOpenChange={onOpenChange}
+          onSubmit={onSubmit}
+        />
+      )}
+    </FormDialog>
+  )
+}
+
+function IdentificationDialogContent({
+  initialValue,
+  onOpenChange,
+  onSubmit,
+}: {
+  initialValue?: Identification | null
+  onOpenChange: (open: boolean) => void
+  onSubmit: (value: Identification) => void | Promise<void>
+}) {
   const [form, setForm] = useState<Identification>(
     initialValue ?? emptyIdentification,
   )
@@ -118,124 +180,108 @@ export function IdentificationDialog({
     onOpenChange(false)
   }
 
-  const dialogKey = initialValue?.id ?? (open ? 'add-identification' : 'closed')
-
   return (
-    <FormDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Identification' : 'Add Identification'}
-      description='Enter employee identification details.'
-      className='w-[95vw] max-w-4xl overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
-    >
-      {open && (
-        <div key={dialogKey}>
-          <div className='space-y-6 px-6 py-5'>
-            <section className='rounded-2xl border bg-card p-5 shadow-sm'>
-              <div className='grid gap-4 xl:grid-cols-2'>
-                <div className='space-y-2'>
-                  <Label>Type</Label>
-                  <Select
-                    value={form.type}
-                    onValueChange={(v) =>
-                      update('type', v as Identification['type'])
-                    }
-                  >
-                    <SelectTrigger className='h-11'>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='national_id'>National ID</SelectItem>
-                      <SelectItem value='iqama'>Iqama</SelectItem>
-                      <SelectItem value='gcc_id'>GCC ID</SelectItem>
-                      <SelectItem value='passport'>Passport</SelectItem>
-                      <SelectItem value='other'>Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+    <>
+      <div className='flex-1 overflow-y-auto space-y-6 px-6 py-5'>
+        <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+          <div className='grid gap-4 xl:grid-cols-2'>
+            <div className='space-y-2'>
+              <Label>Type</Label>
+              <Select
+                value={form.type}
+                onValueChange={(v) =>
+                  update('type', v as Identification['type'])
+                }
+              >
+                <SelectTrigger className='h-11'>
+                  <SelectValue />
+                </SelectTrigger>
 
-                <div className='space-y-2'>
-                  <Label>Identification Number</Label>
-                  <Input
-                    className='h-11'
-                    value={form.identificationNumber}
-                    onChange={(e) =>
-                      update('identificationNumber', e.target.value)
-                    }
-                  />
-                </div>
+                <SelectContent>
+                  <SelectItem value='national_id'>National ID</SelectItem>
+                  <SelectItem value='iqama'>Iqama</SelectItem>
+                  <SelectItem value='gcc_id'>GCC ID</SelectItem>
+                  <SelectItem value='passport'>Passport</SelectItem>
+                  <SelectItem value='other'>Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>Issue Date</Label>
-                  <Input
-                    type='date'
-                    className='h-11'
-                    value={form.issueDate}
-                    onChange={(e) => update('issueDate', e.target.value)}
-                  />
-                </div>
+            <div className='space-y-2'>
+              <Label>Identification Number</Label>
+              <Input
+                className='h-11'
+                value={form.identificationNumber}
+                onChange={(e) => update('identificationNumber', e.target.value)}
+              />
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>Expiry Date</Label>
-                  <Input
-                    type='date'
-                    className='h-11'
-                    value={form.expiryDate}
-                    onChange={(e) => update('expiryDate', e.target.value)}
-                  />
-                </div>
+            <div className='space-y-2'>
+              <Label>Issue Date</Label>
+              <Input
+                type='date'
+                className='h-11'
+                value={form.issueDate}
+                onChange={(e) => update('issueDate', e.target.value)}
+              />
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>Sponsor</Label>
-                  <Input
-                    className='h-11'
-                    value={form.sponsor ?? ''}
-                    onChange={(e) => update('sponsor', e.target.value || null)}
-                  />
-                </div>
+            <div className='space-y-2'>
+              <Label>Expiry Date</Label>
+              <Input
+                type='date'
+                className='h-11'
+                value={form.expiryDate}
+                onChange={(e) => update('expiryDate', e.target.value)}
+              />
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>Issuing Authority</Label>
-                  <Input
-                    className='h-11'
-                    value={form.issuingAuthority ?? ''}
-                    onChange={(e) =>
-                      update('issuingAuthority', e.target.value || null)
-                    }
-                  />
-                </div>
+            <div className='space-y-2'>
+              <Label>Sponsor</Label>
+              <Input
+                className='h-11'
+                value={form.sponsor ?? ''}
+                onChange={(e) => update('sponsor', e.target.value || null)}
+              />
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>Occupation</Label>
-                  <Input
-                    className='h-11'
-                    value={form.occupation ?? ''}
-                    onChange={(e) =>
-                      update('occupation', e.target.value || null)
-                    }
-                  />
-                </div>
+            <div className='space-y-2'>
+              <Label>Issuing Authority</Label>
+              <Input
+                className='h-11'
+                value={form.issuingAuthority ?? ''}
+                onChange={(e) =>
+                  update('issuingAuthority', e.target.value || null)
+                }
+              />
+            </div>
 
-                <div className='flex items-center gap-2 pt-8'>
-                  <Checkbox
-                    checked={form.isCurrent}
-                    onCheckedChange={(v) => update('isCurrent', Boolean(v))}
-                  />
-                  <Label>Current</Label>
-                </div>
-              </div>
-            </section>
+            <div className='space-y-2'>
+              <Label>Occupation</Label>
+              <Input
+                className='h-11'
+                value={form.occupation ?? ''}
+                onChange={(e) => update('occupation', e.target.value || null)}
+              />
+            </div>
+
+            <div className='flex items-center gap-2 pt-8'>
+              <Checkbox
+                checked={form.isCurrent}
+                onCheckedChange={(v) => update('isCurrent', Boolean(v))}
+              />
+              <Label>Current</Label>
+            </div>
           </div>
+        </section>
+      </div>
 
-          <Footer
-            onCancel={() => onOpenChange(false)}
-            onSave={handleSubmit}
-            label='Save Identification'
-          />
-        </div>
-      )}
-    </FormDialog>
+      <Footer
+        onCancel={() => onOpenChange(false)}
+        onSave={handleSubmit}
+        label='Save Identification'
+      />
+    </>
   )
 }
 
