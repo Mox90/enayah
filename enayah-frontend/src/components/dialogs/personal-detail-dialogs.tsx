@@ -27,6 +27,7 @@ import type {
   Visa,
 } from '@/modules/hr/employees/types/employee-personal-details.types'
 import { FormDialog } from '../forms'
+import { Footer } from '../footer/footer'
 
 type DialogProps<T> = {
   open: boolean
@@ -43,31 +44,31 @@ function createClientId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
 
-function Footer({
-  onCancel,
-  onSave,
-  label,
-}: {
-  onCancel: () => void
-  onSave: () => void
-  label: string
-}) {
-  return (
-    <DialogFooter className='border-t bg-muted/40 px-6 py-8 shrink-0'>
-      <Button type='button' variant='outline' onClick={onCancel}>
-        Cancel
-      </Button>
+// function Footer({
+//   onCancel,
+//   onSave,
+//   label,
+// }: {
+//   onCancel: () => void
+//   onSave: () => void
+//   label: string
+// }) {
+//   return (
+//     <DialogFooter className='border-t bg-muted/40 px-6 py-8 shrink-0'>
+//       <Button type='button' variant='outline' onClick={onCancel}>
+//         Cancel
+//       </Button>
 
-      <Button
-        type='button'
-        className='bg-slate-950 text-white hover:bg-slate-800'
-        onClick={onSave}
-      >
-        {label}
-      </Button>
-    </DialogFooter>
-  )
-}
+//       <Button
+//         type='button'
+//         className='bg-slate-950 text-white hover:bg-slate-800'
+//         onClick={onSave}
+//       >
+//         {label}
+//       </Button>
+//     </DialogFooter>
+//   )
+// }
 
 /* -------------------------------------------------------------------------- */
 /* Identification Dialog                                                       */
