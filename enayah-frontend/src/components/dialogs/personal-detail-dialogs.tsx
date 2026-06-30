@@ -93,35 +93,6 @@ export function IdentificationDialog({
   initialValue,
   onSubmit,
 }: DialogProps<Identification>) {
-  //console.log('initialValue is')
-  //console.log(initialValue)
-  //const dialogKey = initialValue?.id ?? (open ? 'add-identification' : 'closed')
-  // const [form, setForm] = useState<Identification>(
-  //   initialValue ?? emptyIdentification,
-  // )
-
-  // function update<K extends keyof Identification>(
-  //   field: K,
-  //   value: Identification[K],
-  // ) {
-  //   setForm((prev) => ({ ...prev, [field]: value }))
-  // }
-
-  // async function handleSubmit() {
-  //   if (!form.identificationNumber.trim()) return
-
-  //   await onSubmit({
-  //     ...form,
-  //     id: form.id || createClientId('identification'),
-  //     sponsor: form.sponsor || null,
-  //     issuingAuthority: form.issuingAuthority || null,
-  //     occupation: form.occupation || null,
-  //     fileId: form.fileId || null,
-  //   })
-
-  //   onOpenChange(false)
-  // }
-
   const dialogKey = initialValue?.id ?? (open ? 'add-identification' : 'closed')
 
   return (
@@ -306,6 +277,39 @@ export function PhoneDialog({
   initialValue,
   onSubmit,
 }: DialogProps<PhoneNumber>) {
+  const dialogKey = initialValue?.id ?? (open ? 'add-phone' : 'closed')
+
+  return (
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={initialValue ? 'Edit Phone Number' : 'Add Phone Number'}
+      description='Enter employee identification details.'
+      //className='w-[95vw] max-w-7xl overflow-hidden p-0'
+      className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+    >
+      {open && (
+        <PhoneDialogContent
+          key={dialogKey}
+          initialValue={initialValue}
+          onOpenChange={onOpenChange}
+          onSubmit={onSubmit}
+        />
+      )}
+    </FormDialog>
+  )
+}
+
+function PhoneDialogContent({
+  initialValue,
+  onOpenChange,
+  onSubmit,
+}: {
+  initialValue?: PhoneNumber | null
+  onOpenChange: (open: boolean) => void
+  onSubmit: (value: PhoneNumber) => void | Promise<void>
+}) {
   const [form, setForm] = useState<PhoneNumber>(initialValue ?? emptyPhone)
 
   function update<K extends keyof PhoneNumber>(
@@ -328,96 +332,81 @@ export function PhoneDialog({
   }
 
   return (
-    <FormDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Phone Number' : 'Add Phone Number'}
-      description='Enter employee phone number details.'
-      className='w-[95vw] max-w-3xl overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
-    >
-      {open && (
-        <>
-          <div className='space-y-6 px-6 py-5'>
-            <section className='rounded-2xl border bg-card p-5 shadow-sm'>
-              <div className='grid gap-4 xl:grid-cols-2'>
-                <div className='space-y-2'>
-                  <Label>Type</Label>
-                  <Select
-                    value={form.type}
-                    onValueChange={(v) =>
-                      update('type', v as PhoneNumber['type'])
-                    }
-                  >
-                    <SelectTrigger className='h-11'>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='mobile'>Mobile</SelectItem>
-                      <SelectItem value='work'>Work</SelectItem>
-                      <SelectItem value='home'>Home</SelectItem>
-                      <SelectItem value='fax'>Fax</SelectItem>
-                      <SelectItem value='other'>Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+    <>
+      <div className='flex-1 overflow-y-auto space-y-6 px-6 py-5'>
+        <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+          <div className='grid gap-4 xl:grid-cols-2'>
+            <div className='space-y-2'>
+              <Label>Type</Label>
+              <Select
+                value={form.type}
+                onValueChange={(v) => update('type', v as PhoneNumber['type'])}
+              >
+                <SelectTrigger className='h-11'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='mobile'>Mobile</SelectItem>
+                  <SelectItem value='work'>Work</SelectItem>
+                  <SelectItem value='home'>Home</SelectItem>
+                  <SelectItem value='fax'>Fax</SelectItem>
+                  <SelectItem value='other'>Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>Country Code</Label>
-                  <Input
-                    className='h-11'
-                    value={form.countryCode}
-                    onChange={(e) => update('countryCode', e.target.value)}
-                  />
-                </div>
+            <div className='space-y-2'>
+              <Label>Country Code</Label>
+              <Input
+                className='h-11'
+                value={form.countryCode}
+                onChange={(e) => update('countryCode', e.target.value)}
+              />
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>Phone Number</Label>
-                  <Input
-                    className='h-11'
-                    value={form.phoneNumber}
-                    onChange={(e) => update('phoneNumber', e.target.value)}
-                  />
-                </div>
+            <div className='space-y-2'>
+              <Label>Phone Number</Label>
+              <Input
+                className='h-11'
+                value={form.phoneNumber}
+                onChange={(e) => update('phoneNumber', e.target.value)}
+              />
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>Extension</Label>
-                  <Input
-                    className='h-11'
-                    value={form.extension ?? ''}
-                    onChange={(e) =>
-                      update('extension', e.target.value || null)
-                    }
-                  />
-                </div>
+            <div className='space-y-2'>
+              <Label>Extension</Label>
+              <Input
+                className='h-11'
+                value={form.extension ?? ''}
+                onChange={(e) => update('extension', e.target.value || null)}
+              />
+            </div>
 
-                <div className='flex items-center gap-2'>
-                  <Checkbox
-                    checked={form.isPrimary}
-                    onCheckedChange={(v) => update('isPrimary', Boolean(v))}
-                  />
-                  <Label>Primary</Label>
-                </div>
+            <div className='flex items-center gap-2'>
+              <Checkbox
+                checked={form.isPrimary}
+                onCheckedChange={(v) => update('isPrimary', Boolean(v))}
+              />
+              <Label>Primary</Label>
+            </div>
 
-                <div className='flex items-center gap-2'>
-                  <Checkbox
-                    checked={form.isWhatsapp}
-                    onCheckedChange={(v) => update('isWhatsapp', Boolean(v))}
-                  />
-                  <Label>WhatsApp</Label>
-                </div>
-              </div>
-            </section>
+            <div className='flex items-center gap-2'>
+              <Checkbox
+                checked={form.isWhatsapp}
+                onCheckedChange={(v) => update('isWhatsapp', Boolean(v))}
+              />
+              <Label>WhatsApp</Label>
+            </div>
           </div>
+        </section>
+      </div>
 
-          <Footer
-            onCancel={() => onOpenChange(false)}
-            onSave={handleSubmit}
-            label='Save Phone'
-          />
-        </>
-      )}
-    </FormDialog>
+      <Footer
+        onCancel={() => onOpenChange(false)}
+        onSave={handleSubmit}
+        label='Save Phone'
+      />
+    </>
   )
 }
 

@@ -24,7 +24,7 @@ router.get(
 )
 
 router.post(
-  '/:id/personal',
+  '/personal/:id',
   requirePermission('employee.update'),
   audit('EMPLOYEE_PERSONAL_CREATE', {
     resource: 'EMPLOYEE',
