@@ -284,7 +284,7 @@ export function PhoneDialog({
       open={open}
       onOpenChange={onOpenChange}
       title={initialValue ? 'Edit Phone Number' : 'Add Phone Number'}
-      description='Enter employee identification details.'
+      description='Enter employee phone details.'
       //className='w-[95vw] max-w-7xl overflow-hidden p-0'
       className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
