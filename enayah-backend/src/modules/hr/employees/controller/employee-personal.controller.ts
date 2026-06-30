@@ -25,7 +25,12 @@ export const EmployeePersonalController = {
 
   createAll: asyncHandler(async (req: Request, res: Response) => {
     const { id } = EmployeeIdSchema.parse(req.params)
+    //console.log('Employe id is ' + id)
+    //console.log('Data received before parsing:')
+    //console.log(req.body)
     const body = CreateEmployeePersonalSchema.parse(req.body)
+    //console.log('Data received after parsing')
+    //console.log(body)
 
     const result = await EmployeePersonalService.createAll(id, body)
     res.status(201).json(result)
