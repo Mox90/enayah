@@ -72,6 +72,13 @@ export const ContractMovementRepository = {
     })
   },
 
+  findLatestByContractId: async (tx: DB, contractId: string) => {
+    return tx.query.contractMovements.findFirst({
+      where: and(eq(contractMovements.contractId, contractId), isActive),
+      orderBy: (m, { desc }) => [desc(m.sequenceNumber)],
+    })
+  },
+
   getNextSequenceNumber: async (tx: DB, contractId: string) => {
     const [row] = await tx
       .select({

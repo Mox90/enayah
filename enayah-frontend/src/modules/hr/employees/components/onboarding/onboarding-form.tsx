@@ -400,12 +400,9 @@ export function OnboardingForm({ onCancel }: Props) {
                 <span
                   className={[
                     'flex h-6 w-6 items-center justify-center rounded-full border text-xs font-semibold transition-colors',
-
                     completed && 'border-green-600 bg-green-600 text-white',
-
                     active &&
                       'border-primary bg-primary text-primary-foreground',
-
                     !active &&
                       !completed &&
                       'border-muted-foreground text-muted-foreground',
@@ -419,11 +416,8 @@ export function OnboardingForm({ onCancel }: Props) {
                 <span
                   className={[
                     'text-sm font-medium',
-
                     active && 'text-primary',
-
                     completed && 'text-green-600',
-
                     !active && !completed && 'text-muted-foreground',
                   ]
                     .filter(Boolean)

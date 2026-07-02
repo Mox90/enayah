@@ -7,11 +7,20 @@ import {
   updateContractSchema,
 } from '../dto/contract.request'
 import { ContractService } from '../service/contract.service'
+import { RenewContractSchema } from '../dto/contract-renewal.request'
 
 export const ContractController = {
   create: asyncHandler(async (req: Request, res: Response) => {
     const body = createContractSchema.parse(req.body)
     const result = await ContractService.create(body)
+
+    res.status(201).json(result)
+  }),
+
+  renew: asyncHandler(async (req: Request, res: Response) => {
+    const body = RenewContractSchema.parse(req.body)
+
+    const result = await ContractService.renew(body)
 
     res.status(201).json(result)
   }),

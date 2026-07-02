@@ -27,9 +27,10 @@ import { CountryLookupItem } from '../services/countries.service'
 interface Props {
   value?: string | null
   onChange: (country: CountryLookupItem) => void
+  placeholder?: string
 }
 
-export function CountryCombobox({ value, onChange }: Props) {
+export function CountryCombobox({ value, onChange, placeholder }: Props) {
   const t = useTranslations('employees')
   const locale = useLocale()
   const isRtl = locale === 'ar'
@@ -56,7 +57,7 @@ export function CountryCombobox({ value, onChange }: Props) {
             ? isRtl
               ? selected.nameAr
               : selected.name
-            : t('selectNationality')}
+            : placeholder || t('selectNationality')}
 
           <ChevronsUpDown className='ml-2 h-4 w-4 opacity-50' />
         </Button>
@@ -65,7 +66,7 @@ export function CountryCombobox({ value, onChange }: Props) {
       <PopoverContent className='w-[350px] p-0'>
         <Command>
           <CommandInput
-            placeholder={t('searchNat')}
+            placeholder={placeholder ? 'Search country...' : t('searchNat')}
             value={search}
             onValueChange={setSearch}
           />
@@ -98,11 +99,13 @@ export function CountryCombobox({ value, onChange }: Props) {
                       {isRtl ? (country.nameAr ?? country.name) : country.name}
                     </span>
 
-                    <span className='text-xs text-muted-foreground'>
-                      {isRtl
-                        ? (country.nationalityAr ?? country.nationalityEn)
-                        : country.nationalityEn}
-                    </span>
+                    {!placeholder && (
+                      <span className='text-xs text-muted-foreground'>
+                        {isRtl
+                          ? (country.nationalityAr ?? country.nationalityEn)
+                          : country.nationalityEn}
+                      </span>
+                    )}
                   </div>
                 </CommandItem>
               ))}
