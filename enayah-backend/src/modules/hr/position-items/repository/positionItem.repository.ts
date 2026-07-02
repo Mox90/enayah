@@ -106,6 +106,27 @@ export const PositionItemRepository = {
     return row
   },
 
+  releaseIfFilled: async (tx: DB, id: string) => {
+    const [row] = await tx
+      .update(positionItems)
+      .set({
+        status: 'vacant',
+        updatedAt: new Date(),
+        version: sql`${positionItems.version} + 1`,
+      })
+      .where(
+        and(
+          eq(positionItems.id, id),
+          eq(positionItems.isDeleted, false),
+          isNull(positionItems.deletedAt),
+          eq(positionItems.status, 'filled'),
+        ),
+      )
+      .returning()
+
+    return row ?? null
+  },
+
   create: async (tx: DB, data: CreatePositionItemDTO) => {
     const [row] = await tx
       .insert(positionItems)

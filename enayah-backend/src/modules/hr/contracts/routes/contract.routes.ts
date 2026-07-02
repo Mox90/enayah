@@ -21,6 +21,18 @@ router.post(
   ContractController.create,
 )
 
+router.post(
+  '/renew',
+  requirePermission('contract.create'),
+  audit('CREATE_CONTRACT', {
+    resource: 'CONTRACT',
+    sanitize: {
+      allowList: ['id', 'employmentId', 'contractType', 'startDate', 'endDate'],
+    },
+  }),
+  ContractController.renew,
+)
+
 router.get(
   '/:id',
   requirePermission('employee.view'),

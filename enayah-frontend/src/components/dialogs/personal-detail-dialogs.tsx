@@ -28,6 +28,8 @@ import type {
 } from '@/modules/hr/employees/types/employee-personal-details.types'
 import { FormDialog } from '../forms'
 import { Footer } from '../footer/footer'
+import { PhoneCodeCombobox } from '@/modules/countries/components/phone-code'
+import { CountryCombobox } from '@/modules/countries/components/country-combobox'
 
 type DialogProps<T> = {
   open: boolean
@@ -356,21 +358,22 @@ function PhoneDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>Country Code</Label>
-              <Input
-                className='h-11'
-                value={form.countryCode}
-                onChange={(e) => update('countryCode', e.target.value)}
-              />
-            </div>
+              <Label>Mobile</Label>
 
-            <div className='space-y-2'>
-              <Label>Phone Number</Label>
-              <Input
-                className='h-11'
-                value={form.phoneNumber}
-                onChange={(e) => update('phoneNumber', e.target.value)}
-              />
+              <div className='flex h-11 overflow-hidden rounded-md border border-input bg-background'>
+                <PhoneCodeCombobox
+                  value={form.countryCode || '+966'}
+                  onChange={(value) => update('countryCode', value)}
+                  className='rounded-none border-0 border-r'
+                />
+
+                <Input
+                  className='border-0! rounded-none! bg-transparent! shadow-none! focus-visible:ring-0 focus-visible:ring-offset-0'
+                  value={form.phoneNumber}
+                  onChange={(e) => update('phoneNumber', e.target.value)}
+                  placeholder='512345678'
+                />
+              </div>
             </div>
 
             <div className='space-y-2'>
@@ -427,6 +430,39 @@ export function EmailDialog({
   initialValue,
   onSubmit,
 }: DialogProps<Email>) {
+  const dialogKey = initialValue?.id ?? (open ? 'add-email' : 'closed')
+  return (
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={initialValue ? 'Edit Email' : 'Add Email'}
+      description='Enter employee email details.'
+      //className='w-[95vw] max-w-3xl overflow-hidden p-0'
+      //headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+      className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+    >
+      {open && (
+        <EmailDialogContent
+          key={dialogKey}
+          initialValue={initialValue}
+          onOpenChange={onOpenChange}
+          onSubmit={onSubmit}
+        />
+      )}
+    </FormDialog>
+  )
+}
+
+function EmailDialogContent({
+  initialValue,
+  onOpenChange,
+  onSubmit,
+}: {
+  initialValue?: Email | null
+  onOpenChange: (open: boolean) => void
+  onSubmit: (value: Email) => void | Promise<void>
+}) {
   const [form, setForm] = useState<Email>(initialValue ?? emptyEmail)
 
   function update<K extends keyof Email>(field: K, value: Email[K]) {
@@ -445,66 +481,55 @@ export function EmailDialog({
   }
 
   return (
-    <FormDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Email' : 'Add Email'}
-      description='Enter employee email details.'
-      className='w-[95vw] max-w-3xl overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
-    >
-      {open && (
-        <>
-          <div className='space-y-6 px-6 py-5'>
-            <section className='rounded-2xl border bg-card p-5 shadow-sm'>
-              <div className='grid gap-4 xl:grid-cols-2'>
-                <div className='space-y-2'>
-                  <Label>Type</Label>
-                  <Select
-                    value={form.type}
-                    onValueChange={(v) => update('type', v as Email['type'])}
-                  >
-                    <SelectTrigger className='h-11'>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='work'>Work</SelectItem>
-                      <SelectItem value='personal'>Personal</SelectItem>
-                      <SelectItem value='secondary'>Secondary</SelectItem>
-                      <SelectItem value='other'>Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+    <>
+      <div className='flex-1 overflow-y-auto space-y-6 px-6 py-5'>
+        <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+          <div className='grid gap-4 xl:grid-cols-2'>
+            <div className='space-y-2'>
+              <Label>Type</Label>
+              <Select
+                value={form.type}
+                onValueChange={(v) => update('type', v as Email['type'])}
+              >
+                <SelectTrigger className='h-11'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='work'>Work</SelectItem>
+                  <SelectItem value='personal'>Personal</SelectItem>
+                  <SelectItem value='secondary'>Secondary</SelectItem>
+                  <SelectItem value='other'>Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>Email</Label>
-                  <Input
-                    type='email'
-                    className='h-11'
-                    value={form.email}
-                    onChange={(e) => update('email', e.target.value)}
-                  />
-                </div>
+            <div className='space-y-2'>
+              <Label>Email</Label>
+              <Input
+                type='email'
+                className='h-11'
+                value={form.email}
+                onChange={(e) => update('email', e.target.value)}
+              />
+            </div>
 
-                <div className='flex items-center gap-2'>
-                  <Checkbox
-                    checked={form.isPrimary}
-                    onCheckedChange={(v) => update('isPrimary', Boolean(v))}
-                  />
-                  <Label>Primary</Label>
-                </div>
-              </div>
-            </section>
+            <div className='flex items-center gap-2'>
+              <Checkbox
+                checked={form.isPrimary}
+                onCheckedChange={(v) => update('isPrimary', Boolean(v))}
+              />
+              <Label>Primary</Label>
+            </div>
           </div>
+        </section>
+      </div>
 
-          <Footer
-            onCancel={() => onOpenChange(false)}
-            onSave={handleSubmit}
-            label='Save Email'
-          />
-        </>
-      )}
-    </FormDialog>
+      <Footer
+        onCancel={() => onOpenChange(false)}
+        onSave={handleSubmit}
+        label='Save Email'
+      />
+    </>
   )
 }
 
@@ -530,6 +555,38 @@ export function AddressDialog({
   initialValue,
   onSubmit,
 }: DialogProps<Address>) {
+  const dialogKey = initialValue?.id ?? (open ? 'add-address' : 'closed')
+
+  return (
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={initialValue ? 'Edit Address' : 'Add Address'}
+      description='Enter employee address details.'
+      className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+    >
+      {open && (
+        <AddressDialogContent
+          key={dialogKey}
+          initialValue={initialValue}
+          onOpenChange={onOpenChange}
+          onSubmit={onSubmit}
+        />
+      )}
+    </FormDialog>
+  )
+}
+
+function AddressDialogContent({
+  initialValue,
+  onOpenChange,
+  onSubmit,
+}: {
+  initialValue?: Address | null
+  onOpenChange: (open: boolean) => void
+  onSubmit: (value: Address) => void | Promise<void>
+}) {
   const [form, setForm] = useState<Address>(initialValue ?? emptyAddress)
 
   function update<K extends keyof Address>(field: K, value: Address[K]) {
@@ -553,113 +610,112 @@ export function AddressDialog({
   }
 
   return (
-    <FormDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Address' : 'Add Address'}
-      description='Enter employee address details.'
-      className='w-[95vw] max-w-4xl overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
-    >
-      {open && (
-        <>
-          <div className='space-y-6 px-6 py-5'>
-            <section className='rounded-2xl border bg-card p-5 shadow-sm'>
-              <div className='grid gap-4 xl:grid-cols-2'>
-                <div className='space-y-2'>
-                  <Label>Address Type</Label>
-                  <Select
-                    value={form.addressType}
-                    onValueChange={(v) =>
-                      update('addressType', v as Address['addressType'])
-                    }
-                  >
-                    <SelectTrigger className='h-11'>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='home'>Home</SelectItem>
-                      <SelectItem value='mailing'>Mailing</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+    <>
+      <div className='flex-1 overflow-y-auto space-y-6 px-6 py-5'>
+        <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+          <div className='grid gap-4 xl:grid-cols-2'>
+            <div className='space-y-2'>
+              <Label>Address Type</Label>
+              <Select
+                value={form.addressType}
+                onValueChange={(v) =>
+                  update('addressType', v as Address['addressType'])
+                }
+              >
+                <SelectTrigger className='h-11'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='home'>Home</SelectItem>
+                  <SelectItem value='mailing'>Mailing</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>Country ID</Label>
-                  <Input
-                    className='h-11'
-                    value={form.countryId}
-                    onChange={(e) => update('countryId', e.target.value)}
-                  />
-                </div>
+            <div className='space-y-2'>
+              <Label>Country</Label>
+              {/* <Input
+                className='h-11'
+                value={form.countryId}
+                onChange={(e) => update('countryId', e.target.value)}
+              /> */}
 
-                <div className='space-y-2'>
-                  <Label>City</Label>
-                  <Input
-                    className='h-11'
-                    value={form.city}
-                    onChange={(e) => update('city', e.target.value)}
-                  />
-                </div>
+              <CountryCombobox
+                value={form.countryId}
+                placeholder='Select country'
+                onChange={(country) => {
+                  update('countryId', country.id)
+                  //update('countryNameEn', country.name)
+                  //update('countryNameAr', country.nameAr)
+                }}
+              />
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>District</Label>
-                  <Input
-                    className='h-11'
-                    value={form.district}
-                    onChange={(e) => update('district', e.target.value)}
-                  />
-                </div>
+            <div className='space-y-2'>
+              <Label>City</Label>
+              <Input
+                className='h-11'
+                value={form.city}
+                onChange={(e) => update('city', e.target.value)}
+              />
+            </div>
 
-                <div className='space-y-2 xl:col-span-2'>
-                  <Label>Street</Label>
-                  <Input
-                    className='h-11'
-                    value={form.street}
-                    onChange={(e) => update('street', e.target.value)}
-                  />
-                </div>
+            <div className='space-y-2'>
+              <Label>District</Label>
+              <Input
+                className='h-11'
+                value={form.district}
+                onChange={(e) => update('district', e.target.value)}
+              />
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>Building</Label>
-                  <Input
-                    className='h-11'
-                    value={form.building ?? ''}
-                    onChange={(e) => update('building', e.target.value || null)}
-                  />
-                </div>
+            <div className='space-y-2 xl:col-span-2'>
+              <Label>Street</Label>
+              <Input
+                className='h-11'
+                value={form.street}
+                onChange={(e) => update('street', e.target.value)}
+              />
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>Postal Code</Label>
-                  <Input
-                    className='h-11'
-                    value={form.postalCode}
-                    onChange={(e) => update('postalCode', e.target.value)}
-                  />
-                </div>
+            <div className='space-y-2'>
+              <Label>Building</Label>
+              <Input
+                className='h-11'
+                value={form.building ?? ''}
+                onChange={(e) => update('building', e.target.value || null)}
+              />
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>Additional Number</Label>
-                  <Input
-                    className='h-11'
-                    value={form.additionalNumber ?? ''}
-                    onChange={(e) =>
-                      update('additionalNumber', e.target.value || null)
-                    }
-                  />
-                </div>
-              </div>
-            </section>
+            <div className='space-y-2'>
+              <Label>Postal Code</Label>
+              <Input
+                className='h-11'
+                value={form.postalCode}
+                onChange={(e) => update('postalCode', e.target.value)}
+              />
+            </div>
+
+            <div className='space-y-2'>
+              <Label>Additional Number</Label>
+              <Input
+                className='h-11'
+                value={form.additionalNumber ?? ''}
+                onChange={(e) =>
+                  update('additionalNumber', e.target.value || null)
+                }
+              />
+            </div>
           </div>
+        </section>
+      </div>
 
-          <Footer
-            onCancel={() => onOpenChange(false)}
-            onSave={handleSubmit}
-            label='Save Address'
-          />
-        </>
-      )}
-    </FormDialog>
+      <Footer
+        onCancel={() => onOpenChange(false)}
+        onSave={handleSubmit}
+        label='Save Address'
+      />
+    </>
   )
 }
 
@@ -688,6 +744,38 @@ export function DependentDialog({
   initialValue,
   onSubmit,
 }: DialogProps<Dependent>) {
+  const dialogKey = initialValue?.id ?? (open ? 'add-dependent' : 'closed')
+
+  return (
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={initialValue ? 'Edit Dependent' : 'Add Dependent'}
+      description='Enter employee dependent details.'
+      className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+    >
+      {open && (
+        <DependentDialogContent
+          key={dialogKey}
+          initialValue={initialValue}
+          onOpenChange={onOpenChange}
+          onSubmit={onSubmit}
+        />
+      )}
+    </FormDialog>
+  )
+}
+
+function DependentDialogContent({
+  initialValue,
+  onOpenChange,
+  onSubmit,
+}: {
+  initialValue?: Dependent | null
+  onOpenChange: (open: boolean) => void
+  onSubmit: (value: Dependent) => void | Promise<void>
+}) {
   const [form, setForm] = useState<Dependent>(initialValue ?? emptyDependent)
 
   function update<K extends keyof Dependent>(field: K, value: Dependent[K]) {
@@ -714,122 +802,109 @@ export function DependentDialog({
   }
 
   return (
-    <FormDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Dependent' : 'Add Dependent'}
-      description='Enter employee dependent details.'
-      className='w-[95vw] max-w-5xl overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
-    >
-      {open && (
-        <>
-          <div className='space-y-6 px-6 py-5'>
-            <section className='rounded-2xl border bg-card p-5 shadow-sm'>
-              <div className='grid gap-4 xl:grid-cols-2'>
-                <InputField
-                  label='First Name EN'
-                  value={form.firstNameEn}
-                  onChange={(v) => update('firstNameEn', v)}
-                />
-                <InputField
-                  label='Second Name EN'
-                  value={form.secondNameEn ?? ''}
-                  onChange={(v) => update('secondNameEn', v || null)}
-                />
-                <InputField
-                  label='Third Name EN'
-                  value={form.thirdNameEn ?? ''}
-                  onChange={(v) => update('thirdNameEn', v || null)}
-                />
-                <InputField
-                  label='Family Name EN'
-                  value={form.familyNameEn}
-                  onChange={(v) => update('familyNameEn', v)}
-                />
-                <InputField
-                  label='First Name AR'
-                  value={form.firstNameAr}
-                  onChange={(v) => update('firstNameAr', v)}
-                />
-                <InputField
-                  label='Second Name AR'
-                  value={form.secondNameAr ?? ''}
-                  onChange={(v) => update('secondNameAr', v || null)}
-                />
-                <InputField
-                  label='Third Name AR'
-                  value={form.thirdNameAr ?? ''}
-                  onChange={(v) => update('thirdNameAr', v || null)}
-                />
-                <InputField
-                  label='Family Name AR'
-                  value={form.familyNameAr}
-                  onChange={(v) => update('familyNameAr', v)}
-                />
+    <>
+      <div className='flex-1 overflow-y-auto space-y-6 px-6 py-5'>
+        <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+          <div className='grid gap-4 xl:grid-cols-2'>
+            <InputField
+              label='First Name EN'
+              value={form.firstNameEn}
+              onChange={(v) => update('firstNameEn', v)}
+            />
+            <InputField
+              label='Second Name EN'
+              value={form.secondNameEn ?? ''}
+              onChange={(v) => update('secondNameEn', v || null)}
+            />
+            <InputField
+              label='Third Name EN'
+              value={form.thirdNameEn ?? ''}
+              onChange={(v) => update('thirdNameEn', v || null)}
+            />
+            <InputField
+              label='Family Name EN'
+              value={form.familyNameEn}
+              onChange={(v) => update('familyNameEn', v)}
+            />
+            <InputField
+              label='First Name AR'
+              value={form.firstNameAr}
+              onChange={(v) => update('firstNameAr', v)}
+            />
+            <InputField
+              label='Second Name AR'
+              value={form.secondNameAr ?? ''}
+              onChange={(v) => update('secondNameAr', v || null)}
+            />
+            <InputField
+              label='Third Name AR'
+              value={form.thirdNameAr ?? ''}
+              onChange={(v) => update('thirdNameAr', v || null)}
+            />
+            <InputField
+              label='Family Name AR'
+              value={form.familyNameAr}
+              onChange={(v) => update('familyNameAr', v)}
+            />
 
-                <div className='space-y-2'>
-                  <Label>Relationship</Label>
-                  <Select
-                    value={form.relationship}
-                    onValueChange={(v) =>
-                      update('relationship', v as Dependent['relationship'])
-                    }
-                  >
-                    <SelectTrigger className='h-11'>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='spouse'>Spouse</SelectItem>
-                      <SelectItem value='child'>Child</SelectItem>
-                      <SelectItem value='father'>Father</SelectItem>
-                      <SelectItem value='mother'>Mother</SelectItem>
-                      <SelectItem value='other'>Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+            <div className='space-y-2'>
+              <Label>Relationship</Label>
+              <Select
+                value={form.relationship}
+                onValueChange={(v) =>
+                  update('relationship', v as Dependent['relationship'])
+                }
+              >
+                <SelectTrigger className='h-11'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='spouse'>Spouse</SelectItem>
+                  <SelectItem value='child'>Child</SelectItem>
+                  <SelectItem value='father'>Father</SelectItem>
+                  <SelectItem value='mother'>Mother</SelectItem>
+                  <SelectItem value='other'>Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>Gender</Label>
-                  <Select
-                    value={form.gender}
-                    onValueChange={(v) =>
-                      update('gender', v as Dependent['gender'])
-                    }
-                  >
-                    <SelectTrigger className='h-11'>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value='male'>Male</SelectItem>
-                      <SelectItem value='female'>Female</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+            <div className='space-y-2'>
+              <Label>Gender</Label>
+              <Select
+                value={form.gender}
+                onValueChange={(v) =>
+                  update('gender', v as Dependent['gender'])
+                }
+              >
+                <SelectTrigger className='h-11'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='male'>Male</SelectItem>
+                  <SelectItem value='female'>Female</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>Date of Birth</Label>
-                  <Input
-                    type='date'
-                    className='h-11'
-                    value={form.dateOfBirth ?? ''}
-                    onChange={(e) =>
-                      update('dateOfBirth', e.target.value || null)
-                    }
-                  />
-                </div>
-              </div>
-            </section>
+            <div className='space-y-2'>
+              <Label>Date of Birth</Label>
+              <Input
+                type='date'
+                className='h-11'
+                value={form.dateOfBirth ?? ''}
+                onChange={(e) => update('dateOfBirth', e.target.value || null)}
+              />
+            </div>
           </div>
+        </section>
+      </div>
 
-          <Footer
-            onCancel={() => onOpenChange(false)}
-            onSave={handleSubmit}
-            label='Save Dependent'
-          />
-        </>
-      )}
-    </FormDialog>
+      <Footer
+        onCancel={() => onOpenChange(false)}
+        onSave={handleSubmit}
+        label='Save Dependent'
+      />
+    </>
   )
 }
 
@@ -852,6 +927,39 @@ export function EmergencyContactDialog({
   initialValue,
   onSubmit,
 }: DialogProps<EmergencyContact>) {
+  const dialogKey =
+    initialValue?.id ?? (open ? 'add-emergency-contact' : 'closed')
+
+  return (
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={initialValue ? 'Edit Emergency Contact' : 'Add Emergency Contact'}
+      description='Enter emergency contact details.'
+      className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+    >
+      {open && (
+        <EmergencyContactDialogContent
+          key={dialogKey}
+          initialValue={initialValue}
+          onOpenChange={onOpenChange}
+          onSubmit={onSubmit}
+        />
+      )}
+    </FormDialog>
+  )
+}
+
+function EmergencyContactDialogContent({
+  initialValue,
+  onOpenChange,
+  onSubmit,
+}: {
+  initialValue?: EmergencyContact | null
+  onOpenChange: (open: boolean) => void
+  onSubmit: (value: EmergencyContact) => void | Promise<void>
+}) {
   const [form, setForm] = useState<EmergencyContact>(
     initialValue ?? emptyEmergencyContact,
   )
@@ -879,62 +987,51 @@ export function EmergencyContactDialog({
   }
 
   return (
-    <FormDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Emergency Contact' : 'Add Emergency Contact'}
-      description='Enter emergency contact details.'
-      className='w-[95vw] max-w-4xl overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
-    >
-      {open && (
-        <>
-          <div className='space-y-6 px-6 py-5'>
-            <section className='rounded-2xl border bg-card p-5 shadow-sm'>
-              <div className='grid gap-4 xl:grid-cols-2'>
-                <InputField
-                  label='Name'
-                  value={form.name}
-                  onChange={(v) => update('name', v)}
-                />
+    <>
+      <div className='flex-1 overflow-y-auto space-y-6 px-6 py-5'>
+        <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+          <div className='grid gap-4 xl:grid-cols-2'>
+            <InputField
+              label='Name'
+              value={form.name}
+              onChange={(v) => update('name', v)}
+            />
 
-                <InputField
-                  label='Relationship'
-                  value={form.relationship ?? ''}
-                  onChange={(v) => update('relationship', v || null)}
-                />
+            <InputField
+              label='Relationship'
+              value={form.relationship ?? ''}
+              onChange={(v) => update('relationship', v || null)}
+            />
 
-                <InputField
-                  label='Mobile'
-                  value={form.mobile ?? ''}
-                  onChange={(v) => update('mobile', v || null)}
-                />
+            <InputField
+              label='Mobile'
+              value={form.mobile ?? ''}
+              onChange={(v) => update('mobile', v || null)}
+            />
 
-                <InputField
-                  label='Alternate Mobile'
-                  value={form.alternateMobile ?? ''}
-                  onChange={(v) => update('alternateMobile', v || null)}
-                />
+            <InputField
+              label='Alternate Mobile'
+              value={form.alternateMobile ?? ''}
+              onChange={(v) => update('alternateMobile', v || null)}
+            />
 
-                <div className='space-y-2 xl:col-span-2'>
-                  <Label>Address</Label>
-                  <Textarea
-                    value={form.address ?? ''}
-                    onChange={(e) => update('address', e.target.value || null)}
-                  />
-                </div>
-              </div>
-            </section>
+            <div className='space-y-2 xl:col-span-2'>
+              <Label>Address</Label>
+              <Textarea
+                value={form.address ?? ''}
+                onChange={(e) => update('address', e.target.value || null)}
+              />
+            </div>
           </div>
+        </section>
+      </div>
 
-          <Footer
-            onCancel={() => onOpenChange(false)}
-            onSave={handleSubmit}
-            label='Save Emergency Contact'
-          />
-        </>
-      )}
-    </FormDialog>
+      <Footer
+        onCancel={() => onOpenChange(false)}
+        onSave={handleSubmit}
+        label='Save Emergency Contact'
+      />
+    </>
   )
 }
 
@@ -958,6 +1055,38 @@ export function VisaDialog({
   initialValue,
   onSubmit,
 }: DialogProps<Visa>) {
+  const dialogKey = initialValue?.id ?? (open ? 'add-visa' : 'closed')
+
+  return (
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={initialValue ? 'Edit Visa' : 'Add Visa'}
+      description='Enter employee visa details.'
+      className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+    >
+      {open && (
+        <VisaDialogContent
+          key={dialogKey}
+          initialValue={initialValue}
+          onOpenChange={onOpenChange}
+          onSubmit={onSubmit}
+        />
+      )}
+    </FormDialog>
+  )
+}
+
+function VisaDialogContent({
+  initialValue,
+  onOpenChange,
+  onSubmit,
+}: {
+  initialValue?: Visa | null
+  onOpenChange: (open: boolean) => void
+  onSubmit: (value: Visa) => void | Promise<void>
+}) {
   const [form, setForm] = useState<Visa>(initialValue ?? emptyVisa)
 
   function update<K extends keyof Visa>(field: K, value: Visa[K]) {
@@ -980,74 +1109,59 @@ export function VisaDialog({
   }
 
   return (
-    <FormDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Visa' : 'Add Visa'}
-      description='Enter employee visa details.'
-      className='w-[95vw] max-w-4xl overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
-    >
-      {open && (
-        <>
-          <div className='space-y-6 px-6 py-5'>
-            <section className='rounded-2xl border bg-card p-5 shadow-sm'>
-              <div className='grid gap-4 xl:grid-cols-2'>
-                <InputField
-                  label='Visa Number'
-                  value={form.visaNumber}
-                  onChange={(v) => update('visaNumber', v)}
-                />
+    <>
+      <div className='flex-1 overflow-y-auto space-y-6 px-6 py-5'>
+        <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+          <div className='grid gap-4 xl:grid-cols-2'>
+            <InputField
+              label='Visa Number'
+              value={form.visaNumber}
+              onChange={(v) => update('visaNumber', v)}
+            />
 
-                <InputField
-                  label='Visa Type'
-                  value={form.visaType ?? ''}
-                  onChange={(v) => update('visaType', v || undefined)}
-                />
+            <InputField
+              label='Visa Type'
+              value={form.visaType ?? ''}
+              onChange={(v) => update('visaType', v || undefined)}
+            />
 
-                <div className='space-y-2'>
-                  <Label>Issue Date</Label>
-                  <Input
-                    type='date'
-                    className='h-11'
-                    value={form.issueDate ?? ''}
-                    onChange={(e) =>
-                      update('issueDate', e.target.value || null)
-                    }
-                  />
-                </div>
+            <div className='space-y-2'>
+              <Label>Issue Date</Label>
+              <Input
+                type='date'
+                className='h-11'
+                value={form.issueDate ?? ''}
+                onChange={(e) => update('issueDate', e.target.value || null)}
+              />
+            </div>
 
-                <div className='space-y-2'>
-                  <Label>Expiry Date</Label>
-                  <Input
-                    type='date'
-                    className='h-11'
-                    value={form.expiryDate ?? ''}
-                    onChange={(e) =>
-                      update('expiryDate', e.target.value || null)
-                    }
-                  />
-                </div>
+            <div className='space-y-2'>
+              <Label>Expiry Date</Label>
+              <Input
+                type='date'
+                className='h-11'
+                value={form.expiryDate ?? ''}
+                onChange={(e) => update('expiryDate', e.target.value || null)}
+              />
+            </div>
 
-                <div className='flex items-center gap-2'>
-                  <Checkbox
-                    checked={form.isCurrent}
-                    onCheckedChange={(v) => update('isCurrent', Boolean(v))}
-                  />
-                  <Label>Current</Label>
-                </div>
-              </div>
-            </section>
+            <div className='flex items-center gap-2'>
+              <Checkbox
+                checked={form.isCurrent}
+                onCheckedChange={(v) => update('isCurrent', Boolean(v))}
+              />
+              <Label>Current</Label>
+            </div>
           </div>
+        </section>
+      </div>
 
-          <Footer
-            onCancel={() => onOpenChange(false)}
-            onSave={handleSubmit}
-            label='Save Visa'
-          />
-        </>
-      )}
-    </FormDialog>
+      <Footer
+        onCancel={() => onOpenChange(false)}
+        onSave={handleSubmit}
+        label='Save Visa'
+      />
+    </>
   )
 }
 

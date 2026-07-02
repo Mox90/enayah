@@ -29,7 +29,11 @@ import { useState } from 'react'
 import { useDialogState } from '@/hooks/useDialogState'
 import {
   AddressDialog,
+  DependentDialog,
+  EmailDialog,
+  EmergencyContactDialog,
   IdentificationDialog,
+  PhoneDialog,
   VisaDialog,
 } from '@/components/dialogs/personal-detail-dialogs'
 
@@ -371,7 +375,6 @@ const PersonalTab = ({ personal }: Props) => {
               if (identification.editing) {
                 employeePersonal.updateIdentification.mutate({
                   id: identification.editing.id,
-
                   data: value,
                 })
               } else {
@@ -379,6 +382,78 @@ const PersonalTab = ({ personal }: Props) => {
               }
 
               identification.close()
+            }}
+          />
+
+          <PhoneDialog
+            open={phone.open}
+            onOpenChange={phone.setOpen}
+            initialValue={phone.editing}
+            onSubmit={(value) => {
+              if (phone.editing) {
+                employeePersonal.updatePhone.mutate({
+                  id: phone.editing.id,
+                  data: value,
+                })
+              } else {
+                employeePersonal.createPhone.mutate(value)
+              }
+
+              phone.close()
+            }}
+          />
+
+          <EmailDialog
+            open={email.open}
+            onOpenChange={email.setOpen}
+            initialValue={email.editing}
+            onSubmit={(value) => {
+              if (email.editing) {
+                employeePersonal.updateEmail.mutate({
+                  id: email.editing.id,
+                  data: value,
+                })
+              } else {
+                employeePersonal.createEmail.mutate(value)
+              }
+
+              email.close()
+            }}
+          />
+
+          <DependentDialog
+            open={dependent.open}
+            onOpenChange={dependent.setOpen}
+            initialValue={dependent.editing}
+            onSubmit={(value) => {
+              if (dependent.editing) {
+                employeePersonal.updateDependent.mutate({
+                  id: dependent.editing.id,
+                  data: value,
+                })
+              } else {
+                employeePersonal.createDependent.mutate(value)
+              }
+
+              dependent.close()
+            }}
+          />
+
+          <EmergencyContactDialog
+            open={emergencyContact.open}
+            onOpenChange={emergencyContact.setOpen}
+            initialValue={emergencyContact.editing}
+            onSubmit={(value) => {
+              if (emergencyContact.editing) {
+                employeePersonal.updateEmergencyContact.mutate({
+                  id: emergencyContact.editing.id,
+                  data: value,
+                })
+              } else {
+                employeePersonal.createEmergencyContact.mutate(value)
+              }
+
+              emergencyContact.close()
             }}
           />
 
@@ -390,7 +465,6 @@ const PersonalTab = ({ personal }: Props) => {
               if (address.editing) {
                 employeePersonal.updateAddress.mutate({
                   id: address.editing.id,
-
                   data: value,
                 })
               } else {

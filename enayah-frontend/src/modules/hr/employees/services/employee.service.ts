@@ -14,7 +14,22 @@ import {
 import { Employee } from '../types/employee.types'
 import { EmployeeProfile } from '../types/employee-profile.types'
 import { EmployeePersonalDetails } from '../types/employee-personal-details.types'
-import { CreateIdentificationDto } from '../types/employee-personal.dto'
+import {
+  CreateAddressDto,
+  CreateDependentDto,
+  CreateEmailDto,
+  CreateEmergencyContactDto,
+  CreateIdentificationDto,
+  CreatePhoneDto,
+  CreateVisaDto,
+  UpdateAddressDto,
+  UpdateDependentDto,
+  UpdateEmailDto,
+  UpdateEmergencyContactDto,
+  UpdateIdentificationDto,
+  UpdatePhoneDto,
+  UpdateVisaDto,
+} from '../types/employee-personal.dto'
 
 //import { Employee } from '../types/employee.types'
 const base = `${API_ENDPOINTS.hr.employees}/personal`
@@ -145,93 +160,114 @@ export const employeeService = {
     return response.data
   },
 
-  updateIdentification: async (id: string, data: unknown) =>
+  updateIdentification: async (id: string, data: UpdateIdentificationDto) =>
     api.patch(`${base}/identifications/${id}`, data),
 
   deleteIdentification: async (id: string) =>
     api.delete(`${base}/identifications/${id}`),
 
   // ------------------------------------------------------------------
-
   // PHONE NUMBERS
-
   // ------------------------------------------------------------------
 
-  createPhone: async (employeeId: string, data: unknown) =>
-    api.post(`${base}/${employeeId}/phones`, data),
+  createPhone: async (employeeId: string, data: CreatePhoneDto) => {
+    const { ...payload } = data
+    const response = await api.post(`${base}/${employeeId}`, {
+      phoneNumbers: [payload],
+    })
+    return response.data
+  },
 
-  updatePhone: async (id: string, data: unknown) =>
-    api.patch(`${base}/phones/${id}`, data),
+  updatePhone: async (id: string, data: UpdatePhoneDto) =>
+    api.patch(`${base}/phone-numbers/${id}`, data),
 
-  deletePhone: async (id: string) => api.delete(`${base}/phones/${id}`),
+  deletePhone: async (id: string) => api.delete(`${base}/phone-numbers/${id}`),
 
   // ------------------------------------------------------------------
-
   // EMAILS
-
   // ------------------------------------------------------------------
 
-  createEmail: async (employeeId: string, data: unknown) =>
-    api.post(`${base}/${employeeId}/emails`, data),
+  createEmail: async (employeeId: string, data: CreateEmailDto) => {
+    const { ...payload } = data
+    const response = await api.post(`${base}/${employeeId}`, {
+      emails: [payload],
+    })
+    return response.data
+  },
 
-  updateEmail: async (id: string, data: unknown) =>
+  updateEmail: async (id: string, data: UpdateEmailDto) =>
     api.patch(`${base}/emails/${id}`, data),
 
   deleteEmail: async (id: string) => api.delete(`${base}/emails/${id}`),
 
   // ------------------------------------------------------------------
-
   // ADDRESSES
-
   // ------------------------------------------------------------------
 
-  createAddress: async (employeeId: string, data: unknown) =>
-    api.post(`${base}/${employeeId}/addresses`, data),
+  createAddress: async (employeeId: string, data: CreateAddressDto) => {
+    const { ...payload } = data
+    const response = await api.post(`${base}/${employeeId}`, {
+      addresses: [payload],
+    })
+    return response.data
+  },
 
-  updateAddress: async (id: string, data: unknown) =>
+  updateAddress: async (id: string, data: UpdateAddressDto) =>
     api.patch(`${base}/addresses/${id}`, data),
 
   deleteAddress: async (id: string) => api.delete(`${base}/addresses/${id}`),
 
   // ------------------------------------------------------------------
-
   // DEPENDENTS
-
   // ------------------------------------------------------------------
 
-  createDependent: async (employeeId: string, data: unknown) =>
-    api.post(`${base}/${employeeId}/dependents`, data),
+  createDependent: async (employeeId: string, data: CreateDependentDto) => {
+    const { ...payload } = data
+    const response = await api.post(`${base}/${employeeId}`, {
+      dependents: [payload],
+    })
+    return response.data
+  },
 
-  updateDependent: async (id: string, data: unknown) =>
+  updateDependent: async (id: string, data: UpdateDependentDto) =>
     api.patch(`${base}/dependents/${id}`, data),
 
   deleteDependent: async (id: string) => api.delete(`${base}/dependents/${id}`),
 
   // ------------------------------------------------------------------
-
   // EMERGENCY CONTACTS
-
   // ------------------------------------------------------------------
 
-  createEmergencyContact: async (employeeId: string, data: unknown) =>
-    api.post(`${base}/${employeeId}/emergency-contacts`, data),
+  createEmergencyContact: async (
+    employeeId: string,
+    data: CreateEmergencyContactDto,
+  ) => {
+    const { ...payload } = data
+    const response = await api.post(`${base}/${employeeId}`, {
+      emergencyContacts: [payload],
+    })
+    return response.data
+  },
 
-  updateEmergencyContact: async (id: string, data: unknown) =>
+  updateEmergencyContact: async (id: string, data: UpdateEmergencyContactDto) =>
     api.patch(`${base}/emergency-contacts/${id}`, data),
 
   deleteEmergencyContact: async (id: string) =>
     api.delete(`${base}/emergency-contacts/${id}`),
 
   // ------------------------------------------------------------------
-
   // VISAS
-
   // ------------------------------------------------------------------
 
-  createVisa: async (employeeId: string, data: unknown) =>
-    api.post(`${base}/${employeeId}/visas`, data),
+  createVisa: async (employeeId: string, data: CreateVisaDto) => {
+    const { ...payload } = data
+    const response = await api.post(`${base}/${employeeId}`, {
+      visas: [payload],
+    })
+    return response.data
+  },
 
-  updateVisa: async (id: string, data: unknown) =>
+  updateVisa: async (id: string, data: UpdateVisaDto) =>
     api.patch(`${base}/visas/${id}`, data),
 
   deleteVisa: async (id: string) => api.delete(`${base}/visas/${id}`),
