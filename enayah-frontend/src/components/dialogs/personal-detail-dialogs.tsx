@@ -312,7 +312,12 @@ function PhoneDialogContent({
   onOpenChange: (open: boolean) => void
   onSubmit: (value: PhoneNumber) => void | Promise<void>
 }) {
-  const [form, setForm] = useState<PhoneNumber>(initialValue ?? emptyPhone)
+  const [form, setForm] = useState<PhoneNumber>(
+    initialValue ?? {
+      ...emptyPhone,
+      countryCode: emptyPhone.countryCode || '+966',
+    },
+  )
 
   function update<K extends keyof PhoneNumber>(
     field: K,

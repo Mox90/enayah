@@ -33,11 +33,8 @@ export const ContractRepository = {
     dto: CreateContractDto & { contractNumber: string },
   ) => {
     const [row] = await tx
-
       .insert(contracts)
-
       .values(toContractDb(dto))
-
       .returning({ id: contracts.id })
 
     const created = assertExists(row, 'Failed to create contract')
@@ -47,6 +44,21 @@ export const ContractRepository = {
 
   findById: async (tx: DB, id: string) => {
     return findByIdOrThrow(tx, id)
+  },
+
+  findByIdForUpdate: async (tx: DB, id: string) => {
+    const [contract] = await tx
+      .select()
+      .from(contracts)
+      .where(and(eq(contracts.id, id), isActive))
+      .for('update')
+      .limit(1)
+
+    if (!contract) {
+      throw new AppError('Contract not found', 404)
+    }
+
+    return contract
   },
 
   findByEmploymentId: async (tx: DB, employmentId: string) => {

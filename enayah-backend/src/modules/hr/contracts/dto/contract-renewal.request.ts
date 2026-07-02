@@ -5,12 +5,17 @@ import { z } from 'zod'
 export const RenewContractSchema = z.object({
   currentContractId: z.uuid(),
 
-  contract: z.object({
-    startDate: z.iso.date(),
-    endDate: z.iso.date(),
-    signedDate: z.iso.date().nullable().optional(),
-    notes: z.string().nullable().optional(),
-  }),
+  contract: z
+    .object({
+      startDate: z.iso.date(),
+      endDate: z.iso.date(),
+      signedDate: z.iso.date().nullable().optional(),
+      notes: z.string().nullable().optional(),
+    })
+    .refine((c) => c.endDate > c.startDate, {
+      message: 'endDate must be after startDate',
+      path: ['endDate'],
+    }),
 
   movement: z.object({
     positionItemId: z.uuid(),

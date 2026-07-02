@@ -55,7 +55,11 @@ export const ContractService = {
 
   renew: async (dto: RenewContractDto) => {
     return db.transaction(async (tx) => {
-      const currentContract = await ContractRepository.findById(
+      // const currentContract = await ContractRepository.findById(
+      //   tx,
+      //   dto.currentContractId,
+      // )
+      const currentContract = await ContractRepository.findByIdForUpdate(
         tx,
         dto.currentContractId,
       )
@@ -156,10 +160,17 @@ export const ContractService = {
         : null
 
       if (!isSamePositionItem) {
-        await PositionItemRepository.releaseIfFilled(
+        const released = await PositionItemRepository.releaseIfFilled(
           tx,
           latestMovement.positionItemId,
         )
+
+        if (!released) {
+          throw new AppError(
+            'Failed to release previous position item during renewal',
+            409,
+          )
+        }
       }
 
       await ContractRepository.update(tx, currentContract.id, {
