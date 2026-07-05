@@ -81,4 +81,12 @@ export const ContractController = {
 
     res.status(204).send()
   }),
+
+  getRenewalDefaults: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = contractIdSchema.parse(req.params)
+
+    const result = await ContractService.getRenewalDefaults(id)
+
+    res.status(200).json(result)
+  }),
 }

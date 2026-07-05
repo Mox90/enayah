@@ -38,6 +38,12 @@ router.post(
 )
 
 router.get(
+  '/:id/renewal-defaults',
+  requirePermission('employment.view'),
+  ContractController.getRenewalDefaults,
+)
+
+router.get(
   '/:id',
   requirePermission('employee.view'),
   ContractController.findById,

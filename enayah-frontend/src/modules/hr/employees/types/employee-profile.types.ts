@@ -71,6 +71,19 @@ export interface EmployeeProfile {
         titleEn: string
         titleAr: string | null
       }
+
+      compensation?: {
+        id: string
+        baseSalary: number | string
+        effectiveDate: string
+        status: 'draft' | 'approved' | 'applied'
+        reason?: string | null
+        allowances: {
+          id: string
+          type: string
+          amount: number | string
+        }[]
+      } | null
     }
   }
 }

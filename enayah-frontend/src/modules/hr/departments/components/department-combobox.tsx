@@ -29,7 +29,7 @@ interface DepartmentLookupItem {
 
 interface Props {
   value?: string | null
-  selectedLabel?: string
+  selectedLabel?: string | null
   onChange: (department: DepartmentLookupItem) => void
 }
 

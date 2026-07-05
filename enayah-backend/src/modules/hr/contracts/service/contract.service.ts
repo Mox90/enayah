@@ -187,4 +187,8 @@ export const ContractService = {
       }
     })
   },
+
+  getRenewalDefaults: async (contractId: string) => {
+    return ContractRepository.getRenewalDefaults(db, contractId)
+  },
 }

@@ -33,6 +33,9 @@ import { toArabic, toPersianDigits } from '@/utils/utilities'
 import { useState } from 'react'
 import { useUpdatePersonalMutation } from '../../hooks/use-update-employee-profile'
 import { EmployeePersonalDialog } from '@/components/dialogs/employee-personal-dialog'
+import { useRenewContract } from '@/modules/hr/contracts/hooks/use-renew-contract'
+import { ContractRenewalDialog } from '@/components/dialogs/contract-renewal-dialog'
+import { useContractRenewalDefaults } from '@/modules/hr/contracts/hooks/use-contract-renewal-defaults'
 
 const statusClass: Record<string, string> = {
   active: 'bg-green-100 text-green-700 border-green-200',
@@ -50,6 +53,12 @@ const statusLabel: Record<string, string> = {
   resigned: 'Resigned',
   eoc: 'End of Contract',
   terminated: 'Terminated',
+}
+
+function nextDay(date: string) {
+  const d = new Date(date)
+  d.setDate(d.getDate() + 1)
+  return d.toISOString().slice(0, 10)
 }
 
 // const workforceLabel: Record<string, string> = {
@@ -74,6 +83,8 @@ export function EmployeeProfileHeader({ profile }: Props) {
   const isRtl = locale === 'ar'
 
   //console.log('Version receive from Props is ' + p.version)
+  // console.log('Profile ')
+  // console.log(profile)
 
   const name = isRtl
     ? [p.firstNameAr, p.secondNameAr, p.thirdNameAr, p.familyNameAr]
@@ -84,8 +95,19 @@ export function EmployeeProfileHeader({ profile }: Props) {
   const [editOpen, setEditOpen] = useState(false)
   const updatePersonalMutation = useUpdatePersonalMutation()
 
+  const [renewOpen, setRenewOpen] = useState(false)
+  const renewMutation = useRenewContract(profile.personal.id)
+
   const avatar = profile.personal?.avatar
   const fullName = name.filter(Boolean).join(' ') || 'Employee profile image'
+
+  const currentContract = e?.contract
+  const currentMovement = e?.movement
+
+  const { data: renewalDefaults, isLoading: isRenewalDefaultsLoading } =
+    useContractRenewalDefaults(currentContract?.id, renewOpen)
+
+  console.log('Renewal Defaults: ', renewalDefaults)
 
   return (
     <div className='overflow-hidden rounded-2xl border bg-background shadow-sm'>
@@ -124,9 +146,14 @@ export function EmployeeProfileHeader({ profile }: Props) {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  if (!currentContract) return
+                  setRenewOpen(true)
+                }}
+              >
                 <FilePenLine className='mr-2 h-4 w-4' />
-                {cont('contract')}
+                {cont('renewContract')}
               </DropdownMenuItem>
 
               <DropdownMenuItem>
@@ -253,6 +280,48 @@ export function EmployeeProfileHeader({ profile }: Props) {
             })
           }}
         />
+      )}
+
+      {renewOpen && currentContract && (
+        <>
+          {isRenewalDefaultsLoading || !renewalDefaults ? (
+            <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/40'>
+              <div className='rounded-xl bg-background px-6 py-4 shadow-lg'>
+                Loading renewal details...
+              </div>
+            </div>
+          ) : (
+            <ContractRenewalDialog
+              open={renewOpen}
+              onOpenChange={setRenewOpen}
+              currentContractId={renewalDefaults.contract.id}
+              currentPositionItemId={renewalDefaults.movement.positionItemId}
+              currentItemNumber={renewalDefaults.movement.itemNumber}
+              currentDepartmentId={
+                renewalDefaults.movement.officialDepartmentId
+              }
+              currentPositionId={renewalDefaults.movement.officialPositionId}
+              currentBaseSalary={renewalDefaults.compensation?.baseSalary}
+              currentAllowances={renewalDefaults.compensation?.allowances ?? []}
+              defaultStartDate={nextDay(renewalDefaults.contract.endDate)}
+              currentDepartmentName={
+                isRtl
+                  ? (renewalDefaults.movement.officialDepartmentNameAr ??
+                    renewalDefaults.movement.officialDepartmentNameEn)
+                  : renewalDefaults.movement.officialDepartmentNameEn
+              }
+              currentPositionTitle={
+                isRtl
+                  ? (renewalDefaults.movement.officialPositionTitleAr ??
+                    renewalDefaults.movement.officialPositionTitleEn)
+                  : renewalDefaults.movement.officialPositionTitleEn
+              }
+              onSubmit={async (payload) => {
+                await renewMutation.mutateAsync(payload)
+              }}
+            />
+          )}
+        </>
       )}
     </div>
   )

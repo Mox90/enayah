@@ -289,6 +289,7 @@
   },
   "contracts": {
     "contract": "Contract",
+    "renewContract": "Contract Renewal",
     "transfer": "Transfer",
     "eca": "Employment, Contract & Assignment",
     "ecaSub": "Initial employment record, first contract, legal PCN assignment, and actual appointment.",
