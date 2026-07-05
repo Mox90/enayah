@@ -39,7 +39,7 @@ router.post(
 
 router.get(
   '/:id/renewal-defaults',
-  requirePermission('employment.view'),
+  requirePermission('contract.view'),
   ContractController.getRenewalDefaults,
 )
 

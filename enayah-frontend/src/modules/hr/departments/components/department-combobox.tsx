@@ -62,7 +62,7 @@ export function DepartmentCombobox({ value, onChange, selectedLabel }: Props) {
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className='w-[420px] p-0'>
+      <PopoverContent className='w-105 p-0'>
         <Command shouldFilter={false}>
           <CommandInput
             placeholder='Search department...'
