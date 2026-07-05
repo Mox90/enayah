@@ -31,7 +31,7 @@ interface PositionLookupItem {
 
 interface Props {
   value?: string | null
-  selectedLabel?: string
+  selectedLabel?: string | null
   onChange: (position: PositionLookupItem) => void
 }
 

@@ -10,6 +10,7 @@ export const API_ENDPOINTS = {
     positions: '/hr/positions',
     credentials: '/hr/credentials',
     onboarding: '/hr/onboarding',
+    contracts: '/hr/contracts',
   },
 
   iam: {

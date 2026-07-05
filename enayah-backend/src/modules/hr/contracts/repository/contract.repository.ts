@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
-import { contracts, DB } from '../../../../db'
+import { contractMovements, contracts, DB } from '../../../../db'
 import { CreateContractDto, UpdateContractDto } from '../dto/contract.request'
 import { toContractDb, toContractUpdateDb } from '../dto/contract.mapper'
 
@@ -156,5 +156,61 @@ export const ContractRepository = {
       .where(and(eq(contracts.id, id), isActive))
 
     return existing
+  },
+
+  getRenewalDefaults: async (tx: DB, contractId: string) => {
+    const contract = await tx.query.contracts.findFirst({
+      where: and(eq(contracts.id, contractId), eq(contracts.isDeleted, false)),
+      with: {
+        movements: {
+          where: eq(contractMovements.isDeleted, false),
+          orderBy: (m, { desc }) => [desc(m.sequenceNumber)],
+          limit: 1,
+          with: {
+            positionItem: true,
+            department: true,
+            position: true,
+            compensations: {
+              with: {
+                allowances: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!contract) {
+      throw new AppError('Contract not found', 404)
+    }
+
+    const movement = contract.movements[0]
+    const compensation = movement?.compensations?.[0] ?? null
+
+    return {
+      contract: {
+        id: contract.id,
+        endDate: contract.endDate,
+      },
+      movement: {
+        positionItemId: movement?.positionItemId ?? null,
+        itemNumber: movement?.positionItem?.itemNumber ?? null,
+        officialDepartmentId: movement?.officialDepartmentId ?? null,
+        officialDepartmentNameEn: movement?.department?.nameEn ?? null,
+        officialDepartmentNameAr: movement?.department?.nameAr ?? null,
+        officialPositionId: movement?.officialPositionId ?? null,
+        officialPositionTitleEn: movement?.position?.titleEn ?? null,
+        officialPositionTitleAr: movement?.position?.titleAr ?? null,
+      },
+      compensation: compensation
+        ? {
+            baseSalary: Number(compensation.baseSalary),
+            allowances: compensation.allowances.map((a) => ({
+              type: a.type,
+              amount: Number(a.amount),
+            })),
+          }
+        : null,
+    }
   },
 }

@@ -29,7 +29,7 @@ interface DepartmentLookupItem {
 
 interface Props {
   value?: string | null
-  selectedLabel?: string
+  selectedLabel?: string | null
   onChange: (department: DepartmentLookupItem) => void
 }
 
@@ -62,7 +62,7 @@ export function DepartmentCombobox({ value, onChange, selectedLabel }: Props) {
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className='w-[420px] p-0'>
+      <PopoverContent className='w-105 p-0'>
         <Command shouldFilter={false}>
           <CommandInput
             placeholder='Search department...'

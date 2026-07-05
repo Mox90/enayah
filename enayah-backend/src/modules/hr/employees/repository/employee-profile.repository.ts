@@ -21,7 +21,7 @@ const isActive = and(
 )
 
 export const EmployeeProfileRepository = {
-  async findProfile(tx: DB, employeeId: string) {
+  findProfile: async (tx: DB, employeeId: string) => {
     // ------------------------------------
     // latest movement per contract
     // ------------------------------------
