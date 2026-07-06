@@ -184,9 +184,7 @@ function DegreeDialogContent({
             <h3 className='text-sm font-semibold text-foreground'>
               {t('graduationDateLabel')}
             </h3>
-            <p className='text-xs text-muted-foreground'>
-              Graduation or completion date, if available.
-            </p>
+            <p className='text-xs text-muted-foreground'>{t('degreeSub')}</p>
           </div>
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
@@ -235,15 +233,16 @@ export function DegreeDialog({
   generateId = false,
 }: Props) {
   const dialogKey = initialValue?.id ?? (open ? 'add-degree' : 'closed')
+  const t = useTranslations('credentials')
 
   return (
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Degree' : 'Add Degree'}
-      description="Enter the employee's board qualification details."
-      className='w-[95vw] max-w-4xl overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+      title={initialValue ? t('editDegree') : t('addDegree')}
+      description={t('educationSub')}
+      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
     >
       {open && (
         <DegreeDialogContent

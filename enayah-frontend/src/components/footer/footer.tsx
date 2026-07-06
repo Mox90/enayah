@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl'
 import { Button } from '../ui/button'
 import { DialogFooter } from '../ui/dialog'
 
@@ -10,10 +11,11 @@ export function Footer({
   onSave: () => void
   label: string
 }) {
+  const ct = useTranslations('common')
   return (
     <DialogFooter className='border-t bg-muted/40 px-6 py-8 shrink-0'>
       <Button type='button' variant='outline' onClick={onCancel}>
-        Cancel
+        {ct('cancel')}
       </Button>
 
       <Button

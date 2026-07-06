@@ -107,7 +107,7 @@ export function EmployeeProfileHeader({ profile }: Props) {
   const { data: renewalDefaults, isLoading: isRenewalDefaultsLoading } =
     useContractRenewalDefaults(currentContract?.id, renewOpen)
 
-  console.log('Renewal Defaults: ', renewalDefaults)
+  //console.log('Renewal Defaults: ', renewalDefaults)
 
   return (
     <div className='overflow-hidden rounded-2xl border bg-background shadow-sm'>

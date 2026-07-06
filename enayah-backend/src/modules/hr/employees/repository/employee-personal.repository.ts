@@ -157,6 +157,9 @@ export const EmployeePersonalRepository = {
           eq(employeeAddresses.employeeId, employeeId),
           eq(employeeAddresses.isDeleted, false),
         ),
+        with: {
+          country: true,
+        },
       }),
 
       tx.query.employeeEmergencyContacts.findMany({

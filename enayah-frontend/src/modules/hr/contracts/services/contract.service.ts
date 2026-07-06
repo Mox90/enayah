@@ -8,6 +8,7 @@ export const contractService = {
       `${API_ENDPOINTS.hr.contracts}/renew`,
       payload,
     )
+    //console.log('Renew Contract Response: ', response.data)
     return response.data
   },
 

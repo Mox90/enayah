@@ -4,6 +4,7 @@ import { Label } from '../ui/label'
 import { Input } from '../ui/input'
 import { Button } from '../ui/button'
 import { FormDialog } from '../forms'
+import { useLocale, useTranslations } from 'next-intl'
 
 export type BoardFormValue = {
   id?: string
@@ -47,6 +48,9 @@ function BoardDialogContent({
 }) {
   const [form, setForm] = useState<BoardFormValue>(initialValue ?? emptyValue)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const crt = useTranslations('credentials')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
 
   function update<K extends keyof BoardFormValue>(
     field: K,
@@ -95,17 +99,15 @@ function BoardDialogContent({
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
-              Board Qualification
+              {crt('boardSub2')}
             </h3>
 
-            <p className='text-xs text-muted-foreground'>
-              Enter the board name, specialty, and issuing authority.
-            </p>
+            <p className='text-xs text-muted-foreground'>{crt('boardSub3')}</p>
           </div>
 
           <div className='grid grid-cols-1 gap-4'>
             <div className='space-y-2 xl:col-span-2'>
-              <Label>Board Name *</Label>
+              <Label>{crt('boardName')}</Label>
 
               <Input
                 className='h-11'
@@ -116,7 +118,7 @@ function BoardDialogContent({
             </div>
 
             <div className='space-y-2 xl:col-span-2'>
-              <Label>Specialty</Label>
+              <Label>{crt('specialty')}</Label>
 
               <Input
                 className='h-11'
@@ -127,7 +129,7 @@ function BoardDialogContent({
             </div>
 
             <div className='space-y-2 xl:col-span-2'>
-              <Label>Issuing Body *</Label>
+              <Label>{crt('issuingBody')}</Label>
 
               <Input
                 className='h-11'
@@ -142,17 +144,17 @@ function BoardDialogContent({
         <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
-              Validity Period
+              {crt('validityPeriodLbl')}
             </h3>
 
             <p className='text-xs text-muted-foreground'>
-              Add the issue and expiry dates if available.
+              {crt('validityPeriodSub')}
             </p>
           </div>
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>Issue Date</Label>
+              <Label>{crt('issued')}</Label>
 
               <Input
                 type='date'
@@ -163,7 +165,7 @@ function BoardDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>Expiry Date</Label>
+              <Label>{crt('expires')}</Label>
 
               <Input
                 type='date'
@@ -183,7 +185,7 @@ function BoardDialogContent({
           variant='outline'
           onClick={() => onOpenChange(false)}
         >
-          Cancel
+          {crt('cancel')}
         </Button>
 
         <Button
@@ -192,7 +194,7 @@ function BoardDialogContent({
           onClick={handleSubmit}
           disabled={isSubmitting}
         >
-          Save Board
+          {crt('saveBoard', { item: isRtl ? 'مجلس' : 'Board' })}
         </Button>
       </DialogFooter>
     </>
@@ -207,15 +209,17 @@ export function BoardDialog({
   generateId = false,
 }: Props) {
   const dialogKey = initialValue?.id ?? (open ? 'add-board' : 'closed')
-
+  const crt = useTranslations('credentials')
   return (
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Board' : 'Add Board'}
-      description="Enter the employee's board qualification details."
-      className='w-[95vw] max-w-4xl overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+      title={initialValue ? crt('editBoard') : crt('addBoard')}
+      description={crt('boardSub')}
+      //className='w-[95vw] max-w-4xl overflow-hidden p-0'
+      //headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
     >
       {open && (
         <BoardDialogContent
