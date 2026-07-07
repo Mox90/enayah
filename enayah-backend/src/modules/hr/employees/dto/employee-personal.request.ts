@@ -170,6 +170,7 @@ export const EmployeeAddressSchema = z.object({
 
   city: z.string().trim().max(100).nullable().optional(),
   district: z.string().trim().max(100).nullable().optional(),
+  stateProvince: z.string().trim().max(100).nullable().optional(),
   street: z.string().trim().max(255).nullable().optional(),
   building: z.string().trim().max(100).nullable().optional(),
   postalCode: z.string().trim().max(20).nullable().optional(),
@@ -183,6 +184,7 @@ export const UpdateEmployeeAddressSchema = z
     countryId: optionalUuid,
     city: z.string().trim().max(100).nullable().optional(),
     district: z.string().trim().max(100).nullable().optional(),
+    stateProvince: z.string().trim().max(100).nullable().optional(),
     street: z.string().trim().max(255).nullable().optional(),
     building: z.string().trim().max(100).nullable().optional(),
     postalCode: z.string().trim().max(20).nullable().optional(),

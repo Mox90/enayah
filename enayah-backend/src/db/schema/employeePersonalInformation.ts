@@ -125,6 +125,9 @@ export const employeeAddresses = pgTable('employee_addresses', {
   building: varchar('building', {
     length: 100,
   }),
+  stateProvince: varchar('state_province', {
+    length: 100,
+  }),
   postalCode: varchar('postal_code', {
     length: 20,
   }),

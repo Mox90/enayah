@@ -158,7 +158,7 @@ export const getExpiryStatus = (
         ? 'border-r-red-600 border-red-500/30'
         : 'border-l-red-600 border-red-500/30',
       pulseClass:
-        'animate-[pulse_1.5s_infinite] shadow-[0_0_15px_rgba(239,68,68,0.2)]',
+        'animate-[pulse_0.6s_infinite] shadow-[0_0_15px_rgba(239,68,68,0.2)]',
       diffDays,
     }
   }

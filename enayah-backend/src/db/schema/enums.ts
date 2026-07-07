@@ -283,3 +283,20 @@ export const phoneTypeEnum = pgEnum('phone_type', [
   'fax',
   'other',
 ])
+
+export const notificationSeverityEnum = pgEnum('notification_severity', [
+  'info',
+  'warning',
+  'success',
+  'error',
+])
+
+export const iqamaRenewalStatusEnum = pgEnum('iqama_renewal_status', [
+  'pending_upload',
+  'uploaded',
+  'under_process',
+  'approved',
+  'denied',
+  'completed',
+  'eoc_required',
+])
