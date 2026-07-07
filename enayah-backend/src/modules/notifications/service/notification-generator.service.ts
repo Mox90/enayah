@@ -8,6 +8,7 @@ import {
   users,
   userRoles,
   roles,
+  DB,
 } from '../../../db'
 import { NotificationRepository } from '../repository/notification.repository'
 
@@ -31,17 +32,41 @@ function calculateDaysUntil(expiryDate: string) {
   return Math.ceil(diffMs / (1000 * 60 * 60 * 24))
 }
 
-function getMilestone(expiryDate: string) {
+async function getNextDueMilestone(
+  tx: DB,
+  sourceType: string,
+  sourceId: string,
+  expiryDate: string,
+) {
   const daysUntil = calculateDaysUntil(expiryDate)
 
   if (daysUntil < 0) {
-    return {
-      key: 'expired',
-      days: daysUntil,
+    const alreadyNotified = await NotificationRepository.hasEvent(tx, {
+      sourceType,
+      sourceId,
+      milestone: 'expired',
+    })
+
+    return alreadyNotified ? null : { key: 'expired', days: daysUntil }
+  }
+
+  const dueMilestones = EXPIRY_MILESTONES.filter(
+    (milestone) => daysUntil <= milestone.days,
+  ).sort((a, b) => a.days - b.days)
+
+  for (const milestone of dueMilestones) {
+    const alreadyNotified = await NotificationRepository.hasEvent(tx, {
+      sourceType,
+      sourceId,
+      milestone: milestone.key,
+    })
+
+    if (!alreadyNotified) {
+      return milestone
     }
   }
 
-  return EXPIRY_MILESTONES.find((m) => m.days === daysUntil) ?? null
+  return null
 }
 
 function getSeverity(milestoneKey: string, days: number) {
@@ -105,7 +130,12 @@ export const NotificationGeneratorService = {
           continue
         }
 
-        const milestone = getMilestone(iqama.expiryDate)
+        const milestone = await getNextDueMilestone(
+          tx,
+          'employee_identification',
+          iqama.identificationId,
+          iqama.expiryDate,
+        )
 
         if (!milestone) {
           skipped++

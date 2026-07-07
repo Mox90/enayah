@@ -377,7 +377,9 @@
     "officialMovementSub": "Select whether this renewal keeps the same PCN or includes promotion, transfer, or other movement.",
     "movementType": "Movement Type *",
     "compensationSub": "Optional salary adjustment for this renewal.",
-    "allowanceSub": "Add or remove allowances for this renewal contract."
+    "allowanceSub": "Add or remove allowances for this renewal contract.",
+    "renewingContract": "Renewing...",
+    "renewContractBtn": "Renew Contract"
   },
   "credentials": {
     "createSuccess": "{name} has been created.",

@@ -454,13 +454,14 @@ function ContractRenewalDialogContent({
           onClick={handleSubmit}
           disabled={isSubmitting}
         >
-          {isSubmitting
+          {/* {isSubmitting
             ? isRtl
               ? 'جارٍ التجديد...'
               : 'Renewing...'
             : isRtl
               ? 'تجديد العقد'
-              : 'Renew Contract'}
+              : 'Renew Contract'} */}
+          {isSubmitting ? ct('renewingContract') : ct('renewContract')}
         </Button>
       </DialogFooter>
     </>

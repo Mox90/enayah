@@ -150,4 +150,23 @@ export const NotificationRepository = {
 
     return created
   },
+
+  hasEvent: async (
+    tx: DB,
+    data: {
+      sourceType: string
+      sourceId: string
+      milestone: string
+    },
+  ) => {
+    const row = await tx.query.notificationEvents.findFirst({
+      where: and(
+        eq(notificationEvents.sourceType, data.sourceType),
+        eq(notificationEvents.sourceId, data.sourceId),
+        eq(notificationEvents.milestone, data.milestone),
+      ),
+    })
+
+    return Boolean(row)
+  },
 }

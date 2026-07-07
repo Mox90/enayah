@@ -21,7 +21,7 @@ router.patch('/:id/archive', NotificationController.archive)
 
 router.post(
   '/generate-iqama-expiry-alerts',
-  requirePermission('employee.view'),
+  requirePermission('notifications.generate'),
   NotificationController.generateIqamaExpiryAlerts,
 )
 

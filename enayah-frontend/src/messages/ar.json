@@ -231,7 +231,9 @@
     "deleteAllowance": "حذف المخصص",
     "noAllowanceMessage": "لم تتم إضافة أي مخصصات لهذا التجديد.",
     "movementRemarks": "ملاحظات حول الحركة",
-    "contractNotes": "ملاحظات العقد"
+    "contractNotes": "ملاحظات العقد",
+    "renewingContract": "جارٍ التجديد...",
+    "renewContractBtn": "تجديد العقد"
   },
   "departments": {
     "departmentName": "الأقسام",
