@@ -9,7 +9,7 @@ import {
 } from 'drizzle-orm/pg-core'
 import { employees } from './hr'
 import { baseColumns } from './base'
-import { sql } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import {
   emailTypeEnum,
   genderEnum,
@@ -217,3 +217,13 @@ export const employeePhoneNumbers = pgTable('employee_phone_numbers', {
   isWhatsapp: boolean('is_whatsapp').default(false).notNull(),
   ...baseColumns,
 })
+
+export const employeeAddressesRelations = relations(
+  employeeAddresses,
+  ({ one }) => ({
+    country: one(countries, {
+      fields: [employeeAddresses.countryId],
+      references: [countries.id],
+    }),
+  }),
+)

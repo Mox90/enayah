@@ -36,12 +36,17 @@ export type Address = {
   building?: string | null
   postalCode: string
   additionalNumber?: string | null
+  country: {
+    id: string
+    name: string
+    nameAr: string
+  }
 }
 
 export type EmergencyContact = {
   id: string
   name: string
-  relationship?: string | null
+  relationship: 'spouse' | 'child' | 'father' | 'mother' | 'other'
   mobile: string | null
   alternateMobile?: string | null
   address?: string | null

@@ -30,6 +30,7 @@ import { FormDialog } from '../forms'
 import { Footer } from '../footer/footer'
 import { PhoneCodeCombobox } from '@/modules/countries/components/phone-code'
 import { CountryCombobox } from '@/modules/countries/components/country-combobox'
+import { useLocale, useTranslations } from 'next-intl'
 
 type DialogProps<T> = {
   open: boolean
@@ -96,15 +97,20 @@ export function IdentificationDialog({
   onSubmit,
 }: DialogProps<Identification>) {
   const dialogKey = initialValue?.id ?? (open ? 'add-identification' : 'closed')
+  const it = useTranslations('identifications')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
 
   return (
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Identification' : 'Add Identification'}
-      description='Enter employee identification details.'
+      title={
+        initialValue ? it('editIdentificationBtn') : it('addIdentificationBtn')
+      }
+      description={it('idTitleSub')}
       //className='w-[95vw] max-w-7xl overflow-hidden p-0'
-      className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
     >
       {open && (
@@ -128,6 +134,11 @@ function IdentificationDialogContent({
   onOpenChange: (open: boolean) => void
   onSubmit: (value: Identification) => void | Promise<void>
 }) {
+  const it = useTranslations('identifications')
+  const et = useTranslations('employees')
+  const ct = useTranslations('common')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
   const [form, setForm] = useState<Identification>(
     initialValue ?? emptyIdentification,
   )
@@ -160,7 +171,7 @@ function IdentificationDialogContent({
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='grid gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>Type</Label>
+              <Label>{et('idType')}</Label>
               <Select
                 value={form.type}
                 onValueChange={(v) =>
@@ -171,18 +182,20 @@ function IdentificationDialogContent({
                   <SelectValue />
                 </SelectTrigger>
 
-                <SelectContent>
-                  <SelectItem value='national_id'>National ID</SelectItem>
-                  <SelectItem value='iqama'>Iqama</SelectItem>
-                  <SelectItem value='gcc_id'>GCC ID</SelectItem>
-                  <SelectItem value='passport'>Passport</SelectItem>
-                  <SelectItem value='other'>Other</SelectItem>
+                <SelectContent dir={isRtl ? 'rtl' : 'ltr'}>
+                  <SelectItem value='national_id'>
+                    {et('national_id')}
+                  </SelectItem>
+                  <SelectItem value='iqama'>{et('iqama')}</SelectItem>
+                  <SelectItem value='gcc_id'>{et('gcc_id')}</SelectItem>
+                  <SelectItem value='passport'>{et('passport')}</SelectItem>
+                  <SelectItem value='other'>{et('other')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className='space-y-2'>
-              <Label>Identification Number</Label>
+              <Label>{it('number')}</Label>
               <Input
                 className='h-11'
                 value={form.identificationNumber}
@@ -191,7 +204,7 @@ function IdentificationDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>Issue Date</Label>
+              <Label>{it('issueDate')}</Label>
               <Input
                 type='date'
                 className='h-11'
@@ -201,7 +214,7 @@ function IdentificationDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>Expiry Date</Label>
+              <Label>{it('expiryDate')}</Label>
               <Input
                 type='date'
                 className='h-11'
@@ -211,7 +224,7 @@ function IdentificationDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>Sponsor</Label>
+              <Label>{it('sponsor')}</Label>
               <Input
                 className='h-11'
                 value={form.sponsor ?? ''}
@@ -220,7 +233,7 @@ function IdentificationDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>Issuing Authority</Label>
+              <Label>{it('authority')}</Label>
               <Input
                 className='h-11'
                 value={form.issuingAuthority ?? ''}
@@ -231,7 +244,7 @@ function IdentificationDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>Occupation</Label>
+              <Label>{it('occupation')}</Label>
               <Input
                 className='h-11'
                 value={form.occupation ?? ''}
@@ -244,7 +257,7 @@ function IdentificationDialogContent({
                 checked={form.isCurrent}
                 onCheckedChange={(v) => update('isCurrent', Boolean(v))}
               />
-              <Label>Current</Label>
+              <Label>{ct('current')}</Label>
             </div>
           </div>
         </section>
@@ -253,7 +266,7 @@ function IdentificationDialogContent({
       <Footer
         onCancel={() => onOpenChange(false)}
         onSave={handleSubmit}
-        label='Save Identification'
+        label={it('saveIdentification')}
       />
     </>
   )
@@ -280,15 +293,18 @@ export function PhoneDialog({
   onSubmit,
 }: DialogProps<PhoneNumber>) {
   const dialogKey = initialValue?.id ?? (open ? 'add-phone' : 'closed')
+  const pt = useTranslations('phoneNumber')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
 
   return (
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Phone Number' : 'Add Phone Number'}
+      title={initialValue ? pt('editPhoneNumberBtn') : pt('addPhoneNumberBtn')}
       description='Enter employee phone details.'
       //className='w-[95vw] max-w-7xl overflow-hidden p-0'
-      className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
     >
       {open && (
@@ -312,6 +328,9 @@ function PhoneDialogContent({
   onOpenChange: (open: boolean) => void
   onSubmit: (value: PhoneNumber) => void | Promise<void>
 }) {
+  const pt = useTranslations('phoneNumber')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
   const [form, setForm] = useState<PhoneNumber>(
     initialValue ?? {
       ...emptyPhone,
@@ -344,7 +363,7 @@ function PhoneDialogContent({
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='grid gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>Type</Label>
+              <Label>{pt('type')}</Label>
               <Select
                 value={form.type}
                 onValueChange={(v) => update('type', v as PhoneNumber['type'])}
@@ -352,18 +371,18 @@ function PhoneDialogContent({
                 <SelectTrigger className='h-11'>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='mobile'>Mobile</SelectItem>
-                  <SelectItem value='work'>Work</SelectItem>
-                  <SelectItem value='home'>Home</SelectItem>
-                  <SelectItem value='fax'>Fax</SelectItem>
-                  <SelectItem value='other'>Other</SelectItem>
+                <SelectContent dir={isRtl ? 'rtl' : 'ltr'}>
+                  <SelectItem value='mobile'>{pt('mobile')}</SelectItem>
+                  <SelectItem value='work'>{pt('work')}</SelectItem>
+                  <SelectItem value='home'>{pt('home')}</SelectItem>
+                  <SelectItem value='fax'>{pt('fax')}</SelectItem>
+                  <SelectItem value='other'>{pt('other')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className='space-y-2'>
-              <Label>Mobile</Label>
+              <Label>{pt('mobile')}</Label>
 
               <div className='flex h-11 overflow-hidden rounded-md border border-input bg-background'>
                 <PhoneCodeCombobox
@@ -382,7 +401,7 @@ function PhoneDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>Extension</Label>
+              <Label>{pt('extension')}</Label>
               <Input
                 className='h-11'
                 value={form.extension ?? ''}
@@ -395,7 +414,7 @@ function PhoneDialogContent({
                 checked={form.isPrimary}
                 onCheckedChange={(v) => update('isPrimary', Boolean(v))}
               />
-              <Label>Primary</Label>
+              <Label>{pt('primary')}</Label>
             </div>
 
             <div className='flex items-center gap-2'>
@@ -403,7 +422,7 @@ function PhoneDialogContent({
                 checked={form.isWhatsapp}
                 onCheckedChange={(v) => update('isWhatsapp', Boolean(v))}
               />
-              <Label>WhatsApp</Label>
+              <Label>{pt('whatsapp')}</Label>
             </div>
           </div>
         </section>
@@ -412,7 +431,7 @@ function PhoneDialogContent({
       <Footer
         onCancel={() => onOpenChange(false)}
         onSave={handleSubmit}
-        label='Save Phone'
+        label={pt('savePhone')}
       />
     </>
   )
@@ -436,15 +455,16 @@ export function EmailDialog({
   onSubmit,
 }: DialogProps<Email>) {
   const dialogKey = initialValue?.id ?? (open ? 'add-email' : 'closed')
+  const emt = useTranslations('email')
   return (
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Email' : 'Add Email'}
-      description='Enter employee email details.'
+      title={initialValue ? emt('editEmailBtn') : emt('addEmailBtn')}
+      description={emt('emailSub')}
       //className='w-[95vw] max-w-3xl overflow-hidden p-0'
       //headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
-      className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
     >
       {open && (
@@ -469,7 +489,9 @@ function EmailDialogContent({
   onSubmit: (value: Email) => void | Promise<void>
 }) {
   const [form, setForm] = useState<Email>(initialValue ?? emptyEmail)
-
+  const emt = useTranslations('email')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
   function update<K extends keyof Email>(field: K, value: Email[K]) {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
@@ -491,7 +513,7 @@ function EmailDialogContent({
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='grid gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>Type</Label>
+              <Label>{emt('type')}</Label>
               <Select
                 value={form.type}
                 onValueChange={(v) => update('type', v as Email['type'])}
@@ -499,17 +521,17 @@ function EmailDialogContent({
                 <SelectTrigger className='h-11'>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='work'>Work</SelectItem>
-                  <SelectItem value='personal'>Personal</SelectItem>
-                  <SelectItem value='secondary'>Secondary</SelectItem>
-                  <SelectItem value='other'>Other</SelectItem>
+                <SelectContent dir={isRtl ? 'rtl' : 'ltr'}>
+                  <SelectItem value='work'>{emt('work')}</SelectItem>
+                  <SelectItem value='personal'>{emt('personal')}</SelectItem>
+                  <SelectItem value='secondary'>{emt('secondary')}</SelectItem>
+                  <SelectItem value='other'>{emt('other')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className='space-y-2'>
-              <Label>Email</Label>
+              <Label>{emt('emailAddress')}</Label>
               <Input
                 type='email'
                 className='h-11'
@@ -523,7 +545,7 @@ function EmailDialogContent({
                 checked={form.isPrimary}
                 onCheckedChange={(v) => update('isPrimary', Boolean(v))}
               />
-              <Label>Primary</Label>
+              <Label>{emt('primary')}</Label>
             </div>
           </div>
         </section>
@@ -532,7 +554,7 @@ function EmailDialogContent({
       <Footer
         onCancel={() => onOpenChange(false)}
         onSave={handleSubmit}
-        label='Save Email'
+        label={emt('saveEmail')}
       />
     </>
   )
@@ -552,6 +574,11 @@ const emptyAddress: Address = {
   building: null,
   postalCode: '',
   additionalNumber: null,
+  country: {
+    id: '',
+    name: '',
+    nameAr: '',
+  },
 }
 
 export function AddressDialog({
@@ -568,7 +595,7 @@ export function AddressDialog({
       onOpenChange={onOpenChange}
       title={initialValue ? 'Edit Address' : 'Add Address'}
       description='Enter employee address details.'
-      className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
     >
       {open && (
@@ -750,14 +777,15 @@ export function DependentDialog({
   onSubmit,
 }: DialogProps<Dependent>) {
   const dialogKey = initialValue?.id ?? (open ? 'add-dependent' : 'closed')
+  const dt = useTranslations('dependents')
 
   return (
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Dependent' : 'Add Dependent'}
-      description='Enter employee dependent details.'
-      className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      title={initialValue ? dt('editDependent') : dt('addDependent')}
+      description={dt('dependentsSub')}
+      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
     >
       {open && (
@@ -782,6 +810,10 @@ function DependentDialogContent({
   onSubmit: (value: Dependent) => void | Promise<void>
 }) {
   const [form, setForm] = useState<Dependent>(initialValue ?? emptyDependent)
+  const dt = useTranslations('dependents')
+  const et = useTranslations('employees')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
 
   function update<K extends keyof Dependent>(field: K, value: Dependent[K]) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -812,48 +844,48 @@ function DependentDialogContent({
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='grid gap-4 xl:grid-cols-2'>
             <InputField
-              label='First Name EN'
+              label={dt('firstNameEn')}
               value={form.firstNameEn}
               onChange={(v) => update('firstNameEn', v)}
             />
             <InputField
-              label='Second Name EN'
+              label={dt('secondNameEn')}
               value={form.secondNameEn ?? ''}
               onChange={(v) => update('secondNameEn', v || null)}
             />
             <InputField
-              label='Third Name EN'
+              label={dt('thirdNameEn')}
               value={form.thirdNameEn ?? ''}
               onChange={(v) => update('thirdNameEn', v || null)}
             />
             <InputField
-              label='Family Name EN'
+              label={dt('familyNameEn')}
               value={form.familyNameEn}
               onChange={(v) => update('familyNameEn', v)}
             />
             <InputField
-              label='First Name AR'
+              label={dt('firstNameAr')}
               value={form.firstNameAr}
               onChange={(v) => update('firstNameAr', v)}
             />
             <InputField
-              label='Second Name AR'
+              label={dt('secondNameAr')}
               value={form.secondNameAr ?? ''}
               onChange={(v) => update('secondNameAr', v || null)}
             />
             <InputField
-              label='Third Name AR'
+              label={dt('thirdNameAr')}
               value={form.thirdNameAr ?? ''}
               onChange={(v) => update('thirdNameAr', v || null)}
             />
             <InputField
-              label='Family Name AR'
+              label={dt('familyNameAr')}
               value={form.familyNameAr}
               onChange={(v) => update('familyNameAr', v)}
             />
 
             <div className='space-y-2'>
-              <Label>Relationship</Label>
+              <Label>{dt('relationship')}</Label>
               <Select
                 value={form.relationship}
                 onValueChange={(v) =>
@@ -864,17 +896,17 @@ function DependentDialogContent({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value='spouse'>Spouse</SelectItem>
-                  <SelectItem value='child'>Child</SelectItem>
-                  <SelectItem value='father'>Father</SelectItem>
-                  <SelectItem value='mother'>Mother</SelectItem>
-                  <SelectItem value='other'>Other</SelectItem>
+                  <SelectItem value='spouse'>{dt('spouse')}</SelectItem>
+                  <SelectItem value='child'>{dt('child')}</SelectItem>
+                  <SelectItem value='father'>{dt('father')}</SelectItem>
+                  <SelectItem value='mother'>{dt('mother')}</SelectItem>
+                  <SelectItem value='other'>{dt('other')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className='space-y-2'>
-              <Label>Gender</Label>
+              <Label>{dt('gender')}</Label>
               <Select
                 value={form.gender}
                 onValueChange={(v) =>
@@ -885,14 +917,14 @@ function DependentDialogContent({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value='male'>Male</SelectItem>
-                  <SelectItem value='female'>Female</SelectItem>
+                  <SelectItem value='male'>{et('male')}</SelectItem>
+                  <SelectItem value='female'>{et('female')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className='space-y-2'>
-              <Label>Date of Birth</Label>
+              <Label>{dt('dateOfBirth')}</Label>
               <Input
                 type='date'
                 className='h-11'
@@ -920,7 +952,7 @@ function DependentDialogContent({
 const emptyEmergencyContact: EmergencyContact = {
   id: '',
   name: '',
-  relationship: null,
+  relationship: 'spouse',
   mobile: null,
   alternateMobile: null,
   address: null,
@@ -934,14 +966,19 @@ export function EmergencyContactDialog({
 }: DialogProps<EmergencyContact>) {
   const dialogKey =
     initialValue?.id ?? (open ? 'add-emergency-contact' : 'closed')
+  const ect = useTranslations('emergencyContact')
 
   return (
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Emergency Contact' : 'Add Emergency Contact'}
-      description='Enter emergency contact details.'
-      className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      title={
+        initialValue
+          ? ect('emergencyContactTitle')
+          : ect('addEmergencyContactBtn')
+      }
+      description={ect('emergencyContactSub')}
+      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
     >
       {open && (
@@ -965,6 +1002,10 @@ function EmergencyContactDialogContent({
   onOpenChange: (open: boolean) => void
   onSubmit: (value: EmergencyContact) => void | Promise<void>
 }) {
+  const ect = useTranslations('emergencyContact')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
+
   const [form, setForm] = useState<EmergencyContact>(
     initialValue ?? emptyEmergencyContact,
   )
@@ -997,31 +1038,51 @@ function EmergencyContactDialogContent({
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='grid gap-4 xl:grid-cols-2'>
             <InputField
-              label='Name'
+              label={ect('name')}
               value={form.name}
               onChange={(v) => update('name', v)}
             />
 
-            <InputField
-              label='Relationship'
+            {/* <InputField
+              label={ect('relationship')}
               value={form.relationship ?? ''}
               onChange={(v) => update('relationship', v || null)}
-            />
+            /> */}
+            <div className='space-y-2'>
+              <Label>{ect('relationship')}</Label>
+              <Select
+                value={form.relationship}
+                onValueChange={(v) =>
+                  update('relationship', v as EmergencyContact['relationship'])
+                }
+              >
+                <SelectTrigger className='h-11'>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent dir={isRtl ? 'rtl' : 'ltr'}>
+                  <SelectItem value='spouse'>{ect('spouse')}</SelectItem>
+                  <SelectItem value='child'>{ect('child')}</SelectItem>
+                  <SelectItem value='father'>{ect('father')}</SelectItem>
+                  <SelectItem value='mother'>{ect('mother')}</SelectItem>
+                  <SelectItem value='other'>{ect('other')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <InputField
-              label='Mobile'
+              label={ect('phoneNumber')}
               value={form.mobile ?? ''}
               onChange={(v) => update('mobile', v || null)}
             />
 
             <InputField
-              label='Alternate Mobile'
+              label={ect('alternateMobile')}
               value={form.alternateMobile ?? ''}
               onChange={(v) => update('alternateMobile', v || null)}
             />
 
             <div className='space-y-2 xl:col-span-2'>
-              <Label>Address</Label>
+              <Label>{ect('address')}</Label>
               <Textarea
                 value={form.address ?? ''}
                 onChange={(e) => update('address', e.target.value || null)}
@@ -1034,7 +1095,7 @@ function EmergencyContactDialogContent({
       <Footer
         onCancel={() => onOpenChange(false)}
         onSave={handleSubmit}
-        label='Save Emergency Contact'
+        label={ect('saveEmergencyContact')}
       />
     </>
   )
@@ -1061,14 +1122,15 @@ export function VisaDialog({
   onSubmit,
 }: DialogProps<Visa>) {
   const dialogKey = initialValue?.id ?? (open ? 'add-visa' : 'closed')
+  const vt = useTranslations('visas')
 
   return (
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Visa' : 'Add Visa'}
-      description='Enter employee visa details.'
-      className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      title={initialValue ? vt('editVisaBtn') : vt('addVisaBtn')}
+      description={vt('visaSub')}
+      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
     >
       {open && (
@@ -1093,6 +1155,9 @@ function VisaDialogContent({
   onSubmit: (value: Visa) => void | Promise<void>
 }) {
   const [form, setForm] = useState<Visa>(initialValue ?? emptyVisa)
+  const vt = useTranslations('visas')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
 
   function update<K extends keyof Visa>(field: K, value: Visa[K]) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -1119,19 +1184,19 @@ function VisaDialogContent({
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='grid gap-4 xl:grid-cols-2'>
             <InputField
-              label='Visa Number'
+              label={vt('visaNumber')}
               value={form.visaNumber}
               onChange={(v) => update('visaNumber', v)}
             />
 
             <InputField
-              label='Visa Type'
+              label={vt('visaType')}
               value={form.visaType ?? ''}
               onChange={(v) => update('visaType', v || undefined)}
             />
 
             <div className='space-y-2'>
-              <Label>Issue Date</Label>
+              <Label>{vt('issueDate')}</Label>
               <Input
                 type='date'
                 className='h-11'
@@ -1141,7 +1206,7 @@ function VisaDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>Expiry Date</Label>
+              <Label>{vt('expiryDate')}</Label>
               <Input
                 type='date'
                 className='h-11'
@@ -1155,7 +1220,7 @@ function VisaDialogContent({
                 checked={form.isCurrent}
                 onCheckedChange={(v) => update('isCurrent', Boolean(v))}
               />
-              <Label>Current</Label>
+              <Label>{vt('current')}</Label>
             </div>
           </div>
         </section>
@@ -1164,7 +1229,7 @@ function VisaDialogContent({
       <Footer
         onCancel={() => onOpenChange(false)}
         onSave={handleSubmit}
-        label='Save Visa'
+        label={vt('saveVisa')}
       />
     </>
   )

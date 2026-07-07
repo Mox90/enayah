@@ -93,7 +93,7 @@ export const createUserWithRole = async (data: {
 }) => {
   return db.transaction(async (tx) => {
     try {
-      console.log('🔥 Creating user with:', data)
+      //console.log('🔥 Creating user with:', data)
       const [user] = await tx.insert(users).values(data).returning({
         id: users.id,
         //email: users.email,
@@ -101,7 +101,7 @@ export const createUserWithRole = async (data: {
         //employeeId: users.employeeId,
       })
 
-      console.log('✅ User created:', user)
+      //console.log('✅ User created:', user)
 
       if (!user) throw new Error('User creation failed')
 
@@ -109,7 +109,7 @@ export const createUserWithRole = async (data: {
         where: eq(roles.name, 'EMPLOYEE'),
       })
 
-      console.log('🔍 Default role:', defaultRole)
+      //console.log('🔍 Default role:', defaultRole)
 
       if (!defaultRole) throw new Error('Default role not found')
 

@@ -112,8 +112,8 @@ export function EmployeePersonalDialog({
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title='Edit Personal Information'
-      description="Update the employee's English and Arabic personal details."
+      title={et('editPersonalInfo')}
+      description={et('editPersonalInfoSub')}
       // 1. Set a responsive max-height (max-h-[90vh]) instead of leaving it unconstrained
       className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
@@ -123,16 +123,16 @@ export function EmployeePersonalDialog({
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
-              English Name
+              {et('englishName')}
             </h3>
             <p className='text-xs text-muted-foreground'>
-              Official English name as shown in HR records.
+              {et('englishNameSub')}
             </p>
           </div>
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>First Name EN</Label>
+              <Label>{et('firstNameEn')}</Label>
               <Input
                 className='h-11'
                 value={form.firstNameEn}
@@ -141,7 +141,7 @@ export function EmployeePersonalDialog({
             </div>
 
             <div className='space-y-2'>
-              <Label>Second Name EN</Label>
+              <Label>{et('secondNameEn')}</Label>
               <Input
                 className='h-11'
                 value={form.secondNameEn ?? ''}
@@ -150,7 +150,7 @@ export function EmployeePersonalDialog({
             </div>
 
             <div className='space-y-2'>
-              <Label>Third Name EN</Label>
+              <Label>{et('thirdNameEn')}</Label>
               <Input
                 className='h-11'
                 value={form.thirdNameEn ?? ''}
@@ -159,7 +159,7 @@ export function EmployeePersonalDialog({
             </div>
 
             <div className='space-y-2'>
-              <Label>Family Name EN</Label>
+              <Label>{et('familyNameEn')}</Label>
               <Input
                 className='h-11'
                 value={form.familyNameEn}
@@ -172,16 +172,16 @@ export function EmployeePersonalDialog({
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
-              Arabic Name
+              {et('arabicName')}
             </h3>
             <p className='text-xs text-muted-foreground'>
-              Official Arabic name as shown in HR records.
+              {et('arabicNameSub')}
             </p>
           </div>
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>Family Name AR</Label>
+              <Label>{et('familyNameAr')}</Label>
               <Input
                 dir='rtl'
                 className='h-11 text-right'
@@ -191,7 +191,7 @@ export function EmployeePersonalDialog({
             </div>
 
             <div className='space-y-2'>
-              <Label>Second Name AR</Label>
+              <Label>{et('secondNameAr')}</Label>
               <Input
                 dir='rtl'
                 className='h-11 text-right'
@@ -201,7 +201,7 @@ export function EmployeePersonalDialog({
             </div>
 
             <div className='space-y-2'>
-              <Label>Third Name AR</Label>
+              <Label>{et('thirdNameAr')}</Label>
               <Input
                 dir='rtl'
                 className='h-11 text-right'
@@ -211,7 +211,7 @@ export function EmployeePersonalDialog({
             </div>
 
             <div className='space-y-2'>
-              <Label>First Name AR</Label>
+              <Label>{et('firstNameAr')}</Label>
               <Input
                 dir='rtl'
                 className='h-11 text-right'
@@ -244,7 +244,7 @@ export function EmployeePersonalDialog({
             </div>
 
             <div className='space-y-2'>
-              <Label>Date of Birth</Label>
+              <Label>{et('dateOfBirth')}</Label>
               <Input
                 type='date'
                 className='h-11 bg-background'
@@ -260,7 +260,7 @@ export function EmployeePersonalDialog({
       <Footer
         onCancel={() => onOpenChange(false)}
         onSave={handleSubmit}
-        label='Save Personal Information'
+        label={et('savePersonalInfo')}
       />
       {/* <DialogFooter className='border-t bg-muted/40 px-6 py-8 shrink-0'>
         <Button

@@ -64,6 +64,8 @@ function SectionCard({
   spanClass?: string
   onAdd?: () => void
 }) {
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
   return (
     <Card className='overflow-hidden transition-all duration-200 hover:shadow-md'>
       <CardHeader className='border-b bg-muted/20'>
@@ -78,7 +80,7 @@ function SectionCard({
           {onAdd && (
             <Button size='sm' variant='outline' onClick={onAdd}>
               <Plus className='mr-2 h-4 w-4' />
-              Add {title}
+              {isRtl ? 'إضافة' : 'Add'} {title}
             </Button>
           )}
         </div>
@@ -104,6 +106,7 @@ function RowActions({
   onEdit?: () => void
   onDelete?: () => void
 }) {
+  const ct = useTranslations('common')
   if (!onEdit && !onDelete) return null
   return (
     <DropdownMenu>
@@ -117,7 +120,7 @@ function RowActions({
         {onEdit && (
           <DropdownMenuItem onClick={onEdit}>
             <Pencil className='mr-2 h-4 w-4' />
-            Edit
+            {ct('edit')}
           </DropdownMenuItem>
         )}
 
@@ -137,7 +140,7 @@ function RowActions({
             onClick={onDelete}
           >
             <Trash2 className='mr-2 h-4 w-4' />
-            Delete
+            {ct('delete')}
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>
@@ -209,6 +212,14 @@ export function PersonalDetailsCards({
   onDeleteVisa,
 }: Props) {
   const et = useTranslations('employees')
+  const ct = useTranslations('common')
+  const it = useTranslations('identifications')
+  const pt = useTranslations('phoneNumber')
+  const dt = useTranslations('dependents')
+  const at = useTranslations('addresses')
+  const emt = useTranslations('email')
+  const ect = useTranslations('emergencyContact')
+  const vt = useTranslations('visas')
   const locale = useLocale()
   const isRtl = locale === 'ar'
   //console.log('isRtl ' + isRtl)
@@ -221,10 +232,12 @@ export function PersonalDetailsCards({
   const emergencyContacts = personalDetails?.emergencyContacts ?? []
   const visas = personalDetails?.visas ?? []
 
+  console.log('Personal Details: ', addresses)
+
   return (
     <div className='space-y-6'>
       <SectionCard
-        title='Identifications'
+        title={it('idTitle')}
         //icon={<IdCard className='h-5 w-5 text-green-600' />}
         icon={
           <span
@@ -247,6 +260,7 @@ export function PersonalDetailsCards({
             identifications.map((item) => {
               const status = getExpiryStatus(item.expiryDate, isRtl)
               //const isExpired = new Date(item.expiryDate) < new Date()
+              //console.log('Expiry Status: ', item.type)
               const isExpired = item.expiryDate
                 ? new Date(item.expiryDate) < new Date()
                 : false
@@ -259,7 +273,8 @@ export function PersonalDetailsCards({
                   <div className='mb-5 border-b border-muted/50 pb-3'>
                     <div className='flex items-start justify-between gap-3'>
                       <div className='min-w-0 text-base font-bold tracking-tight text-foreground capitalize'>
-                        {item.type.replace('_', ' ')}
+                        {/* {item.type.replace('_', ' ')} */}
+                        {et(item.type)}
                       </div>
 
                       <div className='flex shrink-0 flex-wrap items-center justify-end gap-2'>
@@ -268,7 +283,8 @@ export function PersonalDetailsCards({
                             variant='destructive'
                             className='rounded-full px-2.5 py-0.5 text-xs font-bold shadow-sm'
                           >
-                            Expired
+                            🚨
+                            {ct('expired')}
                           </Badge>
                         )}
 
@@ -277,7 +293,10 @@ export function PersonalDetailsCards({
                           status.diffDays > 0 &&
                           status.diffDays <= 30 && (
                             <Badge className='rounded-full border border-red-400 bg-red-600 px-2.5 py-0.5 text-xs font-bold tracking-wide text-white shadow-sm hover:bg-red-600'>
-                              ⚠️ Expiring in {status.diffDays} days!
+                              ⚠️{' '}
+                              {ct.rich('expiringMessage1', {
+                                item: status.diffDays,
+                              })}
                             </Badge>
                           )}
 
@@ -286,7 +305,9 @@ export function PersonalDetailsCards({
                           status.diffDays > 30 &&
                           status.diffDays <= 60 && (
                             <Badge className='rounded-full bg-orange-500 px-2.5 py-0.5 text-xs font-semibold tracking-wide text-white shadow-sm hover:bg-orange-500'>
-                              Expiring within {status.diffDays} days
+                              {ct.rich('expiringMessage2', {
+                                item: status.diffDays,
+                              })}
                             </Badge>
                           )}
 
@@ -296,7 +317,9 @@ export function PersonalDetailsCards({
                           status.diffDays <= 90 && (
                             <Badge className='rounded-full border border-yellow-500/40 bg-yellow-500/20 px-2.5 py-0.5 text-xs font-medium text-yellow-700 dark:text-yellow-400'>
                               <span className='mr-1 inline-block'>⏰</span>
-                              Expires in {status.diffDays} days
+                              {ct.rich('expiringMessage3', {
+                                item: status.diffDays,
+                              })}
                             </Badge>
                           )}
 
@@ -305,7 +328,7 @@ export function PersonalDetailsCards({
                             variant='secondary'
                             className='rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-600 shadow-sm dark:text-emerald-400'
                           >
-                            Current
+                            {ct('current')}
                           </Badge>
                         )}
 
@@ -319,19 +342,34 @@ export function PersonalDetailsCards({
 
                   {/* Data Grid Section */}
                   <div className='grid gap-x-6 gap-y-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3'>
-                    <InfoRow label='Number' value={item.identificationNumber} />
                     <InfoRow
-                      label='Issue Date'
+                      label={it('number')}
+                      value={
+                        isRtl
+                          ? toPersianDigits(item.identificationNumber)
+                          : item.identificationNumber
+                      }
+                    />
+                    <InfoRow
+                      label={it('issueDate')}
                       value={formatDate(item.issueDate, isRtl)}
                     />
                     <InfoRow
-                      label='Expiry Date'
+                      label={it('expiryDate')}
                       value={formatDate(item.expiryDate, isRtl)}
                     />
-                    <InfoRow label='Occupation' value={dash(item.occupation)} />
-                    <InfoRow label='Sponsor' value={dash(item.sponsor)} />
                     <InfoRow
-                      label='Authority'
+                      label={it('occupation')}
+                      value={dash(item.occupation)}
+                    />
+                    <InfoRow
+                      label={it('sponsor')}
+                      value={dash(
+                        isRtl ? toPersianDigits(item.sponsor) : item.sponsor,
+                      )}
+                    />
+                    <InfoRow
+                      label={it('authority')}
                       value={dash(item.issuingAuthority)}
                     />
                   </div>
@@ -344,7 +382,7 @@ export function PersonalDetailsCards({
 
       <div className='grid gap-6 lg:grid-cols-2'>
         <SectionCard
-          title='Phone Numbers'
+          title={pt('phoneTitle')}
           icon={<span className='text-3xl leading-none'>☎️</span>}
           className='flex h-10 w-10 items-center justify-center rounded-xl'
           spanClass='text-purple-400'
@@ -370,10 +408,10 @@ export function PersonalDetailsCards({
                       </div>
 
                       <div className='flex flex-wrap items-center justify-end gap-2'>
-                        {phone.isPrimary && <Badge>Primary</Badge>}
+                        {phone.isPrimary && <Badge>{pt('primary')}</Badge>}
 
                         {phone.isWhatsapp && (
-                          <Badge variant='outline'>WhatsApp</Badge>
+                          <Badge variant='outline'>{pt('whatsApp')}</Badge>
                         )}
 
                         <div
@@ -391,9 +429,9 @@ export function PersonalDetailsCards({
                     </div>
 
                     <div className='grid gap-3 md:grid-cols-2'>
-                      <InfoRow label='Type' value={phone.type} />
+                      <InfoRow label={pt('type')} value={pt(phone.type)} />
                       <InfoRow
-                        label='Extension'
+                        label={pt('extension')}
                         value={dash(phone.extension)}
                       />
                     </div>
@@ -405,7 +443,7 @@ export function PersonalDetailsCards({
         </SectionCard>
 
         <SectionCard
-          title='Emails'
+          title={emt('emailTitle')}
           // icon={<Mail className='h-5 w-5 text-teal-500' />}
           icon={
             <span
@@ -433,12 +471,12 @@ export function PersonalDetailsCards({
                         {email.email}
                       </div>
                       <div className='text-sm text-muted-foreground capitalize'>
-                        {email.type}
+                        {emt(email.type)}
                       </div>
                     </div>
 
                     <div className='flex shrink-0 items-center justify-end gap-2'>
-                      {email.isPrimary && <Badge>Primary</Badge>}
+                      {email.isPrimary && <Badge>{emt('primary')}</Badge>}
 
                       <div
                         className={cn(
@@ -461,7 +499,7 @@ export function PersonalDetailsCards({
       </div>
 
       <SectionCard
-        title='Emergency Contacts'
+        title={ect('emergencyContactTitle')}
         //icon={<Siren className='h-5 w-5 text-red-500' />}
         icon={<span className='text-3xl leading-none'>🚨</span>}
         className='flex h-10 w-10 items-center justify-center rounded-xl'
@@ -505,15 +543,29 @@ export function PersonalDetailsCards({
 
                   <div className='grid gap-3'>
                     <InfoRow
-                      label='Relationship'
-                      value={dash(contact.relationship)}
+                      label={ect('relationship')}
+                      value={ect(contact.relationship)}
                     />
-                    <InfoRow label='Mobile' value={dash(contact.mobile)} />
                     <InfoRow
-                      label='Alternate Mobile'
-                      value={dash(contact.alternateMobile)}
+                      label={ect('phoneNumber')}
+                      value={
+                        isRtl
+                          ? dash(toPersianDigits(contact.mobile))
+                          : dash(contact.mobile)
+                      }
                     />
-                    <InfoRow label='Address' value={dash(contact.address)} />
+                    <InfoRow
+                      label={ect('alternateMobile')}
+                      value={
+                        isRtl
+                          ? dash(toPersianDigits(contact.alternateMobile))
+                          : dash(contact.alternateMobile)
+                      }
+                    />
+                    <InfoRow
+                      label={ect('address')}
+                      value={dash(contact.address)}
+                    />
                     {/*Add  More vertical button that show Edit and Delete when click. */}
                   </div>
                 </div>
@@ -524,7 +576,7 @@ export function PersonalDetailsCards({
       </SectionCard>
 
       <SectionCard
-        title='Dependents'
+        title={dt('dependentsTitle')}
         icon={<Users className='h-5 w-5 text-sky-400' />}
         //icon={<span className='text-3xl leading-none'>🚨</span>}
         className='flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/10'
@@ -539,21 +591,33 @@ export function PersonalDetailsCards({
               {dependents.map((dep) => (
                 <div key={dep.id} className='rounded-xl border p-4'>
                   <div className='mb-4 font-semibold'>
-                    {[
-                      dep.firstNameEn,
-                      dep.secondNameEn,
-                      dep.thirdNameEn,
-                      dep.familyNameEn,
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
+                    {isRtl
+                      ? [
+                          dep.firstNameAr,
+                          dep.secondNameAr,
+                          dep.thirdNameAr,
+                          dep.familyNameAr,
+                        ]
+                          .filter(Boolean)
+                          .join(' ')
+                      : [
+                          dep.firstNameEn,
+                          dep.secondNameEn,
+                          dep.thirdNameEn,
+                          dep.familyNameEn,
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
                   </div>
 
                   <div className='grid gap-3 md:grid-cols-2'>
-                    <InfoRow label='Relationship' value={dep.relationship} />
-                    <InfoRow label='Gender' value={dep.gender} />
                     <InfoRow
-                      label='Date of Birth'
+                      label={dt('relationship')}
+                      value={dt(dep.relationship)}
+                    />
+                    <InfoRow label={dt('gender')} value={et(dep.gender)} />
+                    <InfoRow
+                      label={dt('dateOfBirth')}
                       value={formatDate(dep.dateOfBirth, isRtl)}
                     />
                   </div>
@@ -574,7 +638,7 @@ export function PersonalDetailsCards({
 
       <div className='grid gap-6 lg:grid-cols-2'>
         <SectionCard
-          title='Addresses'
+          title={at('addressesTitle')}
           //icon={<MapPin className='h-5 w-5 text-pink-500' />}
           icon={<span className='text-3xl leading-none'>🗺️</span>}
           className='flex h-10 w-10 items-center justify-center rounded-xl'
@@ -614,6 +678,7 @@ export function PersonalDetailsCards({
                           address.street,
                           address.district,
                           address.city,
+                          address.country.name,
                         ]
                           .filter(Boolean)
                           .join(', ')}
@@ -622,12 +687,12 @@ export function PersonalDetailsCards({
 
                     <div className='grid gap-4 md:grid-cols-2'>
                       <InfoRow
-                        label='Postal Code'
+                        label={at('postalCode')}
                         value={dash(address.postalCode)}
                       />
 
                       <InfoRow
-                        label='Additional No.'
+                        label={at('additionalNumber')}
                         value={dash(address.additionalNumber)}
                       />
                     </div>
@@ -639,7 +704,7 @@ export function PersonalDetailsCards({
         </SectionCard>
 
         <SectionCard
-          title='Visas'
+          title={vt('visasTitle')}
           //icon={<Plane className='h-5 w-5 text-sky-400' />}
           icon={
             <span
@@ -685,17 +750,20 @@ export function PersonalDetailsCards({
                     >
                       <div className='font-semibold'>{visa.visaNumber}</div>
 
-                      {visa.isCurrent && <Badge>Current</Badge>}
+                      {visa.isCurrent && <Badge>{ct('current')}</Badge>}
                     </div>
 
                     <div className='grid gap-3 md:grid-cols-2'>
-                      <InfoRow label='Visa Type' value={dash(visa.visaType)} />
                       <InfoRow
-                        label='Issue Date'
+                        label={vt('visaType')}
+                        value={dash(visa.visaType)}
+                      />
+                      <InfoRow
+                        label={vt('issueDate')}
                         value={formatDate(visa.issueDate, isRtl)}
                       />
                       <InfoRow
-                        label='Expiry Date'
+                        label={vt('expiryDate')}
                         value={formatDate(visa.expiryDate, isRtl)}
                       />
                     </div>
