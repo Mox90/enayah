@@ -574,6 +574,7 @@ const emptyAddress: Address = {
   building: null,
   postalCode: '',
   additionalNumber: null,
+  stateProvince: '',
   country: {
     id: '',
     name: '',
@@ -588,13 +589,14 @@ export function AddressDialog({
   onSubmit,
 }: DialogProps<Address>) {
   const dialogKey = initialValue?.id ?? (open ? 'add-address' : 'closed')
+  const at = useTranslations('addresses')
 
   return (
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Address' : 'Add Address'}
-      description='Enter employee address details.'
+      title={initialValue ? at('editAddressBtn') : at('addAddressBtn')}
+      description={at('addressSub')}
       className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
     >
@@ -620,6 +622,9 @@ function AddressDialogContent({
   onSubmit: (value: Address) => void | Promise<void>
 }) {
   const [form, setForm] = useState<Address>(initialValue ?? emptyAddress)
+  const at = useTranslations('addresses')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
 
   function update<K extends keyof Address>(field: K, value: Address[K]) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -630,12 +635,14 @@ function AddressDialogContent({
     if (!form.district.trim()) return
     if (!form.street.trim()) return
     if (!form.postalCode.trim()) return
+    //if (!form.stateProvince.trim()) return
 
     await onSubmit({
       ...form,
       id: form.id || createClientId('address'),
       building: form.building || null,
       additionalNumber: form.additionalNumber || null,
+      stateProvince: form.stateProvince || null,
     })
 
     onOpenChange(false)
@@ -647,7 +654,7 @@ function AddressDialogContent({
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='grid gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>Address Type</Label>
+              <Label>{at('addressType')}</Label>
               <Select
                 value={form.addressType}
                 onValueChange={(v) =>
@@ -657,52 +664,24 @@ function AddressDialogContent({
                 <SelectTrigger className='h-11'>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='home'>Home</SelectItem>
-                  <SelectItem value='mailing'>Mailing</SelectItem>
+                <SelectContent dir={isRtl ? 'rtl' : 'ltr'}>
+                  <SelectItem value='home'>{at('home')}</SelectItem>
+                  <SelectItem value='mailing'>{at('mailing')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className='space-y-2'>
-              <Label>Country</Label>
-              {/* <Input
-                className='h-11'
-                value={form.countryId}
-                onChange={(e) => update('countryId', e.target.value)}
-              /> */}
-
-              <CountryCombobox
-                value={form.countryId}
-                placeholder='Select country'
-                onChange={(country) => {
-                  update('countryId', country.id)
-                  //update('countryNameEn', country.name)
-                  //update('countryNameAr', country.nameAr)
-                }}
-              />
-            </div>
-
-            <div className='space-y-2'>
-              <Label>City</Label>
+              <Label>{at('building')}</Label>
               <Input
                 className='h-11'
-                value={form.city}
-                onChange={(e) => update('city', e.target.value)}
-              />
-            </div>
-
-            <div className='space-y-2'>
-              <Label>District</Label>
-              <Input
-                className='h-11'
-                value={form.district}
-                onChange={(e) => update('district', e.target.value)}
+                value={form.building ?? ''}
+                onChange={(e) => update('building', e.target.value || null)}
               />
             </div>
 
             <div className='space-y-2 xl:col-span-2'>
-              <Label>Street</Label>
+              <Label>{at('streetAddress')}</Label>
               <Input
                 className='h-11'
                 value={form.street}
@@ -711,16 +690,34 @@ function AddressDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>Building</Label>
+              <Label>{at('district')}</Label>
               <Input
                 className='h-11'
-                value={form.building ?? ''}
-                onChange={(e) => update('building', e.target.value || null)}
+                value={form.district}
+                onChange={(e) => update('district', e.target.value)}
               />
             </div>
 
             <div className='space-y-2'>
-              <Label>Postal Code</Label>
+              <Label>{at('city')}</Label>
+              <Input
+                className='h-11'
+                value={form.city}
+                onChange={(e) => update('city', e.target.value)}
+              />
+            </div>
+
+            <div className='space-y-2'>
+              <Label>{at('stateProvince')}</Label>
+              <Input
+                className='h-11'
+                value={form.stateProvince ?? ''}
+                onChange={(e) => update('stateProvince', e.target.value)}
+              />
+            </div>
+
+            <div className='space-y-2'>
+              <Label>{at('postalCode')}</Label>
               <Input
                 className='h-11'
                 value={form.postalCode}
@@ -729,13 +726,32 @@ function AddressDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>Additional Number</Label>
+              <Label>{at('additionalNumber')}</Label>
               <Input
                 className='h-11'
                 value={form.additionalNumber ?? ''}
                 onChange={(e) =>
                   update('additionalNumber', e.target.value || null)
                 }
+              />
+            </div>
+
+            <div className='space-y-2'>
+              <Label>{at('country')}</Label>
+              {/* <Input
+                className='h-11'
+                value={form.countryId}
+                onChange={(e) => update('countryId', e.target.value)}
+              /> */}
+
+              <CountryCombobox
+                value={form.countryId}
+                placeholder={at('selectCountry')}
+                onChange={(country) => {
+                  update('countryId', country.id)
+                  //update('countryNameEn', country.name)
+                  //update('countryNameAr', country.nameAr)
+                }}
               />
             </div>
           </div>
@@ -745,7 +761,7 @@ function AddressDialogContent({
       <Footer
         onCancel={() => onOpenChange(false)}
         onSave={handleSubmit}
-        label='Save Address'
+        label={at('saveAddress')}
       />
     </>
   )
@@ -783,7 +799,7 @@ export function DependentDialog({
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={initialValue ? dt('editDependent') : dt('addDependent')}
+      title={initialValue ? dt('editDependentBtn') : dt('addDependentBtn')}
       description={dt('dependentsSub')}
       className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'

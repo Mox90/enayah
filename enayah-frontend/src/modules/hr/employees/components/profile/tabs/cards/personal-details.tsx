@@ -232,7 +232,7 @@ export function PersonalDetailsCards({
   const emergencyContacts = personalDetails?.emergencyContacts ?? []
   const visas = personalDetails?.visas ?? []
 
-  console.log('Personal Details: ', addresses)
+  //console.log('Personal Details: ', addresses)
 
   return (
     <div className='space-y-6'>
@@ -283,8 +283,7 @@ export function PersonalDetailsCards({
                             variant='destructive'
                             className='rounded-full px-2.5 py-0.5 text-xs font-bold shadow-sm'
                           >
-                            🚨
-                            {ct('expired')}
+                            🚨 {ct('expired')}
                           </Badge>
                         )}
 
@@ -590,43 +589,58 @@ export function PersonalDetailsCards({
             <div className='grid gap-4 md:grid-cols-2'>
               {dependents.map((dep) => (
                 <div key={dep.id} className='rounded-xl border p-4'>
-                  <div className='mb-4 font-semibold'>
-                    {isRtl
-                      ? [
-                          dep.firstNameAr,
-                          dep.secondNameAr,
-                          dep.thirdNameAr,
-                          dep.familyNameAr,
-                        ]
-                          .filter(Boolean)
-                          .join(' ')
-                      : [
-                          dep.firstNameEn,
-                          dep.secondNameEn,
-                          dep.thirdNameEn,
-                          dep.familyNameEn,
-                        ]
-                          .filter(Boolean)
-                          .join(' ')}
+                  {/* Header */}
+
+                  <div className='mb-4 flex items-start justify-between gap-3'>
+                    <div className='font-semibold'>
+                      {isRtl
+                        ? [
+                            dep.firstNameAr,
+
+                            dep.secondNameAr,
+
+                            dep.thirdNameAr,
+
+                            dep.familyNameAr,
+                          ]
+
+                            .filter(Boolean)
+
+                            .join(' ')
+                        : [
+                            dep.firstNameEn,
+
+                            dep.secondNameEn,
+
+                            dep.thirdNameEn,
+
+                            dep.familyNameEn,
+                          ]
+
+                            .filter(Boolean)
+
+                            .join(' ')}
+                    </div>
+
+                    <RowActions
+                      onEdit={() => onEditDependent?.(dep.id)}
+                      onDelete={() => onDeleteDependent?.(dep.id)}
+                    />
                   </div>
+
+                  {/* Details */}
 
                   <div className='grid gap-3 md:grid-cols-2'>
                     <InfoRow
                       label={dt('relationship')}
                       value={dt(dep.relationship)}
                     />
+
                     <InfoRow label={dt('gender')} value={et(dep.gender)} />
+
                     <InfoRow
                       label={dt('dateOfBirth')}
                       value={formatDate(dep.dateOfBirth, isRtl)}
-                    />
-                  </div>
-                  {/*Add  More vertical button that show Edit and Delete when click. When edit reuse the add dialog dependent */}
-                  <div className='flex justify-end align-start gap-2'>
-                    {/*Add  More vertical button that show Edit and Delete when click. */}
-                    <RowActions
-                      onEdit={() => onEditDependent?.(dep.id)}
-                      onDelete={() => onDeleteDependent?.(dep.id)}
                     />
                   </div>
                 </div>
@@ -678,7 +692,8 @@ export function PersonalDetailsCards({
                           address.street,
                           address.district,
                           address.city,
-                          address.country.name,
+                          address.stateProvince,
+                          address.country?.name,
                         ]
                           .filter(Boolean)
                           .join(', ')}

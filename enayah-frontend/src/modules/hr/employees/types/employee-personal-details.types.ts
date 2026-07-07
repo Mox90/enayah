@@ -36,11 +36,12 @@ export type Address = {
   building?: string | null
   postalCode: string
   additionalNumber?: string | null
+  stateProvince?: string | null
   country: {
     id: string
     name: string
     nameAr: string
-  }
+  } | null
 }
 
 export type EmergencyContact = {

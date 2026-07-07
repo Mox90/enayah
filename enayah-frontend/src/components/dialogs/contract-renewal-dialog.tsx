@@ -27,6 +27,7 @@ import { DepartmentCombobox } from '@/modules/hr/departments/components/departme
 import { PositionCombobox } from '@/modules/hr/positions/components/position-combobox'
 import { Trash2 } from 'lucide-react'
 import { AllowanceTypeCombobox } from '../comboboxes/allowance-combobox'
+import { useLocale, useTranslations } from 'next-intl'
 
 interface Props {
   open: boolean
@@ -71,6 +72,11 @@ function ContractRenewalDialogContent({
   currentDepartmentName,
   currentPositionTitle,
 }: Props) {
+  const ct = useTranslations('contracts')
+  const et = useTranslations('employees')
+  const cmt = useTranslations('common')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
   const [startDate, setStartDate] = useState(defaultStartDate)
   const [durationMonths, setDurationMonths] = useState<'3' | '6' | '12'>('12')
   const [endDate, setEndDate] = useState(
@@ -206,15 +212,15 @@ function ContractRenewalDialogContent({
       <div className='flex-1 space-y-6 overflow-y-auto px-6 py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
-            <h3 className='text-sm font-semibold'>Contract Period</h3>
+            <h3 className='text-sm font-semibold'>{ct('contractPeriod')}</h3>
             <p className='text-xs text-muted-foreground'>
-              Choose the renewal start date and contract duration.
+              {ct('contractSub2')}
             </p>
           </div>
 
           <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>Start Date *</Label>
+              <Label>{ct('startDate')}</Label>
               <Input
                 type='date'
                 className='h-11'
@@ -224,22 +230,22 @@ function ContractRenewalDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>Duration *</Label>
+              <Label>{ct('duration')}</Label>
               <Select value={durationMonths} onValueChange={updateDuration}>
                 <SelectTrigger className='h-11'>
                   <SelectValue />
                 </SelectTrigger>
 
-                <SelectContent>
-                  <SelectItem value='3'>3 Months</SelectItem>
-                  <SelectItem value='6'>6 Months</SelectItem>
-                  <SelectItem value='12'>12 Months</SelectItem>
+                <SelectContent dir={isRtl ? 'rtl' : 'ltr'}>
+                  <SelectItem value='3'>{ct('threeMonths')}</SelectItem>
+                  <SelectItem value='6'>{ct('sixMonths')}</SelectItem>
+                  <SelectItem value='12'>{ct('twelveMonths')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className='space-y-2 lg:col-span-2'>
-              <Label>End Date *</Label>
+              <Label>{ct('endDate')}</Label>
               <Input
                 type='date'
                 className='h-11'
@@ -252,16 +258,15 @@ function ContractRenewalDialogContent({
 
         <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
           <div className='mb-4'>
-            <h3 className='text-sm font-semibold'>Official Movement</h3>
+            <h3 className='text-sm font-semibold'>{ct('officialMovement')}</h3>
             <p className='text-xs text-muted-foreground'>
-              Select whether this renewal keeps the same PCN or includes
-              promotion, transfer, or other movement.
+              {ct('officialMovementSub')}
             </p>
           </div>
 
           <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>Movement Type *</Label>
+              <Label>{ct('movementType')}</Label>
               <Select
                 value={movementType}
                 onValueChange={(v) => setMovementType(v as RenewalMovementType)}
@@ -271,21 +276,21 @@ function ContractRenewalDialogContent({
                 </SelectTrigger>
 
                 <SelectContent>
-                  <SelectItem value='renewal'>Renewal</SelectItem>
-                  <SelectItem value='promotion'>Promotion</SelectItem>
-                  <SelectItem value='transfer'>Transfer</SelectItem>
-                  <SelectItem value='demotion'>Demotion</SelectItem>
+                  <SelectItem value='renewal'>{ct('renewal')}</SelectItem>
+                  <SelectItem value='promotion'>{ct('promotion')}</SelectItem>
+                  <SelectItem value='transfer'>{ct('transfer')}</SelectItem>
+                  <SelectItem value='demotion'>{ct('demotion')}</SelectItem>
                   <SelectItem value='temporary_assignment'>
-                    Temporary Assignment
+                    {ct('temporary_assignment')}
                   </SelectItem>
-                  <SelectItem value='acting'>Acting</SelectItem>
-                  <SelectItem value='amendment'>Amendment</SelectItem>
+                  <SelectItem value='acting'>{ct('acting')}</SelectItem>
+                  <SelectItem value='amendment'>{ct('amendment')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className='space-y-2 lg:col-span-2'>
-              <Label>Position Item / PCN *</Label>
+              <Label>{et('pcnText')}</Label>
               <PositionItemCombobox
                 value={positionItemId}
                 selectedLabel={selectedItemNumber}
@@ -300,7 +305,7 @@ function ContractRenewalDialogContent({
 
             <div className='grid grid-cols-1 gap-4 lg:col-span-2 lg:grid-cols-2'>
               <div className='space-y-2'>
-                <Label>Actual Department</Label>
+                <Label>{ct('actualDepartmentLabel')}</Label>
                 <DepartmentCombobox
                   value={actualDepartmentId ?? null}
                   selectedLabel={currentDepartmentName}
@@ -311,7 +316,7 @@ function ContractRenewalDialogContent({
               </div>
 
               <div className='space-y-2'>
-                <Label>Actual Position</Label>
+                <Label>{ct('actualPositionLabel')}</Label>
                 <PositionCombobox
                   value={actualPositionId ?? null}
                   selectedLabel={currentPositionTitle}
@@ -326,15 +331,15 @@ function ContractRenewalDialogContent({
 
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
-            <h3 className='text-sm font-semibold'>Compensation</h3>
+            <h3 className='text-sm font-semibold'>{et('compensation')}</h3>
             <p className='text-xs text-muted-foreground'>
-              Optional salary adjustment for this renewal.
+              {ct('compensationSub')}
             </p>
           </div>
 
           <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>Base Salary</Label>
+              <Label>{et('baseSalaryLabel')}</Label>
               <Input
                 type='number'
                 className='h-11'
@@ -348,14 +353,16 @@ function ContractRenewalDialogContent({
           <div className='space-y-4 pt-4'>
             <div className='flex items-center justify-between'>
               <div>
-                <h4 className='text-sm font-semibold'>Allowances</h4>
+                <h4 className='text-sm font-semibold'>
+                  {et('allowancesLabel')}
+                </h4>
                 <p className='text-xs text-muted-foreground'>
-                  Add or remove allowances for this renewal contract.
+                  {ct('allowanceSub')}
                 </p>
               </div>
 
               <Button type='button' variant='outline' onClick={addAllowance}>
-                Add Allowance
+                {et('addAllowance')}
               </Button>
             </div>
 
@@ -402,7 +409,7 @@ function ContractRenewalDialogContent({
 
               {allowances.length === 0 && (
                 <p className='text-sm text-muted-foreground'>
-                  No allowances added for this renewal.
+                  {et('noAllowanceMessage')}
                 </p>
               )}
             </div>
@@ -412,7 +419,7 @@ function ContractRenewalDialogContent({
         <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
           <div className='grid grid-cols-1 gap-4'>
             <div className='space-y-2'>
-              <Label>Movement Remarks</Label>
+              <Label>{et('movementRemarks')}</Label>
               <Textarea
                 value={remarks}
                 onChange={(e) => setRemarks(e.target.value)}
@@ -421,7 +428,7 @@ function ContractRenewalDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>Contract Notes</Label>
+              <Label>{et('contractNotes')}</Label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
@@ -438,7 +445,7 @@ function ContractRenewalDialogContent({
           variant='outline'
           onClick={() => onOpenChange(false)}
         >
-          Cancel
+          {cmt('cancel')}
         </Button>
 
         <Button
@@ -447,7 +454,14 @@ function ContractRenewalDialogContent({
           onClick={handleSubmit}
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Renewing...' : 'Renew Contract'}
+          {/* {isSubmitting
+            ? isRtl
+              ? 'جارٍ التجديد...'
+              : 'Renewing...'
+            : isRtl
+              ? 'تجديد العقد'
+              : 'Renew Contract'} */}
+          {isSubmitting ? ct('renewingContract') : ct('renewContract')}
         </Button>
       </DialogFooter>
     </>
@@ -458,14 +472,15 @@ export function ContractRenewalDialog(props: Props) {
   const dialogKey = props.open
     ? `renew-${props.currentContractId}`
     : 'closed-renewal'
+  const ct = useTranslations('contracts')
 
   return (
     <FormDialog
       open={props.open}
       onOpenChange={props.onOpenChange}
-      title='Renew Contract'
-      description='Create a renewal contract with optional promotion, transfer, or salary adjustment.'
-      className='w-[95vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
+      title={ct('renewContract')}
+      description={ct('contractSub')}
+      className='w-[85vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
     >
       {props.open && (
