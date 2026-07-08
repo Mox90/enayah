@@ -34,6 +34,8 @@ export const employeeIdentifications = pgTable(
     }).notNull(),
     issueDate: date('issue_date'),
     expiryDate: date('expiry_date'),
+    expiryDateHijri: varchar('expiry_date_hijri', { length: 10 }), // 1447-09-15
+    issueDateHijri: varchar('issue_date_hijri', { length: 10 }),
     sponsor: varchar('sponsor', {
       length: 255,
     }),

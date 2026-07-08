@@ -31,6 +31,10 @@ import { Footer } from '../footer/footer'
 import { PhoneCodeCombobox } from '@/modules/countries/components/phone-code'
 import { CountryCombobox } from '@/modules/countries/components/country-combobox'
 import { useLocale, useTranslations } from 'next-intl'
+import { HijriDatePicker } from './hijri-date-picker'
+import { DateObject } from 'react-multi-date-picker'
+import gregorian from 'react-date-object/calendars/gregorian'
+import arabic from 'react-date-object/calendars/arabic'
 
 type DialogProps<T> = {
   open: boolean
@@ -83,6 +87,9 @@ const emptyIdentification: Identification = {
   identificationNumber: '',
   issueDate: '',
   expiryDate: '',
+  issueDateHijri: null,
+  expiryDateHijri: null,
+  dateCalendar: 'gregorian',
   sponsor: null,
   issuingAuthority: null,
   occupation: null,
@@ -203,23 +210,137 @@ function IdentificationDialogContent({
               />
             </div>
 
+            {form.type === 'iqama' && (
+              <>
+                <div className='space-y-2'>
+                  <Label>{it('issueDateHijri')}</Label>
+                  {/* <HijriDatePicker
+                    value={form.issueDateHijri}
+                    onChange={(date) => {
+                      update('issueDateHijri', date.hijri)
+                      // converted Gregorian
+                      update('issueDate', date.gregorian)
+                      update('dateCalendar', 'hijri')
+                    }}
+                  /> */}
+                  <HijriDatePicker
+                    value={form.issueDateHijri}
+                    onChange={({ hijri, gregorian }) => {
+                      setForm((prev) => ({
+                        ...prev,
+                        issueDateHijri: hijri,
+                        issueDate: gregorian,
+                        dateCalendar: 'hijri',
+                      }))
+                    }}
+                  />
+                </div>
+
+                <div className='space-y-2'>
+                  <Label>{it('expiryDateHijri')}</Label>
+                  {/* <HijriDatePicker
+                    value={form.expiryDateHijri}
+                    onChange={(date) => {
+                      update('expiryDateHijri', date.hijri)
+                      // used by notification generator
+                      update('expiryDate', date.gregorian)
+                      update('dateCalendar', 'hijri')
+                    }}
+                  /> */}
+                  <HijriDatePicker
+                    value={form.expiryDateHijri}
+                    onChange={({ hijri, gregorian }) => {
+                      setForm((prev) => ({
+                        ...prev,
+                        expiryDateHijri: hijri,
+                        expiryDate: gregorian,
+                        dateCalendar: 'hijri',
+                      }))
+                    }}
+                  />
+                </div>
+              </>
+            )}
+
             <div className='space-y-2'>
               <Label>{it('issueDate')}</Label>
-              <Input
+              {/* <Input
                 type='date'
                 className='h-11'
                 value={form.issueDate}
                 onChange={(e) => update('issueDate', e.target.value)}
+              /> */}
+              <Input
+                type='date'
+                className='h-11'
+                value={form.issueDate || ''}
+                onChange={(e) => {
+                  const val = e.target.value
+                  if (!val) {
+                    setForm((prev) => ({
+                      ...prev,
+                      issueDate: '',
+                      issueDateHijri: null,
+                    }))
+                    return
+                  }
+
+                  // Convert standard date back to Hijri format
+                  const hijriConverted = new DateObject({
+                    date: val,
+                    calendar: gregorian,
+                  })
+                    .convert(arabic)
+                    .format('YYYY-MM-DD')
+
+                  setForm((prev) => ({
+                    ...prev,
+                    issueDate: val,
+                    issueDateHijri: hijriConverted,
+                    dateCalendar: 'gregorian',
+                  }))
+                }}
               />
             </div>
 
             <div className='space-y-2'>
               <Label>{it('expiryDate')}</Label>
-              <Input
+              {/* <Input
                 type='date'
                 className='h-11'
                 value={form.expiryDate}
                 onChange={(e) => update('expiryDate', e.target.value)}
+              /> */}
+              <Input
+                type='date'
+                className='h-11'
+                value={form.expiryDate || ''}
+                onChange={(e) => {
+                  const val = e.target.value
+                  if (!val) {
+                    setForm((prev) => ({
+                      ...prev,
+                      expiryDate: '',
+                      expiryDateHijri: null,
+                    }))
+                    return
+                  }
+
+                  // Convert standard date back to Hijri format
+                  const hijriConverted = new DateObject({
+                    date: val,
+                    calendar: gregorian,
+                  })
+                    .convert(arabic)
+                    .format('YYYY-MM-DD')
+
+                  setForm((prev) => ({
+                    ...prev,
+                    expiryDate: val,
+                    expiryDateHijri: hijriConverted,
+                    dateCalendar: 'gregorian',
+                  }))
+                }}
               />
             </div>
 

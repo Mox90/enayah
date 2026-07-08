@@ -100,13 +100,14 @@ export function EmployeeWorkspace() {
         open={filterOpen}
         onOpenChange={setFilterOpen}
         values={filters}
-        onApply={(newFilters: any) => {
+        onApply={(newFilters: EmployeeFilters) => {
           setFilters({
             departmentIds: newFilters.departmentIds ?? [],
             positionIds: newFilters.positionIds ?? [],
-            categoryCodes: (newFilters.categoryCodes ?? []).map((x: string) =>
-              Number(x),
-            ),
+            // categoryCodes: (newFilters.categoryCodes ?? []).map((x: string) =>
+            //   Number(x),
+            // ),
+            categoryCodes: newFilters.categoryCodes ?? [],
             genders: newFilters.genders ?? [],
             nationalities: newFilters.nationalities ?? [],
             employmentStatuses: newFilters.employmentStatuses ?? [],

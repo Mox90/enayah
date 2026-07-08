@@ -4,6 +4,11 @@ export type Identification = {
   identificationNumber: string
   issueDate: string
   expiryDate: string
+
+  issueDateHijri?: string | null
+  expiryDateHijri?: string | null
+
+  dateCalendar?: 'gregorian' | 'hijri'
   sponsor?: string | null
   issuingAuthority?: string | null
   occupation?: string | null
