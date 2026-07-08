@@ -56,6 +56,12 @@ export const employeeIdentifications = pgTable(
           OR ${table.issueDate} IS NULL
           OR ${table.expiryDate} >= ${table.issueDate}`,
     ),
+    validHijriDateRange: check(
+      'chk_employee_identification_valid_hijri_date_range',
+      sql`${table.expiryDateHijri} IS NULL
+          OR ${table.issueDateHijri} IS NULL
+          OR ${table.expiryDateHijri} >= ${table.issueDateHijri}`,
+    ),
   }),
 )
 

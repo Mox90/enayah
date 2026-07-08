@@ -289,6 +289,7 @@ function IdentificationDialogContent({
                   const hijriConverted = new DateObject({
                     date: val,
                     calendar: gregorian,
+                    format: 'YYYY-MM-DD',
                   })
                     .convert(arabic)
                     .format('YYYY-MM-DD')
@@ -330,6 +331,7 @@ function IdentificationDialogContent({
                   const hijriConverted = new DateObject({
                     date: val,
                     calendar: gregorian,
+                    format: 'YYYY-MM-DD',
                   })
                     .convert(arabic)
                     .format('YYYY-MM-DD')
