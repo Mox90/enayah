@@ -194,7 +194,7 @@ function BoardDialogContent({
           onClick={handleSubmit}
           disabled={isSubmitting}
         >
-          {crt('saveBoard', { item: isRtl ? 'مجلس' : 'Board' })}
+          {crt('save', { item: isRtl ? 'مجلس' : 'Board' })}
         </Button>
       </DialogFooter>
     </>

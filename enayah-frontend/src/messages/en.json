@@ -503,6 +503,8 @@
     "number": "Number",
     "issueDate": "Issue Date",
     "expiryDate": "Expiry Date",
+    "issueDateHijri": "Issue Date in Hijri",
+    "expiryDateHijri": "Expiry Date in Hijri",
     "occupation": "Occupation",
     "sponsor": "Sponsor",
     "authority": "Authority",

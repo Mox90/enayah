@@ -503,6 +503,8 @@
     "number": "رقم",
     "issueDate": "تاريخ الإصدار",
     "expiryDate": "تاريخ انتهاء الصلاحية",
+    "issueDateHijri": "تاريخ الإصدار بالهجري",
+    "expiryDateHijri": "تاريخ الانتهاء بالهجري",
     "occupation": "المهنة",
     "sponsor": "الراعي",
     "authority": "السلطة",

@@ -208,7 +208,7 @@ export function EmployeeFilterSheet({
             options={[
               { value: '1000', label: et('physician') },
               { value: '2000', label: et('nurse') },
-              { value: '3000', label: et('support_service') },
+              { value: '3000', label: et('allied_health') },
               { value: '4000', label: et('administrative') },
               { value: '5000', label: et('support_service') },
             ]}

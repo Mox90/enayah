@@ -25,7 +25,18 @@ export const EmployeeIdentificationSchema = z.object({
   identificationNumber: z.string().trim().min(1).max(30),
 
   issueDate: optionalDate,
+  issueDateHijri: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable()
+    .optional(),
+
   expiryDate: optionalDate,
+  expiryDateHijri: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable()
+    .optional(),
 
   sponsor: z.string().trim().max(255).nullable().optional(),
   issuingAuthority: z.string().trim().max(100).nullable().optional(),
@@ -45,7 +56,18 @@ export const UpdateEmployeeIdentificationSchema = z
       .optional(),
     identificationNumber: z.string().trim().min(1).max(30).optional(),
     issueDate: optionalDate,
+    issueDateHijri: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .nullable()
+      .optional(),
+
     expiryDate: optionalDate,
+    expiryDateHijri: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .nullable()
+      .optional(),
     sponsor: z.string().trim().max(255).nullable().optional(),
     issuingAuthority: z.string().trim().max(100).nullable().optional(),
     occupation: z.string().trim().max(150).nullable().optional(),

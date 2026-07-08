@@ -226,6 +226,7 @@ interface Props {
 export function EmployeeSelectionActions({ selectedIds }: Props) {
   const router = useRouter()
   const locale = useLocale()
+  const isRtl = locale === 'ar'
   const t = useTranslations('common')
 
   if (selectedIds.length === 0) return null
@@ -239,7 +240,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
       </div>
 
       <div className='grid grid-cols-2 gap-2 sm:flex sm:items-center'>
-        <DropdownMenu>
+        <DropdownMenu dir={isRtl ? 'rtl' : 'ltr'}>
           <DropdownMenuTrigger asChild>
             <Button variant='outline' className='h-10 rounded-xl'>
               <Download className='mr-2 h-4 w-4' />
@@ -281,7 +282,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
           {t('print')}
         </Button>
 
-        <DropdownMenu>
+        <DropdownMenu dir={isRtl ? 'rtl' : 'ltr'}>
           <DropdownMenuTrigger asChild>
             <Button
               variant='outline'

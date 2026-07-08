@@ -43,6 +43,13 @@
       "when": 1783405155910,
       "tag": "0005_nifty_overlord",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1783426897010,
+      "tag": "0006_noisy_leo",
+      "breakpoints": true
     }
   ]
 }

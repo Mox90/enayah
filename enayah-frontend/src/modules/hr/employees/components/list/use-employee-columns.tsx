@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/tables'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
+import { toArabic, toPersianDigits } from '@/utils/utilities'
 
 export function useEmployeeColumns(
   sortBy: string,
@@ -110,7 +111,11 @@ export function useEmployeeColumns(
           {/* {row.original.categoryCode !== null
             ? row.original.categoryCode
             : 'N/A'} */}
-          {row.original.categoryCode !== null ? row.original.categoryCode : '-'}
+          {row.original.categoryCode !== null
+            ? isRtl
+              ? toPersianDigits(row.original.categoryCode)
+              : row.original.categoryCode
+            : '-'}
         </Badge>
       ),
     },
@@ -162,7 +167,9 @@ export function useEmployeeColumns(
         const parsed = new Date(raw)
         return Number.isNaN(parsed.getTime())
           ? '-'
-          : format(parsed, 'dd-MMM-yyyy')
+          : isRtl
+            ? toArabic(String(parsed), 1)
+            : format(parsed, 'dd-MMM-yyyy')
       },
     },
 
