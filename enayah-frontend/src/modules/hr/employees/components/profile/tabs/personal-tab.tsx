@@ -24,7 +24,16 @@ import {
 import { PersonalDetailsCards } from './cards/personal-details'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { EmployeePersonalDetails } from '../../../types/employee-personal-details.types'
+import {
+  Address,
+  Dependent,
+  Email,
+  EmergencyContact,
+  EmployeePersonalDetails,
+  Identification,
+  PhoneNumber,
+  Visa,
+} from '../../../types/employee-personal-details.types'
 import { useState } from 'react'
 import { useDialogState } from '@/hooks/useDialogState'
 import {
@@ -299,7 +308,7 @@ const PersonalTab = ({ personal }: Props) => {
             onAddIdentification={identification.add}
             onEditIdentification={(id) => {
               const item = personalDetails?.identifications.find(
-                (x) => x.id === id,
+                (x: Identification) => x.id === id,
               )
               if (!item) return
               identification.edit(item)
@@ -310,7 +319,7 @@ const PersonalTab = ({ personal }: Props) => {
             onAddPhone={phone.add}
             onEditPhone={(id) => {
               const item = personalDetails?.phoneNumbers.find(
-                (x) => x.id === id,
+                (x: PhoneNumber) => x.id === id,
               )
               if (!item) return
               phone.edit(item)
@@ -320,7 +329,9 @@ const PersonalTab = ({ personal }: Props) => {
             }}
             onAddEmail={email.add}
             onEditEmail={(id) => {
-              const item = personalDetails?.emails.find((x) => x.id === id)
+              const item = personalDetails?.emails.find(
+                (x: Email) => x.id === id,
+              )
               if (!item) return
               email.edit(item)
             }}
@@ -329,7 +340,9 @@ const PersonalTab = ({ personal }: Props) => {
             }}
             onAddAddress={address.add}
             onEditAddress={(id) => {
-              const item = personalDetails?.addresses.find((x) => x.id === id)
+              const item = personalDetails?.addresses.find(
+                (x: Address) => x.id === id,
+              )
               if (!item) return
               address.edit(item)
             }}
@@ -338,7 +351,9 @@ const PersonalTab = ({ personal }: Props) => {
             }}
             onAddDependent={dependent.add}
             onEditDependent={(id) => {
-              const item = personalDetails?.dependents.find((x) => x.id === id)
+              const item = personalDetails?.dependents.find(
+                (x: Dependent) => x.id === id,
+              )
               if (!item) return
               dependent.edit(item)
             }}
@@ -348,7 +363,7 @@ const PersonalTab = ({ personal }: Props) => {
             onAddEmergencyContact={emergencyContact.add}
             onEditEmergencyContact={(id) => {
               const item = personalDetails?.emergencyContacts.find(
-                (x) => x.id === id,
+                (x: EmergencyContact) => x.id === id,
               )
               if (!item) return
               emergencyContact.edit(item)
@@ -358,7 +373,7 @@ const PersonalTab = ({ personal }: Props) => {
             }}
             onAddVisa={visa.add}
             onEditVisa={(id) => {
-              const item = personalDetails?.visas.find((x) => x.id === id)
+              const item = personalDetails?.visas.find((x: Visa) => x.id === id)
               if (!item) return
               visa.edit(item)
             }}
