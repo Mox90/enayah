@@ -2,7 +2,7 @@
 
 'use client'
 
-import { Bell, Check, Archive } from 'lucide-react'
+import { Bell, Check, Archive, ClipboardCheck } from 'lucide-react'
 import { useLocale } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,7 @@ import {
   useNotifications,
 } from '../hooks/use-notifications'
 import { toArabic, toArabicDigits } from '@/utils/utilities'
+import { useRouter } from 'next/navigation'
 
 const severityClass: Record<string, string> = {
   info: 'bg-blue-500',
@@ -27,7 +28,45 @@ const severityClass: Record<string, string> = {
   error: 'bg-red-500',
 }
 
+type NotificationSeverity = 'info' | 'warning' | 'success' | 'error'
+
+type NotificationMetadata = {
+  documentType?: string
+  employeeNumber?: string
+  milestone?: string
+  iqamaRenewalCaseId?: string
+}
+
+type NotificationItem = {
+  id: string
+  notificationId: string
+  recipientUserId: string
+
+  isRead: boolean
+  readAt: string | null
+  isArchived: boolean
+  createdAt: string
+
+  notification: {
+    id: string
+    employeeId: string | null
+
+    type: string
+    title: string
+    message: string
+
+    sourceType: string
+    sourceId: string
+
+    dueDate: string | null
+    severity: NotificationSeverity
+
+    metadata: NotificationMetadata | null
+  }
+}
+
 export function NotificationBell() {
+  const router = useRouter()
   const locale = useLocale()
   const isRtl = locale === 'ar'
 
@@ -36,6 +75,18 @@ export function NotificationBell() {
   const archive = useArchiveNotification()
 
   const unreadCount = data.filter((item) => !item.isRead).length
+
+  const startProcess = async (item: NotificationItem) => {
+    if (!item.isRead) {
+      await markRead.mutateAsync(item.id)
+    }
+
+    const caseId = item.notification.metadata?.iqamaRenewalCaseId
+
+    if (item.notification.type === 'iqama_expiry' && caseId) {
+      router.push(`/hr/iqama-renewal-cases/${caseId}`)
+    }
+  }
 
   return (
     <DropdownMenu dir={isRtl ? 'rtl' : 'ltr'}>
@@ -144,6 +195,20 @@ export function NotificationBell() {
                           {isRtl ? 'مقروء' : 'Read'}
                         </Button>
                       )}
+
+                      <Button
+                        type='button'
+                        size='sm'
+                        variant='outline'
+                        className='h-7 px-2 text-xs'
+                        //onClick={() => startProcess(item)}
+                        disabled={markRead.isPending}
+                        onClick={() => markRead.mutate(item.id)}
+                      >
+                        <ClipboardCheck className='mr-1 h-3 w-3' />
+
+                        {isRtl ? 'بدء الإجراء' : 'Start Process'}
+                      </Button>
 
                       <Button
                         type='button'
