@@ -31,7 +31,7 @@ export function NotificationBell() {
   const locale = useLocale()
   const isRtl = locale === 'ar'
 
-  const { data = [], isLoading } = useNotifications()
+  const { data = [], isLoading, isError } = useNotifications()
   const markRead = useMarkNotificationRead()
   const archive = useArchiveNotification()
 
@@ -78,6 +78,14 @@ export function NotificationBell() {
           {isLoading && (
             <div className='px-4 py-6 text-sm text-muted-foreground'>
               {isRtl ? 'جاري تحميل الإشعارات...' : 'Loading notifications...'}
+            </div>
+          )}
+
+          {isError && (
+            <div className='px-4 py-6 text-sm text-muted-foreground'>
+              {isRtl
+                ? 'تعذر تحميل الإشعارات.'
+                : 'Failed to load notifications.'}
             </div>
           )}
 
@@ -128,6 +136,8 @@ export function NotificationBell() {
                           size='sm'
                           variant='outline'
                           className='h-7 px-2 text-xs'
+                          //onClick={() => markRead.mutate(item.id)}
+                          disabled={markRead.isPending}
                           onClick={() => markRead.mutate(item.id)}
                         >
                           <Check className='mr-1 h-3 w-3' />
@@ -140,6 +150,8 @@ export function NotificationBell() {
                         size='sm'
                         variant='ghost'
                         className='h-7 px-2 text-xs'
+                        //onClick={() => archive.mutate(item.id)}
+                        disabled={archive.isPending}
                         onClick={() => archive.mutate(item.id)}
                       >
                         <Archive className='mr-1 h-3 w-3' />

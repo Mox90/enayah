@@ -99,6 +99,17 @@ export const IqamaExpiryGenerator = {
 
         const employeeName = `${iqama.firstNameEn} ${iqama.familyNameEn}`
 
+        const event = await NotificationRepository.reserveEventIfNotExists(tx, {
+          sourceType,
+          sourceId,
+          milestone: milestone.key,
+        })
+
+        if (!event) {
+          skipped++
+          continue
+        }
+
         const notification = await NotificationRepository.createNotification(
           tx,
           {
@@ -130,17 +141,10 @@ export const IqamaExpiryGenerator = {
           continue
         }
 
-        const event = await NotificationRepository.createEventIfNotExists(tx, {
-          sourceType,
-          sourceId,
-          milestone: milestone.key,
+        await NotificationRepository.attachNotificationToEvent(tx, {
+          eventId: event.id,
           notificationId: notification.id,
         })
-
-        if (!event) {
-          skipped++
-          continue
-        }
 
         await NotificationRepository.addRecipients(
           tx,

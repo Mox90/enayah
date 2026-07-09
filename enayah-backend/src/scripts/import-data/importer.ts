@@ -476,7 +476,7 @@ export async function runImport(determiner: number, file: string) {
       break
     case 2:
       sheet = workbook.getWorksheet('Jawazat Database')
-      if (!sheet) throw new Error('Sheet "Database" not found')
+      if (!sheet) throw new Error('Sheet "Jawazat Database" not found')
 
       type ImportRow = {
         employeeNumber: string
@@ -521,33 +521,59 @@ export async function runImport(determiner: number, file: string) {
 
             //console.log(row)
             if (row.iqamaNumber) {
-              await tx
-                .insert(employeeIdentifications)
-                .values({
-                  employeeId: employee.id,
-                  type: 'iqama',
-                  identificationNumber: row.iqamaNumber,
-                  issueDate: null,
-                  expiryDate: row.dateExpireGreg,
-                  expiryDateHijri: row.dateExpiryHijri,
-                  isCurrent: true,
+              const existingIqama =
+                await tx.query.employeeIdentifications.findFirst({
+                  where: and(
+                    eq(employeeIdentifications.employeeId, employee.id),
+                    eq(employeeIdentifications.type, 'iqama'),
+                    eq(
+                      employeeIdentifications.identificationNumber,
+                      row.iqamaNumber,
+                    ),
+                  ),
                 })
-                .onConflictDoNothing()
+              if (!existingIqama) {
+                await tx
+                  .insert(employeeIdentifications)
+                  .values({
+                    employeeId: employee.id,
+                    type: 'iqama',
+                    identificationNumber: row.iqamaNumber,
+                    issueDate: null,
+                    expiryDate: row.dateExpireGreg,
+                    expiryDateHijri: row.dateExpiryHijri,
+                    isCurrent: true,
+                  })
+                  .onConflictDoNothing()
+              }
             }
 
             if (row.passportNumber) {
-              await tx
-                .insert(employeeIdentifications)
-                .values({
-                  employeeId: employee.id,
-                  type: 'passport',
-                  identificationNumber: row.passportNumber,
-                  issueDate: null,
-                  expiryDate: row.passportExpiryDateGreg,
-                  expiryDateHijri: null,
-                  isCurrent: true,
+              const existingPassport =
+                await tx.query.employeeIdentifications.findFirst({
+                  where: and(
+                    eq(employeeIdentifications.employeeId, employee.id),
+                    eq(employeeIdentifications.type, 'passport'),
+                    eq(
+                      employeeIdentifications.identificationNumber,
+                      row.passportNumber,
+                    ),
+                  ),
                 })
-                .onConflictDoNothing()
+              if (!existingPassport) {
+                await tx
+                  .insert(employeeIdentifications)
+                  .values({
+                    employeeId: employee.id,
+                    type: 'passport',
+                    identificationNumber: row.passportNumber,
+                    issueDate: null,
+                    expiryDate: row.passportExpiryDateGreg,
+                    expiryDateHijri: null,
+                    isCurrent: true,
+                  })
+                  .onConflictDoNothing()
+              }
             }
           } catch (error) {
             console.error(`❌ Failed row: ${row.employeeNumber}`, error)

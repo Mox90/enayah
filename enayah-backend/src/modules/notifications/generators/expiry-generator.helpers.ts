@@ -30,6 +30,43 @@ export function calculateDaysUntil(expiryDate: string) {
   return Math.ceil(diffMs / (1000 * 60 * 60 * 24))
 }
 
+// export async function getNextDueMilestone(
+//   tx: DB,
+//   sourceType: string,
+//   sourceId: string,
+//   expiryDate: string,
+// ): Promise<ExpiryMilestone | null> {
+//   const daysUntil = calculateDaysUntil(expiryDate)
+
+//   if (daysUntil < 0) {
+//     const alreadyNotified = await NotificationRepository.hasEvent(tx, {
+//       sourceType,
+//       sourceId,
+//       milestone: 'expired',
+//     })
+
+//     return alreadyNotified ? null : { key: 'expired', days: daysUntil }
+//   }
+
+//   const dueMilestones = EXPIRY_MILESTONES.filter(
+//     (milestone) => daysUntil <= milestone.days,
+//   ).sort((a, b) => a.days - b.days)
+
+//   for (const milestone of dueMilestones) {
+//     const alreadyNotified = await NotificationRepository.hasEvent(tx, {
+//       sourceType,
+//       sourceId,
+//       milestone: milestone.key,
+//     })
+
+//     if (!alreadyNotified) {
+//       return milestone
+//     }
+//   }
+
+//   return null
+// }
+
 export async function getNextDueMilestone(
   tx: DB,
   sourceType: string,
@@ -48,23 +85,19 @@ export async function getNextDueMilestone(
     return alreadyNotified ? null : { key: 'expired', days: daysUntil }
   }
 
-  const dueMilestones = EXPIRY_MILESTONES.filter(
+  const dueMilestone = EXPIRY_MILESTONES.filter(
     (milestone) => daysUntil <= milestone.days,
-  ).sort((a, b) => a.days - b.days)
+  ).sort((a, b) => a.days - b.days)[0]
 
-  for (const milestone of dueMilestones) {
-    const alreadyNotified = await NotificationRepository.hasEvent(tx, {
-      sourceType,
-      sourceId,
-      milestone: milestone.key,
-    })
+  if (!dueMilestone) return null
 
-    if (!alreadyNotified) {
-      return milestone
-    }
-  }
+  const alreadyNotified = await NotificationRepository.hasEvent(tx, {
+    sourceType,
+    sourceId,
+    milestone: dueMilestone.key,
+  })
 
-  return null
+  return alreadyNotified ? null : dueMilestone
 }
 
 export function getSeverity(
