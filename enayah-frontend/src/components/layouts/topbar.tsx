@@ -21,6 +21,7 @@ import MobileSidebar from './mobile-sidebar'
 import { api } from '@/lib/api/client'
 import { Link, useRouter } from '../../../i18n/navigation'
 import { transform } from 'zod'
+import { NotificationBell } from '@/modules/notifications/components/notification-bell'
 //import { router } from 'next/client'
 
 const Topbar = () => {
@@ -111,9 +112,10 @@ const Topbar = () => {
         </Button>
 
         {/* Notifications */}
-        <Button variant='ghost' size='icon' aria-label='Notifications'>
+        {/* <Button variant='ghost' size='icon' aria-label='Notifications'>
           <Bell className='h-5 w-5' />
-        </Button>
+        </Button> */}
+        <NotificationBell />
 
         {/* PROFILE */}
         <DropdownMenu dir={isRtl ? 'rtl' : 'ltr'}>

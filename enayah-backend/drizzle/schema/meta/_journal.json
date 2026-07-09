@@ -50,6 +50,13 @@
       "when": 1783426897010,
       "tag": "0006_noisy_leo",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1783581945117,
+      "tag": "0007_serious_darkhawk",
+      "breakpoints": true
     }
   ]
 }
