@@ -169,4 +169,44 @@ export const NotificationRepository = {
 
     return Boolean(row)
   },
+
+  reserveEventIfNotExists: async (
+    tx: DB,
+    input: {
+      sourceType: string
+      sourceId: string
+      milestone: string
+    },
+  ) => {
+    const [event] = await tx
+      .insert(notificationEvents)
+      .values({
+        sourceType: input.sourceType,
+        sourceId: input.sourceId,
+        milestone: input.milestone,
+        notificationId: null,
+      })
+      .onConflictDoNothing()
+      .returning()
+
+    return event ?? null
+  },
+
+  attachNotificationToEvent: async (
+    tx: DB,
+    input: {
+      eventId: string
+      notificationId: string
+    },
+  ) => {
+    const [event] = await tx
+      .update(notificationEvents)
+      .set({
+        notificationId: input.notificationId,
+      })
+      .where(eq(notificationEvents.id, input.eventId))
+      .returning()
+
+    return event ?? null
+  },
 }

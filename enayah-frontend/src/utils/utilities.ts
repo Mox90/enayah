@@ -158,7 +158,7 @@ export const getExpiryStatus = (
         ? 'border-r-red-600 border-red-500/30'
         : 'border-l-red-600 border-red-500/30',
       pulseClass:
-        'animate-[pulse_0.6s_infinite] shadow-[0_0_15px_rgba(239,68,68,0.2)]',
+        'animate-[pulse_0.5s_infinite] shadow-[0_0_15px_rgba(239,68,68,0.2)]',
       diffDays,
     }
   }
@@ -168,7 +168,7 @@ export const getExpiryStatus = (
       borderClass: isRtl
         ? 'border-r-red-500 border-red-500/20'
         : 'border-l-red-500 border-red-500/20',
-      pulseClass: 'animate-pulse',
+      pulseClass: 'animate-[pulse_0.7s_infinite]',
       diffDays,
     }
   }
@@ -178,7 +178,7 @@ export const getExpiryStatus = (
       borderClass: isRtl
         ? 'border-r-amber-500 border-amber-500/20'
         : 'border-l-amber-500 border-amber-500/20',
-      pulseClass: 'animate-pulse',
+      pulseClass: 'animate-[pulse_0.9s_infinite]',
       diffDays,
     }
   }

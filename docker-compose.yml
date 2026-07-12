@@ -3,13 +3,10 @@ services:
     image: nginx:alpine
     container_name: enayah-nginx
     restart: always
-
     ports:
       - '80:80'
-
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-
     depends_on:
       - frontend
       - backend
@@ -66,6 +63,10 @@ services:
       - ./enayah-backend:/app:cached
       - backend_node_modules:/app/node_modules
     command: npm run dev
+    labels:
+      ofelia.enabled: 'true'
+      ofelia.job-exec.notification-generator.schedule: '0 0 7 * * *'
+      ofelia.job-exec.notification-generator.command: 'npm run notifications:generate'
 
   frontend:
     build: ./enayah-frontend
@@ -83,6 +84,16 @@ services:
       - ./enayah-frontend:/app:cached
       - frontend_node_modules:/app/node_modules
     command: npm run dev
+
+  ofelia:
+    image: mcuadros/ofelia:latest
+    container_name: enayah-ofelia
+    restart: always
+    depends_on:
+      - backend
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: daemon --docker
 
 volumes:
   postgres_data:

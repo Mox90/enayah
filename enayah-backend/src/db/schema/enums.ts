@@ -293,10 +293,12 @@ export const notificationSeverityEnum = pgEnum('notification_severity', [
 
 export const iqamaRenewalStatusEnum = pgEnum('iqama_renewal_status', [
   'pending_upload',
-  'uploaded',
+  'uploaded_to_mhrsd',
   'under_process',
-  'approved',
-  'denied',
+  'approved_by_mhrsd',
+  'denied_by_mhrsd',
+  'sent_to_government_relations',
   'completed',
   'eoc_required',
+  'cancelled',
 ])
