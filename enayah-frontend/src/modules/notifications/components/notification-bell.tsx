@@ -20,49 +20,13 @@ import {
 } from '../hooks/use-notifications'
 import { toArabic, toArabicDigits } from '@/utils/utilities'
 import { useRouter } from 'next/navigation'
+import { NotificationItem } from '../services/notification.service'
 
 const severityClass: Record<string, string> = {
   info: 'bg-blue-500',
   warning: 'bg-amber-500',
   success: 'bg-green-500',
   error: 'bg-red-500',
-}
-
-type NotificationSeverity = 'info' | 'warning' | 'success' | 'error'
-
-type NotificationMetadata = {
-  documentType?: string
-  employeeNumber?: string
-  milestone?: string
-  iqamaRenewalCaseId?: string
-}
-
-type NotificationItem = {
-  id: string
-  notificationId: string
-  recipientUserId: string
-
-  isRead: boolean
-  readAt: string | null
-  isArchived: boolean
-  createdAt: string
-
-  notification: {
-    id: string
-    employeeId: string | null
-
-    type: string
-    title: string
-    message: string
-
-    sourceType: string
-    sourceId: string
-
-    dueDate: string | null
-    severity: NotificationSeverity
-
-    metadata: NotificationMetadata | null
-  }
 }
 
 export function NotificationBell() {
@@ -181,7 +145,7 @@ export function NotificationBell() {
                     )}
 
                     <div className='flex gap-2 pt-2'>
-                      {!item.isRead && (
+                      {/* {!item.isRead && (
                         <Button
                           type='button'
                           size='sm'
@@ -194,7 +158,7 @@ export function NotificationBell() {
                           <Check className='mr-1 h-3 w-3' />
                           {isRtl ? 'مقروء' : 'Read'}
                         </Button>
-                      )}
+                      )} */}
 
                       <Button
                         type='button'
@@ -203,7 +167,7 @@ export function NotificationBell() {
                         className='h-7 px-2 text-xs'
                         //onClick={() => startProcess(item)}
                         disabled={markRead.isPending}
-                        onClick={() => markRead.mutate(item.id)}
+                        onClick={() => startProcess(item)}
                       >
                         <ClipboardCheck className='mr-1 h-3 w-3' />
 

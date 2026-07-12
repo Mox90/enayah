@@ -152,9 +152,9 @@ export async function importEmployeeDatabase(
     errors: [],
   }
 
-  await db.transaction(async (tx) => {
-    for (const row of rows) {
-      try {
+  for (const row of rows) {
+    try {
+      await db.transaction(async (tx) => {
         if (
           !row.code ||
           !row.deptNameEn ||
@@ -169,7 +169,7 @@ export async function importEmployeeDatabase(
               row.employeeNumber ?? 'N/A'
             }`,
           )
-          continue
+          return
         }
 
         let foundDepartment = await tx.query.departments.findFirst({
@@ -252,7 +252,7 @@ export async function importEmployeeDatabase(
 
         if (positionItem.status !== 'filled') {
           summary.skipped++
-          continue
+          return
         }
 
         if (
@@ -271,7 +271,7 @@ export async function importEmployeeDatabase(
               row.employeeNumber ?? 'N/A'
             }`,
           )
-          continue
+          return
         }
 
         let foundEmployee = await tx.query.employees.findFirst({
@@ -314,7 +314,7 @@ export async function importEmployeeDatabase(
 
         if (employmentExists) {
           summary.skipped++
-          continue
+          return
         }
 
         const employmentData: EmploymentInsert = {
@@ -393,21 +393,23 @@ export async function importEmployeeDatabase(
           assignmentReason: 'service_need',
         })
 
+        // keep all your existing import logic here
+
         summary.imported++
         console.log(`✅ Imported: ${row.employeeNumber}`)
-      } catch (error) {
-        summary.failed++
+      })
+    } catch (error) {
+      summary.failed++
 
-        summary.errors.push(
-          `${row.employeeNumber ?? 'N/A'}: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        )
+      summary.errors.push(
+        `${row.employeeNumber ?? 'N/A'}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      )
 
-        console.error(`❌ Failed row: ${row.employeeNumber}`, error)
-      }
+      console.error(`❌ Failed row: ${row.employeeNumber}`, error)
     }
-  })
+  }
 
   console.log('🎉 Employee database import completed', summary)
 

@@ -77,7 +77,14 @@ export async function importJawazatDatabase(
               expiryDateHijri: row.dateExpiryHijri,
               isCurrent: true,
             })
-            .onConflictDoNothing()
+            //.onConflictDoNothing()
+            .onConflictDoNothing({
+              target: [
+                employeeIdentifications.employeeId,
+                employeeIdentifications.type,
+                employeeIdentifications.identificationNumber,
+              ],
+            })
         }
 
         if (row.passportNumber) {
@@ -95,7 +102,10 @@ export async function importJawazatDatabase(
             .onConflictDoNothing()
         }
 
-        summary.imported++
+        //summary.imported++
+        if (row.iqamaNumber || row.passportNumber) {
+          summary.imported++
+        }
       } catch (error) {
         summary.failed++
 

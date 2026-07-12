@@ -2,21 +2,40 @@
 
 import { api } from '@/lib/api/client'
 
+type NotificationSeverity = 'info' | 'warning' | 'success' | 'error'
+
+type NotificationMetadata = {
+  documentType?: string
+  employeeNumber?: string
+  milestone?: string
+  iqamaRenewalCaseId?: string
+}
+
 export type NotificationItem = {
   id: string
   notificationId: string
   recipientUserId: string
+
   isRead: boolean
+  readAt: string | null
   isArchived: boolean
   createdAt: string
+
   notification: {
     id: string
+    employeeId: string | null
+
     type: string
     title: string
     message: string
-    dueDate?: string | null
-    severity: 'info' | 'warning' | 'success' | 'error'
-    metadata?: unknown
+
+    sourceType: string
+    sourceId: string
+
+    dueDate: string | null
+    severity: NotificationSeverity //'info' | 'warning' | 'success' | 'error'
+
+    metadata: NotificationMetadata | null
   }
 }
 
