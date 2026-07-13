@@ -21,6 +21,8 @@ import {
 import { toArabic, toArabicDigits } from '@/utils/utilities'
 import { useRouter } from 'next/navigation'
 import { NotificationItem } from '../services/notification.service'
+import { API_ENDPOINTS } from '@/lib/api/endpoints'
+import { toast } from 'sonner'
 
 const severityClass: Record<string, string> = {
   info: 'bg-blue-500',
@@ -40,16 +42,43 @@ export function NotificationBell() {
 
   const unreadCount = data.filter((item) => !item.isRead).length
 
+  // const startProcess = async (item: NotificationItem) => {
+  //   const caseId = item.notification.metadata?.iqamaRenewalCaseId
+
+  //   if (item.notification.type === 'iqama_expiry' && caseId) {
+  //     router.push(`${API_ENDPOINTS.hr.iqamaRenewal}/${caseId}`)
+  //   }
+
+  //    if (!item.isRead) {
+  //      await markRead.mutateAsync(item.id)
+  //    }
+  // }
+
   const startProcess = async (item: NotificationItem) => {
-    if (!item.isRead) {
-      await markRead.mutateAsync(item.id)
+    const rawCaseId = item.notification.metadata?.iqamaRenewalCaseId
+
+    if (typeof rawCaseId !== 'string' || rawCaseId.trim() === '') {
+      console.error('Missing iqamaRenewalCaseId:', item.notification.metadata)
+
+      toast.error(
+        isRtl
+          ? 'لا يحتوي الإشعار على معاملة تجديد إقامة'
+          : 'This notification has no Iqama renewal case',
+      )
+
+      return
     }
 
-    const caseId = item.notification.metadata?.iqamaRenewalCaseId
+    const params = new URLSearchParams({
+      view: 'form',
+      caseId: rawCaseId,
+    })
 
-    if (item.notification.type === 'iqama_expiry' && caseId) {
-      router.push(`/hr/iqama-renewal-cases/${caseId}`)
-    }
+    router.push(`/${locale}/iqama-renewal-process?${params.toString()}`)
+
+    // if (!item.isRead) {
+    //   await markRead.mutate(item.id)
+    // }
   }
 
   return (
@@ -160,19 +189,19 @@ export function NotificationBell() {
                         </Button>
                       )} */}
 
-                      <Button
-                        type='button'
-                        size='sm'
-                        variant='outline'
-                        className='h-7 px-2 text-xs'
-                        //onClick={() => startProcess(item)}
-                        disabled={markRead.isPending}
-                        onClick={() => startProcess(item)}
-                      >
-                        <ClipboardCheck className='mr-1 h-3 w-3' />
-
-                        {isRtl ? 'بدء الإجراء' : 'Start Process'}
-                      </Button>
+                      {item.notification.type === 'iqama_expiry' && (
+                        <Button
+                          type='button'
+                          size='sm'
+                          variant='outline'
+                          className='h-7 px-2 text-xs'
+                          disabled={markRead.isPending}
+                          onClick={() => startProcess(item)}
+                        >
+                          <ClipboardCheck className='mr-1 h-3 w-3' />
+                          {isRtl ? 'بدء الإجراء' : 'Start Process'}
+                        </Button>
+                      )}
 
                       <Button
                         type='button'

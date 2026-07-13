@@ -20,12 +20,15 @@ import {
   PickaxeIcon,
   Waypoints,
   TrafficCone,
+  FileClock,
+  LucideIcon,
 } from 'lucide-react'
+import React from 'react'
 
 export interface NavigationItem {
   label: string
   href: string
-  icon: any
+  icon: LucideIcon
   permission?: string
 }
 
@@ -76,6 +79,13 @@ export const navigation: NavigationItem[] = [
     href: '/contracts',
     icon: FileText,
     permission: 'contract.view',
+  },
+
+  {
+    label: 'iqamaRenewal',
+    href: '/iqama-renewal-process',
+    icon: FileClock,
+    permission: 'iqama.renewal.view',
   },
 
   {

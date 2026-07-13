@@ -357,16 +357,23 @@ export function PersonalDetailsCards({
                       label={it('expiryDate')}
                       value={formatDate(item.expiryDate, isRtl)}
                     />
-                    <InfoRow
-                      label={it('occupation')}
-                      value={dash(item.occupation)}
-                    />
-                    <InfoRow
-                      label={it('sponsor')}
-                      value={dash(
-                        isRtl ? toPersianDigits(item.sponsor) : item.sponsor,
-                      )}
-                    />
+                    {item.type === 'iqama' && (
+                      <>
+                        <InfoRow
+                          label={it('occupation')}
+                          value={dash(item.occupation)}
+                        />
+                        <InfoRow
+                          label={it('sponsor')}
+                          value={dash(
+                            isRtl
+                              ? toPersianDigits(item.sponsor)
+                              : item.sponsor,
+                          )}
+                        />
+                      </>
+                    )}
+
                     <InfoRow
                       label={it('authority')}
                       value={dash(item.issuingAuthority)}
