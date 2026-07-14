@@ -67,14 +67,14 @@ export type UpdateIqamaRenewalCaseInput = z.infer<
   typeof UpdateIqamaRenewalCaseSchema
 >
 
-export const AssignIqamaRenewalCaseSchema = z.object({
-  assignedToUserId: z.string().uuid().nullable(),
-  version: z.coerce.number().int().positive(),
-})
+// export const AssignIqamaRenewalCaseSchema = z.object({
+//   assignedToUserId: z.string().uuid().nullable(),
+//   version: z.coerce.number().int().positive(),
+// })
 
-export type AssignIqamaRenewalCaseInput = z.infer<
-  typeof AssignIqamaRenewalCaseSchema
->
+// export type AssignIqamaRenewalCaseInput = z.infer<
+//   typeof AssignIqamaRenewalCaseSchema
+// >
 
 export const ChangeIqamaRenewalStatusSchema = z
   .object({

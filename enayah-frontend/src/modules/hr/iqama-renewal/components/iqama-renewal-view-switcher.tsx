@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { cn } from '@/lib/utils'
 import { IqamaRenewalView } from '../types/iqama-renewal.types'
+import { useTranslations } from 'next-intl'
 
 //import type { IqamaRenewalView } from '../../types/iqama-renewal-view.types'
 
@@ -30,6 +31,7 @@ const views = [
 ] as const
 
 export function IqamaRenewalViewSwitcher({ view, onViewChange }: Props) {
+  const t = useTranslations('iqamaRenewal')
   return (
     <div className='w-full overflow-x-auto sm:w-auto'>
       <ButtonGroup className='w-full sm:w-auto'>
@@ -43,8 +45,8 @@ export function IqamaRenewalViewSwitcher({ view, onViewChange }: Props) {
               type='button'
               variant={active ? 'default' : 'outline'}
               size='icon'
-              aria-label={item.label}
-              title={item.label}
+              aria-label={t(item.label)}
+              title={t(item.label)}
               onClick={() => onViewChange(item.value)}
               className={cn(
                 'h-10 min-w-10 rounded-xl transition-all',

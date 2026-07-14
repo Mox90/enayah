@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 import type { IqamaRenewalStatus } from '../types/iqama-renewal.types'
+import { useTranslations } from 'next-intl'
 
 const statusClass: Record<IqamaRenewalStatus, string> = {
   pending_upload: 'border-amber-200 bg-amber-50 text-amber-700',
@@ -28,12 +29,14 @@ export function IqamaRenewalStatusBadge({
 }: {
   status: IqamaRenewalStatus
 }) {
+  const t = useTranslations('iqamaRenewal')
   return (
     <Badge
       variant='outline'
       className={cn('whitespace-nowrap', statusClass[status])}
     >
-      {humanize(status)}
+      {/* {humanize(status)} */}
+      {t(status)}
     </Badge>
   )
 }

@@ -623,6 +623,10 @@
     "searchPlaceholder": "Search here...",
     "open": "Open",
     "pending": "Pending",
+    "approved": "Approved",
+    "denied": "Denied",
+    "overdue": "Overdue",
+    "days": "Days",
     "employeeNumber": "Employee Number",
     "employeeName": "Employee Name",
     "iqamaNumber": "Iqama Number",
@@ -643,6 +647,15 @@
     "saving": "Saving...",
     "back": "Back",
     "loadingProcess": "Loading Iqama renewal process...",
-    "loadProcessFailed": "Failed to load the Iqama renewal process."
+    "loadProcessFailed": "Failed to load the Iqama renewal process.",
+    "pending_upload": "Pending Upload",
+    "uploaded_to_mhrsd": "Uploaded to MHRSD",
+    "under_process": "Under process",
+    "approved_by_mhrsd": "Approved by MHRSD",
+    "denied_by_mhrsd": "Denied by MHRSD",
+    "sent_to_government_relations": "Sent to government relation",
+    "completed": "Completed",
+    "eoc_required": "EOC required",
+    "cancelled": "Cancelled"
   }
 }

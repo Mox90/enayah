@@ -42,7 +42,7 @@ export function IqamaRenewalWorkspace() {
     console.error('Iqama renewal request failed:', error)
   }
 
-  console.log('DATA is ', data)
+  //console.log('DATA is ', data)
 
   // 2. Update the URL instead of local state to switch modes
   function openCreateForm() {

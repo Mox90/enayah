@@ -623,6 +623,10 @@
     "searchPlaceholder": "ابحث هنا...",
     "open": "فتح",
     "pending": "قيد الانتظار",
+    "approved": "تمت الموافقة",
+    "denied": "مرفوض",
+    "overdue": "متأخر",
+    "days": "أيام",
     "employeeNumber": "رقم الموظف",
     "employeeName": "اسم الموظف",
     "iqamaNumber": "رقم الإقامة",
@@ -643,6 +647,15 @@
     "saving": "جارٍ الحفظ...",
     "back": "رجوع",
     "loadingProcess": "جارٍ تحميل معاملة تجديد الإقامة...",
-    "loadProcessFailed": "تعذر تحميل معاملة تجديد الإقامة."
+    "loadProcessFailed": "تعذر تحميل معاملة تجديد الإقامة.",
+    "pending_upload": "بانتظار الرفع",
+    "uploaded_to_mhrsd": "تم الرفع إلى وزارة الموارد البشرية والتنمية الاجتماعية",
+    "under_process": "قيد المعالجة",
+    "approved_by_mhrsd": "معتمد من وزارة الموارد البشرية والتنمية الاجتماعية",
+    "denied_by_mhrsd": "مرفوض من قبل وزارة الموارد البشرية والتنمية الاجتماعية",
+    "sent_to_government_relations": "أُرسلت إلى قسم العلاقات الحكومية",
+    "completed": "مكتمل",
+    "eoc_required": "مطلوب إنهاء العقد",
+    "cancelled": "أُلغِيَ"
   }
 }
