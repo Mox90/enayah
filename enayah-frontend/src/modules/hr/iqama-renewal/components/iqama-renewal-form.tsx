@@ -1,4 +1,4 @@
-//src/modules/hr/iqama-renewal/components/iqama-renewal-form.tsx
+// src/modules/hr/iqama-renewal/components/iqama-renewal-form.tsx
 
 'use client'
 
@@ -8,6 +8,13 @@ import { useLocale, useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 
 import {
@@ -15,22 +22,25 @@ import {
   useIqamaRenewalProcess,
   useUpdateIqamaRenewalCase,
 } from '../hooks/use-iqama-renewal-processes'
-import { IqamaRenewalStatusBadge } from './iqama-renewal-status-badge'
 import {
-  IqamaRenewalStatus,
+  AssigneeOption,
   UpdateIqamaRenewalCasePayload,
 } from '../types/iqama-renewal.types'
+import { IqamaRenewalStatusBadge } from './iqama-renewal-status-badge'
+import { IqamaRenewalWorkflowActions } from './iqama-renewal-workflow-actions'
 
 interface Props {
   caseId?: string | null
   onCancel: () => void
   onSaved: () => void
+
+  canManageWorkflow: boolean
+  assignees?: AssigneeOption[]
 }
 
 type FormValues = {
   employeeId: string
   identificationId: string
-  status: IqamaRenewalStatus
   assignedToUserId: string
   governmentRelationsDueDate: string
   notes: string
@@ -39,7 +49,6 @@ type FormValues = {
 const EMPTY_VALUES: FormValues = {
   employeeId: '',
   identificationId: '',
-  status: 'pending_upload',
   assignedToUserId: '',
   governmentRelationsDueDate: '',
   notes: '',
@@ -57,7 +66,13 @@ function toNullable(value: string) {
   return normalized === '' ? null : normalized
 }
 
-export function IqamaRenewalForm({ caseId, onCancel, onSaved }: Props) {
+export function IqamaRenewalForm({
+  caseId,
+  onCancel,
+  onSaved,
+  canManageWorkflow,
+  assignees = [],
+}: Props) {
   const t = useTranslations('iqamaRenewal')
   const locale = useLocale()
   const isArabic = locale.toLowerCase().startsWith('ar')
@@ -71,8 +86,6 @@ export function IqamaRenewalForm({ caseId, onCancel, onSaved }: Props) {
   const createProcess = useCreateIqamaRenewalProcess()
   const updateProcess = useUpdateIqamaRenewalCase()
 
-  //const [values, setValues] = useState<FormValues>(EMPTY_VALUES)
-
   const isEditing = Boolean(caseId)
   const isSaving = createProcess.isPending || updateProcess.isPending
 
@@ -84,7 +97,6 @@ export function IqamaRenewalForm({ caseId, onCancel, onSaved }: Props) {
     return {
       employeeId: existingCase.employeeId,
       identificationId: existingCase.identificationId,
-      status: existingCase.status,
       assignedToUserId: existingCase.assignedToUserId ?? '',
       governmentRelationsDueDate: toDateInputValue(
         existingCase.governmentRelationsDueDate,
@@ -99,6 +111,8 @@ export function IqamaRenewalForm({ caseId, onCancel, onSaved }: Props) {
     ...initialValues,
     ...changes,
   }
+
+  const hasChanges = Object.keys(changes).length > 0
 
   function updateField<K extends keyof FormValues>(
     field: K,
@@ -115,27 +129,38 @@ export function IqamaRenewalForm({ caseId, onCancel, onSaved }: Props) {
 
     try {
       if (caseId) {
-        if (!existingCase) return
+        if (!existingCase || !hasChanges) return
 
-        const updatePayload: UpdateIqamaRenewalCasePayload = {
-          status: values.status,
-          assignedToUserId: toNullable(values.assignedToUserId),
-          governmentRelationsDueDate: toNullable(
-            values.governmentRelationsDueDate,
-          ),
-          notes: toNullable(values.notes),
+        const payload: UpdateIqamaRenewalCasePayload = {
+          version: existingCase.version,
+        }
+
+        if (changes.assignedToUserId !== undefined) {
+          payload.assignedToUserId = toNullable(changes.assignedToUserId)
+        }
+
+        if (changes.governmentRelationsDueDate !== undefined) {
+          payload.governmentRelationsDueDate = toNullable(
+            changes.governmentRelationsDueDate,
+          )
+        }
+
+        if (changes.notes !== undefined) {
+          payload.notes = toNullable(changes.notes)
         }
 
         await updateProcess.mutateAsync({
           id: caseId,
-          payload: updatePayload,
+          payload,
         })
+
+        setChanges({})
       } else {
         if (!values.employeeId.trim() || !values.identificationId.trim()) {
           return
         }
 
-        const createPayload = {
+        await createProcess.mutateAsync({
           employeeId: values.employeeId.trim(),
           identificationId: values.identificationId.trim(),
           assignedToUserId: toNullable(values.assignedToUserId),
@@ -143,14 +168,11 @@ export function IqamaRenewalForm({ caseId, onCancel, onSaved }: Props) {
             values.governmentRelationsDueDate,
           ),
           notes: toNullable(values.notes),
-        }
-
-        await createProcess.mutateAsync(createPayload)
+        })
       }
 
       onSaved()
     } catch (error) {
-      // Mutation hooks already display an error toast.
       console.error('Failed to save Iqama process:', error)
     }
   }
@@ -176,145 +198,196 @@ export function IqamaRenewalForm({ caseId, onCancel, onSaved }: Props) {
     : existingCase?.employeeNameEn
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className='space-y-6 rounded-2xl border bg-card p-6 shadow-sm'
-    >
-      <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
-        <div>
-          <h1 className='text-xl font-semibold'>
-            {isEditing ? t('editProcess') : t('createProcess')}
-          </h1>
+    <div className='space-y-6'>
+      <form
+        onSubmit={handleSubmit}
+        className='space-y-6 rounded-2xl border bg-card p-6 shadow-sm'
+      >
+        <div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
+          <div>
+            <h1 className='text-xl font-semibold'>
+              {isEditing ? t('editProcess') : t('createProcess')}
+            </h1>
 
-          {existingCase && (
-            <div className='mt-2'>
-              <IqamaRenewalStatusBadge status={existingCase.status} />
-            </div>
-          )}
+            {existingCase && (
+              <div className='mt-2'>
+                <IqamaRenewalStatusBadge status={existingCase.status} />
+              </div>
+            )}
+          </div>
+
+          <Button
+            type='button'
+            variant='outline'
+            onClick={onCancel}
+            disabled={isSaving}
+          >
+            {t('back')}
+          </Button>
         </div>
 
-        <Button
-          type='button'
-          variant='outline'
-          onClick={onCancel}
-          disabled={isSaving}
-        >
-          {t('cancel')}
-        </Button>
-      </div>
+        {existingCase && (
+          <div className='grid gap-4 rounded-xl bg-muted/40 p-4 sm:grid-cols-2 lg:grid-cols-4'>
+            <div>
+              <div className='text-xs text-muted-foreground'>
+                {t('employeeNumber')}
+              </div>
+
+              <div className='font-medium'>
+                {existingCase.employeeNumber ?? '-'}
+              </div>
+            </div>
+
+            <div>
+              <div className='text-xs text-muted-foreground'>
+                {t('employeeName')}
+              </div>
+
+              <div className='font-medium' dir={isArabic ? 'rtl' : 'ltr'}>
+                {employeeName ?? '-'}
+              </div>
+            </div>
+
+            <div>
+              <div className='text-xs text-muted-foreground'>
+                {t('iqamaNumber')}
+              </div>
+
+              <div className='font-medium'>
+                {existingCase.iqamaNumber ?? '-'}
+              </div>
+            </div>
+
+            <div>
+              <div className='text-xs text-muted-foreground'>
+                {t('expiryDate')}
+              </div>
+
+              <div className='font-medium'>
+                {toDateInputValue(existingCase.expiryDate) || '-'}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className='grid gap-4 md:grid-cols-2'>
+          {!isEditing && (
+            <>
+              <div className='space-y-2'>
+                <Label htmlFor='employeeId'>{t('employeeId')}</Label>
+
+                <Input
+                  id='employeeId'
+                  value={values.employeeId}
+                  disabled={isSaving}
+                  required
+                  onChange={(event) =>
+                    updateField('employeeId', event.target.value)
+                  }
+                />
+              </div>
+
+              <div className='space-y-2'>
+                <Label htmlFor='identificationId'>
+                  {t('identificationId')}
+                </Label>
+
+                <Input
+                  id='identificationId'
+                  value={values.identificationId}
+                  disabled={isSaving}
+                  required
+                  onChange={(event) =>
+                    updateField('identificationId', event.target.value)
+                  }
+                />
+              </div>
+            </>
+          )}
+
+          <div className='space-y-2'>
+            <Label htmlFor='assignedToUserId'>{t('assignedTo')}</Label>
+
+            <Select
+              value={values.assignedToUserId || 'unassigned'}
+              disabled={isSaving || !canManageWorkflow}
+              onValueChange={(value) =>
+                updateField(
+                  'assignedToUserId',
+                  value === 'unassigned' ? '' : value,
+                )
+              }
+            >
+              <SelectTrigger id='assignedToUserId'>
+                <SelectValue placeholder={t('selectAssignee')} />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value='unassigned'>{t('unassigned')}</SelectItem>
+
+                {assignees.map((assignee) => (
+                  <SelectItem key={assignee.id} value={assignee.id}>
+                    {assignee.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className='space-y-2'>
+            <Label htmlFor='governmentRelationsDueDate'>
+              {t('governmentRelationsDueDate')}
+            </Label>
+
+            <Input
+              id='governmentRelationsDueDate'
+              type='date'
+              value={values.governmentRelationsDueDate}
+              disabled={isSaving}
+              onChange={(event) =>
+                updateField('governmentRelationsDueDate', event.target.value)
+              }
+            />
+          </div>
+        </div>
+
+        <div className='space-y-2'>
+          <Label htmlFor='notes'>{t('notes')}</Label>
+
+          <Textarea
+            id='notes'
+            rows={5}
+            value={values.notes}
+            disabled={isSaving}
+            onChange={(event) => updateField('notes', event.target.value)}
+          />
+        </div>
+
+        <div className='flex justify-end gap-3'>
+          <Button
+            type='button'
+            variant='outline'
+            onClick={onCancel}
+            disabled={isSaving}
+          >
+            {t('cancel')}
+          </Button>
+
+          <Button
+            type='submit'
+            disabled={isSaving || (isEditing && !hasChanges)}
+          >
+            {isSaving ? t('saving') : t('save')}
+          </Button>
+        </div>
+      </form>
 
       {existingCase && (
-        <div className='grid gap-4 rounded-xl bg-muted/40 p-4 sm:grid-cols-3'>
-          <div>
-            <div className='text-xs text-muted-foreground'>
-              {t('employeeNumber')}
-            </div>
-            <div className='font-medium'>
-              {existingCase.employeeNumber ?? '-'}
-            </div>
-          </div>
-
-          <div>
-            <div className='text-xs text-muted-foreground'>
-              {t('employeeName')}
-            </div>
-            <div className='font-medium' dir={isArabic ? 'rtl' : 'ltr'}>
-              {employeeName ?? '-'}
-            </div>
-          </div>
-
-          <div>
-            <div className='text-xs text-muted-foreground'>
-              {t('iqamaNumber')}
-            </div>
-            <div className='font-medium'>{existingCase.iqamaNumber ?? '-'}</div>
-          </div>
-        </div>
-      )}
-
-      <div className='grid gap-4 md:grid-cols-2'>
-        <div className='space-y-2'>
-          <Label htmlFor='employeeId'>{t('employeeId')}</Label>
-
-          <Input
-            id='employeeId'
-            value={values.employeeId}
-            disabled={isEditing || isSaving}
-            required={!isEditing}
-            onChange={(event) => updateField('employeeId', event.target.value)}
-          />
-        </div>
-
-        <div className='space-y-2'>
-          <Label htmlFor='identificationId'>{t('identificationId')}</Label>
-
-          <Input
-            id='identificationId'
-            value={values.identificationId}
-            disabled={isEditing || isSaving}
-            required={!isEditing}
-            onChange={(event) =>
-              updateField('identificationId', event.target.value)
-            }
-          />
-        </div>
-
-        <div className='space-y-2'>
-          <Label htmlFor='assignedToUserId'>{t('assignedTo')}</Label>
-
-          <Input
-            id='assignedToUserId'
-            value={values.assignedToUserId}
-            disabled={isSaving}
-            onChange={(event) =>
-              updateField('assignedToUserId', event.target.value)
-            }
-          />
-        </div>
-
-        <div className='space-y-2'>
-          <Label htmlFor='governmentRelationsDueDate'>
-            {t('governmentRelationsDueDate')}
-          </Label>
-
-          <Input
-            id='governmentRelationsDueDate'
-            type='date'
-            value={values.governmentRelationsDueDate}
-            disabled={isSaving}
-            onChange={(event) =>
-              updateField('governmentRelationsDueDate', event.target.value)
-            }
-          />
-        </div>
-      </div>
-
-      <div className='space-y-2'>
-        <Label htmlFor='notes'>{t('notes')}</Label>
-
-        <Textarea
-          id='notes'
-          rows={5}
-          value={values.notes}
-          disabled={isSaving}
-          onChange={(event) => updateField('notes', event.target.value)}
+        <IqamaRenewalWorkflowActions
+          renewalCase={existingCase}
+          canManageWorkflow={canManageWorkflow}
         />
-      </div>
-
-      <div className='flex justify-end gap-3'>
-        <Button
-          type='button'
-          variant='outline'
-          onClick={onCancel}
-          disabled={isSaving}
-        >
-          {t('cancel')}
-        </Button>
-
-        <Button type='submit' disabled={isSaving}>
-          {isSaving ? t('saving') : t('save')}
-        </Button>
-      </div>
-    </form>
+      )}
+    </div>
   )
 }

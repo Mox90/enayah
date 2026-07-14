@@ -656,6 +656,8 @@
     "sent_to_government_relations": "أُرسلت إلى قسم العلاقات الحكومية",
     "completed": "مكتمل",
     "eoc_required": "مطلوب إنهاء العقد",
-    "cancelled": "أُلغِيَ"
+    "cancelled": "أُلغِيَ",
+    "selectAssignee": "Assign to",
+    "unassigned": "Unassigned"
   }
 }

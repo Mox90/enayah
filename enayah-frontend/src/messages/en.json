@@ -656,6 +656,8 @@
     "sent_to_government_relations": "Sent to government relation",
     "completed": "Completed",
     "eoc_required": "EOC required",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "selectAssignee": "Assign to",
+    "unassigned": "Unassigned"
   }
 }

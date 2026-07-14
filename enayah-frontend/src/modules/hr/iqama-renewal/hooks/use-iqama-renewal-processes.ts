@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 import { iqamaRenewalService } from '../services/iqama-renewal.service'
 import type { IqamaRenewalListParams } from '../services/iqama-renewal.service'
 import type {
+  ChangeIqamaRenewalStatusPayload,
   CreateIqamaRenewalCasePayload,
   UpdateIqamaRenewalCasePayload,
 } from '../types/iqama-renewal.types'
@@ -94,6 +95,38 @@ export function useUpdateIqamaRenewalCase() {
     onError: (error) => {
       console.error(error)
       toast.error('Failed to update Iqama renewal process')
+    },
+  })
+}
+
+export function useChangeIqamaRenewalStatus() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string
+      payload: ChangeIqamaRenewalStatusPayload
+    }) => iqamaRenewalService.changeIqamaRenewalStatus(id, payload),
+
+    onSuccess: async (updatedCase) => {
+      queryClient.setQueryData(
+        iqamaRenewalKeys.detail(updatedCase.id),
+        updatedCase,
+      )
+
+      await queryClient.invalidateQueries({
+        queryKey: iqamaRenewalKeys.lists(),
+      })
+
+      toast.success('Iqama renewal status updated.')
+    },
+
+    onError: (error) => {
+      console.error(error)
+      toast.error('Failed to update Iqama renewal status.')
     },
   })
 }

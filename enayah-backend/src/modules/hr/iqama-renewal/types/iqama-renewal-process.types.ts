@@ -31,11 +31,8 @@ export const IqamaRenewalCaseIdSchema = z.object({
 export const CreateIqamaRenewalCaseSchema = z.object({
   employeeId: z.string().uuid(),
   identificationId: z.string().uuid(),
-
   assignedToUserId: z.string().uuid().nullable().optional(),
-
   governmentRelationsDueDate: z.string().date().nullable().optional(),
-
   notes: z.string().trim().max(5000).nullable().optional(),
 })
 
@@ -46,11 +43,8 @@ export type CreateIqamaRenewalCaseInput = z.infer<
 export const UpdateIqamaRenewalCaseSchema = z
   .object({
     assignedToUserId: z.string().uuid().nullable().optional(),
-
     governmentRelationsDueDate: z.string().date().nullable().optional(),
-
     notes: z.string().trim().max(5000).nullable().optional(),
-
     version: z.coerce.number().int().positive(),
   })
   .refine(
@@ -79,13 +73,9 @@ export type UpdateIqamaRenewalCaseInput = z.infer<
 export const ChangeIqamaRenewalStatusSchema = z
   .object({
     status: IqamaRenewalStatusSchema,
-
     denialReason: z.string().trim().min(1).max(5000).nullable().optional(),
-
     governmentRelationsDueDate: z.string().date().nullable().optional(),
-
     notes: z.string().trim().max(5000).nullable().optional(),
-
     version: z.coerce.number().int().positive(),
   })
   .superRefine((data, ctx) => {
@@ -116,37 +106,25 @@ export type ChangeIqamaRenewalStatusInput = z.infer<
 
 export const ListIqamaRenewalCasesQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
-
   limit: z.coerce.number().int().positive().max(100).default(25),
-
   status: z
     .union([IqamaRenewalStatusSchema, z.array(IqamaRenewalStatusSchema)])
     .optional(),
-
   employeeId: z.string().uuid().optional(),
-
   identificationId: z.string().uuid().optional(),
-
   assignedToUserId: z.string().uuid().optional(),
-
   unassigned: z
     .enum(['true', 'false'])
     .transform((value) => value === 'true')
     .optional(),
-
   governmentRelationsDueFrom: z.string().date().optional(),
-
   governmentRelationsDueTo: z.string().date().optional(),
-
   createdFrom: z.string().date().optional(),
-
   createdTo: z.string().date().optional(),
-
   includeDeleted: z
     .enum(['true', 'false'])
     .transform((value) => value === 'true')
     .default(false),
-
   sortBy: z
     .enum(['createdAt', 'updatedAt', 'status', 'governmentRelationsDueDate'])
     .default('createdAt'),

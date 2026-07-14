@@ -20,31 +20,23 @@ import {
 
 const allowedTransitions = {
   pending_upload: ['uploaded_to_mhrsd', 'cancelled'],
-
   uploaded_to_mhrsd: [
     'under_process',
     'approved_by_mhrsd',
     'denied_by_mhrsd',
     'cancelled',
   ],
-
   under_process: ['approved_by_mhrsd', 'denied_by_mhrsd', 'cancelled'],
-
   approved_by_mhrsd: ['sent_to_government_relations', 'cancelled'],
-
   denied_by_mhrsd: [
     'pending_upload',
     'uploaded_to_mhrsd',
     'eoc_required',
     'cancelled',
   ],
-
   sent_to_government_relations: ['completed', 'eoc_required', 'cancelled'],
-
   eoc_required: ['completed', 'cancelled'],
-
   completed: [],
-
   cancelled: [],
 } satisfies Record<IqamaRenewalStatus, readonly IqamaRenewalStatus[]>
 

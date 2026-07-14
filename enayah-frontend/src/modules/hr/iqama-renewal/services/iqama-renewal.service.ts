@@ -3,6 +3,7 @@
 import { api } from '@/lib/api/client'
 
 import type {
+  ChangeIqamaRenewalStatusPayload,
   CreateIqamaRenewalCasePayload,
   IqamaRenewalCase,
   IqamaRenewalCaseListResponse,
@@ -73,6 +74,18 @@ export const iqamaRenewalService = {
   ): Promise<IqamaRenewalCase> => {
     const response = await api.patch<IqamaRenewalCase>(
       `${API_ENDPOINTS.hr.iqamaRenewal}/${id}`,
+      payload,
+    )
+
+    return response.data
+  },
+
+  changeIqamaRenewalStatus: async (
+    id: string,
+    payload: ChangeIqamaRenewalStatusPayload,
+  ) => {
+    const response = await api.patch<IqamaRenewalCase>(
+      `${API_ENDPOINTS.hr.iqamaRenewal}/${id}/status`,
       payload,
     )
 
