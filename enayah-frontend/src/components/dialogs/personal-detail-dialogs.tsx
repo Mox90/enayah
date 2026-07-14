@@ -346,14 +346,29 @@ function IdentificationDialogContent({
               />
             </div>
 
-            <div className='space-y-2'>
-              <Label>{it('sponsor')}</Label>
-              <Input
-                className='h-11'
-                value={form.sponsor ?? ''}
-                onChange={(e) => update('sponsor', e.target.value || null)}
-              />
-            </div>
+            {form.type === 'iqama' && (
+              <>
+                <div className='space-y-2'>
+                  <Label>{it('sponsor')}</Label>
+                  <Input
+                    className='h-11'
+                    value={form.sponsor ?? ''}
+                    onChange={(e) => update('sponsor', e.target.value || null)}
+                  />
+                </div>
+
+                <div className='space-y-2'>
+                  <Label>{it('occupation')}</Label>
+                  <Input
+                    className='h-11'
+                    value={form.occupation ?? ''}
+                    onChange={(e) =>
+                      update('occupation', e.target.value || null)
+                    }
+                  />
+                </div>
+              </>
+            )}
 
             <div className='space-y-2'>
               <Label>{it('authority')}</Label>
@@ -363,15 +378,6 @@ function IdentificationDialogContent({
                 onChange={(e) =>
                   update('issuingAuthority', e.target.value || null)
                 }
-              />
-            </div>
-
-            <div className='space-y-2'>
-              <Label>{it('occupation')}</Label>
-              <Input
-                className='h-11'
-                value={form.occupation ?? ''}
-                onChange={(e) => update('occupation', e.target.value || null)}
               />
             </div>
 

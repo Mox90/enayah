@@ -11,6 +11,7 @@ import { onboardingRoutes } from './onboarding'
 import { contractRoutes } from './contracts'
 import { contractMovementRoutes } from './contract-movements'
 import { appointmentRoutes } from './appointments'
+import { iqamaRenewalProcessRoutes } from './iqama-renewal'
 
 const router = Router()
 
@@ -26,6 +27,7 @@ router.use('/credentials', credentialRoutes.routes)
 router.use('/contracts', contractRoutes)
 router.use('/contract-movements', contractMovementRoutes)
 router.use('/appointments', appointmentRoutes)
+router.use('/iqama-renewal-process', iqamaRenewalProcessRoutes)
 
 export const hrModule = {
   routes: router,

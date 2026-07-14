@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
     credentials: '/hr/credentials',
     onboarding: '/hr/onboarding',
     contracts: '/hr/contracts',
+    iqamaRenewal: '/hr/iqama-renewal-process',
   },
 
   iam: {
