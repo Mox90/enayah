@@ -21,12 +21,14 @@ export type IqamaRenewalStatus =
 
 export type IqamaRenewalCase = {
   id: string
+
   employeeId: string
   identificationId: string
 
   employeeNumber: string | null
   employeeNameEn: string | null
   employeeNameAr: string | null
+
   iqamaNumber: string | null
   expiryDate: string | null
 
@@ -36,6 +38,7 @@ export type IqamaRenewalCase = {
   assignedToName: string | null
 
   governmentRelationsDueDate: string | null
+
   notes: string | null
   denialReason: string | null
 
@@ -44,6 +47,7 @@ export type IqamaRenewalCase = {
   mhrsdDeniedAt: string | null
 
   version: number
+
   createdAt: string
   updatedAt: string
 }
@@ -78,10 +82,11 @@ export type UpdateIqamaRenewalCasePayload = {
 
 export type ChangeIqamaRenewalStatusPayload = {
   status: IqamaRenewalStatus
-  version: number
-  notes?: string | null
-  denialReason?: string | null
+  assignedToUserId?: string | null
   governmentRelationsDueDate?: string | null
+  denialReason?: string | null
+  notes?: string | null
+  version: number
 }
 
 export type AssigneeOption = {

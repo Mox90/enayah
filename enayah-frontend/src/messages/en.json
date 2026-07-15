@@ -658,6 +658,20 @@
     "eoc_required": "EOC required",
     "cancelled": "Cancelled",
     "selectAssignee": "Assign to",
-    "unassigned": "Unassigned"
+    "unassigned": "Unassigned",
+    "workflowActions": "Workflow Actions",
+    "workflowActionsDescription": "Select the next action for this Iqama renewal process.",
+    "confirmStatusChange": "Confirm Status Change",
+    "confirmStatusChangeDescription": "Review the information before changing the process status.",
+    "newStatus": "New Status",
+    "confirm": "Confirm",
+    "updatingStatus": "Updating...",
+    "denialReason": "Denial Reason",
+    "selectGovernmentRelationsUser": "Select Government Relations User",
+    "noAssigneesAvailable": "No Government Relations users are available",
+    "processCompleted": "This Iqama renewal process has been completed.",
+    "processCancelled": "This Iqama renewal process has been cancelled.",
+    "mhrsdApprovedAt": "MHRSD Approval Date",
+    "mhrsdDeniedAt": "MHRSD Denial Date"
   }
 }

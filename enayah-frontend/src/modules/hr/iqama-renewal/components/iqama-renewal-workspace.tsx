@@ -8,6 +8,7 @@ import { IqamaRenewalTable } from './iqama-renewal-table'
 import { IqamaRenewalToolbar } from './iqama-renewal-toolbar'
 import type { IqamaRenewalSortBy } from '../services/iqama-renewal.service'
 import { IqamaRenewalForm } from './iqama-renewal-form'
+import { useAuthStore } from '@/modules/iam/stores/auth.store'
 
 export function IqamaRenewalWorkspace() {
   const searchParams = useSearchParams()
@@ -16,12 +17,15 @@ export function IqamaRenewalWorkspace() {
 
   const [view, setView] = useState<IqamaRenewalView>('list')
 
+  const user = useAuthStore((state) => state.user)
+
   // 1. Derive state directly from searchParams (No useEffect needed)
   const caseIdFromUrl = searchParams.get('caseId')
   const requestedView = searchParams.get('view')
 
   const mode = requestedView === 'form' ? 'form' : 'directory'
-
+  const canManageWorkflow =
+    user?.roles?.some((role) => role.name === 'HR_ADMIN') ?? false
   const selectedCaseId = mode === 'form' ? caseIdFromUrl : null
 
   const [page, setPage] = useState(1)
@@ -41,8 +45,6 @@ export function IqamaRenewalWorkspace() {
   if (isError) {
     console.error('Iqama renewal request failed:', error)
   }
-
-  //console.log('DATA is ', data)
 
   // 2. Update the URL instead of local state to switch modes
   function openCreateForm() {
@@ -73,6 +75,8 @@ export function IqamaRenewalWorkspace() {
         caseId={selectedCaseId}
         onCancel={closeForm}
         onSaved={closeForm}
+        canManageWorkflow={canManageWorkflow}
+        governmentRelationsUsers={[]}
       />
     )
   }

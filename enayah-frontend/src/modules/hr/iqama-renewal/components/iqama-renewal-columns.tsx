@@ -17,6 +17,7 @@ import {
 import type { IqamaRenewalSortBy } from '../services/iqama-renewal.service'
 import type { IqamaRenewalCase } from '../types/iqama-renewal.types'
 import { IqamaRenewalStatusBadge } from './iqama-renewal-status-badge'
+import { toArabic, toPersianDigits } from '@/utils/utilities'
 
 type Labels = {
   employeeNumber: string
@@ -94,7 +95,9 @@ export function getIqamaRenewalColumns(
       ),
       cell: ({ row }) => (
         <span className='font-medium'>
-          {row.original.employeeNumber ?? '-'}
+          {isArabic
+            ? toPersianDigits(row.original.employeeNumber)
+            : (row.original.employeeNumber ?? '-')}
         </span>
       ),
     },
@@ -130,7 +133,10 @@ export function getIqamaRenewalColumns(
           sortOrder={sortOrder}
         />
       ),
-      cell: ({ row }) => row.original.iqamaNumber ?? '-',
+      cell: ({ row }) =>
+        isArabic
+          ? toPersianDigits(row.original.iqamaNumber)
+          : (row.original.iqamaNumber ?? '-'),
     },
 
     {
@@ -144,7 +150,10 @@ export function getIqamaRenewalColumns(
           sortOrder={sortOrder}
         />
       ),
-      cell: ({ row }) => formatDate(row.original.expiryDate),
+      cell: ({ row }) =>
+        isArabic
+          ? toArabic(formatDate(row.original.expiryDate), 1)
+          : formatDate(row.original.expiryDate),
     },
 
     {
@@ -250,10 +259,10 @@ export function getIqamaRenewalColumns(
       header: labels.actions,
       enableSorting: false,
       cell: ({ row }) => (
-        <DropdownMenu>
+        <DropdownMenu dir={isArabic ? 'rtl' : 'ltr'}>
           <DropdownMenuTrigger asChild>
             <Button variant='ghost' size='icon'>
-              <MoreHorizontal className='h-4 w-4' />
+              <MoreHorizontal className='h-4 w-4 text-green-700' />
             </Button>
           </DropdownMenuTrigger>
 

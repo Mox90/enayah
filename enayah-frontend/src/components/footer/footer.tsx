@@ -1,29 +1,79 @@
+// src/components/footer/footer.tsx
+
+import type { ReactNode } from 'react'
+import { Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { Button } from '../ui/button'
-import { DialogFooter } from '../ui/dialog'
+
+import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
+import { DialogFooter } from '@/components/ui/dialog'
+
+type ButtonVariant =
+  | 'default'
+  | 'destructive'
+  | 'outline'
+  | 'secondary'
+  | 'ghost'
+  | 'link'
+
+interface FooterProps {
+  onCancel: () => void
+  onSave: () => void
+  label: string
+  savingLabel?: string
+  disabled?: boolean
+  isSaving?: boolean
+  saveVariant?: ButtonVariant
+  saveClassName?: string
+  saveIcon?: ReactNode
+}
 
 export function Footer({
   onCancel,
   onSave,
   label,
-}: {
-  onCancel: () => void
-  onSave: () => void
-  label: string
-}) {
+  savingLabel,
+  disabled = false,
+  isSaving = false,
+  saveVariant = 'default',
+  saveClassName,
+  saveIcon,
+}: FooterProps) {
   const ct = useTranslations('common')
+
   return (
-    <DialogFooter className='border-t bg-muted/40 px-6 py-8 shrink-0'>
-      <Button type='button' variant='outline' onClick={onCancel}>
+    <DialogFooter className='shrink-0 border-t bg-muted/40 px-6 py-5'>
+      <Button
+        type='button'
+        variant='outline'
+        disabled={isSaving}
+        onClick={onCancel}
+      >
         {ct('cancel')}
       </Button>
 
       <Button
         type='button'
-        className='bg-slate-950 text-white hover:bg-slate-800'
+        variant={saveVariant}
+        disabled={disabled || isSaving}
+        className={cn(
+          saveVariant === 'default' &&
+            'bg-slate-950 text-white hover:bg-slate-800',
+          saveClassName,
+        )}
         onClick={onSave}
       >
-        {label}
+        {isSaving ? (
+          <>
+            <Loader2 className='h-4 w-4 animate-spin' />
+            {savingLabel ?? label}
+          </>
+        ) : (
+          <>
+            {saveIcon}
+            {label}
+          </>
+        )}
       </Button>
     </DialogFooter>
   )

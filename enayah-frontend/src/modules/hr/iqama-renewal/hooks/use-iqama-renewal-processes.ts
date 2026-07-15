@@ -15,6 +15,7 @@ import type {
   CreateIqamaRenewalCasePayload,
   UpdateIqamaRenewalCasePayload,
 } from '../types/iqama-renewal.types'
+import { useTranslations } from 'next-intl'
 
 export const iqamaRenewalKeys = {
   all: ['iqama-renewal-cases'] as const,
@@ -48,15 +49,16 @@ export function useIqamaRenewalProcess(id?: string | null) {
 
 export function useCreateIqamaRenewalProcess() {
   const queryClient = useQueryClient()
+  const t = useTranslations('iqamaRenewal')
 
   return useMutation({
     mutationFn: (payload: CreateIqamaRenewalCasePayload) =>
       iqamaRenewalService.create(payload),
 
-    onSuccess: (created) => {
+    onSuccess: async (created) => {
       queryClient.setQueryData(iqamaRenewalKeys.detail(created.id), created)
 
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: iqamaRenewalKeys.lists(),
       })
 
@@ -72,6 +74,7 @@ export function useCreateIqamaRenewalProcess() {
 
 export function useUpdateIqamaRenewalCase() {
   const queryClient = useQueryClient()
+  const t = useTranslations('iqamaRenewal')
 
   return useMutation({
     mutationFn: ({
@@ -82,10 +85,9 @@ export function useUpdateIqamaRenewalCase() {
       payload: UpdateIqamaRenewalCasePayload
     }) => iqamaRenewalService.update(id, payload),
 
-    onSuccess: (updated) => {
+    onSuccess: async (updated) => {
       queryClient.setQueryData(iqamaRenewalKeys.detail(updated.id), updated)
-
-      queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: iqamaRenewalKeys.lists(),
       })
 
@@ -101,6 +103,7 @@ export function useUpdateIqamaRenewalCase() {
 
 export function useChangeIqamaRenewalStatus() {
   const queryClient = useQueryClient()
+  const t = useTranslations('iqamaRenewal')
 
   return useMutation({
     mutationFn: ({

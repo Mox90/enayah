@@ -29,7 +29,7 @@ export function PositionActions({ position }: PositionActionProps) {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant='ghost' size='icon' aria-label='Position Action'>
-            <MoreVerticalIcon className='h-4 w-4' />
+            <MoreVerticalIcon className='h-4 w-4 text-green-700' />
           </Button>
         </DropdownMenuTrigger>
 

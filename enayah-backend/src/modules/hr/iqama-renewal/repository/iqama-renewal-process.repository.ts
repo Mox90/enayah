@@ -41,16 +41,16 @@ type CreateCaseData = {
 }
 
 export type UpdateCaseData = Partial<{
-  status: IqamaRenewalStatus
-  assignedToUserId: string | null
-  governmentRelationsDueDate: string | null
-  notes: string | null
-  denialReason: string | null
-  mhrsdUploadedAt: Date | null
-  mhrsdApprovedAt: Date | null
-  mhrsdDeniedAt: Date | null
-  updatedBy: string
-  updatedAt: Date
+  status?: IqamaRenewalStatus
+  assignedToUserId?: string | null
+  governmentRelationsDueDate?: string | null
+  notes?: string | null
+  denialReason?: string | null
+  mhrsdUploadedAt?: Date | null
+  mhrsdApprovedAt?: Date | null
+  mhrsdDeniedAt?: Date | null
+  updatedBy?: string
+  updatedAt?: Date
 }>
 
 const normalizeStatuses = (

@@ -112,7 +112,7 @@ function RowActions({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button size='icon' variant='ghost' aria-label='Row actions'>
-          <MoreVertical className='h-4 w-4' />
+          <MoreVertical className='h-4 w-4 text-green-700' />
         </Button>
       </DropdownMenuTrigger>
 
