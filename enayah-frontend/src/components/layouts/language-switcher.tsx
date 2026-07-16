@@ -2,28 +2,43 @@
 
 import { Button } from '@/components/ui/button'
 import { useLocale } from 'next-intl'
-import { usePathname, useRouter } from '../../../i18n/navigation'
+import { useSearchParams } from 'next/navigation'
 
-//import { usePathname, useRouter } from '@/i18n/navigation'
+import { usePathname, useRouter } from '../../../i18n/navigation'
 
 const LanguageSwitcher = () => {
   const locale = useLocale()
-
   const router = useRouter()
-
   const pathname = usePathname()
+  const searchParams = useSearchParams()
 
   const handleSwitchLanguage = () => {
     const nextLocale = locale === 'en' ? 'ar' : 'en'
 
-    router.replace(pathname, {
-      locale: nextLocale,
-    })
+    const query = Object.fromEntries(searchParams.entries())
+
+    router.replace(
+      {
+        pathname,
+        query,
+      },
+      {
+        locale: nextLocale,
+      },
+    )
   }
 
   return (
-    <Button variant='ghost' size='icon' onClick={handleSwitchLanguage}>
-      <span className='text-lg'>{locale === 'ar' ? '🇸🇦' : '🇺🇸'}</span>
+    <Button
+      type='button'
+      variant='ghost'
+      size='icon'
+      onClick={handleSwitchLanguage}
+      aria-label={locale === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}
+    >
+      <span className='text-lg' aria-hidden='true'>
+        {locale === 'ar' ? '🇸🇦' : '🇺🇸'}
+      </span>
     </Button>
   )
 }

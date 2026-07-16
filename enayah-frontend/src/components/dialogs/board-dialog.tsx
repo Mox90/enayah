@@ -95,7 +95,7 @@ function BoardDialogContent({
 
   return (
     <>
-      <div className='space-y-6 px-6 py-1'>
+      <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
@@ -178,7 +178,7 @@ function BoardDialogContent({
         </section>
       </div>
 
-      <DialogFooter className='border-t bg-muted/40 px-6 py-6'>
+      <DialogFooter className='shrink-0 border-t bg-muted/40 px-4 py-4 sm:px-6 sm:py-6'>
         <Button
           type='button'
           className='p-4'
@@ -210,16 +210,15 @@ export function BoardDialog({
 }: Props) {
   const dialogKey = initialValue?.id ?? (open ? 'add-board' : 'closed')
   const crt = useTranslations('credentials')
+
   return (
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
       title={initialValue ? crt('editBoard') : crt('addBoard')}
       description={crt('boardSub')}
-      //className='w-[95vw] max-w-4xl overflow-hidden p-0'
-      //headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
-      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+      className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'
     >
       {open && (
         <BoardDialogContent

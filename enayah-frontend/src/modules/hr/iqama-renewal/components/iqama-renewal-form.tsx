@@ -40,6 +40,7 @@ import type {
 
 import { IqamaRenewalStatusBadge } from './iqama-renewal-status-badge'
 import { IqamaRenewalWorkflowActions } from './iqama-renewal-workflow-actions'
+import { toArabic, toPersianDigits } from '@/utils/utilities'
 
 interface Props {
   caseId?: string | null
@@ -260,6 +261,14 @@ export function IqamaRenewalForm({
   const mhrsdDecisionDate =
     existingCase?.mhrsdApprovedAt ?? existingCase?.mhrsdDeniedAt
 
+  const iqamaNumber = isArabic
+    ? toPersianDigits(existingCase?.iqamaNumber)
+    : existingCase?.iqamaNumber
+
+  const employeeNumber = isArabic
+    ? toPersianDigits(existingCase?.employeeNumber)
+    : existingCase?.employeeNumber
+
   const mhrsdDecisionLabel = existingCase?.mhrsdApprovedAt
     ? t('mhrsdApprovedAt')
     : existingCase?.mhrsdDeniedAt
@@ -387,11 +396,11 @@ export function IqamaRenewalForm({
                   <div className='mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground'>
                     <span className='inline-flex items-center gap-1.5'>
                       <UserRound className='h-3.5 w-3.5' />
-                      {existingCase.employeeNumber ?? '-'}
+                      {employeeNumber ?? '-'}
                     </span>
                     <span className='inline-flex items-center gap-1.5'>
                       <Fingerprint className='h-3.5 w-3.5' />
-                      {existingCase.iqamaNumber ?? '-'}
+                      {iqamaNumber ?? '-'}
                     </span>
                   </div>
                 )}
@@ -422,7 +431,7 @@ export function IqamaRenewalForm({
                     <DetailItem
                       icon={IdCard}
                       label={t('employeeNumber')}
-                      value={existingCase.employeeNumber ?? '-'}
+                      value={employeeNumber ?? '-'}
                       emphasis
                     />
 
@@ -437,14 +446,19 @@ export function IqamaRenewalForm({
                     <DetailItem
                       icon={Fingerprint}
                       label={t('iqamaNumber')}
-                      value={existingCase.iqamaNumber ?? '-'}
-                      valueDir='ltr'
+                      value={iqamaNumber ?? '-'}
+                      valueDir={isArabic ? 'rtl' : 'ltr'}
                     />
 
                     <DetailItem
                       icon={CalendarDays}
                       label={t('expiryDate')}
-                      value={formatDisplayDate(existingCase.expiryDate, locale)}
+                      //value={formatDisplayDate(existingCase.expiryDate, locale)}
+                      value={
+                        isArabic
+                          ? toArabic(existingCase.expiryDate, 1)
+                          : existingCase.expiryDate
+                      }
                     />
 
                     <DetailItem

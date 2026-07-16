@@ -2,8 +2,7 @@
 
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import gsap from 'gsap'
+import { useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import {
   AlertTriangle,
@@ -92,227 +91,6 @@ const actionIconClasses: Record<ActionTone, string> = {
   danger: 'bg-rose-600 text-white shadow-rose-600/20',
 
   info: 'bg-blue-600 text-white shadow-blue-600/20',
-}
-
-interface WorkflowActionButtonProps {
-  action: ActionDefinition
-  disabled: boolean
-  isRtl: boolean
-  subtitle: string
-  animationDelay: number
-  onClick: () => void
-}
-
-function WorkflowActionButton({
-  action,
-  disabled,
-  isRtl,
-  subtitle,
-  animationDelay,
-  onClick,
-}: WorkflowActionButtonProps) {
-  const iconRef = useRef<HTMLSpanElement>(null)
-  const arrowRef = useRef<HTMLSpanElement>(null)
-  const idleTweenRef = useRef<gsap.core.Tween | null>(null)
-
-  const ActionIcon = action.icon
-
-  function prefersReducedMotion() {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  }
-
-  useEffect(() => {
-    const icon = iconRef.current
-
-    if (!icon) {
-      return
-    }
-
-    const matchMedia = gsap.matchMedia()
-
-    matchMedia.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.set(icon, {
-        y: 0,
-        rotate: 0,
-        scale: 1,
-        transformOrigin: '50% 50%',
-      })
-
-      const idleTween = gsap.to(icon, {
-        y: -4,
-        duration: 0.8,
-        delay: animationDelay,
-        repeat: -1,
-        repeatDelay: 0.18,
-        yoyo: true,
-        ease: 'sine.inOut',
-      })
-
-      idleTweenRef.current = idleTween
-
-      return () => {
-        idleTween.kill()
-        idleTweenRef.current = null
-      }
-    })
-
-    return () => matchMedia.revert()
-  }, [animationDelay])
-
-  function playAttentionAnimation() {
-    if (prefersReducedMotion()) {
-      return
-    }
-
-    const icon = iconRef.current
-    const arrow = arrowRef.current
-
-    if (!icon) {
-      return
-    }
-
-    idleTweenRef.current?.pause()
-    gsap.killTweensOf(icon)
-
-    gsap
-      .timeline()
-      .to(icon, {
-        y: -7,
-        rotate: -6,
-        scale: 1.14,
-        duration: 0.18,
-        ease: 'power2.out',
-      })
-      .to(icon, {
-        y: 0,
-        rotate: 0,
-        scale: 1,
-        duration: 0.5,
-        ease: 'bounce.out',
-      })
-
-    if (arrow) {
-      gsap.killTweensOf(arrow)
-      gsap.to(arrow, {
-        x: isRtl ? -5 : 5,
-        duration: 0.28,
-        repeat: 1,
-        yoyo: true,
-        ease: 'power2.inOut',
-      })
-    }
-  }
-
-  function resumeIdleAnimation() {
-    if (prefersReducedMotion()) {
-      return
-    }
-
-    const icon = iconRef.current
-    const arrow = arrowRef.current
-
-    if (!icon) {
-      return
-    }
-
-    gsap.killTweensOf(icon)
-
-    gsap.to(icon, {
-      y: 0,
-      rotate: 0,
-      scale: 1,
-      duration: 0.2,
-      ease: 'power2.out',
-      onComplete: () => idleTweenRef.current?.restart(false),
-    })
-
-    if (arrow) {
-      gsap.to(arrow, {
-        x: 0,
-        duration: 0.2,
-        ease: 'power2.out',
-      })
-    }
-  }
-
-  function playPressAnimation() {
-    if (prefersReducedMotion() || !iconRef.current) {
-      return
-    }
-
-    gsap.to(iconRef.current, {
-      scale: 0.86,
-      duration: 0.1,
-      ease: 'power2.out',
-    })
-  }
-
-  function releasePressAnimation() {
-    if (prefersReducedMotion() || !iconRef.current) {
-      return
-    }
-
-    gsap.to(iconRef.current, {
-      scale: 1,
-      duration: 0.28,
-      ease: 'back.out(2.4)',
-    })
-  }
-
-  return (
-    <Button
-      type='button'
-      variant='outline'
-      disabled={disabled}
-      className={cn(
-        'group relative h-auto min-h-24 justify-start overflow-hidden whitespace-normal rounded-2xl p-4 text-start shadow-sm transition-[transform,box-shadow,border-color,background-color] duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:-translate-y-0.5 focus-visible:shadow-md disabled:translate-y-0',
-        actionToneClasses[action.tone],
-      )}
-      onBlur={resumeIdleAnimation}
-      onClick={onClick}
-      onFocus={playAttentionAnimation}
-      onMouseEnter={playAttentionAnimation}
-      onMouseLeave={resumeIdleAnimation}
-      onPointerCancel={releasePressAnimation}
-      onPointerDown={playPressAnimation}
-      onPointerUp={releasePressAnimation}
-    >
-      <span
-        aria-hidden='true'
-        className='pointer-events-none absolute inset-y-0 -start-1/2 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-0 transition-all duration-700 group-hover:start-[115%] group-hover:opacity-100 group-focus-visible:start-[115%] group-focus-visible:opacity-100 dark:via-white/10'
-      />
-
-      <div
-        className={cn(
-          'relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-md transition-transform duration-200 group-hover:scale-105 group-focus-visible:scale-105',
-          actionIconClasses[action.tone],
-        )}
-      >
-        <span ref={iconRef} className='flex will-change-transform'>
-          <ActionIcon className='h-5 w-5' />
-        </span>
-      </div>
-
-      <div className='relative z-10 min-w-0 flex-1'>
-        <div className='font-semibold'>{action.label}</div>
-
-        <div className='mt-1 text-xs font-normal text-muted-foreground'>
-          {subtitle}
-        </div>
-      </div>
-
-      <div className='relative z-10 hidden h-9 w-9 items-center justify-center rounded-full border bg-background shadow-sm lg:flex'>
-        <span ref={arrowRef} className='flex will-change-transform'>
-          <ArrowRight
-            className={cn(
-              'h-4 w-4 text-muted-foreground',
-              isRtl && 'rotate-180',
-            )}
-          />
-        </span>
-      </div>
-    </Button>
-  )
 }
 
 function getAvailableActions(status: IqamaRenewalStatus): ActionDefinition[] {
@@ -644,17 +422,49 @@ export function IqamaRenewalWorkflowActions({
           </div>
 
           <div className='mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3'>
-            {actions.map((action, index) => (
-              <WorkflowActionButton
-                key={action.status}
-                action={action}
-                disabled={changeStatus.isPending}
-                isRtl={isRtl}
-                subtitle={t('newStatus')}
-                animationDelay={index * 0.16}
-                onClick={() => openAction(action.status)}
-              />
-            ))}
+            {actions.map((action) => {
+              const ActionIcon = action.icon
+
+              return (
+                <Button
+                  key={action.status}
+                  type='button'
+                  variant='outline'
+                  disabled={changeStatus.isPending}
+                  className={cn(
+                    'group h-auto min-h-24 justify-start whitespace-normal rounded-2xl p-4 text-start shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
+                    actionToneClasses[action.tone],
+                  )}
+                  onClick={() => openAction(action.status)}
+                >
+                  <div
+                    className={cn(
+                      'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-md',
+                      actionIconClasses[action.tone],
+                    )}
+                  >
+                    <ActionIcon className='h-5 w-5' />
+                  </div>
+
+                  <div className='min-w-0 flex-1'>
+                    <div className='font-semibold'>{action.label}</div>
+
+                    <div className='mt-1 text-xs font-normal text-muted-foreground'>
+                      {t('newStatus')}
+                    </div>
+                  </div>
+
+                  <div className='hidden h-9 w-9 items-center justify-center rounded-full border bg-background shadow-sm lg:flex'>
+                    <ArrowRight
+                      className={cn(
+                        'h-4 w-4 text-muted-foreground',
+                        isRtl && 'rotate-180',
+                      )}
+                    />
+                  </div>
+                </Button>
+              )
+            })}
           </div>
         </div>
       </div>
@@ -668,8 +478,8 @@ export function IqamaRenewalWorkflowActions({
         }}
         title={selectedAction?.label ?? t('confirmStatusChange')}
         description={t('confirmStatusChangeDescription')}
-        //className='flex max-h-[90vh] w-[70vw] flex-col overflow-hidden p-0 md:max-w-4xl lg:max-w-5xl'
-        className='flex max-h-[90vh] w-[calc(100vw-2rem)] flex-col overflow-hidden p-0 md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+        //className='flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] flex-col overflow-hidden p-0 md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+        className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
         headerClassName={cn(
           'shrink-0 border-b bg-gradient-to-r px-6 py-5 text-white',
           getDialogHeaderClass(selectedStatus),
@@ -677,40 +487,53 @@ export function IqamaRenewalWorkflowActions({
       >
         {selectedStatus && (
           <>
-            <div className='flex-1 space-y-6 overflow-y-auto px-6 py-5'>
-              <section className='rounded-2xl border bg-gradient-to-br from-muted/60 via-background to-background p-5 shadow-sm'>
-                <div className='mb-4 flex items-center gap-2 text-sm font-semibold'>
-                  <Workflow className='h-4 w-4 text-primary' />
-                  {t('confirmStatusChange')}
+            {/* <div className='flex-1 space-y-6 overflow-y-auto px-6 py-5'> */}
+            <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-6 py-5'>
+              <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+                <div className='mb-5 flex items-center gap-3'>
+                  <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-950 text-white dark:bg-slate-100 dark:text-slate-950'>
+                    <Workflow className='h-5 w-5' />
+                  </div>
+
+                  <div>
+                    <h3 className='font-semibold'>
+                      {t('confirmStatusChange')}
+                    </h3>
+
+                    <p className='mt-0.5 text-sm text-muted-foreground'>
+                      {t('confirmStatusChangeDescription')}
+                    </p>
+                  </div>
                 </div>
 
-                {/* <div className='grid items-center gap-4 sm:grid-cols-[1fr_auto_1fr]'> */}
-                <div className='grid items-center gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]'>
-                  <div className='min-w-0 rounded-xl border bg-background p-4'>
-                    <div className='mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground'>
+                <div className='grid items-stretch gap-4 xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]'>
+                  <div className='min-w-0 rounded-xl border bg-muted/30 p-4'>
+                    <div className='mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
                       {t('currentStage')}
                     </div>
 
-                    <div className='max-w-full overflow-hidden'>
+                    <div className='min-w-0'>
                       <IqamaRenewalStatusBadge status={renewalCase.status} />
                     </div>
                   </div>
 
-                  <div className='hidden h-9 w-9 items-center justify-center rounded-full border bg-background shadow-sm sm:flex'>
-                    <ArrowRight
-                      className={cn(
-                        'h-4 w-4 text-muted-foreground',
-                        isRtl && 'rotate-180',
-                      )}
-                    />
+                  <div className='hidden items-center justify-center xl:flex'>
+                    <div className='flex h-10 w-10 items-center justify-center rounded-full border bg-background shadow-sm'>
+                      <ArrowRight
+                        className={cn(
+                          'h-4 w-4 text-muted-foreground',
+                          isRtl && 'rotate-180',
+                        )}
+                      />
+                    </div>
                   </div>
 
                   <div className='min-w-0 rounded-xl border border-primary/20 bg-primary/5 p-4'>
-                    <div className='mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground'>
+                    <div className='mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
                       {t('newStatus')}
                     </div>
 
-                    <div className='max-w-full overflow-hidden'>
+                    <div className='min-w-0'>
                       <IqamaRenewalStatusBadge status={selectedStatus} />
                     </div>
                   </div>
@@ -766,22 +589,20 @@ export function IqamaRenewalWorkflowActions({
               {requiresGovernmentRelationsAssignment && (
                 <section className='rounded-2xl border bg-card p-5 shadow-sm'>
                   <div className='mb-5 flex items-center gap-3'>
-                    <div className='flex h-9 w-9 items-center justify-center rounded-xl bg-blue-600 text-white'>
-                      <UserRoundCheck className='h-4 w-4' />
+                    <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white'>
+                      <UserRoundCheck className='h-5 w-5' />
                     </div>
 
                     <div>
-                      <h3 className='text-sm font-semibold'>
-                        {t('assignedTo')}
-                      </h3>
+                      <h3 className='font-semibold'>{t('assignedTo')}</h3>
 
-                      <p className='mt-0.5 text-xs text-muted-foreground'>
+                      <p className='mt-0.5 text-sm text-muted-foreground'>
                         {t('selectGovernmentRelationsUser')}
                       </p>
                     </div>
                   </div>
 
-                  <div className='grid gap-4 lg:grid-cols-2'>
+                  <div className='grid gap-4 xl:grid-cols-2'>
                     <div className='min-w-0 space-y-2'>
                       <Label htmlFor='governmentRelationsAssignee'>
                         {t('assignedTo')}
@@ -795,7 +616,7 @@ export function IqamaRenewalWorkflowActions({
                       >
                         <SelectTrigger
                           id='governmentRelationsAssignee'
-                          className='h-11 w-full min-w-0 bg-background'
+                          className='h-11 w-full min-w-0'
                         >
                           <SelectValue
                             placeholder={t('selectGovernmentRelationsUser')}
@@ -821,27 +642,23 @@ export function IqamaRenewalWorkflowActions({
                       </Select>
                     </div>
 
-                    <div className='space-y-2'>
+                    <div className='min-w-0 space-y-2'>
                       <Label htmlFor='governmentRelationsDueDate'>
                         {t('governmentRelationsDueDate')}
                         <span className='ms-1 text-destructive'>*</span>
                       </Label>
 
-                      <div className='relative'>
-                        {/* <CalendarDays className='pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' /> */}
-
-                        <Input
-                          id='governmentRelationsDueDate'
-                          type='date'
-                          required
-                          value={governmentRelationsDueDate}
-                          disabled={changeStatus.isPending}
-                          className='h-11 w-full min-w-0 bg-background'
-                          onChange={(event) =>
-                            setGovernmentRelationsDueDate(event.target.value)
-                          }
-                        />
-                      </div>
+                      <Input
+                        id='governmentRelationsDueDate'
+                        type='date'
+                        required
+                        value={governmentRelationsDueDate}
+                        disabled={changeStatus.isPending}
+                        className='h-11 w-full min-w-0'
+                        onChange={(event) =>
+                          setGovernmentRelationsDueDate(event.target.value)
+                        }
+                      />
                     </div>
                   </div>
                 </section>

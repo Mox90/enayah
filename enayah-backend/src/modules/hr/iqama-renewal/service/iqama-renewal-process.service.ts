@@ -116,7 +116,15 @@ const assertGovernmentRelationsAssignee = async (
     .from(users)
     .innerJoin(userRoles, eq(userRoles.userId, users.id))
     .innerJoin(roles, eq(roles.id, userRoles.roleId))
-    .where(and(eq(users.id, userId), eq(roles.name, 'government_relations')))
+    //.where(and(eq(users.id, userId), eq(roles.name, 'government_relations')))
+    .where(
+      and(
+        eq(users.id, userId),
+        eq(roles.name, 'government_relations'),
+        eq(users.isActive, true),
+        eq(userRoles.isActive, true),
+      ),
+    )
     .limit(1)
 
   if (!assignee) {

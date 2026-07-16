@@ -152,7 +152,7 @@ export function getIqamaRenewalColumns(
       ),
       cell: ({ row }) =>
         isArabic
-          ? toArabic(formatDate(row.original.expiryDate), 1)
+          ? toArabic(row.original.expiryDate, 1) || '-'
           : formatDate(row.original.expiryDate),
     },
 
