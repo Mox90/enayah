@@ -1,7 +1,15 @@
-// src/modules/hr/iqama-renewal-process/iqama-renewal-process.service.ts
+// src/modules/hr/iqama-renewal-process/service/iqama-renewal-process.service.ts
 
-import { db, employeeIdentifications, employees, users } from '../../../../db'
 import { and, eq } from 'drizzle-orm'
+
+import {
+  db,
+  employeeIdentifications,
+  employees,
+  roles,
+  userRoles,
+  users,
+} from '../../../../db'
 
 import {
   ChangeIqamaRenewalStatusInput,
@@ -12,10 +20,10 @@ import {
   ListIqamaRenewalCasesQuery,
   UpdateIqamaRenewalCaseInput,
 } from '../types/iqama-renewal-process.types'
-// import { employeeIdentifications, employees, users } from '../../../../db/schema'
+
 import {
   IqamaRenewalProcessRepository,
-  UpdateCaseData,
+  type UpdateCaseData,
 } from '../repository/iqama-renewal-process.repository'
 
 const allowedTransitions = {
@@ -97,24 +105,44 @@ const validateStatusTransition = (
   }
 }
 
+const assertGovernmentRelationsAssignee = async (
+  tx: Parameters<typeof IqamaRenewalProcessRepository.findById>[0],
+  userId: string,
+) => {
+  const [assignee] = await tx
+    .select({
+      id: users.id,
+    })
+    .from(users)
+    .innerJoin(userRoles, eq(userRoles.userId, users.id))
+    .innerJoin(roles, eq(roles.id, userRoles.roleId))
+    //.where(and(eq(users.id, userId), eq(roles.name, 'government_relations')))
+    .where(
+      and(
+        eq(users.id, userId),
+        eq(roles.name, 'government_relations'),
+        eq(users.isActive, true),
+        eq(userRoles.isActive, true),
+      ),
+    )
+    .limit(1)
+
+  if (!assignee) {
+    throw new IqamaRenewalProcessError(
+      'The selected user is not a Government Relations user.',
+      422,
+      'INVALID_GOVERNMENT_RELATIONS_ASSIGNEE',
+    )
+  }
+}
+
 const buildStatusUpdate = (
-  currentStatus: IqamaRenewalStatus,
   input: ChangeIqamaRenewalStatusInput,
   actor: IqamaRenewalCaseActor,
-) => {
+): UpdateCaseData => {
   const now = new Date()
 
-  const update: {
-    status: IqamaRenewalStatus
-    updatedAt: Date
-    updatedBy: string
-    notes?: string | null
-    denialReason?: string | null
-    governmentRelationsDueDate?: string | null
-    mhrsdUploadedAt?: Date | null
-    mhrsdApprovedAt?: Date | null
-    mhrsdDeniedAt?: Date | null
-  } = {
+  const update: UpdateCaseData = {
     status: input.status,
     updatedAt: now,
     updatedBy: actor.userId,
@@ -124,19 +152,12 @@ const buildStatusUpdate = (
     update.notes = input.notes
   }
 
-  if (input.governmentRelationsDueDate !== undefined) {
-    update.governmentRelationsDueDate = input.governmentRelationsDueDate
-  }
-
   switch (input.status) {
     case 'pending_upload':
-      /*
-       * This usually means a denied case was returned for correction
-       * and needs to be uploaded again.
-       */
       update.denialReason = null
       update.mhrsdDeniedAt = null
       update.mhrsdApprovedAt = null
+      update.assignedToUserId = null
       update.governmentRelationsDueDate = null
       break
 
@@ -145,6 +166,11 @@ const buildStatusUpdate = (
       update.mhrsdApprovedAt = null
       update.mhrsdDeniedAt = null
       update.denialReason = null
+      update.assignedToUserId = null
+      update.governmentRelationsDueDate = null
+      break
+
+    case 'under_process':
       break
 
     case 'approved_by_mhrsd':
@@ -157,17 +183,30 @@ const buildStatusUpdate = (
       update.mhrsdDeniedAt = now
       update.mhrsdApprovedAt = null
       update.denialReason = input.denialReason?.trim() ?? null
+      update.assignedToUserId = null
       update.governmentRelationsDueDate = null
       break
 
     case 'sent_to_government_relations':
+      update.assignedToUserId = input.assignedToUserId ?? null
+
       update.governmentRelationsDueDate =
         input.governmentRelationsDueDate ?? null
       break
 
+    case 'eoc_required':
+      break
+
     case 'completed':
+      break
+
     case 'cancelled':
       break
+
+    default: {
+      const exhaustiveCheck: never = input.status
+      return exhaustiveCheck
+    }
   }
 
   return update
@@ -205,7 +244,6 @@ export const IqamaRenewalProcessService = {
           id: employeeIdentifications.id,
           employeeId: employeeIdentifications.employeeId,
           type: employeeIdentifications.type,
-          isCurrent: employeeIdentifications.isCurrent,
         })
         .from(employeeIdentifications)
         .where(
@@ -234,7 +272,7 @@ export const IqamaRenewalProcessService = {
 
       if (identification.type !== 'iqama') {
         throw new IqamaRenewalProcessError(
-          'Only an Iqama identification can be used for an Iqama renewal case.',
+          'Only an Iqama identification can be used.',
           422,
           'IDENTIFICATION_IS_NOT_IQAMA',
         )
@@ -266,7 +304,7 @@ export const IqamaRenewalProcessService = {
 
       if (existing) {
         throw new IqamaRenewalProcessError(
-          'An active renewal case already exists for this Iqama identification.',
+          'An active renewal case already exists for this Iqama.',
           409,
           'ACTIVE_IQAMA_RENEWAL_CASE_EXISTS',
         )
@@ -346,7 +384,11 @@ export const IqamaRenewalProcessService = {
         updateData,
       )
 
-      return assertVersionUpdateSucceeded(updated)
+      assertVersionUpdateSucceeded(updated)
+
+      const refreshed = await IqamaRenewalProcessRepository.findById(tx, id)
+
+      return assertCaseExists(refreshed)
     })
   },
 
@@ -362,16 +404,27 @@ export const IqamaRenewalProcessService = {
 
       validateStatusTransition(record.status, input.status)
 
-      const statusUpdate = buildStatusUpdate(record.status, input, actor)
+      if (
+        input.status === 'sent_to_government_relations' &&
+        input.assignedToUserId
+      ) {
+        await assertGovernmentRelationsAssignee(tx, input.assignedToUserId)
+      }
+
+      const updateData = buildStatusUpdate(input, actor)
 
       const updated = await IqamaRenewalProcessRepository.updateWithVersion(
         tx,
         id,
         input.version,
-        statusUpdate,
+        updateData,
       )
 
-      return assertVersionUpdateSucceeded(updated)
+      assertVersionUpdateSucceeded(updated)
+
+      const refreshed = await IqamaRenewalProcessRepository.findById(tx, id)
+
+      return assertCaseExists(refreshed)
     })
   },
 

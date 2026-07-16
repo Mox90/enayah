@@ -33,7 +33,7 @@ export function PositionItemActions({
             size='icon'
             aria-label={it('positionItemActions')}
           >
-            <MoreVerticalIcon className='h-4 w-4' />
+            <MoreVerticalIcon className='h-4 w-4 text-green-700' />
           </Button>
         </DropdownMenuTrigger>
 

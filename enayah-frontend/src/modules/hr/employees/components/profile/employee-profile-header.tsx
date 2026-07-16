@@ -134,7 +134,7 @@ export function EmployeeProfileHeader({ profile }: Props) {
                 size='icon'
                 className='text-white hover:bg-white/10 hover:text-white'
               >
-                <MoreVertical className='h-5 w-5' />
+                <MoreVertical className='h-5 w-5 text-green-700' />
               </Button>
             </DropdownMenuTrigger>
 

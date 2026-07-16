@@ -23,28 +23,30 @@ export type IqamaRenewalCase = {
   id: string
 
   employeeId: string
-  employeeNumber: string
-  employeeNameEn: string
-  employeeNameAr?: string | null
-
   identificationId: string
-  iqamaNumber: string
-  expiryDate: string
-  expiryDateHijri?: string | null
+
+  employeeNumber: string | null
+  employeeNameEn: string | null
+  employeeNameAr: string | null
+
+  iqamaNumber: string | null
+  expiryDate: string | null
 
   status: IqamaRenewalStatus
 
-  assignedToUserId?: string | null
-  assignedToName?: string | null
+  assignedToUserId: string | null
+  assignedToName: string | null
 
-  mhrsdUploadedAt?: string | null
-  mhrsdApprovedAt?: string | null
-  mhrsdDeniedAt?: string | null
+  governmentRelationsDueDate: string | null
 
-  governmentRelationsDueDate?: string | null
+  notes: string | null
+  denialReason: string | null
 
-  notes?: string | null
-  denialReason?: string | null
+  mhrsdUploadedAt: string | null
+  mhrsdApprovedAt: string | null
+  mhrsdDeniedAt: string | null
+
+  version: number
 
   createdAt: string
   updatedAt: string
@@ -64,17 +66,32 @@ export type CreateIqamaRenewalCasePayload = {
 }
 
 export type UpdateIqamaRenewalCasePayload = {
-  status: IqamaRenewalStatus
+  //status: IqamaRenewalStatus
 
   assignedToUserId?: string | null
   governmentRelationsDueDate?: string | null
 
   notes?: string | null
-  denialReason?: string | null
+  //denialReason?: string | null
 
-  mhrsdUploadedAt?: string | null
-  mhrsdApprovedAt?: string | null
-  mhrsdDeniedAt?: string | null
+  //mhrsdUploadedAt?: string | null
+  //mhrsdApprovedAt?: string | null
+  //mhrsdDeniedAt?: string | null
+  version: number
+}
+
+export type ChangeIqamaRenewalStatusPayload = {
+  status: IqamaRenewalStatus
+  assignedToUserId?: string | null
+  governmentRelationsDueDate?: string | null
+  denialReason?: string | null
+  notes?: string | null
+  version: number
+}
+
+export type AssigneeOption = {
+  id: string
+  label: string
 }
 
 export type IqamaRenewalView = 'list' | 'kanban'

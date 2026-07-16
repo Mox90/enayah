@@ -63,6 +63,7 @@ import { Button } from '@/components/ui/button'
 import { EmployeeView } from '../../types/employee-view.types'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { cn } from '@/lib/utils'
+import { useLocale } from 'next-intl'
 
 interface Props {
   view: EmployeeView
@@ -79,27 +80,37 @@ const views = [
 export function EmployeeViewSwitcher({ view, onViewChange }: Props) {
   return (
     <div className='w-full overflow-x-auto sm:w-auto'>
-      <ButtonGroup className='w-full sm:w-auto'>
-        {views.map((item) => {
-          const Icon = item.icon
-          const active = view === item.value
+      <div dir='ltr' className='inline-flex'>
+        {/* <ButtonGroup className='w-full sm:w-auto'> */}
+        <ButtonGroup
+          className={cn(
+            'w-fit',
+            '[&>button:first-child]:rounded-l-xl',
+            '[&>button:last-child]:rounded-r-xl',
+            'w-full sm:w-auto',
+          )}
+        >
+          {views.map((item) => {
+            const Icon = item.icon
+            const active = view === item.value
 
-          return (
-            <Button
-              key={item.value}
-              variant={active ? 'default' : 'outline'}
-              size='icon'
-              onClick={() => onViewChange(item.value)}
-              className={cn(
-                'h-10 min-w-10 rounded-xl transition-all',
-                active && 'shadow-sm',
-              )}
-            >
-              <Icon className='h-4 w-4' />
-            </Button>
-          )
-        })}
-      </ButtonGroup>
+            return (
+              <Button
+                key={item.value}
+                variant={active ? 'default' : 'outline'}
+                size='icon'
+                onClick={() => onViewChange(item.value)}
+                className={cn(
+                  'h-10 min-w-10 rounded-xl transition-all',
+                  active && 'shadow-sm',
+                )}
+              >
+                <Icon className='h-4 w-4' />
+              </Button>
+            )
+          })}
+        </ButtonGroup>
+      </div>
     </div>
   )
 }

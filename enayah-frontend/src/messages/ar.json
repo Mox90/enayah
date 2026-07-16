@@ -656,6 +656,22 @@
     "sent_to_government_relations": "أُرسلت إلى قسم العلاقات الحكومية",
     "completed": "مكتمل",
     "eoc_required": "مطلوب إنهاء العقد",
-    "cancelled": "أُلغِيَ"
+    "cancelled": "أُلغِيَ",
+    "selectAssignee": "Assign to",
+    "unassigned": "Unassigned",
+    "workflowActions": "إجراءات سير العمل",
+    "workflowActionsDescription": "اختر الإجراء التالي لعملية تجديد الإقامة.",
+    "confirmStatusChange": "تأكيد تغيير الحالة",
+    "confirmStatusChangeDescription": "راجع المعلومات قبل تغيير حالة العملية.",
+    "newStatus": "الحالة الجديدة",
+    "confirm": "تأكيد",
+    "updatingStatus": "جارٍ التحديث...",
+    "denialReason": "سبب الرفض",
+    "selectGovernmentRelationsUser": "اختر موظف العلاقات الحكومية",
+    "noAssigneesAvailable": "لا يوجد مستخدمون متاحون في العلاقات الحكومية",
+    "processCompleted": "تم إكمال عملية تجديد الإقامة.",
+    "processCancelled": "تم إلغاء عملية تجديد الإقامة.",
+    "mhrsdApprovedAt": "تاريخ موافقة وزارة الموارد البشرية",
+    "mhrsdDeniedAt": "تاريخ رفض وزارة الموارد البشرية"
   }
 }

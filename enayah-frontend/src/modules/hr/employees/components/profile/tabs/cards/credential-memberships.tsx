@@ -109,7 +109,7 @@ export function CredentialMemberships({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button size='icon' variant='ghost'>
-                      <MoreVertical className='h-4 w-4' />
+                      <MoreVertical className='h-4 w-4 text-green-700' />
                     </Button>
                   </DropdownMenuTrigger>
 

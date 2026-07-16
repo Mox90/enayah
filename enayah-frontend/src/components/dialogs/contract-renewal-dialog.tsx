@@ -209,7 +209,7 @@ function ContractRenewalDialogContent({
 
   return (
     <>
-      <div className='flex-1 space-y-6 overflow-y-auto px-6 py-5'>
+      <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold'>{ct('contractPeriod')}</h3>
@@ -439,7 +439,7 @@ function ContractRenewalDialogContent({
         </section>
       </div>
 
-      <DialogFooter className='border-t bg-muted/40 px-6 py-6'>
+      <DialogFooter className='shrink-0 border-t bg-muted/40 px-4 py-4 sm:px-6 sm:py-6'>
         <Button
           type='button'
           variant='outline'
@@ -475,13 +475,21 @@ export function ContractRenewalDialog(props: Props) {
   const ct = useTranslations('contracts')
 
   return (
+    // <FormDialog
+    //   open={props.open}
+    //   onOpenChange={props.onOpenChange}
+    //   title={ct('renewContract')}
+    //   description={ct('contractSub')}
+    //   className='flex max-h-[calc(100dvh-2rem)] min-h-0 w-[calc(100vw-2rem)] flex-col overflow-hidden p-0 md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+    //   headerClassName='shrink-0 border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+    // >
     <FormDialog
       open={props.open}
       onOpenChange={props.onOpenChange}
       title={ct('renewContract')}
       description={ct('contractSub')}
-      className='w-[85vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+      className='flex h-[calc(100dvh-1rem)] min-h-0 w-[calc(100vw-1rem)] flex-col overflow-hidden p-0 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100vw-2rem)] md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+      headerClassName='shrink-0 border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
     >
       {props.open && (
         <ContractRenewalDialogContent key={dialogKey} {...props} />

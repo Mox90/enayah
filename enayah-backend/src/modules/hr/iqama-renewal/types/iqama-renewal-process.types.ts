@@ -1,21 +1,8 @@
-// src/modules/hr/iqama-renewal-process/iqama-renewal-process.types.ts
+// src/modules/hr/iqama-renewal-process/types/iqama-renewal-process.types.ts
 
 import { z } from 'zod'
+
 import { iqamaRenewalStatusEnum } from '../../../../db'
-
-// export const IqamaRenewalStatusSchema = z.enum([
-//   'pending_upload',
-//   'uploaded_to_mhrsd',
-//   'under_process',
-//   'approved_by_mhrsd',
-//   'denied_by_mhrsd',
-//   'sent_to_government_relations',
-//   'completed',
-//   'eoc_required',
-//   'cancelled',
-// ])
-
-// export type IqamaRenewalStatus = z.infer<typeof IqamaRenewalStatusSchema>
 
 export const IqamaRenewalStatusSchema = z.enum(
   iqamaRenewalStatusEnum.enumValues,
@@ -59,7 +46,7 @@ export const UpdateIqamaRenewalCaseSchema = z
       data.governmentRelationsDueDate !== undefined ||
       data.notes !== undefined,
     {
-      message: 'At least one field must be provided.',
+      message: 'At least one editable field must be provided.',
     },
   )
 
@@ -67,22 +54,15 @@ export type UpdateIqamaRenewalCaseInput = z.infer<
   typeof UpdateIqamaRenewalCaseSchema
 >
 
-// export const AssignIqamaRenewalCaseSchema = z.object({
-//   assignedToUserId: z.string().uuid().nullable(),
-//   version: z.coerce.number().int().positive(),
-// })
-
-// export type AssignIqamaRenewalCaseInput = z.infer<
-//   typeof AssignIqamaRenewalCaseSchema
-// >
-
 export const ChangeIqamaRenewalStatusSchema = z
   .object({
     status: IqamaRenewalStatusSchema,
 
-    denialReason: z.string().trim().min(1).max(5000).nullable().optional(),
+    assignedToUserId: z.string().uuid().nullable().optional(),
 
     governmentRelationsDueDate: z.string().date().nullable().optional(),
+
+    denialReason: z.string().trim().max(5000).nullable().optional(),
 
     notes: z.string().trim().max(5000).nullable().optional(),
 
@@ -93,20 +73,26 @@ export const ChangeIqamaRenewalStatusSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['denialReason'],
-        message: 'Denial reason is required when the case is denied by MHRSD.',
+        message: 'Denial reason is required.',
       })
     }
 
-    if (
-      data.status === 'sent_to_government_relations' &&
-      !data.governmentRelationsDueDate
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['governmentRelationsDueDate'],
-        message:
-          'Government Relations due date is required when sending the case.',
-      })
+    if (data.status === 'sent_to_government_relations') {
+      if (!data.assignedToUserId) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['assignedToUserId'],
+          message: 'A Government Relations user must be selected.',
+        })
+      }
+
+      if (!data.governmentRelationsDueDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['governmentRelationsDueDate'],
+          message: 'Government Relations due date is required.',
+        })
+      }
     }
   })
 
@@ -114,10 +100,14 @@ export type ChangeIqamaRenewalStatusInput = z.infer<
   typeof ChangeIqamaRenewalStatusSchema
 >
 
+const QueryBooleanSchema = z
+  .enum(['true', 'false'])
+  .transform((value) => value === 'true')
+
 export const ListIqamaRenewalCasesQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
 
-  limit: z.coerce.number().int().positive().max(100).default(25),
+  limit: z.coerce.number().int().positive().max(100).default(20),
 
   status: z
     .union([IqamaRenewalStatusSchema, z.array(IqamaRenewalStatusSchema)])
@@ -129,10 +119,7 @@ export const ListIqamaRenewalCasesQuerySchema = z.object({
 
   assignedToUserId: z.string().uuid().optional(),
 
-  unassigned: z
-    .enum(['true', 'false'])
-    .transform((value) => value === 'true')
-    .optional(),
+  unassigned: QueryBooleanSchema.optional(),
 
   governmentRelationsDueFrom: z.string().date().optional(),
 
@@ -142,10 +129,7 @@ export const ListIqamaRenewalCasesQuerySchema = z.object({
 
   createdTo: z.string().date().optional(),
 
-  includeDeleted: z
-    .enum(['true', 'false'])
-    .transform((value) => value === 'true')
-    .default(false),
+  includeDeleted: QueryBooleanSchema.default(false),
 
   sortBy: z
     .enum(['createdAt', 'updatedAt', 'status', 'governmentRelationsDueDate'])

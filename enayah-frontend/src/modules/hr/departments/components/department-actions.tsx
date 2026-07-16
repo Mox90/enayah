@@ -33,7 +33,7 @@ export function DepartmentActions({ department }: DepartmentActionsProps) {
             size='icon'
             aria-label={dT('departmentActions')}
           >
-            <MoreVerticalIcon className='h-4 w-4' />
+            <MoreVerticalIcon className='h-4 w-4 text-green-700' />
           </Button>
         </DropdownMenuTrigger>
 
