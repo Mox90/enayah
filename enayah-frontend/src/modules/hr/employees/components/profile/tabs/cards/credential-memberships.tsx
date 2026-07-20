@@ -19,6 +19,7 @@ import { VerificationBadge } from '@/components/badges/verification-badge'
 import { useLocale, useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { toPersianDigits } from '@/utils/utilities'
+import { RowActions } from '@/components/dialogs/row-actions'
 
 const verifyClass = {
   verified: 'bg-green-100 text-green-700 border-green-200',
@@ -74,83 +75,45 @@ export function CredentialMemberships({
           </div>
         )}
 
-        {memberships.map((x) => (
-          <div key={x.id} className='border rounded-lg p-4'>
-            <div className='flex justify-between'>
-              <div>
-                <div className='font-semibold'>{x.organization}</div>
+        {memberships.map((x) => {
+          const xId = x.id
+          return (
+            <div key={x.id} className='border rounded-lg p-4'>
+              <div className='flex justify-between'>
+                <div>
+                  <div className='font-semibold'>{x.organization}</div>
 
-                <div>{x.membershipNumber}</div>
+                  <div>{x.membershipNumber}</div>
 
-                <div>{x.membershipLevel}</div>
+                  <div>{x.membershipLevel}</div>
 
-                {/* {x.specialty && <div>Specialty: {x.specialty}</div>} */}
+                  {/* {x.specialty && <div>Specialty: {x.specialty}</div>} */}
 
-                {x.startDate && (
-                  <div>
-                    {ct('issued')}:{' '}
-                    {format(new Date(x.startDate), 'dd-MMM-yyyy')}
-                  </div>
-                )}
+                  {x.startDate && (
+                    <div>
+                      {ct('issued')}:{' '}
+                      {format(new Date(x.startDate), 'dd-MMM-yyyy')}
+                    </div>
+                  )}
 
-                {x.expiryDate && (
-                  <div>
-                    {ct('expires')}:{' '}
-                    {format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
-                  </div>
-                )}
+                  {x.expiryDate && (
+                    <div>
+                      {ct('expires')}:{' '}
+                      {format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
+                    </div>
+                  )}
 
-                <VerificationBadge verified={x.isVerified ?? false} />
-              </div>
+                  <VerificationBadge verified={x.isVerified ?? false} />
+                </div>
 
-              <div className='flex flex-col gap-2'>
-                {/* <Badge>{x.status}</Badge> */}
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size='icon' variant='ghost'>
-                      <MoreVertical className='h-4 w-4 text-green-700' />
-                    </Button>
-                  </DropdownMenuTrigger>
-
-                  <DropdownMenuContent>
-                    {onEdit && (
-                      <DropdownMenuItem
-                        className={
-                          isRtl
-                            ? 'justify-end text-right'
-                            : 'justify-start text-left'
-                        }
-                        onClick={() => {
-                          if (!x.id) return
-                          onEdit(x.id)
-                        }}
-                      >
-                        {ct('edit')}
-                      </DropdownMenuItem>
-                    )}
-
-                    {onDelete && (
-                      <DropdownMenuItem
-                        className={`text-red-600 ${
-                          isRtl
-                            ? 'justify-end text-right'
-                            : 'justify-start text-left'
-                        }`}
-                        onClick={() => {
-                          if (!x.id) return
-                          onDelete(x.id)
-                        }}
-                      >
-                        {ct('delete')}
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <RowActions
+                  onEdit={xId && onEdit ? () => onEdit(xId) : undefined}
+                  onDelete={xId && onDelete ? () => onDelete(xId) : undefined}
+                />
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </CardContent>
     </Card>
   )

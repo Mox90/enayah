@@ -1,6 +1,6 @@
 // src/modules/hr/iqama-renewal-process/service/iqama-renewal-process.service.ts
 
-import { and, eq } from 'drizzle-orm'
+import { and, asc, eq, or, sql } from 'drizzle-orm'
 
 import {
   db,
@@ -14,6 +14,7 @@ import {
 import {
   ChangeIqamaRenewalStatusInput,
   CreateIqamaRenewalCaseInput,
+  GOVERNMENT_RELATIONS_ROLE,
   IqamaRenewalCaseActor,
   IqamaRenewalProcessError,
   IqamaRenewalStatus,
@@ -116,11 +117,11 @@ const assertGovernmentRelationsAssignee = async (
     .from(users)
     .innerJoin(userRoles, eq(userRoles.userId, users.id))
     .innerJoin(roles, eq(roles.id, userRoles.roleId))
-    //.where(and(eq(users.id, userId), eq(roles.name, 'government_relations')))
+    //.where(and(eq(users.id, userId), eq(roles.name, 'HR_GOVERNMENT_RELATION')))
     .where(
       and(
         eq(users.id, userId),
-        eq(roles.name, 'government_relations'),
+        eq(roles.name, GOVERNMENT_RELATIONS_ROLE),
         eq(users.isActive, true),
         eq(userRoles.isActive, true),
       ),
@@ -213,6 +214,97 @@ const buildStatusUpdate = (
 }
 
 export const IqamaRenewalProcessService = {
+  listGovernmentRelationsUsers: async () => {
+    const result = await db
+      .selectDistinct({
+        id: users.id,
+        employeeId: users.employeeId,
+        email: users.email,
+        username: users.username,
+
+        employeeNumber: employees.employeeNumber,
+
+        labelEn: sql<string>`
+        nullif(
+          trim(
+            concat_ws(
+              ' ',
+              ${employees.firstNameEn},
+              ${employees.secondNameEn},
+              ${employees.thirdNameEn},
+              ${employees.familyNameEn}
+            )
+          ),
+          ''
+        )
+      `,
+
+        labelAr: sql<string>`
+        nullif(
+          trim(
+            concat_ws(
+              ' ',
+             ${employees.firstNameAr},
+              ${employees.secondNameAr},
+              ${employees.thirdNameAr},
+              ${employees.familyNameAr}
+            )
+          ),
+          ''
+        )
+      `,
+      })
+      .from(users)
+      .innerJoin(userRoles, eq(userRoles.userId, users.id))
+      .innerJoin(roles, eq(roles.id, userRoles.roleId))
+      .leftJoin(employees, eq(employees.id, users.employeeId))
+      .where(
+        and(
+          eq(users.isActive, true),
+          eq(users.isDeleted, false),
+          eq(roles.name, GOVERNMENT_RELATIONS_ROLE),
+          or(eq(employees.isDeleted, false), sql`${employees.id} is null`),
+        ),
+      )
+      .orderBy(
+        asc(sql<string>`
+        nullif(
+          trim(
+            concat_ws(
+              ' ',
+             ${employees.firstNameAr},
+              ${employees.secondNameAr},
+              ${employees.thirdNameAr},
+              ${employees.familyNameAr}
+            )
+          ),
+          ''
+        )
+      `),
+        //asc(employees.lastNameEn),
+        asc(users.username),
+      )
+
+    return result.map((user) => ({
+      id: user.id,
+      employeeId: user.employeeId,
+
+      // Useful fallbacks when an account is not linked correctly.
+      labelEn: user.labelEn || user.email || user.username || 'Unnamed user',
+
+      labelAr:
+        user.labelAr ||
+        user.labelEn ||
+        user.email ||
+        user.username ||
+        'مستخدم بدون اسم',
+
+      email: user.email,
+      username: user.username,
+      employeeNumber: user.employeeNumber,
+    }))
+  },
+
   create: async (
     input: CreateIqamaRenewalCaseInput,
     actor: IqamaRenewalCaseActor,

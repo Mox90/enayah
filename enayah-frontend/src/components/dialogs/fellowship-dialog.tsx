@@ -3,17 +3,14 @@
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FormDialog } from '../forms'
+import { useLocale, useTranslations } from 'next-intl'
+import { DialogFooter } from '../ui/dialog'
+import { Footer } from '../footer/footer'
+import { Save } from 'lucide-react'
 
 export type FellowshipFormValue = {
   id?: string
@@ -57,9 +54,18 @@ function FellowshipDialogContent({
   onSubmit: (value: FellowshipFormValue) => void | Promise<void>
   generateId: boolean
 }) {
+  const t = useTranslations('credentials')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
+
   const [form, setForm] = useState<FellowshipFormValue>(
     initialValue ?? emptyValue,
   )
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const fellowshipName = form.fellowshipName.trim()
+  const issuingBody = form.issuingBody.trim()
 
   function update<K extends keyof FellowshipFormValue>(
     field: K,
@@ -79,27 +85,43 @@ function FellowshipDialogContent({
     return `fellowship-${Date.now()}-${Math.random().toString(36).slice(2)}`
   }
 
-  async function handleSubmit() {
-    if (!form.fellowshipName.trim()) return
-    if (!form.issuingBody.trim()) return
+  const formInvalid = !fellowshipName || !issuingBody
 
-    await onSubmit({
-      ...form,
-      id: form.id ?? (generateId ? createClientId() : undefined),
-      abbreviation: form.abbreviation || null,
-      specialty: form.specialty || null,
-      issueDate: form.issueDate || null,
-      expiryDate: form.expiryDate || null,
-      documentFileId: form.documentFileId || null,
-      isVerified: form.isVerified ?? false,
-    })
+  function closeDialog() {
+    if (isSubmitting) return
 
     onOpenChange(false)
   }
 
+  async function handleSubmit() {
+    if (isSubmitting || formInvalid) return
+
+    setIsSubmitting(true)
+
+    try {
+      await onSubmit({
+        ...form,
+        id: form.id ?? (generateId ? createClientId() : undefined),
+        abbreviation: form.abbreviation || null,
+        specialty: form.specialty || null,
+        issueDate: form.issueDate || null,
+        expiryDate: form.expiryDate || null,
+        documentFileId: form.documentFileId || null,
+        isVerified: form.isVerified ?? false,
+      })
+
+      onOpenChange(false)
+    } catch (error) {
+      // Keep the dialog open.
+      // The parent mutation hook can display the error toast.
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <>
-      <div className='space-y-6 px-6 py-1'>
+      <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
@@ -188,24 +210,18 @@ function FellowshipDialogContent({
         </section>
       </div>
 
-      <DialogFooter className='border-t bg-muted/40 px-6 py-6'>
-        <Button
-          type='button'
-          className='p-4'
-          variant='outline'
-          onClick={() => onOpenChange(false)}
-        >
-          Cancel
-        </Button>
-
-        <Button
-          type='button'
-          className='bg-slate-950 p-4 text-white hover:bg-slate-800'
-          onClick={handleSubmit}
-        >
-          Save Fellowship
-        </Button>
-      </DialogFooter>
+      <Footer
+        onCancel={closeDialog}
+        onSave={handleSubmit}
+        label={t('save', {
+          item: isRtl ? 'زمالة' : 'Fellowship',
+        })}
+        savingLabel={t('saving', { item: 'fellowship' })}
+        disabled={formInvalid}
+        isSaving={isSubmitting}
+        saveVariant='default'
+        saveIcon={<Save className='h-4 w-4' />}
+      />
     </>
   )
 }
@@ -225,8 +241,8 @@ export function FellowshipDialog({
       onOpenChange={onOpenChange}
       title={initialValue ? 'Edit Fellowship' : 'Add Fellowship'}
       description="Enter the employee's fellowship qualification details."
-      className='w-[95vw] max-w-4xl overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+      className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'
     >
       {open && (
         <FellowshipDialogContent

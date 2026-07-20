@@ -8,6 +8,8 @@ export const IqamaRenewalStatusSchema = z.enum(
   iqamaRenewalStatusEnum.enumValues,
 )
 
+export const GOVERNMENT_RELATIONS_ROLE = 'HR_GOVERNMENT_RELATION'
+
 export type IqamaRenewalStatus =
   (typeof iqamaRenewalStatusEnum.enumValues)[number]
 

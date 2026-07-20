@@ -1,10 +1,13 @@
+'use client'
+
 import { useState } from 'react'
-import { DialogFooter } from '../ui/dialog'
-import { Label } from '../ui/label'
-import { Input } from '../ui/input'
-import { Button } from '../ui/button'
-import { FormDialog } from '../forms'
+import { Save } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
+
+import { FormDialog } from '@/components/forms'
+import { Footer } from '@/components/footer/footer'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 export type BoardFormValue = {
   id?: string
@@ -46,18 +49,26 @@ function BoardDialogContent({
   onSubmit: (value: BoardFormValue) => void | Promise<void>
   generateId: boolean
 }) {
-  const [form, setForm] = useState<BoardFormValue>(initialValue ?? emptyValue)
+  const [form, setForm] = useState<BoardFormValue>(
+    initialValue ?? { ...emptyValue },
+  )
   const [isSubmitting, setIsSubmitting] = useState(false)
+
   const crt = useTranslations('credentials')
   const locale = useLocale()
-  const isRtl = locale === 'ar'
+  const isRtl = locale.toLowerCase().startsWith('ar')
+
+  const boardName = form.boardName.trim()
+  const issuingBody = form.issuingBody.trim()
+  const issueDate = form.issueDate?.trim()
+  const expiryDate = form.expiryDate?.trim()
 
   function update<K extends keyof BoardFormValue>(
     field: K,
     value: BoardFormValue[K],
   ) {
-    setForm((prev) => ({
-      ...prev,
+    setForm((previous) => ({
+      ...previous,
       [field]: value,
     }))
   }
@@ -70,28 +81,51 @@ function BoardDialogContent({
     return `board-${Date.now()}-${Math.random().toString(36).slice(2)}`
   }
 
-  async function handleSubmit() {
+  const formInvalid =
+    !boardName ||
+    !issuingBody ||
+    Boolean(issueDate && expiryDate && expiryDate < issueDate)
+
+  function closeDialog() {
     if (isSubmitting) return
-    if (!form.boardName.trim()) return
-    if (!form.issuingBody.trim()) return
+
+    onOpenChange(false)
+  }
+
+  async function handleSubmit() {
+    if (isSubmitting || formInvalid) return
+
+    //if (!boardName || !issuingBody) return
 
     setIsSubmitting(true)
+
     try {
       await onSubmit({
         ...form,
         id: form.id ?? (generateId ? createClientId() : undefined),
-        specialty: form.specialty || null,
+        boardName,
+        issuingBody,
+        specialty: form.specialty?.trim() || null,
         issueDate: form.issueDate || null,
         expiryDate: form.expiryDate || null,
       })
 
       onOpenChange(false)
-    } catch (error) {
-      // keep dialog open; upstream mutation hook can surface toast/error UI
+    } catch {
+      // Keep the dialog open.
+      // The parent mutation can display the error toast.
     } finally {
       setIsSubmitting(false)
     }
   }
+
+  // const submitDisabled =
+  //   isSubmitting ||
+  //   !form.boardName.trim() ||
+  //   !form.issuingBody.trim() ||
+  //   Boolean(
+  //     form.issueDate && form.expiryDate && form.expiryDate < form.issueDate,
+  //   )
 
   return (
     <>
@@ -106,35 +140,49 @@ function BoardDialogContent({
           </div>
 
           <div className='grid grid-cols-1 gap-4'>
-            <div className='space-y-2 xl:col-span-2'>
-              <Label>{crt('boardName')}</Label>
+            <div className='space-y-2'>
+              <Label htmlFor='boardName'>
+                {crt('boardName')}
+                <span className='ms-1 text-destructive'>*</span>
+              </Label>
 
               <Input
+                id='boardName'
                 className='h-11'
                 value={form.boardName}
-                onChange={(e) => update('boardName', e.target.value)}
+                disabled={isSubmitting}
+                onChange={(event) => update('boardName', event.target.value)}
                 placeholder='Saudi Board in General Surgery'
               />
             </div>
 
-            <div className='space-y-2 xl:col-span-2'>
-              <Label>{crt('specialty')}</Label>
+            <div className='space-y-2'>
+              <Label htmlFor='boardSpecialty'>{crt('specialty')}</Label>
 
               <Input
+                id='boardSpecialty'
                 className='h-11'
                 value={form.specialty ?? ''}
-                onChange={(e) => update('specialty', e.target.value || null)}
+                disabled={isSubmitting}
+                onChange={(event) =>
+                  update('specialty', event.target.value || null)
+                }
                 placeholder='General Surgery'
               />
             </div>
 
-            <div className='space-y-2 xl:col-span-2'>
-              <Label>{crt('issuingBody')}</Label>
+            <div className='space-y-2'>
+              <Label htmlFor='boardIssuingBody'>
+                {crt('issuingBody')}
+                <span className='ms-1 text-destructive'>*</span>
+              </Label>
 
               <Input
+                id='boardIssuingBody'
                 className='h-11'
                 value={form.issuingBody}
-                onChange={(e) => update('issuingBody', e.target.value)}
+                disabled={isSubmitting}
+                onChange={(event) => update('issuingBody', event.target.value)}
                 placeholder='Saudi Commission for Health Specialties'
               />
             </div>
@@ -154,49 +202,51 @@ function BoardDialogContent({
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>{crt('issued')}</Label>
+              <Label htmlFor='boardIssueDate'>{crt('issued')}</Label>
 
               <Input
+                id='boardIssueDate'
                 type='date'
                 className='h-11 bg-background'
                 value={form.issueDate ?? ''}
-                onChange={(e) => update('issueDate', e.target.value || null)}
+                disabled={isSubmitting}
+                onChange={(event) =>
+                  update('issueDate', event.target.value || null)
+                }
               />
             </div>
 
             <div className='space-y-2'>
-              <Label>{crt('expires')}</Label>
+              <Label htmlFor='boardExpiryDate'>{crt('expires')}</Label>
 
               <Input
+                id='boardExpiryDate'
                 type='date'
                 className='h-11 bg-background'
+                min={issueDate ?? undefined}
                 value={form.expiryDate ?? ''}
-                onChange={(e) => update('expiryDate', e.target.value || null)}
+                disabled={isSubmitting}
+                onChange={(event) =>
+                  update('expiryDate', event.target.value || null)
+                }
               />
             </div>
           </div>
         </section>
       </div>
 
-      <DialogFooter className='shrink-0 border-t bg-muted/40 px-4 py-4 sm:px-6 sm:py-6'>
-        <Button
-          type='button'
-          className='p-4'
-          variant='outline'
-          onClick={() => onOpenChange(false)}
-        >
-          {crt('cancel')}
-        </Button>
-
-        <Button
-          type='button'
-          className='bg-slate-950 p-4 text-white hover:bg-slate-800'
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-        >
-          {crt('save', { item: isRtl ? 'مجلس' : 'Board' })}
-        </Button>
-      </DialogFooter>
+      <Footer
+        onCancel={closeDialog}
+        onSave={handleSubmit}
+        label={crt('save', {
+          item: isRtl ? 'المجلس' : 'Board',
+        })}
+        savingLabel={crt('saving', { item: 'board' })}
+        disabled={formInvalid}
+        isSaving={isSubmitting}
+        saveVariant='default'
+        saveIcon={<Save className='h-4 w-4' />}
+      />
     </>
   )
 }
@@ -208,8 +258,9 @@ export function BoardDialog({
   onSubmit,
   generateId = false,
 }: Props) {
-  const dialogKey = initialValue?.id ?? (open ? 'add-board' : 'closed')
   const crt = useTranslations('credentials')
+
+  const dialogKey = initialValue?.id ?? (open ? 'add-board' : 'closed')
 
   return (
     <FormDialog

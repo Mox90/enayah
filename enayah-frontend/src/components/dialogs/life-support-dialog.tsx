@@ -1,16 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -24,6 +15,8 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useProviderOptions } from '@/modules/hr/compensations/utils/provider-options'
 import { ProviderCombobox } from '../comboboxes/provider-combobox'
 import { FormDialog } from '../forms'
+import { Footer } from '../footer/footer'
+import { Save } from 'lucide-react'
 
 export type LifeSupportType =
   | 'bls'
@@ -86,10 +79,18 @@ function LifeSupportDialogContent({
   const [form, setForm] = useState<LifeSupportFormValue>(
     initialValue ?? emptyValue,
   )
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   const crt = useTranslations('credentials')
   const locale = useLocale()
   const isRtl = locale === 'ar'
   const providerOptions = useProviderOptions()
+
+  const type = form.type.trim()
+  const provider = form.provider.trim()
+  const expiryDate = form.expiryDate.trim()
+  const certificateNumber = form.certificateNumber?.trim()
+  const issueDate = form.issueDate?.trim()
 
   function update<K extends keyof LifeSupportFormValue>(
     field: K,
@@ -109,32 +110,37 @@ function LifeSupportDialogContent({
     return `life-support-${Date.now()}-${Math.random().toString(36).slice(2)}`
   }
 
-  async function handleSubmit() {
-    if (!form.type) return
-    if (!form.provider.trim()) return
-    if (!form.expiryDate.trim()) return
+  const formInvalid = !type || !provider || !expiryDate
 
-    await onSubmit({
-      ...form,
-      id: form.id ?? (generateId ? createClientId() : undefined),
-      certificateNumber: form.certificateNumber || null,
-      issueDate: form.issueDate || null,
-      //documentFileId: form.documentFileId || null,
-      isVerified: form.isVerified ?? false,
-    })
+  function closeDialog() {
+    if (isSubmitting) return
 
     onOpenChange(false)
   }
 
-  // function getAvailableAllowanceTypes(currentIndex: number) {
-  //   const selected = new Set(
-  //     (value.providers ?? [])
-  //       .filter((_, index) => index !== currentIndex)
-  //       .map((allowance) => allowance.type),
-  //   )
+  async function handleSubmit() {
+    if (isSubmitting || formInvalid) return
 
-  //   return providerOptions.filter((option) => !selected.has(option.value))
-  // }
+    setIsSubmitting(true)
+
+    try {
+      await onSubmit({
+        ...form,
+        id: form.id ?? (generateId ? createClientId() : undefined),
+        certificateNumber: form.certificateNumber || null,
+        issueDate: form.issueDate || null,
+        //documentFileId: form.documentFileId || null,
+        isVerified: form.isVerified ?? false,
+      })
+
+      onOpenChange(false)
+    } catch (error) {
+      // Keep the dialog open.
+      // The parent mutation can display the error toast.
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
     <>
@@ -239,24 +245,18 @@ function LifeSupportDialogContent({
         </section>
       </div>
 
-      <DialogFooter className='border-t bg-muted/40 px-6 py-6'>
-        <Button
-          type='button'
-          className='p-4'
-          variant='outline'
-          onClick={() => onOpenChange(false)}
-        >
-          Cancel
-        </Button>
-
-        <Button
-          type='button'
-          className='bg-slate-950 p-4 text-white hover:bg-slate-800'
-          onClick={handleSubmit}
-        >
-          Save Life Support
-        </Button>
-      </DialogFooter>
+      <Footer
+        onCancel={closeDialog}
+        onSave={handleSubmit}
+        label={crt('save', {
+          item: isRtl ? 'دعم الحياة' : 'Life Support',
+        })}
+        savingLabel={crt('saving', { item: 'life support' })}
+        disabled={formInvalid}
+        isSaving={isSubmitting}
+        saveVariant='default'
+        saveIcon={<Save className='h-4 w-4' />}
+      />
     </>
   )
 }
@@ -276,8 +276,8 @@ export function LifeSupportDialog({
       onOpenChange={onOpenChange}
       title={initialValue ? 'Edit Life Support' : 'Add Life Support'}
       description="Enter the employee's life support certification details."
-      className='w-[95vw] max-w-4xl overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+      className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'
     >
       {open && (
         <LifeSupportDialogContent

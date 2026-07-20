@@ -76,9 +76,10 @@ export function NotificationBell() {
 
     router.push(`/${locale}/iqama-renewal-process?${params.toString()}`)
 
-    // if (!item.isRead) {
-    //   await markRead.mutate(item.id)
-    // }
+    if (!item.isRead) {
+      //await markRead.mutate(item.id)
+      await markRead.mutateAsync(item.id)
+    }
   }
 
   return (

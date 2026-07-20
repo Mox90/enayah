@@ -1,16 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -22,6 +14,8 @@ import {
 } from '@/components/ui/select'
 import { useLocale, useTranslations } from 'next-intl'
 import { FormDialog } from '../forms'
+import { Footer } from '../footer/footer'
+import { Save } from 'lucide-react'
 
 export type DegreeFormValue = {
   id?: string
@@ -73,6 +67,11 @@ function DegreeDialogContent({
 
   const [form, setForm] = useState<DegreeFormValue>(initialValue ?? emptyValue)
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const degreeName = form.degreeName.trim()
+  const institution = form.institution.trim()
+
   function update<K extends keyof DegreeFormValue>(
     field: K,
     value: DegreeFormValue[K],
@@ -91,23 +90,39 @@ function DegreeDialogContent({
     return `degree-${Date.now()}-${Math.random().toString(36).slice(2)}`
   }
 
-  async function handleSubmit() {
-    if (!form.degreeName.trim()) return
-    if (!form.institution.trim()) return
+  const formInvalid = !degreeName || !institution
 
-    await onSubmit({
-      ...form,
-      id: form.id ?? (generateId ? createClientId() : undefined),
-      major: form.major || null,
-      graduationDate: form.graduationDate || null,
-    })
-    //console.log('DATA INPUT IS ', form)
+  function closeDialog() {
+    if (isSubmitting) return
+
     onOpenChange(false)
+  }
+
+  async function handleSubmit() {
+    if (isSubmitting || formInvalid) return
+
+    setIsSubmitting(true)
+
+    try {
+      await onSubmit({
+        ...form,
+        id: form.id ?? (generateId ? createClientId() : undefined),
+        major: form.major || null,
+        graduationDate: form.graduationDate || null,
+      })
+      //console.log('DATA INPUT IS ', form)
+      onOpenChange(false)
+    } catch {
+      // Keep the dialog open.
+      // The parent mutation hook can display the error toast.
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <>
-      <div className='space-y-6 px-6 py-1 '>
+      <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
@@ -203,24 +218,18 @@ function DegreeDialogContent({
         </section>
       </div>
 
-      <DialogFooter className='border-t bg-muted/40 px-6 py-6'>
-        <Button
-          type='button'
-          className='p-4'
-          variant='outline'
-          onClick={() => onOpenChange(false)}
-        >
-          {t('cancel')}
-        </Button>
-
-        <Button
-          type='button'
-          className='bg-slate-950 p-4 text-white hover:bg-slate-800'
-          onClick={handleSubmit}
-        >
-          {t.rich('save', { item: isRtl ? 'شهادة' : 'Degree' })}
-        </Button>
-      </DialogFooter>
+      <Footer
+        onCancel={closeDialog}
+        onSave={handleSubmit}
+        label={t('save', {
+          item: isRtl ? 'التحصيل العلمي' : 'Educational Attainment',
+        })}
+        savingLabel={t('saving', { item: 'educational attainment' })}
+        disabled={formInvalid}
+        isSaving={isSubmitting}
+        saveVariant='default'
+        saveIcon={<Save className='h-4 w-4' />}
+      />
     </>
   )
 }
@@ -241,8 +250,8 @@ export function DegreeDialog({
       onOpenChange={onOpenChange}
       title={initialValue ? t('editDegree') : t('addDegree')}
       description={t('educationSub')}
-      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+      className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'
     >
       {open && (
         <DegreeDialogContent

@@ -302,7 +302,15 @@ const HRAdminDashboard = () => {
 
         <div className='h-[420px] rounded-2xl border bg-[#111827] p-6 shadow-sm'>
           <ResponsiveContainer width='100%' height='100%'>
-            <AreaChart data={hiringTrendData}>
+            <AreaChart
+              data={hiringTrendData}
+              // margin={{
+              //   top: 8,
+              //   right: 40,
+              //   bottom: 8,
+              //   left: 0,
+              // }}
+            >
               <defs>
                 <linearGradient
                   id='physicianGradient'
@@ -367,12 +375,29 @@ const HRAdminDashboard = () => {
 
               <XAxis
                 dataKey='month'
+                interval={0}
+                minTickGap={0}
                 tickLine={false}
                 axisLine={false}
-                tick={{ fill: '#9ca3af', fontSize: 13 }}
+                // padding={{
+                //   left: 12,
+                //   right: 12,
+                // }}
+                tickMargin={8}
+                height={30}
+                padding={{
+                  left: 4,
+                  right: 4,
+                }}
+                // tick={{ fill: '#9ca3af', fontSize: 13 }}
+                tick={{
+                  fill: '#9ca3af',
+                  fontSize: 'clamp(10px, 2vw, 13px)',
+                }}
               />
 
               <YAxis
+                width={20}
                 allowDecimals={false}
                 tickLine={false}
                 axisLine={false}

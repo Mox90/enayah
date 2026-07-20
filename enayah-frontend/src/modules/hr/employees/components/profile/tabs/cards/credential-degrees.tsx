@@ -4,18 +4,13 @@ import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { VerificationBadge } from '@/components/badges/verification-badge'
 import { DegreeInput } from '@/modules/hr/onboarding/types/onboarding.types'
-import { MoreVertical, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toArabic, toPersianDigits } from '@/utils/utilities'
 import { cn } from '@/lib/utils'
+import { RowActions } from '@/components/dialogs/row-actions'
 
 // interface Degree {
 //   id: string
@@ -90,59 +85,47 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
         <div className='text-sm text-muted-foreground'>
           {ct('highestEducationalSub')}
         </div>
-        {degrees.map((degree, index) => (
-          <div
-            key={degree.id ?? `${degree.degreeName}-${index}`}
-            className='rounded-lg border p-4'
-          >
-            <div className='flex justify-between'>
-              <div className='space-y-1'>
-                <div className='font-semibold'>{degree.degreeName}</div>
+        {degrees.map((degree, index) => {
+          const degreeId = degree.id
+          return (
+            <div
+              key={degree.id ?? `${degree.degreeName}-${index}`}
+              className='rounded-lg border p-4'
+            >
+              <div className='flex justify-between'>
+                <div className='space-y-1'>
+                  <div className='font-semibold'>{degree.degreeName}</div>
 
-                <div className='text-sm text-muted-foreground'>
-                  {degree.institution}
+                  <div className='text-sm text-muted-foreground'>
+                    {degree.institution}
+                  </div>
+
+                  {degree.major && (
+                    <div className='text-sm'>
+                      {ct('major')}: {degree.major}
+                    </div>
+                  )}
+
+                  {degree.graduationDate && (
+                    <div className='text-sm'>
+                      {ct('graduated')}:{' '}
+                      {isRtl
+                        ? toArabic(degree.graduationDate, 1)
+                        : format(
+                            new Date(degree.graduationDate),
+                            'dd-MMM-yyyy',
+                          )}
+                    </div>
+                  )}
+
+                  <div className='text-sm'>
+                    {ct('type')}: {ct(degree.degreeType)}
+                  </div>
+
+                  <VerificationBadge verified={degree.isVerified ?? false} />
                 </div>
 
-                {degree.major && (
-                  <div className='text-sm'>
-                    {ct('major')}: {degree.major}
-                  </div>
-                )}
-
-                {degree.graduationDate && (
-                  <div className='text-sm'>
-                    {ct('graduated')}:{' '}
-                    {isRtl
-                      ? toArabic(degree.graduationDate, 1)
-                      : format(new Date(degree.graduationDate), 'dd-MMM-yyyy')}
-                  </div>
-                )}
-
-                <div className='text-sm'>
-                  {ct('type')}:{' '}
-                  {/* {degreeTypeLabel[degree.degreeType.replace('_', ' ') ?? ''] ??
-                    degree.degreeType.replace('_', ' ')} */}
-                  {ct(degree.degreeType)}
-                  {/* <span
-                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${
-                      degreeTypeColors[degree.degreeType] ??
-                      'bg-gray-100 text-gray-700 border-gray-200'
-                    }`}
-                  >
-                    Type:{' '}
-                    {degreeTypeLabel[
-                      degree.degreeType.replace('_', ' ') ?? ''
-                    ] ?? degree.degreeType.replace('_', ' ')}
-                  </span> */}
-                </div>
-
-                <VerificationBadge verified={degree.isVerified ?? false} />
-              </div>
-
-              <div className='flex flex-col items-end gap-2'>
-                {/* <Badge variant={degree.isVerified ? 'default' : 'secondary'}>
-                  {degree.isVerified ? 'Verified' : 'Unverified'}
-                </Badge> */}
+                {/* <div className='flex flex-col items-end gap-2'>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -185,10 +168,19 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
+              </div> */}
+                <RowActions
+                  onEdit={
+                    degreeId && onEdit ? () => onEdit(degreeId) : undefined
+                  }
+                  onDelete={
+                    degreeId && onDelete ? () => onDelete(degreeId) : undefined
+                  }
+                />
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </CardContent>
     </Card>
   )

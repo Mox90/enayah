@@ -527,7 +527,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
             policyNumber: item.policyNumber,
             coverageAmount: item.coverageAmount ?? null,
             startDate: item.startDate ?? null,
-            expiryDate: item.expiryDate ?? null,
+            expiryDate: item.expiryDate! ?? null,
             documentFileId: item.documentFileId ?? null,
             isVerified: item.isVerified ?? false,
           })

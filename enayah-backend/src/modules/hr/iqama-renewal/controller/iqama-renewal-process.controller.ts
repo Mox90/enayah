@@ -103,4 +103,12 @@ export const IqamaRenewalProcessController = {
 
     res.status(204).send()
   }),
+
+  listGovernmentRelationsUsers: asyncHandler(
+    async (req: Request, res: Response, next: NextFunction) => {
+      const users =
+        await IqamaRenewalProcessService.listGovernmentRelationsUsers()
+      res.status(200).json(users)
+    },
+  ),
 }

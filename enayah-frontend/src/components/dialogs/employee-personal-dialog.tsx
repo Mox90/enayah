@@ -1,15 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -24,6 +16,7 @@ import {
 import { useLocale, useTranslations } from 'next-intl'
 import { FormDialog } from '../forms'
 import { Footer } from '../footer/footer'
+import { Save } from 'lucide-react'
 // import { EmployeeProfile } from '../../types/employee-profile.types'
 
 type PersonalFormValue = {
@@ -84,6 +77,13 @@ export function EmployeePersonalDialog({
     getInitialForm(profile),
   )
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const firstNameEn = form.firstNameEn.trim()
+  const familyNameEn = form.familyNameEn.trim()
+  const firstNameAr = form.firstNameAr.trim()
+  const familyNameAr = form.familyNameAr.trim()
+  const dateOfBirth = form.dateOfBirth?.trim()
+
   function update<K extends keyof PersonalFormValue>(
     key: K,
     value: PersonalFormValue[K],
@@ -91,7 +91,24 @@ export function EmployeePersonalDialog({
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
+  const formInvalid =
+    !firstNameEn ||
+    !familyNameEn ||
+    !firstNameAr ||
+    !familyNameAr ||
+    !dateOfBirth
+
+  function closeDialog() {
+    if (isSubmitting) return
+
+    onOpenChange(false)
+  }
+
   async function handleSubmit() {
+    if (isSubmitting || formInvalid) return
+
+    setIsSubmitting(true)
+
     try {
       await onSubmit({
         ...form,
@@ -105,21 +122,24 @@ export function EmployeePersonalDialog({
       onOpenChange(false)
     } catch (error) {
       // keep dialog open; error is surfaced via mutation onError
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   return (
     <FormDialog
       open={open}
+      //open={closeDialog}
       onOpenChange={onOpenChange}
       title={et('editPersonalInfo')}
       description={et('editPersonalInfoSub')}
       // 1. Set a responsive max-height (max-h-[90vh]) instead of leaving it unconstrained
-      className='w-[85vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+      className='w-[95vw] max-w-4xl overflow-hidden p-0'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
     >
       {/* 2. Wrap the form sections in a scrollable container with overflow-y-auto */}
-      <div className='flex-1 overflow-y-auto space-y-6 px-6 py-6'>
+      <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
@@ -258,26 +278,15 @@ export function EmployeePersonalDialog({
 
       {/* 3. Ensure the footer remains fixed at the bottom and doesn't shrink */}
       <Footer
-        onCancel={() => onOpenChange(false)}
+        onCancel={closeDialog}
         onSave={handleSubmit}
         label={et('savePersonalInfo')}
+        savingLabel={et('saving', { item: 'personal information' })}
+        disabled={formInvalid}
+        isSaving={isSubmitting}
+        saveVariant='default'
+        saveIcon={<Save className='h-4 w-4' />}
       />
-      {/* <DialogFooter className='border-t bg-muted/40 px-6 py-8 shrink-0'>
-        <Button
-          className='p-4'
-          variant='outline'
-          onClick={() => onOpenChange(false)}
-        >
-          Cancel
-        </Button>
-
-        <Button
-          className='p-4 bg-slate-950 text-white hover:bg-slate-800'
-          onClick={handleSubmit}
-        >
-          Save Changes
-        </Button>
-      </DialogFooter> */}
     </FormDialog>
   )
 }

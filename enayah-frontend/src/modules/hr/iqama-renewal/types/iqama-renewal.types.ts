@@ -91,7 +91,12 @@ export type ChangeIqamaRenewalStatusPayload = {
 
 export type AssigneeOption = {
   id: string
-  label: string
+  employeeId?: string | null
+  labelEn: string
+  labelAr: string
+  email?: string
+  username?: string
+  employeeNumber?: string | null
 }
 
 export type IqamaRenewalView = 'list' | 'kanban'

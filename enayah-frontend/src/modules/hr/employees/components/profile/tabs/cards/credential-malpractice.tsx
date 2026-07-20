@@ -17,6 +17,7 @@ import { MalpracticeInput } from '@/modules/hr/onboarding/types/onboarding.types
 import { useLocale, useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { toArabic, toArabicDigits, toPersianDigits } from '@/utils/utilities'
+import { RowActions } from '@/components/dialogs/row-actions'
 
 //import { VerificationBadge } from '@/components/common/verification-badge'
 
@@ -67,89 +68,53 @@ export function CredentialMalpractice({
           </div>
         )}
 
-        {malpractice.map((x) => (
-          <div key={x.id} className='rounded-lg border p-4'>
-            <div className='flex justify-between'>
-              <div className='space-y-1'>
-                <div className='font-semibold'>{x.insuranceCompany}</div>
+        {malpractice.map((x) => {
+          const xId = x.id
+          return (
+            <div key={x.id} className='rounded-lg border p-4'>
+              <div className='flex justify-between'>
+                <div className='space-y-1'>
+                  <div className='font-semibold'>{x.insuranceCompany}</div>
 
-                <div className='text-sm text-muted-foreground'>
-                  {ct('policyNum')}: {x.policyNumber}
+                  <div className='text-sm text-muted-foreground'>
+                    {ct('policyNum')}: {x.policyNumber}
+                  </div>
+
+                  {x.coverageAmount && (
+                    <div className='text-sm'>
+                      {ct('amount')}: {x.coverageAmount}
+                    </div>
+                  )}
+
+                  {x.startDate && (
+                    <div className='text-sm'>
+                      {ct('startDate')}:{' '}
+                      {isRtl
+                        ? toArabic(x.startDate, 1)
+                        : format(new Date(x.startDate), 'dd-MMM-yyyy')}
+                    </div>
+                  )}
+
+                  {x.expiryDate && (
+                    <div className='text-sm'>
+                      {ct('expires')}:{' '}
+                      {isRtl
+                        ? toArabic(x.expiryDate, 1)
+                        : format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
+                    </div>
+                  )}
+
+                  <VerificationBadge verified={x.isVerified ?? false} />
                 </div>
 
-                {x.coverageAmount && (
-                  <div className='text-sm'>
-                    {ct('amount')}: {x.coverageAmount}
-                  </div>
-                )}
-
-                {x.startDate && (
-                  <div className='text-sm'>
-                    {ct('startDate')}:{' '}
-                    {isRtl
-                      ? toArabic(x.startDate, 1)
-                      : format(new Date(x.startDate), 'dd-MMM-yyyy')}
-                  </div>
-                )}
-
-                {x.expiryDate && (
-                  <div className='text-sm'>
-                    {ct('expires')}:{' '}
-                    {isRtl
-                      ? toArabic(x.expiryDate, 1)
-                      : format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
-                  </div>
-                )}
-
-                <VerificationBadge verified={x.isVerified ?? false} />
-              </div>
-
-              <div className='flex flex-col items-end gap-2'>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size='icon' variant='ghost'>
-                      <MoreVertical className='h-4 w-4 text-green-700' />
-                    </Button>
-                  </DropdownMenuTrigger>
-
-                  <DropdownMenuContent>
-                    {onEdit && (
-                      <DropdownMenuItem
-                        className={
-                          isRtl
-                            ? 'justify-end text-right'
-                            : 'justify-start text-left'
-                        }
-                        onClick={() => {
-                          if (!x.id) return
-                          onEdit(x.id)
-                        }}
-                      >
-                        {ct('edit')}
-                      </DropdownMenuItem>
-                    )}
-
-                    {onDelete && (
-                      <DropdownMenuItem
-                        className={`text-red-600 ${
-                          isRtl
-                            ? 'justify-end text-right'
-                            : 'justify-start text-left'
-                        }`}
-                        onClick={() => {
-                          if (!x.id) return
-                          onDelete(x.id)
-                        }}
-                      >
-                        {ct('delete')}
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <RowActions
+                  onEdit={xId && onEdit ? () => onEdit(xId) : undefined}
+                  onDelete={xId && onDelete ? () => onDelete(xId) : undefined}
+                />
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </CardContent>
     </Card>
   )
