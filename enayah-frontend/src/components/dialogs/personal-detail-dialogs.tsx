@@ -200,7 +200,7 @@ function IdentificationDialogContent({
               <Label>{it('number')}</Label>
               <Input
                 className='h-11'
-                value={identificationNumber}
+                value={form.identificationNumber}
                 onChange={(e) => update('identificationNumber', e.target.value)}
               />
             </div>
@@ -517,7 +517,7 @@ function PhoneDialogContent({
             <div className='space-y-2'>
               <Label>{pt('type')}</Label>
               <Select
-                value={type}
+                value={form.type}
                 onValueChange={(v) => update('type', v as PhoneNumber['type'])}
               >
                 <SelectTrigger className='h-11'>
@@ -538,14 +538,14 @@ function PhoneDialogContent({
 
               <div className='flex h-11 overflow-hidden rounded-md border border-input bg-background'>
                 <PhoneCodeCombobox
-                  value={countryCode || '+966'}
+                  value={form.countryCode || '+966'}
                   onChange={(value) => update('countryCode', value)}
                   className='rounded-none border-0 border-r'
                 />
 
                 <Input
                   className='border-0! rounded-none! bg-transparent! shadow-none! focus-visible:ring-0 focus-visible:ring-offset-0'
-                  value={phoneNumber}
+                  value={form.phoneNumber}
                   onChange={(e) => update('phoneNumber', e.target.value)}
                   placeholder='512345678'
                 />
@@ -1092,7 +1092,7 @@ function DependentDialogContent({
           <div className='grid gap-4 xl:grid-cols-2'>
             <InputField
               label={dt('firstNameEn')}
-              value={firstNameEn}
+              value={form.firstNameEn}
               onChange={(v) => update('firstNameEn', v)}
             />
             <InputField
@@ -1107,12 +1107,12 @@ function DependentDialogContent({
             />
             <InputField
               label={dt('familyNameEn')}
-              value={familyNameEn}
+              value={form.familyNameEn}
               onChange={(v) => update('familyNameEn', v)}
             />
             <InputField
               label={dt('firstNameAr')}
-              value={firstNameAr}
+              value={form.firstNameAr}
               onChange={(v) => update('firstNameAr', v)}
             />
             <InputField
@@ -1127,7 +1127,7 @@ function DependentDialogContent({
             />
             <InputField
               label={dt('familyNameAr')}
-              value={familyNameAr}
+              value={form.familyNameAr}
               onChange={(v) => update('familyNameAr', v)}
             />
 
@@ -1313,7 +1313,7 @@ function EmergencyContactDialogContent({
           <div className='grid gap-4 xl:grid-cols-2'>
             <InputField
               label={ect('name')}
-              value={name}
+              value={form.name}
               onChange={(v) => update('name', v)}
             />
 
@@ -1325,7 +1325,7 @@ function EmergencyContactDialogContent({
             <div className='space-y-2'>
               <Label>{ect('relationship')}</Label>
               <Select
-                value={relationship}
+                value={form.relationship}
                 onValueChange={(v) =>
                   update('relationship', v as EmergencyContact['relationship'])
                 }
@@ -1345,7 +1345,7 @@ function EmergencyContactDialogContent({
 
             <InputField
               label={ect('phoneNumber')}
-              value={mobile ?? ''}
+              value={form.mobile ?? ''}
               onChange={(v) => update('mobile', v || null)}
             />
 
@@ -1484,7 +1484,7 @@ function VisaDialogContent({
           <div className='grid gap-4 xl:grid-cols-2'>
             <InputField
               label={vt('visaNumber')}
-              value={visaNumber}
+              value={form.visaNumber}
               onChange={(v) => update('visaNumber', v)}
             />
 

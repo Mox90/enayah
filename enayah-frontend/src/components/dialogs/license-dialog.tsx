@@ -140,7 +140,7 @@ function LicenseDialogContent({
               <Label>License Number *</Label>
               <Input
                 className='h-11'
-                value={licenseNumber}
+                value={form.licenseNumber}
                 onChange={(e) => update('licenseNumber', e.target.value)}
                 placeholder='2626912923'
               />
@@ -160,7 +160,7 @@ function LicenseDialogContent({
               <Label>Profession *</Label>
               <Input
                 className='h-11'
-                value={profession ?? ''}
+                value={form.profession ?? ''}
                 onChange={(e) => update('profession', e.target.value)}
                 placeholder='Nurse'
               />
@@ -170,7 +170,7 @@ function LicenseDialogContent({
               <Label>Specialty</Label>
               <Input
                 className='h-11'
-                value={specialty ?? ''}
+                value={form.specialty ?? ''}
                 onChange={(e) => update('specialty', e.target.value || null)}
                 placeholder='Emergency Nursing'
               />
@@ -194,7 +194,7 @@ function LicenseDialogContent({
               <Input
                 type='date'
                 className='h-11 bg-background'
-                value={issueDate ?? ''}
+                value={form.issueDate ?? ''}
                 onChange={(e) => update('issueDate', e.target.value)}
               />
             </div>
@@ -204,7 +204,7 @@ function LicenseDialogContent({
               <Input
                 type='date'
                 className='h-11 bg-background'
-                value={expiryDate ?? ''}
+                value={form.expiryDate ?? ''}
                 onChange={(e) => update('expiryDate', e.target.value)}
               />
             </div>

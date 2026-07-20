@@ -208,7 +208,7 @@ function BoardDialogContent({
                 id='boardIssueDate'
                 type='date'
                 className='h-11 bg-background'
-                value={issueDate ?? ''}
+                value={form.issueDate ?? ''}
                 disabled={isSubmitting}
                 onChange={(event) =>
                   update('issueDate', event.target.value || null)
@@ -224,7 +224,7 @@ function BoardDialogContent({
                 type='date'
                 className='h-11 bg-background'
                 min={issueDate ?? undefined}
-                value={expiryDate ?? ''}
+                value={form.expiryDate ?? ''}
                 disabled={isSubmitting}
                 onChange={(event) =>
                   update('expiryDate', event.target.value || null)

@@ -137,7 +137,7 @@ function MalpracticeDialogContent({
               <Label>Insurance Company *</Label>
               <Input
                 className='h-11'
-                value={insuranceCompany}
+                value={form.insuranceCompany}
                 onChange={(e) => update('insuranceCompany', e.target.value)}
                 placeholder='Insurance Company'
               />
@@ -147,7 +147,7 @@ function MalpracticeDialogContent({
               <Label>Policy Number *</Label>
               <Input
                 className='h-11'
-                value={policyNumber}
+                value={form.policyNumber}
                 onChange={(e) => update('policyNumber', e.target.value)}
                 placeholder='POL-123456'
               />
@@ -200,7 +200,7 @@ function MalpracticeDialogContent({
               <Input
                 type='date'
                 className='h-11 bg-background'
-                value={expiryDate ?? ''}
+                value={form.expiryDate ?? ''}
                 onChange={(e) => update('expiryDate', e.target.value)}
               />
             </div>

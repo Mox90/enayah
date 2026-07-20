@@ -72,50 +72,52 @@ export function CredentialFellowships({
           </div>
         )}
 
-        {fellowships.map((x, index) => (
-          <div
-            key={x.id ?? `${x.fellowshipName}-${index}`}
-            className='border rounded-lg p-4'
-          >
-            <div className='flex justify-between'>
-              <div>
-                <div className='font-semibold'>{x.fellowshipName}</div>
-
-                <div>{x.abbreviation}</div>
-
+        {fellowships.map((x, index) => {
+          const xId = x.id
+          return (
+            <div
+              key={x.id ?? `${x.fellowshipName}-${index}`}
+              className='border rounded-lg p-4'
+            >
+              <div className='flex justify-between'>
                 <div>
-                  {ct('issuingBody')}: {x.issuingBody}
+                  <div className='font-semibold'>{x.fellowshipName}</div>
+
+                  <div>{x.abbreviation}</div>
+
+                  <div>
+                    {ct('issuingBody')}: {x.issuingBody}
+                  </div>
+
+                  {x.specialty && (
+                    <div>
+                      {ct('specialty')}: {x.specialty}
+                    </div>
+                  )}
+
+                  {x.issueDate && (
+                    <div>
+                      {ct('issued')}:{' '}
+                      {isRtl
+                        ? toArabic(x.issueDate, 1)
+                        : format(new Date(x.issueDate), 'dd-MMM-yyyy')}
+                    </div>
+                  )}
+
+                  {x.expiryDate && (
+                    <div>
+                      {ct('expires')}:{' '}
+                      {isRtl
+                        ? toArabic(x.expiryDate, 1)
+                        : format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
+                    </div>
+                  )}
+
+                  <VerificationBadge verified={x.isVerified ?? false} />
+                  {/* <Badge>{x.status}</Badge> */}
                 </div>
 
-                {x.specialty && (
-                  <div>
-                    {ct('specialty')}: {x.specialty}
-                  </div>
-                )}
-
-                {x.issueDate && (
-                  <div>
-                    {ct('issued')}:{' '}
-                    {isRtl
-                      ? toArabic(x.issueDate, 1)
-                      : format(new Date(x.issueDate), 'dd-MMM-yyyy')}
-                  </div>
-                )}
-
-                {x.expiryDate && (
-                  <div>
-                    {ct('expires')}:{' '}
-                    {isRtl
-                      ? toArabic(x.expiryDate, 1)
-                      : format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
-                  </div>
-                )}
-
-                <VerificationBadge verified={x.isVerified ?? false} />
-                {/* <Badge>{x.status}</Badge> */}
-              </div>
-
-              {/* <div className='flex flex-col gap-2'>
+                {/* <div className='flex flex-col gap-2'>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button size='icon' variant='ghost'>
@@ -158,13 +160,14 @@ export function CredentialFellowships({
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div> */}
-              <RowActions
-                onEdit={() => onEdit?.(x.id!)}
-                onDelete={() => onDelete?.(x.id!)}
-              />
+                <RowActions
+                  onEdit={xId && onEdit ? () => onEdit(xId) : undefined}
+                  onDelete={xId && onDelete ? () => onDelete(xId) : undefined}
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </CardContent>
     </Card>
   )

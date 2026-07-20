@@ -105,102 +105,62 @@ export function CredentialLifeSupport({
           </div>
         )}
 
-        {lifeSupports.map((x, index) => (
-          <div
-            key={
-              x.id ?? `${x.certificateNumber}-${x.certificateNumber}-${index}`
-            }
-            className='rounded-lg border p-4'
-          >
-            <div className='flex justify-between'>
-              <div className='space-y-1'>
-                <div className='font-semibold'>
-                  {/* {x.type.replaceAll('_', ' ')} */}
-                  {translateCredentialValue(x.type)}
+        {lifeSupports.map((x, index) => {
+          const xId = x.id
+          return (
+            <div
+              key={
+                x.id ?? `${x.certificateNumber}-${x.certificateNumber}-${index}`
+              }
+              className='rounded-lg border p-4'
+            >
+              <div className='flex justify-between'>
+                <div className='space-y-1'>
+                  <div className='font-semibold'>
+                    {/* {x.type.replaceAll('_', ' ')} */}
+                    {translateCredentialValue(x.type)}
+                  </div>
+
+                  <div className='text-sm text-muted-foreground'>
+                    {/* {x.provider} */}
+                    {translateCredentialValue(x.provider)}
+                  </div>
+
+                  {x.certificateNumber && (
+                    <div className='text-sm'>
+                      {t('certificateNum')}: {x.certificateNumber}
+                    </div>
+                  )}
+
+                  {x.issueDate && (
+                    <div className='text-sm'>
+                      {t('issued')}:{' '}
+                      {isRtl
+                        ? toArabic(x.issueDate, 1)
+                        : format(new Date(x.issueDate), 'dd-MMM-yyyy')}
+                    </div>
+                  )}
+
+                  {x.expiryDate && (
+                    <div className='text-sm'>
+                      {t('expires')}:{' '}
+                      {isRtl
+                        ? toArabic(x.expiryDate, 1)
+                        : format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
+                    </div>
+                  )}
+
+                  {/* <VerificationBadge verified={x.isVerified ?? false} /> */}
                 </div>
 
-                <div className='text-sm text-muted-foreground'>
-                  {/* {x.provider} */}
-                  {translateCredentialValue(x.provider)}
-                </div>
-
-                {x.certificateNumber && (
-                  <div className='text-sm'>
-                    {t('certificateNum')}: {x.certificateNumber}
-                  </div>
-                )}
-
-                {x.issueDate && (
-                  <div className='text-sm'>
-                    {t('issued')}:{' '}
-                    {isRtl
-                      ? toArabic(x.issueDate, 1)
-                      : format(new Date(x.issueDate), 'dd-MMM-yyyy')}
-                  </div>
-                )}
-
-                {x.expiryDate && (
-                  <div className='text-sm'>
-                    {t('expires')}:{' '}
-                    {isRtl
-                      ? toArabic(x.expiryDate, 1)
-                      : format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
-                  </div>
-                )}
-
-                {/* <VerificationBadge verified={x.isVerified ?? false} /> */}
+                <RowActions
+                  onEdit={xId && onEdit ? () => onEdit(xId) : undefined}
+                  onDelete={xId && onDelete ? () => onDelete(xId) : undefined}
+                />
               </div>
-
-              {/* <div className='flex flex-col items-end gap-2'>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size='icon' variant='ghost'>
-                      <MoreVertical className='h-4 w-4 text-green-700' />
-                    </Button>
-                  </DropdownMenuTrigger>
-
-                  <DropdownMenuContent>
-                    {onEdit && (
-                      <DropdownMenuItem
-                        className={
-                          isRtl
-                            ? 'justify-end text-right'
-                            : 'justify-start text-left'
-                        }
-                        onClick={() => {
-                          if (!x.id) return
-                          onEdit(x.id)
-                        }}
-                      >
-                        {t('edit')}
-                      </DropdownMenuItem>
-                    )}
-
-                    {onDelete && (
-                      <DropdownMenuItem
-                        className={`text-red-600 ${
-                          isRtl
-                            ? 'justify-end text-right'
-                            : 'justify-start text-left'
-                        }`}
-                        onClick={() => {
-                          if (!x.id) return
-                          onDelete(x.id)
-                        }}
-                      >
-                        {t('delete')}
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div> */}
-              <RowActions
-                onEdit={() => onEdit?.(x.id!)}
-                onDelete={() => onDelete?.(x.id!)}
-              />
             </div>
-          </div>
-        ))}
+          )
+        })}
       </CardContent>
     </Card>
   )

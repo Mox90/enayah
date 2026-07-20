@@ -160,7 +160,7 @@ function LifeSupportDialogContent({
               <Label>Type *</Label>
               <Select
                 dir={isRtl ? 'rtl' : 'ltr'}
-                value={type}
+                value={form.type}
                 onValueChange={(v) => update('type', v as LifeSupportType)}
               >
                 <SelectTrigger className='h-11'>
@@ -191,7 +191,7 @@ function LifeSupportDialogContent({
             <div className='space-y-2'>
               <Label>Provider *</Label>
               <ProviderCombobox
-                value={provider}
+                value={form.provider}
                 options={providerOptions}
                 onChange={(provider) => update('provider', provider)}
               />
@@ -201,7 +201,7 @@ function LifeSupportDialogContent({
               <Label>Certificate Number</Label>
               <Input
                 className='h-11'
-                value={certificateNumber ?? ''}
+                value={form.certificateNumber ?? ''}
                 onChange={(e) =>
                   update('certificateNumber', e.target.value || null)
                 }
@@ -227,7 +227,7 @@ function LifeSupportDialogContent({
               <Input
                 type='date'
                 className='h-11 bg-background'
-                value={issueDate ?? ''}
+                value={form.issueDate ?? ''}
                 onChange={(e) => update('issueDate', e.target.value || null)}
               />
             </div>
@@ -237,7 +237,7 @@ function LifeSupportDialogContent({
               <Input
                 type='date'
                 className='h-11 bg-background'
-                value={expiryDate}
+                value={form.expiryDate}
                 onChange={(e) => update('expiryDate', e.target.value)}
               />
             </div>

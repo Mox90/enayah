@@ -63,98 +63,60 @@ export function CredentialBoards({ boards, onAdd, onEdit, onDelete }: Props) {
           </div>
         )}
 
-        {boards.map((board, index) => (
-          <div
-            key={board.id ?? `${board.boardName}-${index}`}
-            className='rounded-lg border p-4'
-          >
-            <div className='flex justify-between'>
-              <div className='space-y-1'>
-                <div className='font-semibold'>{board.boardName}</div>
+        {boards.map((board, index) => {
+          const boardId = board.id
+          return (
+            <div
+              key={board.id ?? `${board.boardName}-${index}`}
+              className='rounded-lg border p-4'
+            >
+              <div className='flex justify-between'>
+                <div className='space-y-1'>
+                  <div className='font-semibold'>{board.boardName}</div>
 
-                {board.issuingBody && (
-                  <div className='text-sm text-muted-foreground'>
-                    {ct('issuingBody')}: {board.issuingBody}
-                  </div>
-                )}
+                  {board.issuingBody && (
+                    <div className='text-sm text-muted-foreground'>
+                      {ct('issuingBody')}: {board.issuingBody}
+                    </div>
+                  )}
 
-                {board.specialty && (
-                  <div className='text-sm text-muted-foreground'>
-                    {ct('specialty')}: {board.specialty}
-                  </div>
-                )}
+                  {board.specialty && (
+                    <div className='text-sm text-muted-foreground'>
+                      {ct('specialty')}: {board.specialty}
+                    </div>
+                  )}
 
-                {board.issueDate && (
-                  <div className='text-sm'>
-                    {ct('issued')}:{' '}
-                    {isRtl
-                      ? toArabic(board.issueDate, 1)
-                      : format(new Date(board.issueDate), 'dd-MMM-yyyy')}
-                  </div>
-                )}
+                  {board.issueDate && (
+                    <div className='text-sm'>
+                      {ct('issued')}:{' '}
+                      {isRtl
+                        ? toArabic(board.issueDate, 1)
+                        : format(new Date(board.issueDate), 'dd-MMM-yyyy')}
+                    </div>
+                  )}
 
-                {board.expiryDate && (
-                  <div className='text-sm'>
-                    {ct('expires')}:{' '}
-                    {isRtl
-                      ? toArabic(board.expiryDate, 1)
-                      : format(new Date(board.expiryDate), 'dd-MMM-yyyy')}
-                  </div>
-                )}
+                  {board.expiryDate && (
+                    <div className='text-sm'>
+                      {ct('expires')}:{' '}
+                      {isRtl
+                        ? toArabic(board.expiryDate, 1)
+                        : format(new Date(board.expiryDate), 'dd-MMM-yyyy')}
+                    </div>
+                  )}
 
-                <VerificationBadge verified={board.isVerified ?? false} />
+                  <VerificationBadge verified={board.isVerified ?? false} />
+                </div>
+
+                <RowActions
+                  onEdit={boardId && onEdit ? () => onEdit(boardId) : undefined}
+                  onDelete={
+                    boardId && onDelete ? () => onDelete(boardId) : undefined
+                  }
+                />
               </div>
-
-              {/* <div className='flex flex-col items-end gap-2'>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size='icon' variant='ghost'>
-                      <MoreVertical className='h-4 w-4 text-green-700' />
-                    </Button>
-                  </DropdownMenuTrigger>
-
-                  <DropdownMenuContent>
-                    {onEdit && (
-                      <DropdownMenuItem
-                        className={
-                          isRtl
-                            ? 'justify-end text-right'
-                            : 'justify-start text-left'
-                        }
-                        onClick={() => {
-                          if (!board.id) return
-                          onEdit(board.id)
-                        }}
-                      >
-                        {ct('edit')}
-                      </DropdownMenuItem>
-                    )}
-
-                    {onDelete && (
-                      <DropdownMenuItem
-                        className={`text-red-600 ${
-                          isRtl
-                            ? 'justify-end text-right'
-                            : 'justify-start text-left'
-                        }`}
-                        onClick={() => {
-                          if (!board.id) return
-                          onDelete(board.id)
-                        }}
-                      >
-                        {ct('delete')}
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div> */}
-              <RowActions
-                onEdit={() => onEdit?.(board.id!)}
-                onDelete={() => onDelete?.(board.id!)}
-              />
             </div>
-          </div>
-        ))}
+          )
+        })}
       </CardContent>
     </Card>
   )

@@ -76,88 +76,48 @@ export function CredentialLicenses({
           </div>
         )}
 
-        {licenses.map((x) => (
-          <div key={x.id} className='border rounded-lg p-4'>
-            <div className='flex justify-between'>
-              <div>
-                <div className='font-semibold'>{x.profession}</div>
+        {licenses.map((x) => {
+          const xId = x.id
+          return (
+            <div key={x.id} className='border rounded-lg p-4'>
+              <div className='flex justify-between'>
                 <div>
-                  {ct('issuingAuthority')}: {x.authority}
+                  <div className='font-semibold'>{x.profession}</div>
+                  <div>
+                    {ct('issuingAuthority')}: {x.authority}
+                  </div>
+                  <div>
+                    {ct('licenseNum')}: {x.licenseNumber}
+                  </div>
+                  {x.specialty && (
+                    <div>
+                      {ct('specialty')}: {x.specialty}
+                    </div>
+                  )}
+                  {x.issueDate && (
+                    <div>
+                      {ct('issued')}:{' '}
+                      {format(new Date(x.issueDate), 'dd-MMM-yyyy')}
+                    </div>
+                  )}
+                  {x.expiryDate && (
+                    <div>
+                      {ct('expires')}:{' '}
+                      {format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
+                    </div>
+                  )}
+                  <VerificationBadge verified={x.isVerified ?? false} />{' '}
+                  <StatusBadge status={x.status} />
                 </div>
-                <div>
-                  {ct('licenseNum')}: {x.licenseNumber}
-                </div>
-                {x.specialty && (
-                  <div>
-                    {ct('specialty')}: {x.specialty}
-                  </div>
-                )}
-                {x.issueDate && (
-                  <div>
-                    {ct('issued')}:{' '}
-                    {format(new Date(x.issueDate), 'dd-MMM-yyyy')}
-                  </div>
-                )}
-                {x.expiryDate && (
-                  <div>
-                    {ct('expires')}:{' '}
-                    {format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
-                  </div>
-                )}
-                <VerificationBadge verified={x.isVerified ?? false} />{' '}
-                <StatusBadge status={x.status} />
+
+                <RowActions
+                  onEdit={xId && onEdit ? () => onEdit(xId) : undefined}
+                  onDelete={xId && onDelete ? () => onDelete(xId) : undefined}
+                />
               </div>
-
-              {/* <div className='flex flex-col gap-2'>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size='icon' variant='ghost'>
-                      <MoreVertical className='h-4 w-4 text-green-700' />
-                    </Button>
-                  </DropdownMenuTrigger>
-
-                  <DropdownMenuContent>
-                    {onEdit && (
-                      <DropdownMenuItem
-                        className={
-                          isRtl
-                            ? 'justify-end text-right'
-                            : 'justify-start text-left'
-                        }
-                        onClick={() => {
-                          if (!x.id) return
-                          onEdit(x.id)
-                        }}
-                      >
-                        {ct('edit')}
-                      </DropdownMenuItem>
-                    )}
-
-                    {onDelete && (
-                      <DropdownMenuItem
-                        className={`text-red-600 ${
-                          isRtl
-                            ? 'justify-end text-right'
-                            : 'justify-start text-left'
-                        }`}
-                        onClick={() => {
-                          if (!x.id) return
-                          onDelete(x.id)
-                        }}
-                      >
-                        {ct('delete')}
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div> */}
-              <RowActions
-                onEdit={() => onEdit?.(x.id!)}
-                onDelete={() => onDelete?.(x.id!)}
-              />
             </div>
-          </div>
-        ))}
+          )
+        })}
       </CardContent>
     </Card>
   )

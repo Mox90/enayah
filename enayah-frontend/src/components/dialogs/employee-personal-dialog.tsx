@@ -253,6 +253,11 @@ export function EmployeePersonalDialog({
         onCancel={() => onOpenChange(false)}
         onSave={handleSubmit}
         label={et('savePersonalInfo')}
+        // savingLabel={t('saving', { item: 'fellowship' })}
+        // disabled={formInvalid}
+        // isSaving={isSubmitting}
+        // saveVariant='default'
+        // saveIcon={<Save className='h-4 w-4' />}
       />
       {/* <DialogFooter className='border-t bg-muted/40 px-6 py-8 shrink-0'>
         <Button

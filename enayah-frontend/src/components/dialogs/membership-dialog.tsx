@@ -135,7 +135,7 @@ function MembershipDialogContent({
               <Label>Organization *</Label>
               <Input
                 className='h-11'
-                value={organization}
+                value={form.organization}
                 onChange={(e) => update('organization', e.target.value)}
                 placeholder='Saudi Commission for Health Specialties'
               />
@@ -145,7 +145,7 @@ function MembershipDialogContent({
               <Label>Membership Number</Label>
               <Input
                 className='h-11'
-                value={membershipNumber ?? ''}
+                value={form.membershipNumber ?? ''}
                 onChange={(e) =>
                   update('membershipNumber', e.target.value || null)
                 }
@@ -171,7 +171,7 @@ function MembershipDialogContent({
               <Input
                 type='date'
                 className='h-11 bg-background'
-                value={startDate ?? ''}
+                value={form.startDate ?? ''}
                 onChange={(e) => update('startDate', e.target.value || null)}
               />
             </div>
@@ -181,7 +181,7 @@ function MembershipDialogContent({
               <Input
                 type='date'
                 className='h-11 bg-background'
-                value={expiryDate ?? ''}
+                value={form.expiryDate ?? ''}
                 onChange={(e) => update('expiryDate', e.target.value || null)}
               />
             </div>

@@ -85,42 +85,47 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
         <div className='text-sm text-muted-foreground'>
           {ct('highestEducationalSub')}
         </div>
-        {degrees.map((degree, index) => (
-          <div
-            key={degree.id ?? `${degree.degreeName}-${index}`}
-            className='rounded-lg border p-4'
-          >
-            <div className='flex justify-between'>
-              <div className='space-y-1'>
-                <div className='font-semibold'>{degree.degreeName}</div>
+        {degrees.map((degree, index) => {
+          const degreeId = degree.id
+          return (
+            <div
+              key={degree.id ?? `${degree.degreeName}-${index}`}
+              className='rounded-lg border p-4'
+            >
+              <div className='flex justify-between'>
+                <div className='space-y-1'>
+                  <div className='font-semibold'>{degree.degreeName}</div>
 
-                <div className='text-sm text-muted-foreground'>
-                  {degree.institution}
+                  <div className='text-sm text-muted-foreground'>
+                    {degree.institution}
+                  </div>
+
+                  {degree.major && (
+                    <div className='text-sm'>
+                      {ct('major')}: {degree.major}
+                    </div>
+                  )}
+
+                  {degree.graduationDate && (
+                    <div className='text-sm'>
+                      {ct('graduated')}:{' '}
+                      {isRtl
+                        ? toArabic(degree.graduationDate, 1)
+                        : format(
+                            new Date(degree.graduationDate),
+                            'dd-MMM-yyyy',
+                          )}
+                    </div>
+                  )}
+
+                  <div className='text-sm'>
+                    {ct('type')}: {ct(degree.degreeType)}
+                  </div>
+
+                  <VerificationBadge verified={degree.isVerified ?? false} />
                 </div>
 
-                {degree.major && (
-                  <div className='text-sm'>
-                    {ct('major')}: {degree.major}
-                  </div>
-                )}
-
-                {degree.graduationDate && (
-                  <div className='text-sm'>
-                    {ct('graduated')}:{' '}
-                    {isRtl
-                      ? toArabic(degree.graduationDate, 1)
-                      : format(new Date(degree.graduationDate), 'dd-MMM-yyyy')}
-                  </div>
-                )}
-
-                <div className='text-sm'>
-                  {ct('type')}: {ct(degree.degreeType)}
-                </div>
-
-                <VerificationBadge verified={degree.isVerified ?? false} />
-              </div>
-
-              {/* <div className='flex flex-col items-end gap-2'>
+                {/* <div className='flex flex-col items-end gap-2'>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -164,13 +169,18 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div> */}
-              <RowActions
-                onEdit={() => onEdit?.(degree.id!)}
-                onDelete={() => onDelete?.(degree.id!)}
-              />
+                <RowActions
+                  onEdit={
+                    degreeId && onEdit ? () => onEdit(degreeId) : undefined
+                  }
+                  onDelete={
+                    degreeId && onDelete ? () => onDelete(degreeId) : undefined
+                  }
+                />
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </CardContent>
     </Card>
   )
