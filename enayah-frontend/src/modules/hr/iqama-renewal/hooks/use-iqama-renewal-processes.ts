@@ -11,11 +11,13 @@ import { toast } from 'sonner'
 import { iqamaRenewalService } from '../services/iqama-renewal.service'
 import type { IqamaRenewalListParams } from '../services/iqama-renewal.service'
 import type {
+  AssigneeOption,
   ChangeIqamaRenewalStatusPayload,
   CreateIqamaRenewalCasePayload,
   UpdateIqamaRenewalCasePayload,
 } from '../types/iqama-renewal.types'
 import { useTranslations } from 'next-intl'
+import { api } from '@/lib/api/client'
 
 export const iqamaRenewalKeys = {
   all: ['iqama-renewal-cases'] as const,
@@ -28,6 +30,11 @@ export const iqamaRenewalKeys = {
   details: () => [...iqamaRenewalKeys.all, 'detail'] as const,
 
   detail: (id: string) => [...iqamaRenewalKeys.details(), id] as const,
+
+  assignees: () => [...iqamaRenewalKeys.all, 'assignees'] as const,
+
+  governmentRelationsUsers: () =>
+    [...iqamaRenewalKeys.assignees(), 'government-relations'] as const,
 }
 
 export function useIqamaRenewalProcesses(params: IqamaRenewalListParams) {
@@ -131,5 +138,14 @@ export function useChangeIqamaRenewalStatus() {
       console.error(error)
       toast.error('Failed to update Iqama renewal status.')
     },
+  })
+}
+
+export function useGovernmentRelationsUsers(enabled = true) {
+  return useQuery({
+    queryKey: iqamaRenewalKeys.governmentRelationsUsers(),
+    queryFn: () => iqamaRenewalService.getGovernmentRelationsUsers(),
+    enabled,
+    staleTime: 5 * 60 * 1000,
   })
 }

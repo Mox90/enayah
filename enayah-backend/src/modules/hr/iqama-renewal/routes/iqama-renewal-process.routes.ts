@@ -20,6 +20,12 @@ router.get(
 )
 
 router.get(
+  '/assignees/government-relations',
+  //requirePermission('iqama.renewal.update'),
+  IqamaRenewalProcessController.listGovernmentRelationsUsers,
+)
+
+router.get(
   '/:id',
   requirePermission('iqama.renewal.view'),
   IqamaRenewalProcessController.getById,

@@ -19,6 +19,7 @@ import { VerificationBadge } from '@/components/badges/verification-badge'
 import { useLocale, useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { toPersianDigits } from '@/utils/utilities'
+import { RowActions } from '@/components/dialogs/row-actions'
 
 const verifyClass = {
   verified: 'bg-green-100 text-green-700 border-green-200',
@@ -103,9 +104,8 @@ export function CredentialMemberships({
                 <VerificationBadge verified={x.isVerified ?? false} />
               </div>
 
-              <div className='flex flex-col gap-2'>
-                {/* <Badge>{x.status}</Badge> */}
-
+              {/* <div className='flex flex-col gap-2'>
+                
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button size='icon' variant='ghost'>
@@ -147,7 +147,11 @@ export function CredentialMemberships({
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
+              </div> */}
+              <RowActions
+                onEdit={() => onEdit?.(x.id!)}
+                onDelete={() => onDelete?.(x.id!)}
+              />
             </div>
           </div>
         ))}

@@ -29,12 +29,13 @@ import { Textarea } from '@/components/ui/textarea'
 
 import {
   useCreateIqamaRenewalProcess,
+  useGovernmentRelationsUsers,
   useIqamaRenewalProcess,
   useUpdateIqamaRenewalCase,
 } from '../hooks/use-iqama-renewal-processes'
 
 import type {
-  AssigneeOption,
+  //AssigneeOption,
   UpdateIqamaRenewalCasePayload,
 } from '../types/iqama-renewal.types'
 
@@ -47,7 +48,6 @@ interface Props {
   onCancel: () => void
   onSaved: () => void
   canManageWorkflow?: boolean
-  governmentRelationsUsers?: AssigneeOption[]
 }
 
 type FormValues = {
@@ -212,7 +212,7 @@ export function IqamaRenewalForm({
   onCancel,
   onSaved,
   canManageWorkflow = false,
-  governmentRelationsUsers = [],
+  //governmentRelationsUsers = [],
 }: Props) {
   const t = useTranslations('iqamaRenewal')
   const locale = useLocale()
@@ -223,6 +223,15 @@ export function IqamaRenewalForm({
     isLoading: isLoadingCase,
     isError: isCaseError,
   } = useIqamaRenewalProcess(caseId)
+
+  const shouldLoadGovernmentRelationsUsers =
+    canManageWorkflow && existingCase?.status === 'approved_by_mhrsd'
+
+  const {
+    data: governmentRelationsUsers = [],
+    isLoading: isLoadingGovernmentRelationsUsers,
+    isError: isGovernmentRelationsUsersError,
+  } = useGovernmentRelationsUsers(shouldLoadGovernmentRelationsUsers)
 
   const createProcess = useCreateIqamaRenewalProcess()
   const updateProcess = useUpdateIqamaRenewalCase()
@@ -691,6 +700,10 @@ export function IqamaRenewalForm({
             renewalCase={existingCase}
             canManageWorkflow={canManageWorkflow}
             governmentRelationsUsers={governmentRelationsUsers}
+            isLoadingGovernmentRelationsUsers={
+              isLoadingGovernmentRelationsUsers
+            }
+            isGovernmentRelationsUsersError={isGovernmentRelationsUsersError}
           />
         </div>
       )}

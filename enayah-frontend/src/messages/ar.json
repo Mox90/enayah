@@ -380,7 +380,9 @@
     "officialMovementSub": "حدد ما إذا كان هذا التجديد يُبقي على نفس عنصر الوظيفة (PCN) أم يتضمن ترقية أو نقلاً أو أي حركة أخرى.",
     "movementType": "نوع الحركة *",
     "compensationSub": "تعديل اختياري للراتب عند التجديد.",
-    "allowanceSub": "أضف أو أزِل المخصصات الخاصة بعقد التجديد هذا."
+    "allowanceSub": "أضف أو أزِل المخصصات الخاصة بعقد التجديد هذا.",
+    "renewingContract": "Renewing...",
+    "renewContractBtn": "Renew Contract"
   },
   "credentials": {
     "createSuccess": "تم إنشاء {name}.",
@@ -463,7 +465,8 @@
     "institutionNameLabel": "اسم المنظمة *",
     "graduationDateLabel": "تاريخ التخرج",
     "cancel": "إلغاء",
-    "save": "حفظ {item}",
+    "save": "يحفظ {item}",
+    "saving": "توفير {item}",
     "degreePlaceHolder": "بكالوريوس العلوم في التمريض",
     "majorPlaceHolder": "تمريض",
     "institutionPlaceHolder": "اسم الجامعة (يرجى عدم الاختصار)",
@@ -581,7 +584,8 @@
     "mother": "أم",
     "other": "آخر",
     "dateOfBirth": "تاريخ الميلاد",
-    "gender": "الجنس"
+    "gender": "الجنس",
+    "save": "Save Dependent"
   },
   "addresses": {
     "addressesTitle": "العناوين",
@@ -672,6 +676,9 @@
     "processCompleted": "تم إكمال عملية تجديد الإقامة.",
     "processCancelled": "تم إلغاء عملية تجديد الإقامة.",
     "mhrsdApprovedAt": "تاريخ موافقة وزارة الموارد البشرية",
-    "mhrsdDeniedAt": "تاريخ رفض وزارة الموارد البشرية"
+    "mhrsdDeniedAt": "تاريخ رفض وزارة الموارد البشرية",
+    "loadingAssignees": "جاري تحميل مستخدمي العلاقات الحكومية...",
+    "loadAssigneesFailed": "تعذر تحميل مستخدمي العلاقات الحكومية.",
+    "unnamedUser": "مستخدم بدون اسم"
   }
 }

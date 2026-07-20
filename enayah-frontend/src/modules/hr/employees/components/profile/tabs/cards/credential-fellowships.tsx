@@ -19,6 +19,7 @@ import { FellowshipInput } from '@/modules/hr/onboarding/types/onboarding.types'
 import { useLocale, useTranslations } from 'next-intl'
 import { toArabic, toPersianDigits } from '@/utils/utilities'
 import { cn } from '@/lib/utils'
+import { RowActions } from '@/components/dialogs/row-actions'
 
 // interface Fellowship {
 //   id: string
@@ -114,7 +115,7 @@ export function CredentialFellowships({
                 {/* <Badge>{x.status}</Badge> */}
               </div>
 
-              <div className='flex flex-col gap-2'>
+              {/* <div className='flex flex-col gap-2'>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button size='icon' variant='ghost'>
@@ -156,7 +157,11 @@ export function CredentialFellowships({
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
+              </div> */}
+              <RowActions
+                onEdit={() => onEdit?.(x.id!)}
+                onDelete={() => onDelete?.(x.id!)}
+              />
             </div>
           </div>
         ))}

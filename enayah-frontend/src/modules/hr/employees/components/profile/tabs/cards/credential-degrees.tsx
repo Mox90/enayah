@@ -4,18 +4,13 @@ import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { VerificationBadge } from '@/components/badges/verification-badge'
 import { DegreeInput } from '@/modules/hr/onboarding/types/onboarding.types'
-import { MoreVertical, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { toArabic, toPersianDigits } from '@/utils/utilities'
 import { cn } from '@/lib/utils'
+import { RowActions } from '@/components/dialogs/row-actions'
 
 // interface Degree {
 //   id: string
@@ -119,30 +114,13 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
                 )}
 
                 <div className='text-sm'>
-                  {ct('type')}:{' '}
-                  {/* {degreeTypeLabel[degree.degreeType.replace('_', ' ') ?? ''] ??
-                    degree.degreeType.replace('_', ' ')} */}
-                  {ct(degree.degreeType)}
-                  {/* <span
-                    className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${
-                      degreeTypeColors[degree.degreeType] ??
-                      'bg-gray-100 text-gray-700 border-gray-200'
-                    }`}
-                  >
-                    Type:{' '}
-                    {degreeTypeLabel[
-                      degree.degreeType.replace('_', ' ') ?? ''
-                    ] ?? degree.degreeType.replace('_', ' ')}
-                  </span> */}
+                  {ct('type')}: {ct(degree.degreeType)}
                 </div>
 
                 <VerificationBadge verified={degree.isVerified ?? false} />
               </div>
 
-              <div className='flex flex-col items-end gap-2'>
-                {/* <Badge variant={degree.isVerified ? 'default' : 'secondary'}>
-                  {degree.isVerified ? 'Verified' : 'Unverified'}
-                </Badge> */}
+              {/* <div className='flex flex-col items-end gap-2'>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -185,7 +163,11 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
+              </div> */}
+              <RowActions
+                onEdit={() => onEdit?.(degree.id!)}
+                onDelete={() => onDelete?.(degree.id!)}
+              />
             </div>
           </div>
         ))}

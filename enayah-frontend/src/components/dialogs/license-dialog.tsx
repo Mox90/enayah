@@ -1,26 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { FormDialog } from '../forms'
+import { Footer } from '../footer/footer'
+import { useLocale, useTranslations } from 'next-intl'
+import { Save } from 'lucide-react'
 
 export type LicenseFormValue = {
   id?: string
@@ -65,7 +53,20 @@ function LicenseDialogContent({
   onSubmit: (value: LicenseFormValue) => void | Promise<void>
   generateId: boolean
 }) {
+  const t = useTranslations('credentials')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
+
   const [form, setForm] = useState<LicenseFormValue>(initialValue ?? emptyValue)
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const authority = form.authority.trim()
+  const licenseNumber = form.licenseNumber.trim()
+  const specialty = form.specialty?.trim()
+  const profession = form.profession.trim()
+  const issueDate = form.issueDate?.trim()
+  const expiryDate = form.expiryDate.trim()
 
   function update<K extends keyof LicenseFormValue>(
     field: K,
@@ -85,26 +86,44 @@ function LicenseDialogContent({
     return `license-${Date.now()}-${Math.random().toString(36).slice(2)}`
   }
 
-  async function handleSubmit() {
-    if (!form.authority.trim()) return
-    if (!form.licenseNumber.trim()) return
-    if (!form.profession.trim()) return
-    if (!form.issueDate?.trim()) return
-    if (!form.expiryDate.trim()) return
+  const formInvalid = !authority || !licenseNumber || !profession || !expiryDate
 
-    await onSubmit({
-      ...form,
-      id: form.id ?? (generateId ? createClientId() : undefined),
-      specialty: form.specialty || null,
-      issueDate: form.issueDate || null,
-    })
+  function closeDialog() {
+    if (isSubmitting) return
 
     onOpenChange(false)
   }
 
+  async function handleSubmit() {
+    // if (!form.authority.trim()) return
+    // if (!form.licenseNumber.trim()) return
+    // if (!form.profession.trim()) return
+    // if (!form.issueDate?.trim()) return
+    // if (!form.expiryDate.trim()) return
+    if (isSubmitting || formInvalid) return
+
+    setIsSubmitting(true)
+
+    try {
+      await onSubmit({
+        ...form,
+        id: form.id ?? (generateId ? createClientId() : undefined),
+        specialty: form.specialty || null,
+        issueDate: form.issueDate || null,
+      })
+
+      onOpenChange(false)
+    } catch (error) {
+      // Keep the dialog open.
+      // The parent mutation hook can display the error toast.
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <>
-      <div className='space-y-6 px-6 py-1'>
+      <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
@@ -121,7 +140,7 @@ function LicenseDialogContent({
               <Label>License Number *</Label>
               <Input
                 className='h-11'
-                value={form.licenseNumber}
+                value={licenseNumber}
                 onChange={(e) => update('licenseNumber', e.target.value)}
                 placeholder='2626912923'
               />
@@ -141,7 +160,7 @@ function LicenseDialogContent({
               <Label>Profession *</Label>
               <Input
                 className='h-11'
-                value={form.profession ?? ''}
+                value={profession ?? ''}
                 onChange={(e) => update('profession', e.target.value)}
                 placeholder='Nurse'
               />
@@ -151,7 +170,7 @@ function LicenseDialogContent({
               <Label>Specialty</Label>
               <Input
                 className='h-11'
-                value={form.specialty ?? ''}
+                value={specialty ?? ''}
                 onChange={(e) => update('specialty', e.target.value || null)}
                 placeholder='Emergency Nursing'
               />
@@ -175,7 +194,7 @@ function LicenseDialogContent({
               <Input
                 type='date'
                 className='h-11 bg-background'
-                value={form.issueDate ?? ''}
+                value={issueDate ?? ''}
                 onChange={(e) => update('issueDate', e.target.value)}
               />
             </div>
@@ -185,7 +204,7 @@ function LicenseDialogContent({
               <Input
                 type='date'
                 className='h-11 bg-background'
-                value={form.expiryDate ?? ''}
+                value={expiryDate ?? ''}
                 onChange={(e) => update('expiryDate', e.target.value)}
               />
             </div>
@@ -193,24 +212,18 @@ function LicenseDialogContent({
         </section>
       </div>
 
-      <DialogFooter className='border-t bg-muted/40 px-6 py-6'>
-        <Button
-          type='button'
-          className='p-4'
-          variant='outline'
-          onClick={() => onOpenChange(false)}
-        >
-          Cancel
-        </Button>
-
-        <Button
-          type='button'
-          className='bg-slate-950 p-4 text-white hover:bg-slate-800'
-          onClick={handleSubmit}
-        >
-          Save License
-        </Button>
-      </DialogFooter>
+      <Footer
+        onCancel={closeDialog}
+        onSave={handleSubmit}
+        label={t('save', {
+          item: isRtl ? 'رخصة' : 'License',
+        })}
+        savingLabel={t('saving', { item: 'license' })}
+        disabled={formInvalid}
+        isSaving={isSubmitting}
+        saveVariant='default'
+        saveIcon={<Save className='h-4 w-4' />}
+      />
     </>
   )
 }
@@ -230,8 +243,8 @@ export function LicenseDialog({
       onOpenChange={onOpenChange}
       title={initialValue ? 'Edit License' : 'Add License'}
       description="Enter the employee's obtained license details."
-      className='w-[95vw] max-w-4xl overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+      className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'
     >
       {open && (
         <LicenseDialogContent

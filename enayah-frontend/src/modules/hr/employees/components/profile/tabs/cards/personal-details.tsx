@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
+import { RowActions } from '@/components/dialogs/row-actions'
 
 function dash(value?: string | number | boolean | null) {
   if (value === true) return 'Yes'
@@ -99,54 +100,56 @@ function EmptyState() {
   )
 }
 
-function RowActions({
-  onEdit,
-  onDelete,
-}: {
-  onEdit?: () => void
-  onDelete?: () => void
-}) {
-  const ct = useTranslations('common')
-  if (!onEdit && !onDelete) return null
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button size='icon' variant='ghost' aria-label='Row actions'>
-          <MoreVertical className='h-4 w-4 text-green-700' />
-        </Button>
-      </DropdownMenuTrigger>
+// function RowActions({
+//   onEdit,
+//   onDelete,
+// }: {
+//   onEdit?: () => void
+//   onDelete?: () => void
+// }) {
+//   const ct = useTranslations('common')
+//   const locale = useLocale()
+//   const isRtl = locale === 'ar'
+//   if (!onEdit && !onDelete) return null
+//   return (
+//     <DropdownMenu dir={isRtl ? 'rtl' : 'ltr'}>
+//       <DropdownMenuTrigger asChild>
+//         <Button size='icon' variant='ghost' aria-label='Row actions'>
+//           <MoreVertical className='h-4 w-4 text-green-700' />
+//         </Button>
+//       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align='end'>
-        {onEdit && (
-          <DropdownMenuItem onClick={onEdit}>
-            <Pencil className='mr-2 h-4 w-4' />
-            {ct('edit')}
-          </DropdownMenuItem>
-        )}
+//       <DropdownMenuContent align='end'>
+//         {onEdit && (
+//           <DropdownMenuItem onClick={onEdit}>
+//             <Pencil className='mr-2 h-4 w-4' />
+//             {ct('edit')}
+//           </DropdownMenuItem>
+//         )}
 
-        {/* <DropdownMenuSeparator /> */}
-        {onEdit && onDelete && <DropdownMenuSeparator />}
+//         {/* <DropdownMenuSeparator /> */}
+//         {onEdit && onDelete && <DropdownMenuSeparator />}
 
-        {/* <DropdownMenuItem
-          className='text-destructive focus:text-destructive'
-          onClick={onDelete}
-        >
-          <Trash2 className='mr-2 h-4 w-4' />
-          Delete
-        </DropdownMenuItem> */}
-        {onDelete && (
-          <DropdownMenuItem
-            className='text-destructive focus:text-destructive'
-            onClick={onDelete}
-          >
-            <Trash2 className='mr-2 h-4 w-4' />
-            {ct('delete')}
-          </DropdownMenuItem>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
+//         {/* <DropdownMenuItem
+//           className='text-destructive focus:text-destructive'
+//           onClick={onDelete}
+//         >
+//           <Trash2 className='mr-2 h-4 w-4' />
+//           Delete
+//         </DropdownMenuItem> */}
+//         {onDelete && (
+//           <DropdownMenuItem
+//             className='text-destructive focus:text-destructive'
+//             onClick={onDelete}
+//           >
+//             <Trash2 className='mr-2 h-4 w-4' />
+//             {ct('delete')}
+//           </DropdownMenuItem>
+//         )}
+//       </DropdownMenuContent>
+//     </DropdownMenu>
+//   )
+// }
 
 interface Props {
   personalDetails?: EmployeePersonalDetails

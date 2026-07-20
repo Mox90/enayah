@@ -2,8 +2,7 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -15,8 +14,6 @@ import {
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
-import { DialogFooter } from '@/components/ui/dialog'
-//import { FormDialog } from '@/modules/hr/credentials/components/forms'
 import type {
   Address,
   Dependent,
@@ -35,6 +32,7 @@ import { HijriDatePicker } from './hijri-date-picker'
 import { DateObject } from 'react-multi-date-picker'
 import gregorian from 'react-date-object/calendars/gregorian'
 import arabic from 'react-date-object/calendars/arabic'
+import { Save } from 'lucide-react'
 
 type DialogProps<T> = {
   open: boolean
@@ -50,32 +48,6 @@ function createClientId(prefix: string) {
 
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
-
-// function Footer({
-//   onCancel,
-//   onSave,
-//   label,
-// }: {
-//   onCancel: () => void
-//   onSave: () => void
-//   label: string
-// }) {
-//   return (
-//     <DialogFooter className='border-t bg-muted/40 px-6 py-8 shrink-0'>
-//       <Button type='button' variant='outline' onClick={onCancel}>
-//         Cancel
-//       </Button>
-
-//       <Button
-//         type='button'
-//         className='bg-slate-950 text-white hover:bg-slate-800'
-//         onClick={onSave}
-//       >
-//         {label}
-//       </Button>
-//     </DialogFooter>
-//   )
-// }
 
 /* -------------------------------------------------------------------------- */
 /* Identification Dialog                                                       */
@@ -117,8 +89,8 @@ export function IdentificationDialog({
       }
       description={it('idTitleSub')}
       //className='w-[95vw] max-w-7xl overflow-hidden p-0'
-      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+      className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'
     >
       {open && (
         <IdentificationDialogContent
@@ -146,9 +118,15 @@ function IdentificationDialogContent({
   const ct = useTranslations('common')
   const locale = useLocale()
   const isRtl = locale === 'ar'
+
   const [form, setForm] = useState<Identification>(
     initialValue ?? emptyIdentification,
   )
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const type = form.type.trim()
+  const identificationNumber = form.identificationNumber.trim()
 
   function update<K extends keyof Identification>(
     field: K,
@@ -157,30 +135,47 @@ function IdentificationDialogContent({
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  async function handleSubmit() {
-    if (!form.identificationNumber.trim()) return
+  const formInvalid = !type || !identificationNumber
 
-    await onSubmit({
-      ...form,
-      id: form.id || createClientId('identification'),
-      sponsor: form.sponsor || null,
-      issuingAuthority: form.issuingAuthority || null,
-      occupation: form.occupation || null,
-      fileId: form.fileId || null,
-    })
+  function closeDialog() {
+    if (isSubmitting) return
 
     onOpenChange(false)
   }
 
+  async function handleSubmit() {
+    if (isSubmitting || formInvalid) return
+
+    setIsSubmitting(true)
+
+    try {
+      await onSubmit({
+        ...form,
+        id: form.id || createClientId('identification'),
+        sponsor: form.sponsor || null,
+        issuingAuthority: form.issuingAuthority || null,
+        occupation: form.occupation || null,
+        fileId: form.fileId || null,
+      })
+
+      onOpenChange(false)
+    } catch {
+      // Keep the dialog open.
+      // The parent mutation can display the error toast.
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <>
-      <div className='flex-1 overflow-y-auto space-y-6 px-6 py-5'>
+      <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='grid gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
               <Label>{et('idType')}</Label>
               <Select
-                value={form.type}
+                value={type}
                 onValueChange={(v) =>
                   update('type', v as Identification['type'])
                 }
@@ -205,7 +200,7 @@ function IdentificationDialogContent({
               <Label>{it('number')}</Label>
               <Input
                 className='h-11'
-                value={form.identificationNumber}
+                value={identificationNumber}
                 onChange={(e) => update('identificationNumber', e.target.value)}
               />
             </div>
@@ -393,9 +388,15 @@ function IdentificationDialogContent({
       </div>
 
       <Footer
-        onCancel={() => onOpenChange(false)}
+        //onCancel={() => onOpenChange(false)}
+        onCancel={closeDialog}
         onSave={handleSubmit}
         label={it('saveIdentification')}
+        //savingLabel={crt('saving', { item: 'board' })}
+        disabled={formInvalid}
+        isSaving={isSubmitting}
+        saveVariant='default'
+        saveIcon={<Save className='h-4 w-4' />}
       />
     </>
   )
@@ -433,8 +434,8 @@ export function PhoneDialog({
       title={initialValue ? pt('editPhoneNumberBtn') : pt('addPhoneNumberBtn')}
       description='Enter employee phone details.'
       //className='w-[95vw] max-w-7xl overflow-hidden p-0'
-      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+      className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'
     >
       {open && (
         <PhoneDialogContent
@@ -467,6 +468,11 @@ function PhoneDialogContent({
     },
   )
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const type = form.type.trim()
+  const countryCode = form.countryCode.trim()
+  const phoneNumber = form.phoneNumber.trim()
+
   function update<K extends keyof PhoneNumber>(
     field: K,
     value: PhoneNumber[K],
@@ -474,27 +480,44 @@ function PhoneDialogContent({
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  async function handleSubmit() {
-    if (!form.phoneNumber.trim()) return
+  const formInvalid = !type || !countryCode || !phoneNumber
 
-    await onSubmit({
-      ...form,
-      id: form.id || createClientId('phone'),
-      extension: form.extension || null,
-    })
+  function closeDialog() {
+    if (isSubmitting) return
 
     onOpenChange(false)
   }
 
+  async function handleSubmit() {
+    if (isSubmitting || formInvalid) return
+
+    setIsSubmitting(true)
+
+    try {
+      await onSubmit({
+        ...form,
+        id: form.id || createClientId('phone'),
+        extension: form.extension || null,
+      })
+
+      onOpenChange(false)
+    } catch {
+      // Keep the dialog open.
+      // The parent mutation can display the error toast.
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <>
-      <div className='flex-1 overflow-y-auto space-y-6 px-6 py-5'>
+      <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='grid gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
               <Label>{pt('type')}</Label>
               <Select
-                value={form.type}
+                value={type}
                 onValueChange={(v) => update('type', v as PhoneNumber['type'])}
               >
                 <SelectTrigger className='h-11'>
@@ -515,14 +538,14 @@ function PhoneDialogContent({
 
               <div className='flex h-11 overflow-hidden rounded-md border border-input bg-background'>
                 <PhoneCodeCombobox
-                  value={form.countryCode || '+966'}
+                  value={countryCode || '+966'}
                   onChange={(value) => update('countryCode', value)}
                   className='rounded-none border-0 border-r'
                 />
 
                 <Input
                   className='border-0! rounded-none! bg-transparent! shadow-none! focus-visible:ring-0 focus-visible:ring-offset-0'
-                  value={form.phoneNumber}
+                  value={phoneNumber}
                   onChange={(e) => update('phoneNumber', e.target.value)}
                   placeholder='512345678'
                 />
@@ -558,9 +581,13 @@ function PhoneDialogContent({
       </div>
 
       <Footer
-        onCancel={() => onOpenChange(false)}
+        onCancel={closeDialog}
         onSave={handleSubmit}
         label={pt('savePhone')}
+        disabled={formInvalid}
+        isSaving={isSubmitting}
+        saveVariant='default'
+        saveIcon={<Save className='h-4 w-4' />}
       />
     </>
   )
@@ -593,8 +620,8 @@ export function EmailDialog({
       description={emt('emailSub')}
       //className='w-[95vw] max-w-3xl overflow-hidden p-0'
       //headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
-      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+      className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'
     >
       {open && (
         <EmailDialogContent
@@ -621,24 +648,46 @@ function EmailDialogContent({
   const emt = useTranslations('email')
   const locale = useLocale()
   const isRtl = locale === 'ar'
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const type = form.type.trim()
+  const email = form.email.trim()
+
   function update<K extends keyof Email>(field: K, value: Email[K]) {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  async function handleSubmit() {
-    if (!form.email.trim()) return
+  const formInvalid = !type || !email
 
-    await onSubmit({
-      ...form,
-      id: form.id || createClientId('email'),
-    })
+  function closeDialog() {
+    if (isSubmitting) return
 
     onOpenChange(false)
   }
 
+  async function handleSubmit() {
+    if (isSubmitting || formInvalid) return
+
+    setIsSubmitting(true)
+
+    try {
+      await onSubmit({
+        ...form,
+        id: form.id || createClientId('email'),
+      })
+
+      onOpenChange(false)
+    } catch {
+      // Keep the dialog open.
+      // The parent mutation can display the error toast.
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <>
-      <div className='flex-1 overflow-y-auto space-y-6 px-6 py-5'>
+      <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='grid gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
@@ -681,9 +730,13 @@ function EmailDialogContent({
       </div>
 
       <Footer
-        onCancel={() => onOpenChange(false)}
+        onCancel={closeDialog}
         onSave={handleSubmit}
         label={emt('saveEmail')}
+        disabled={formInvalid}
+        isSaving={isSubmitting}
+        saveVariant='default'
+        saveIcon={<Save className='h-4 w-4' />}
       />
     </>
   )
@@ -726,8 +779,8 @@ export function AddressDialog({
       onOpenChange={onOpenChange}
       title={initialValue ? at('editAddressBtn') : at('addAddressBtn')}
       description={at('addressSub')}
-      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+      className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'
     >
       {open && (
         <AddressDialogContent
@@ -755,31 +808,53 @@ function AddressDialogContent({
   const locale = useLocale()
   const isRtl = locale === 'ar'
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const addressType = form.addressType.trim()
+  const city = form.city.trim()
+  const district = form.district.trim()
+  const street = form.street.trim()
+  const postalCode = form.postalCode.trim()
+
   function update<K extends keyof Address>(field: K, value: Address[K]) {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  async function handleSubmit() {
-    if (!form.city.trim()) return
-    if (!form.district.trim()) return
-    if (!form.street.trim()) return
-    if (!form.postalCode.trim()) return
-    //if (!form.stateProvince.trim()) return
+  const formInvalid =
+    !addressType || !city || !district || !street || !postalCode
 
-    await onSubmit({
-      ...form,
-      id: form.id || createClientId('address'),
-      building: form.building || null,
-      additionalNumber: form.additionalNumber || null,
-      stateProvince: form.stateProvince || null,
-    })
+  function closeDialog() {
+    if (isSubmitting) return
 
     onOpenChange(false)
   }
 
+  async function handleSubmit() {
+    if (isSubmitting || formInvalid) return
+
+    setIsSubmitting(true)
+
+    try {
+      await onSubmit({
+        ...form,
+        id: form.id || createClientId('address'),
+        building: form.building || null,
+        additionalNumber: form.additionalNumber || null,
+        stateProvince: form.stateProvince || null,
+      })
+
+      onOpenChange(false)
+    } catch {
+      // Keep the dialog open.
+      // The parent mutation can display the error toast.
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <>
-      <div className='flex-1 overflow-y-auto space-y-6 px-6 py-5'>
+      <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='grid gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
@@ -888,9 +963,14 @@ function AddressDialogContent({
       </div>
 
       <Footer
-        onCancel={() => onOpenChange(false)}
+        onCancel={closeDialog}
         onSave={handleSubmit}
         label={at('saveAddress')}
+        //savingLabel={crt('saving', { item: 'board' })}
+        disabled={formInvalid}
+        isSaving={isSubmitting}
+        saveVariant='default'
+        saveIcon={<Save className='h-4 w-4' />}
       />
     </>
   )
@@ -930,8 +1010,8 @@ export function DependentDialog({
       onOpenChange={onOpenChange}
       title={initialValue ? dt('editDependentBtn') : dt('addDependentBtn')}
       description={dt('dependentsSub')}
-      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+      className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'
     >
       {open && (
         <DependentDialogContent
@@ -960,37 +1040,59 @@ function DependentDialogContent({
   const locale = useLocale()
   const isRtl = locale === 'ar'
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const firstNameEn = form.firstNameEn.trim()
+  const familyNameEn = form.familyNameEn.trim()
+  const firstNameAr = form.firstNameAr.trim()
+  const familyNameAr = form.familyNameAr.trim()
+
   function update<K extends keyof Dependent>(field: K, value: Dependent[K]) {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  async function handleSubmit() {
-    if (!form.firstNameEn.trim()) return
-    if (!form.familyNameEn.trim()) return
-    if (!form.firstNameAr.trim()) return
-    if (!form.familyNameAr.trim()) return
+  const formInvalid =
+    !firstNameEn || !familyNameEn || !firstNameAr || !familyNameAr
 
-    await onSubmit({
-      ...form,
-      id: form.id || createClientId('dependent'),
-      secondNameEn: form.secondNameEn || null,
-      thirdNameEn: form.thirdNameEn || null,
-      secondNameAr: form.secondNameAr || null,
-      thirdNameAr: form.thirdNameAr || null,
-      dateOfBirth: form.dateOfBirth || null,
-    })
+  function closeDialog() {
+    if (isSubmitting) return
 
     onOpenChange(false)
   }
 
+  async function handleSubmit() {
+    if (isSubmitting || formInvalid) return
+
+    setIsSubmitting(true)
+
+    try {
+      await onSubmit({
+        ...form,
+        id: form.id || createClientId('dependent'),
+        secondNameEn: form.secondNameEn || null,
+        thirdNameEn: form.thirdNameEn || null,
+        secondNameAr: form.secondNameAr || null,
+        thirdNameAr: form.thirdNameAr || null,
+        dateOfBirth: form.dateOfBirth || null,
+      })
+
+      onOpenChange(false)
+    } catch {
+      // Keep the dialog open.
+      // The parent mutation can display the error toast.
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <>
-      <div className='flex-1 overflow-y-auto space-y-6 px-6 py-5'>
+      <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='grid gap-4 xl:grid-cols-2'>
             <InputField
               label={dt('firstNameEn')}
-              value={form.firstNameEn}
+              value={firstNameEn}
               onChange={(v) => update('firstNameEn', v)}
             />
             <InputField
@@ -1005,12 +1107,12 @@ function DependentDialogContent({
             />
             <InputField
               label={dt('familyNameEn')}
-              value={form.familyNameEn}
+              value={familyNameEn}
               onChange={(v) => update('familyNameEn', v)}
             />
             <InputField
               label={dt('firstNameAr')}
-              value={form.firstNameAr}
+              value={firstNameAr}
               onChange={(v) => update('firstNameAr', v)}
             />
             <InputField
@@ -1025,7 +1127,7 @@ function DependentDialogContent({
             />
             <InputField
               label={dt('familyNameAr')}
-              value={form.familyNameAr}
+              value={familyNameAr}
               onChange={(v) => update('familyNameAr', v)}
             />
 
@@ -1082,9 +1184,13 @@ function DependentDialogContent({
       </div>
 
       <Footer
-        onCancel={() => onOpenChange(false)}
+        onCancel={closeDialog}
         onSave={handleSubmit}
-        label='Save Dependent'
+        label={dt('save')}
+        disabled={formInvalid}
+        isSaving={isSubmitting}
+        saveVariant='default'
+        saveIcon={<Save className='h-4 w-4' />}
       />
     </>
   )
@@ -1123,8 +1229,8 @@ export function EmergencyContactDialog({
           : ect('addEmergencyContactBtn')
       }
       description={ect('emergencyContactSub')}
-      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+      className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'
     >
       {open && (
         <EmergencyContactDialogContent
@@ -1155,6 +1261,12 @@ function EmergencyContactDialogContent({
     initialValue ?? emptyEmergencyContact,
   )
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const name = form.name.trim()
+  const relationship = form.relationship.trim()
+  const mobile = form.mobile?.trim()
+
   function update<K extends keyof EmergencyContact>(
     field: K,
     value: EmergencyContact[K],
@@ -1162,29 +1274,46 @@ function EmergencyContactDialogContent({
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  async function handleSubmit() {
-    if (!form.name.trim()) return
+  const formInvalid = !name || !relationship || !mobile
 
-    await onSubmit({
-      ...form,
-      id: form.id || createClientId('emergency-contact'),
-      relationship: form.relationship || null,
-      mobile: form.mobile || null,
-      alternateMobile: form.alternateMobile || null,
-      address: form.address || null,
-    })
+  function closeDialog() {
+    if (isSubmitting) return
 
     onOpenChange(false)
   }
 
+  async function handleSubmit() {
+    if (isSubmitting || formInvalid) return
+
+    setIsSubmitting(true)
+
+    try {
+      await onSubmit({
+        ...form,
+        id: form.id || createClientId('emergency-contact'),
+        relationship: form.relationship || null,
+        mobile: form.mobile || null,
+        alternateMobile: form.alternateMobile || null,
+        address: form.address || null,
+      })
+
+      onOpenChange(false)
+    } catch {
+      // Keep the dialog open.
+      // The parent mutation can display the error toast.
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <>
-      <div className='flex-1 overflow-y-auto space-y-6 px-6 py-5'>
+      <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='grid gap-4 xl:grid-cols-2'>
             <InputField
               label={ect('name')}
-              value={form.name}
+              value={name}
               onChange={(v) => update('name', v)}
             />
 
@@ -1196,7 +1325,7 @@ function EmergencyContactDialogContent({
             <div className='space-y-2'>
               <Label>{ect('relationship')}</Label>
               <Select
-                value={form.relationship}
+                value={relationship}
                 onValueChange={(v) =>
                   update('relationship', v as EmergencyContact['relationship'])
                 }
@@ -1216,7 +1345,7 @@ function EmergencyContactDialogContent({
 
             <InputField
               label={ect('phoneNumber')}
-              value={form.mobile ?? ''}
+              value={mobile ?? ''}
               onChange={(v) => update('mobile', v || null)}
             />
 
@@ -1238,9 +1367,13 @@ function EmergencyContactDialogContent({
       </div>
 
       <Footer
-        onCancel={() => onOpenChange(false)}
+        onCancel={closeDialog}
         onSave={handleSubmit}
         label={ect('saveEmergencyContact')}
+        disabled={formInvalid}
+        isSaving={isSubmitting}
+        saveVariant='default'
+        saveIcon={<Save className='h-4 w-4' />}
       />
     </>
   )
@@ -1275,8 +1408,8 @@ export function VisaDialog({
       onOpenChange={onOpenChange}
       title={initialValue ? vt('editVisaBtn') : vt('addVisaBtn')}
       description={vt('visaSub')}
-      className='w-[70vw] md:max-w-4xl lg:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white flex-shrink-0'
+      className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'
     >
       {open && (
         <VisaDialogContent
@@ -1304,33 +1437,54 @@ function VisaDialogContent({
   const locale = useLocale()
   const isRtl = locale === 'ar'
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const visaNumber = form.visaNumber.trim()
+
   function update<K extends keyof Visa>(field: K, value: Visa[K]) {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  async function handleSubmit() {
-    if (!form.visaNumber.trim()) return
+  const formInvalid = !visaNumber
 
-    await onSubmit({
-      ...form,
-      id: form.id || createClientId('visa'),
-      visaType: form.visaType || undefined,
-      issueDate: form.issueDate || null,
-      expiryDate: form.expiryDate || null,
-      fileId: form.fileId || null,
-    })
+  function closeDialog() {
+    if (isSubmitting) return
 
     onOpenChange(false)
   }
 
+  async function handleSubmit() {
+    if (isSubmitting || formInvalid) return
+
+    setIsSubmitting(true)
+
+    try {
+      await onSubmit({
+        ...form,
+        id: form.id || createClientId('visa'),
+        visaType: form.visaType || undefined,
+        issueDate: form.issueDate || null,
+        expiryDate: form.expiryDate || null,
+        fileId: form.fileId || null,
+      })
+
+      onOpenChange(false)
+    } catch {
+      // Keep the dialog open.
+      // The parent mutation can display the error toast.
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <>
-      <div className='flex-1 overflow-y-auto space-y-6 px-6 py-5'>
+      <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='grid gap-4 xl:grid-cols-2'>
             <InputField
               label={vt('visaNumber')}
-              value={form.visaNumber}
+              value={visaNumber}
               onChange={(v) => update('visaNumber', v)}
             />
 
@@ -1372,9 +1526,13 @@ function VisaDialogContent({
       </div>
 
       <Footer
-        onCancel={() => onOpenChange(false)}
+        onCancel={closeDialog}
         onSave={handleSubmit}
         label={vt('saveVisa')}
+        disabled={formInvalid}
+        isSaving={isSubmitting}
+        saveVariant='default'
+        saveIcon={<Save className='h-4 w-4' />}
       />
     </>
   )

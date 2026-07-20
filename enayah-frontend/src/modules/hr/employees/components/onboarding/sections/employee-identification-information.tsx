@@ -74,9 +74,9 @@ export function EmployeeIdentificationInformation({ value, onChange }: Props) {
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value='national_id'>{t('nationalId')}</SelectItem>
+              <SelectItem value='national_id'>{t('national_id')}</SelectItem>
               <SelectItem value='iqama'>{t('iqama')}</SelectItem>
-              <SelectItem value='gcc_id'>{t('gccId')}</SelectItem>
+              <SelectItem value='gcc_id'>{t('gcc_id')}</SelectItem>
               <SelectItem value='passport'>{t('passport')}</SelectItem>
               <SelectItem value='other'>{t('other')}</SelectItem>
             </SelectContent>

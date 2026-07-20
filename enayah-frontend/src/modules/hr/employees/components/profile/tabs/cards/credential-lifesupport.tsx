@@ -17,6 +17,7 @@ import { LifeSupportInput } from '@/modules/hr/onboarding/types/onboarding.types
 import { useLocale, useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { toArabic, toPersianDigits } from '@/utils/utilities'
+import { RowActions } from '@/components/dialogs/row-actions'
 
 //import { VerificationBadge } from '@/components/common/verification-badge'
 
@@ -150,7 +151,7 @@ export function CredentialLifeSupport({
                 {/* <VerificationBadge verified={x.isVerified ?? false} /> */}
               </div>
 
-              <div className='flex flex-col items-end gap-2'>
+              {/* <div className='flex flex-col items-end gap-2'>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button size='icon' variant='ghost'>
@@ -192,7 +193,11 @@ export function CredentialLifeSupport({
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
+              </div> */}
+              <RowActions
+                onEdit={() => onEdit?.(x.id!)}
+                onDelete={() => onDelete?.(x.id!)}
+              />
             </div>
           </div>
         ))}

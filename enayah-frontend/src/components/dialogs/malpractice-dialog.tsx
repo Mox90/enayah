@@ -1,19 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FormDialog } from '../forms'
+import { Footer } from '../footer/footer'
+import { Save } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
 
 export type MalpracticeFormValue = {
   id?: string
@@ -21,7 +15,7 @@ export type MalpracticeFormValue = {
   policyNumber: string
   coverageAmount?: string | number | null
   startDate?: string | null
-  expiryDate?: string | null
+  expiryDate: string
   documentFileId?: string | null
   isVerified?: boolean
 }
@@ -39,7 +33,7 @@ const emptyValue: MalpracticeFormValue = {
   policyNumber: '',
   coverageAmount: null,
   startDate: null,
-  expiryDate: null,
+  expiryDate: '',
   documentFileId: null,
   isVerified: false,
 }
@@ -58,6 +52,15 @@ function MalpracticeDialogContent({
   const [form, setForm] = useState<MalpracticeFormValue>(
     initialValue ?? emptyValue,
   )
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const crt = useTranslations('credentials')
+  const locale = useLocale()
+  const isRtl = locale.toLowerCase().startsWith('ar')
+
+  const insuranceCompany = form.insuranceCompany.trim()
+  const policyNumber = form.policyNumber.trim()
+  const expiryDate = form.expiryDate?.trim()
 
   function update<K extends keyof MalpracticeFormValue>(
     field: K,
@@ -77,32 +80,48 @@ function MalpracticeDialogContent({
     return `malpractice-${Date.now()}-${Math.random().toString(36).slice(2)}`
   }
 
-  async function handleSubmit() {
-    if (!form.insuranceCompany.trim()) return
-    if (!form.policyNumber.trim()) return
+  const formInvalid = !insuranceCompany || !policyNumber || !expiryDate
 
-    await onSubmit({
-      ...form,
-      id: form.id ?? (generateId ? createClientId() : undefined),
-      //coverageAmount: form.coverageAmount || null,
-      coverageAmount:
-        form.coverageAmount === '' ||
-        form.coverageAmount === null ||
-        form.coverageAmount === undefined
-          ? null
-          : form.coverageAmount,
-      startDate: form.startDate || null,
-      expiryDate: form.expiryDate || null,
-      documentFileId: form.documentFileId || null,
-      isVerified: form.isVerified ?? false,
-    })
+  function closeDialog() {
+    if (isSubmitting) return
 
     onOpenChange(false)
   }
 
+  async function handleSubmit() {
+    if (isSubmitting || formInvalid) return
+
+    setIsSubmitting(true)
+
+    try {
+      await onSubmit({
+        ...form,
+        id: form.id ?? (generateId ? createClientId() : undefined),
+        //coverageAmount: form.coverageAmount || null,
+        coverageAmount:
+          form.coverageAmount === '' ||
+          form.coverageAmount === null ||
+          form.coverageAmount === undefined
+            ? null
+            : form.coverageAmount,
+        startDate: form.startDate || null,
+        expiryDate,
+        documentFileId: form.documentFileId || null,
+        isVerified: form.isVerified ?? false,
+      })
+
+      onOpenChange(false)
+    } catch {
+      // Keep the dialog open.
+      // The parent mutation can display the error toast.
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <>
-      <div className='space-y-6 px-6 py-1'>
+      <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
@@ -118,7 +137,7 @@ function MalpracticeDialogContent({
               <Label>Insurance Company *</Label>
               <Input
                 className='h-11'
-                value={form.insuranceCompany}
+                value={insuranceCompany}
                 onChange={(e) => update('insuranceCompany', e.target.value)}
                 placeholder='Insurance Company'
               />
@@ -128,7 +147,7 @@ function MalpracticeDialogContent({
               <Label>Policy Number *</Label>
               <Input
                 className='h-11'
-                value={form.policyNumber}
+                value={policyNumber}
                 onChange={(e) => update('policyNumber', e.target.value)}
                 placeholder='POL-123456'
               />
@@ -181,32 +200,28 @@ function MalpracticeDialogContent({
               <Input
                 type='date'
                 className='h-11 bg-background'
-                value={form.expiryDate ?? ''}
-                onChange={(e) => update('expiryDate', e.target.value || null)}
+                value={expiryDate ?? ''}
+                onChange={(e) => update('expiryDate', e.target.value)}
               />
             </div>
           </div>
         </section>
       </div>
 
-      <DialogFooter className='border-t bg-muted/40 px-6 py-6'>
-        <Button
-          type='button'
-          className='p-4'
-          variant='outline'
-          onClick={() => onOpenChange(false)}
-        >
-          Cancel
-        </Button>
-
-        <Button
-          type='button'
-          className='bg-slate-950 p-4 text-white hover:bg-slate-800'
-          onClick={handleSubmit}
-        >
-          Save Malpractice
-        </Button>
-      </DialogFooter>
+      <Footer
+        onCancel={closeDialog}
+        onSave={handleSubmit}
+        label={crt('save', {
+          item: isRtl
+            ? 'وثيقة التأمين ضد الأخطاء المهنية'
+            : 'Malpractice Policy',
+        })}
+        savingLabel={crt('saving', { item: 'malpractice insurance policy' })}
+        disabled={formInvalid}
+        isSaving={isSubmitting}
+        saveVariant='default'
+        saveIcon={<Save className='h-4 w-4' />}
+      />
     </>
   )
 }
@@ -230,8 +245,8 @@ export function MalpracticeDialog({
           : 'Add Malpractice Insurance'
       }
       description="Enter the employee's malpractice insurance details."
-      className='w-[95vw] max-w-4xl overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+      className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'
     >
       {open && (
         <MalpracticeDialogContent

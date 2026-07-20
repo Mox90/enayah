@@ -20,6 +20,7 @@ import { LicenseInput } from '@/modules/hr/onboarding/types/onboarding.types'
 import { useLocale, useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { toPersianDigits } from '@/utils/utilities'
+import { RowActions } from '@/components/dialogs/row-actions'
 
 const verifyClass = {
   verified: 'bg-green-100 text-green-700 border-green-200',
@@ -107,7 +108,7 @@ export function CredentialLicenses({
                 <StatusBadge status={x.status} />
               </div>
 
-              <div className='flex flex-col gap-2'>
+              {/* <div className='flex flex-col gap-2'>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button size='icon' variant='ghost'>
@@ -149,7 +150,11 @@ export function CredentialLicenses({
                     )}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              </div>
+              </div> */}
+              <RowActions
+                onEdit={() => onEdit?.(x.id!)}
+                onDelete={() => onDelete?.(x.id!)}
+              />
             </div>
           </div>
         ))}

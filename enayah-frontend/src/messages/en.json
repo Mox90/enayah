@@ -464,6 +464,7 @@
     "graduationDateLabel": "Graduation Date",
     "cancel": "Cancel",
     "save": "Save {item}",
+    "saving": "Saving {item}",
     "degreePlaceHolder": "Bachelor of Science in Nursing",
     "majorPlaceHolder": "Nursing",
     "institutionPlaceHolder": "University Name (Please do not abbreviate)",
@@ -581,7 +582,8 @@
     "mother": "Mother",
     "other": "Other",
     "dateOfBirth": "Date of Birth",
-    "gender": "Gender"
+    "gender": "Gender",
+    "save": "Save Dependent"
   },
   "addresses": {
     "addressesTitle": "Addresses",
@@ -672,6 +674,9 @@
     "processCompleted": "This Iqama renewal process has been completed.",
     "processCancelled": "This Iqama renewal process has been cancelled.",
     "mhrsdApprovedAt": "MHRSD Approval Date",
-    "mhrsdDeniedAt": "MHRSD Denial Date"
+    "mhrsdDeniedAt": "MHRSD Denial Date",
+    "loadingAssignees": "Loading Government Relations users...",
+    "loadAssigneesFailed": "Failed to load Government Relations users.",
+    "unnamedUser": "Unnamed user"
   }
 }

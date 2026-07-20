@@ -3,6 +3,7 @@
 import { api } from '@/lib/api/client'
 
 import type {
+  AssigneeOption,
   ChangeIqamaRenewalStatusPayload,
   CreateIqamaRenewalCasePayload,
   IqamaRenewalCase,
@@ -84,11 +85,19 @@ export const iqamaRenewalService = {
     id: string,
     payload: ChangeIqamaRenewalStatusPayload,
   ) => {
+    console.log(payload)
     const response = await api.patch<IqamaRenewalCase>(
       `${API_ENDPOINTS.hr.iqamaRenewal}/${id}/status`,
       payload,
     )
 
+    return response.data
+  },
+
+  getGovernmentRelationsUsers: async (): Promise<AssigneeOption[]> => {
+    const response = await api.get<AssigneeOption[]>(
+      `${API_ENDPOINTS.hr.iqamaRenewal}/assignees/government-relations`,
+    )
     return response.data
   },
 }

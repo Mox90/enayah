@@ -25,9 +25,10 @@ import { PositionItemCombobox } from '@/modules/hr/positions-items/components/po
 import { useAllowanceOptions } from '@/modules/hr/compensations/utils/allowance-options'
 import { DepartmentCombobox } from '@/modules/hr/departments/components/department-combobox'
 import { PositionCombobox } from '@/modules/hr/positions/components/position-combobox'
-import { Trash2 } from 'lucide-react'
+import { RefreshCcw, Trash2 } from 'lucide-react'
 import { AllowanceTypeCombobox } from '../comboboxes/allowance-combobox'
 import { useLocale, useTranslations } from 'next-intl'
+import { Footer } from '../footer/footer'
 
 interface Props {
   open: boolean
@@ -74,7 +75,7 @@ function ContractRenewalDialogContent({
 }: Props) {
   const ct = useTranslations('contracts')
   const et = useTranslations('employees')
-  const cmt = useTranslations('common')
+  //const cmt = useTranslations('common')
   const locale = useLocale()
   const isRtl = locale === 'ar'
   const [startDate, setStartDate] = useState(defaultStartDate)
@@ -97,6 +98,14 @@ function ContractRenewalDialogContent({
   const [notes, setNotes] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const allowanceOptions = useAllowanceOptions()
+  const formInvalid =
+    !startDate || !endDate || !positionItemId || endDate < startDate
+
+  function closeDialog() {
+    if (isSubmitting) return
+
+    onOpenChange(false)
+  }
   const [allowances, setAllowances] = useState<
     { type: string; amount: number }[]
   >(
@@ -152,8 +161,9 @@ function ContractRenewalDialogContent({
   }
 
   async function handleSubmit() {
-    if (isSubmitting) return
-    if (!startDate || !endDate || !positionItemId) return
+    //if (isSubmitting) return
+    //if (!startDate || !endDate || !positionItemId) return
+    if (isSubmitting || formInvalid) return
 
     setIsSubmitting(true)
 
@@ -202,6 +212,9 @@ function ContractRenewalDialogContent({
       })
 
       onOpenChange(false)
+    } catch {
+      // Keep the dialog open.
+      // The parent mutation hook can display the error toast.
     } finally {
       setIsSubmitting(false)
     }
@@ -422,6 +435,7 @@ function ContractRenewalDialogContent({
               <Label>{et('movementRemarks')}</Label>
               <Textarea
                 value={remarks}
+                disabled={isSubmitting}
                 onChange={(e) => setRemarks(e.target.value)}
                 placeholder='Renewed with same PCN, promotion, transfer, etc.'
               />
@@ -431,6 +445,7 @@ function ContractRenewalDialogContent({
               <Label>{et('contractNotes')}</Label>
               <Textarea
                 value={notes}
+                disabled={isSubmitting}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder='Optional contract notes.'
               />
@@ -439,7 +454,7 @@ function ContractRenewalDialogContent({
         </section>
       </div>
 
-      <DialogFooter className='shrink-0 border-t bg-muted/40 px-4 py-4 sm:px-6 sm:py-6'>
+      {/* <DialogFooter className='shrink-0 border-t bg-muted/40 px-4 py-4 sm:px-6 sm:py-6'>
         <Button
           type='button'
           variant='outline'
@@ -454,16 +469,19 @@ function ContractRenewalDialogContent({
           onClick={handleSubmit}
           disabled={isSubmitting}
         >
-          {/* {isSubmitting
-            ? isRtl
-              ? 'جارٍ التجديد...'
-              : 'Renewing...'
-            : isRtl
-              ? 'تجديد العقد'
-              : 'Renew Contract'} */}
           {isSubmitting ? ct('renewingContract') : ct('renewContract')}
         </Button>
-      </DialogFooter>
+      </DialogFooter> */}
+      <Footer
+        onCancel={closeDialog}
+        onSave={handleSubmit}
+        label={ct('renewContract')}
+        savingLabel={ct('renewingContract')}
+        disabled={formInvalid}
+        isSaving={isSubmitting}
+        saveVariant='default'
+        saveIcon={<RefreshCcw className='h-4 w-4' />}
+      />
     </>
   )
 }

@@ -52,6 +52,8 @@ interface Props {
   renewalCase: IqamaRenewalCase
   canManageWorkflow?: boolean
   governmentRelationsUsers?: AssigneeOption[]
+  isLoadingGovernmentRelationsUsers?: boolean
+  isGovernmentRelationsUsersError?: boolean
 }
 
 type ActionTone = 'default' | 'success' | 'warning' | 'danger' | 'info'
@@ -241,6 +243,8 @@ export function IqamaRenewalWorkflowActions({
   renewalCase,
   canManageWorkflow = false,
   governmentRelationsUsers = [],
+  isLoadingGovernmentRelationsUsers = false,
+  isGovernmentRelationsUsersError = false,
 }: Props) {
   const t = useTranslations('iqamaRenewal')
   const locale = useLocale()
@@ -271,12 +275,19 @@ export function IqamaRenewalWorkflowActions({
   const requiresGovernmentRelationsAssignment =
     selectedStatus === 'sent_to_government_relations'
 
+  const governmentRelationsUsersUnavailable =
+    isLoadingGovernmentRelationsUsers ||
+    isGovernmentRelationsUsersError ||
+    governmentRelationsUsers.length === 0
+
   const confirmDisabled =
     changeStatus.isPending ||
     !selectedStatus ||
     (requiresDenialReason && !denialReason.trim()) ||
     (requiresGovernmentRelationsAssignment &&
-      (!assignedToUserId || !governmentRelationsDueDate))
+      (governmentRelationsUsersUnavailable ||
+        !assignedToUserId ||
+        !governmentRelationsDueDate))
 
   function clearFormFields() {
     setAssignedToUserId('')
@@ -611,7 +622,12 @@ export function IqamaRenewalWorkflowActions({
 
                       <Select
                         value={assignedToUserId}
-                        disabled={changeStatus.isPending}
+                        disabled={
+                          changeStatus.isPending ||
+                          isLoadingGovernmentRelationsUsers ||
+                          isGovernmentRelationsUsersError ||
+                          governmentRelationsUsers.length === 0
+                        }
                         onValueChange={setAssignedToUserId}
                       >
                         <SelectTrigger
@@ -624,7 +640,21 @@ export function IqamaRenewalWorkflowActions({
                         </SelectTrigger>
 
                         <SelectContent dir={isRtl ? 'rtl' : 'ltr'}>
-                          {governmentRelationsUsers.length === 0 ? (
+                          {isLoadingGovernmentRelationsUsers ? (
+                            <SelectItem
+                              value='loading-government-relations-users'
+                              disabled
+                            >
+                              {t('loadingAssignees')}
+                            </SelectItem>
+                          ) : isGovernmentRelationsUsersError ? (
+                            <SelectItem
+                              value='government-relations-users-error'
+                              disabled
+                            >
+                              {t('loadAssigneesFailed')}
+                            </SelectItem>
+                          ) : governmentRelationsUsers.length === 0 ? (
                             <SelectItem
                               value='no-government-relations-users'
                               disabled
@@ -632,11 +662,20 @@ export function IqamaRenewalWorkflowActions({
                               {t('noAssigneesAvailable')}
                             </SelectItem>
                           ) : (
-                            governmentRelationsUsers.map((user) => (
-                              <SelectItem key={user.id} value={user.id}>
-                                {user.label}
-                              </SelectItem>
-                            ))
+                            governmentRelationsUsers.map((user) => {
+                              const displayName = isRtl
+                                ? user.labelAr || user.labelEn
+                                : user.labelEn || user.labelAr
+
+                              return (
+                                <SelectItem key={user.id} value={user.id}>
+                                  {displayName ||
+                                    user.email ||
+                                    user.username ||
+                                    t('unnamedUser')}
+                                </SelectItem>
+                              )
+                            })
                           )}
                         </SelectContent>
                       </Select>
