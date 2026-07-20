@@ -16,6 +16,7 @@ import {
 import { useLocale, useTranslations } from 'next-intl'
 import { FormDialog } from '../forms'
 import { Footer } from '../footer/footer'
+import { Save } from 'lucide-react'
 // import { EmployeeProfile } from '../../types/employee-profile.types'
 
 type PersonalFormValue = {
@@ -76,6 +77,13 @@ export function EmployeePersonalDialog({
     getInitialForm(profile),
   )
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const firstNameEn = form.firstNameEn.trim()
+  const familyNameEn = form.familyNameEn.trim()
+  const firstNameAr = form.firstNameAr.trim()
+  const familyNameAr = form.familyNameAr.trim()
+  const dateOfBirth = form.dateOfBirth?.trim()
+
   function update<K extends keyof PersonalFormValue>(
     key: K,
     value: PersonalFormValue[K],
@@ -83,7 +91,24 @@ export function EmployeePersonalDialog({
     setForm((prev) => ({ ...prev, [key]: value }))
   }
 
+  const formInvalid =
+    !firstNameEn ||
+    !familyNameEn ||
+    !firstNameAr ||
+    !familyNameAr ||
+    !dateOfBirth
+
+  function closeDialog() {
+    if (isSubmitting) return
+
+    onOpenChange(false)
+  }
+
   async function handleSubmit() {
+    if (isSubmitting || formInvalid) return
+
+    setIsSubmitting(true)
+
     try {
       await onSubmit({
         ...form,
@@ -97,12 +122,15 @@ export function EmployeePersonalDialog({
       onOpenChange(false)
     } catch (error) {
       // keep dialog open; error is surfaced via mutation onError
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   return (
     <FormDialog
       open={open}
+      //open={closeDialog}
       onOpenChange={onOpenChange}
       title={et('editPersonalInfo')}
       description={et('editPersonalInfoSub')}
@@ -250,31 +278,15 @@ export function EmployeePersonalDialog({
 
       {/* 3. Ensure the footer remains fixed at the bottom and doesn't shrink */}
       <Footer
-        onCancel={() => onOpenChange(false)}
+        onCancel={closeDialog}
         onSave={handleSubmit}
         label={et('savePersonalInfo')}
-        // savingLabel={t('saving', { item: 'fellowship' })}
-        // disabled={formInvalid}
-        // isSaving={isSubmitting}
-        // saveVariant='default'
-        // saveIcon={<Save className='h-4 w-4' />}
+        savingLabel={et('saving', { item: 'personal information' })}
+        disabled={formInvalid}
+        isSaving={isSubmitting}
+        saveVariant='default'
+        saveIcon={<Save className='h-4 w-4' />}
       />
-      {/* <DialogFooter className='border-t bg-muted/40 px-6 py-8 shrink-0'>
-        <Button
-          className='p-4'
-          variant='outline'
-          onClick={() => onOpenChange(false)}
-        >
-          Cancel
-        </Button>
-
-        <Button
-          className='p-4 bg-slate-950 text-white hover:bg-slate-800'
-          onClick={handleSubmit}
-        >
-          Save Changes
-        </Button>
-      </DialogFooter> */}
     </FormDialog>
   )
 }
