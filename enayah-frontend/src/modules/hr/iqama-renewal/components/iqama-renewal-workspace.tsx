@@ -76,7 +76,7 @@ export function IqamaRenewalWorkspace() {
         onCancel={closeForm}
         onSaved={closeForm}
         canManageWorkflow={canManageWorkflow}
-        governmentRelationsUsers={[]}
+        //governmentRelationsUsers={[]}
       />
     )
   }
