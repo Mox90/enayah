@@ -101,19 +101,41 @@ export const HrDashboardRepository = {
       db
         .select({
           expiringLicenses: sql<number>`
-          count(*) filter (
-            where ${employeeLicenses.expiryDate} is not null
-              and ${employeeLicenses.expiryDate} >= current_date
-              and ${employeeLicenses.expiryDate}
-                <= current_date
-                  + make_interval(
-                      days => ${alertWindowDays}
-                    )
-          )::int
-        `,
+      count(*)::int
+    `,
         })
         .from(employeeLicenses)
-        .where(eq(employeeLicenses.isDeleted, false)),
+        .innerJoin(
+          employees,
+          and(
+            eq(employees.id, employeeLicenses.employeeId),
+            eq(employees.isDeleted, false),
+          ),
+        )
+        .where(
+          and(
+            eq(employeeLicenses.isDeleted, false),
+            gte(employeeLicenses.expiryDate, sql`current_date`),
+            sql`
+        ${employeeLicenses.expiryDate}
+          <= current_date
+            + make_interval(
+                days => ${alertWindowDays}
+              )
+      `,
+            sql`
+        exists (
+          select 1
+          from ${employments}
+          where
+            ${employments.employeeId}
+              = ${employeeLicenses.employeeId}
+            and ${employments.status} = 'active'
+            and ${employments.isDeleted} = false
+        )
+      `,
+          ),
+        ),
 
       /*
        * Active contracts expiring within the alert window.
@@ -209,6 +231,14 @@ export const HrDashboardRepository = {
       })
       .from(employments)
       .where(eq(employments.isDeleted, false))
+    // .innerJoin(
+    //   employees,
+    //   and(
+    //     eq(employees.id, employments.employeeId),
+    //     eq(employees.isDeleted, false),
+    //   ),
+    // )
+    // .where(eq(employments.isDeleted, false))
 
     return result?.oldestYear ? Number(result.oldestYear) : null
   },

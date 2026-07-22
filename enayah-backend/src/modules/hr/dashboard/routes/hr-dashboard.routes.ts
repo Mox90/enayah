@@ -22,7 +22,7 @@ router.get(
   '/hr-admin',
   // Use your existing permission initially, or replace this with
   // hr.dashboard.view when that permission exists.
-  //requirePermission('hr.dashboard.view'),
+  requirePermission('hr.dashboard.view'),
   HrDashboardController.getAdminDashboard,
 )
 
