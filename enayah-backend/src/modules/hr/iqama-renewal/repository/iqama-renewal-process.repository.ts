@@ -1,4 +1,4 @@
-// src/modules/hr/iqama-renewal-process/iqama-renewal-process.repository.ts
+// enayah-backend/src/modules/hr/iqama-renewal-process/iqama-renewal-process.repository.ts
 
 import {
   and,
@@ -100,70 +100,6 @@ export const IqamaRenewalProcessRepository = {
     return created
   },
 
-  // findById: async (
-  //   tx: DB,
-  //   id: string,
-  //   options?: {
-  //     includeDeleted?: boolean
-  //   },
-  // ) => {
-  //   const conditions = [eq(iqamaRenewalCases.id, id)]
-
-  //   if (!options?.includeDeleted) {
-  //     conditions.push(eq(iqamaRenewalCases.isDeleted, false))
-  //   }
-
-  //   const [record] = await tx
-  //     .select({
-  //       ...getTableColumns(iqamaRenewalCases),
-
-  //       employeeNumber: employees.employeeNumber,
-
-  //       employeeNameEn: sql<string | null>`
-  //       nullif(
-  //         concat_ws(
-  //           ' ',
-  //           nullif(trim(${employees.firstNameEn}), ''),
-  //           nullif(trim(${employees.secondNameEn}), ''),
-  //           nullif(trim(${employees.thirdNameEn}), ''),
-  //           nullif(trim(${employees.familyNameEn}), '')
-  //         ),
-  //         ''
-  //       )
-  //     `.as('employee_name_en'),
-
-  //       employeeNameAr: sql<string | null>`
-  //       nullif(
-  //         concat_ws(
-  //           ' ',
-  //           nullif(trim(${employees.firstNameAr}), ''),
-  //           nullif(trim(${employees.secondNameAr}), ''),
-  //           nullif(trim(${employees.thirdNameAr}), ''),
-  //           nullif(trim(${employees.familyNameAr}), '')
-  //         ),
-  //         ''
-  //       )
-  //     `.as('employee_name_ar'),
-
-  //       iqamaNumber: employeeIdentifications.identificationNumber,
-
-  //       expiryDate: employeeIdentifications.expiryDate,
-
-  //       assignedToName: users.username,
-  //     })
-  //     .from(iqamaRenewalCases)
-  //     .leftJoin(employees, eq(employees.id, iqamaRenewalCases.employeeId))
-  //     .leftJoin(
-  //       employeeIdentifications,
-  //       eq(employeeIdentifications.id, iqamaRenewalCases.identificationId),
-  //     )
-  //     .leftJoin(users, eq(users.id, iqamaRenewalCases.assignedToUserId))
-  //     .where(and(...conditions))
-  //     .limit(1)
-
-  //   return record ?? null
-  // },
-
   findById: async (
     tx: DB,
     id: string,
@@ -210,9 +146,7 @@ export const IqamaRenewalProcessRepository = {
       `.as('employee_name_ar'),
 
         iqamaNumber: employeeIdentifications.identificationNumber,
-
         expiryDate: employeeIdentifications.expiryDate,
-
         assignedToName: sql<string | null>`
         coalesce(
           nullif(
@@ -272,156 +206,6 @@ export const IqamaRenewalProcessRepository = {
     return record ?? null
   },
 
-  // list: async (tx: DB, query: ListIqamaRenewalCasesQuery) => {
-  //   const offset = (query.page - 1) * query.limit
-  //   const statuses = normalizeStatuses(query.status)
-
-  //   const conditions: SQL[] = []
-
-  //   if (!query.includeDeleted) {
-  //     conditions.push(eq(iqamaRenewalCases.isDeleted, false))
-  //   }
-
-  //   if (statuses.length === 1) {
-  //     conditions.push(eq(iqamaRenewalCases.status, statuses[0]!))
-  //   }
-
-  //   if (statuses.length > 1) {
-  //     conditions.push(inArray(iqamaRenewalCases.status, statuses))
-  //   }
-
-  //   if (query.employeeId) {
-  //     conditions.push(eq(iqamaRenewalCases.employeeId, query.employeeId))
-  //   }
-
-  //   if (query.identificationId) {
-  //     conditions.push(
-  //       eq(iqamaRenewalCases.identificationId, query.identificationId),
-  //     )
-  //   }
-
-  //   if (query.assignedToUserId) {
-  //     conditions.push(
-  //       eq(iqamaRenewalCases.assignedToUserId, query.assignedToUserId),
-  //     )
-  //   }
-
-  //   if (query.unassigned) {
-  //     conditions.push(isNull(iqamaRenewalCases.assignedToUserId))
-  //   }
-
-  //   if (query.governmentRelationsDueFrom) {
-  //     conditions.push(
-  //       gte(
-  //         iqamaRenewalCases.governmentRelationsDueDate,
-  //         query.governmentRelationsDueFrom,
-  //       ),
-  //     )
-  //   }
-
-  //   if (query.governmentRelationsDueTo) {
-  //     conditions.push(
-  //       lte(
-  //         iqamaRenewalCases.governmentRelationsDueDate,
-  //         query.governmentRelationsDueTo,
-  //       ),
-  //     )
-  //   }
-
-  //   if (query.createdFrom) {
-  //     conditions.push(
-  //       gte(
-  //         iqamaRenewalCases.createdAt,
-  //         new Date(`${query.createdFrom}T00:00:00.000Z`),
-  //       ),
-  //     )
-  //   }
-
-  //   if (query.createdTo) {
-  //     conditions.push(
-  //       lte(
-  //         iqamaRenewalCases.createdAt,
-  //         new Date(`${query.createdTo}T23:59:59.999Z`),
-  //       ),
-  //     )
-  //   }
-
-  //   const where = conditions.length > 0 ? and(...conditions) : undefined
-
-  //   const orderByColumn = getOrderByColumn(query.sortBy)
-
-  //   const orderBy =
-  //     query.sortOrder === 'asc' ? asc(orderByColumn) : desc(orderByColumn)
-
-  //   const [rows, totalResult] = await Promise.all([
-  //     tx
-  //       .select({
-  //         ...getTableColumns(iqamaRenewalCases),
-  //         employeeNumber: employees.employeeNumber,
-  //         employeeNameEn: sql<string | null>`
-  //       nullif(
-  //         concat_ws(
-  //           ' ',
-  //           nullif(trim(${employees.firstNameEn}), ''),
-  //           nullif(trim(${employees.secondNameEn}), ''),
-  //           nullif(trim(${employees.thirdNameEn}), ''),
-  //           nullif(trim(${employees.familyNameEn}), '')
-  //         ),
-  //         ''
-  //       )
-  //     `.as('employee_name_en'),
-  //         employeeNameAr: sql<string | null>`
-  //       nullif(
-  //         concat_ws(
-  //           ' ',
-  //           nullif(trim(${employees.firstNameAr}), ''),
-  //           nullif(trim(${employees.secondNameAr}), ''),
-  //           nullif(trim(${employees.thirdNameAr}), ''),
-  //           nullif(trim(${employees.familyNameAr}), '')
-  //         ),
-  //         ''
-  //       )
-  //     `.as('employee_name_ar'),
-  //         iqamaNumber: employeeIdentifications.identificationNumber,
-  //         expiryDate: employeeIdentifications.expiryDate,
-  //         assignedToName: users.username,
-  //       })
-  //       .from(iqamaRenewalCases)
-  //       .leftJoin(employees, eq(employees.id, iqamaRenewalCases.employeeId))
-  //       .leftJoin(
-  //         employeeIdentifications,
-  //         eq(employeeIdentifications.id, iqamaRenewalCases.identificationId),
-  //       )
-  //       .leftJoin(users, eq(users.id, iqamaRenewalCases.assignedToUserId))
-  //       .where(where)
-  //       .orderBy(orderBy)
-  //       .limit(query.limit)
-  //       .offset(offset),
-
-  //     tx
-  //       .select({
-  //         total: count(),
-  //       })
-  //       .from(iqamaRenewalCases)
-  //       .where(where),
-  //   ])
-
-  //   const total = totalResult[0]?.total ?? 0
-
-  //   const totalPages = total === 0 ? 0 : Math.ceil(total / query.limit)
-  //   console.log(rows)
-  //   return {
-  //     data: rows,
-  //     pagination: {
-  //       page: query.page,
-  //       limit: query.limit,
-  //       total,
-  //       totalPages,
-  //       hasNextPage: query.page < totalPages,
-  //       hasPreviousPage: query.page > 1,
-  //     },
-  //   }
-  // },
   list: async (tx: DB, query: ListIqamaRenewalCasesQuery) => {
     const offset = (query.page - 1) * query.limit
     const statuses = normalizeStatuses(query.status)

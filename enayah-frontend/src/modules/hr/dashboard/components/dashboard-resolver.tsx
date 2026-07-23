@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/hr/dashboard/components/dashboard-resolver.tsx
+
 'use client'
 
 import { useAuthStore } from '@/modules/iam/stores/auth.store'

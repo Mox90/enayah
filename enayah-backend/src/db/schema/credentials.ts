@@ -2,6 +2,7 @@ import {
   bigint,
   boolean,
   date,
+  index,
   integer,
   numeric,
   pgTable,
@@ -17,7 +18,7 @@ import {
 } from './enums'
 import { employees } from './hr'
 import { countries } from './countries'
-import { relations } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 
 /** Sample  */
 
@@ -128,23 +129,31 @@ export const employeeMemberships = pgTable('employee_memberships', {
   ...baseColumns,
 })
 
-export const employeeLicenses = pgTable('employee_licenses', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  employeeId: uuid('employee_id')
-    .notNull()
-    .references(() => employees.id, { onDelete: 'cascade' }),
-  authority: varchar('authority', { length: 255 }).notNull(),
-  licenseNumber: varchar('license_number', { length: 100 }).notNull(),
-  profession: varchar('profession', { length: 255 }).notNull(),
-  specialty: varchar('specialty', { length: 255 }),
-  issueDate: date('issue_date'),
-  expiryDate: date('expiry_date').notNull(),
-  status: licenseStatusEnum('status').default('active').notNull(),
-  isPrimary: boolean('is_primary').default(false).notNull(),
-  documentFileId: uuid('document_file_id').references(() => files.id),
-  ...verificationColumns,
-  ...baseColumns,
-})
+export const employeeLicenses = pgTable(
+  'employee_licenses',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    employeeId: uuid('employee_id')
+      .notNull()
+      .references(() => employees.id, { onDelete: 'cascade' }),
+    authority: varchar('authority', { length: 255 }).notNull(),
+    licenseNumber: varchar('license_number', { length: 100 }).notNull(),
+    profession: varchar('profession', { length: 255 }).notNull(),
+    specialty: varchar('specialty', { length: 255 }),
+    issueDate: date('issue_date'),
+    expiryDate: date('expiry_date').notNull(),
+    status: licenseStatusEnum('status').default('active').notNull(),
+    isPrimary: boolean('is_primary').default(false).notNull(),
+    documentFileId: uuid('document_file_id').references(() => files.id),
+    ...verificationColumns,
+    ...baseColumns,
+  },
+  (table) => [
+    index('idx_employee_licenses_expiry_date')
+      .on(table.expiryDate)
+      .where(sql`${table.isDeleted} = false`),
+  ],
+)
 
 export const employeeLifeSupportCertifications = pgTable(
   'employee_life_support_certifications',

@@ -57,6 +57,20 @@
       "when": 1783581945117,
       "tag": "0007_serious_darkhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1784701921918,
+      "tag": "0008_absurd_sersi",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1784787389072,
+      "tag": "0009_last_energizer",
+      "breakpoints": true
     }
   ]
 }

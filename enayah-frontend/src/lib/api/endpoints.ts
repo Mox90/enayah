@@ -1,3 +1,5 @@
+// enayah-frontend/src/lib/api/endpoints.ts
+
 export const API_ENDPOINTS = {
   org: {
     departments: '/org/departments',
@@ -12,11 +14,17 @@ export const API_ENDPOINTS = {
     onboarding: '/hr/onboarding',
     contracts: '/hr/contracts',
     iqamaRenewal: '/hr/iqama-renewal-process',
+    dashboard: {
+      admin: '/hr/dashboard/hr-admin',
+      manager: '/hr/dashboard/manager',
+      director: '/hr/dashboard/director',
+      employee: '/hr/dashboard/employee',
+    },
   },
 
   iam: {
     login: '/iam/auth/login',
-    signup: 'iam/auth/signup',
+    signup: '/iam/auth/signup',
     me: '/iam/auth/me',
     logout: '/iam/auth/logout',
   },

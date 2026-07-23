@@ -72,9 +72,19 @@ export const employments = pgTable(
     causeOfLeaving: varchar('cause_of_leaving', { length: 255 }),
     ...baseColumns,
   },
-  (table) => ({
-    employeeIdx: index('idx_employments_employee_id').on(table.employeeId),
-  }),
+  // (table) => ({
+  //   employeeIdx: index('idx_employments_employee_id').on(table.employeeId),
+  // }),
+  (table) => [
+    index('idx_employments_employee_id').on(table.employeeId),
+    index('idx_employments_hire_date_active')
+      .on(table.hireDate)
+      .where(sql`${table.isDeleted} = false`),
+
+    index('idx_employments_status_employee')
+      .on(table.status, table.employeeId)
+      .where(sql`${table.isDeleted} = false`),
+  ],
 )
 //CREATE INDEX idx_employments_employee_id ON employments(employee_id);
 
@@ -139,13 +149,21 @@ export const contracts = pgTable(
     notes: text('notes'),
     ...baseColumns,
   },
-  (table) => ({
-    employeeIdx: index('idx_contracts_employment_id').on(table.employmentId),
-    validDateRange: check(
+  (table) => [
+    index('idx_contracts_employment_id').on(table.employmentId),
+
+    index('idx_contracts_status_end_date')
+      .on(table.status, table.endDate)
+      .where(sql`${table.isDeleted} = false`),
+
+    check(
       'chk_contracts_valid_date_range',
-      sql`${table.endDate} IS NULL OR ${table.endDate} >= ${table.startDate}`,
+      sql`
+      ${table.endDate} IS NULL
+      OR ${table.endDate} >= ${table.startDate}
+    `,
     ),
-  }),
+  ],
 )
 
 export const contractMovements = pgTable(
@@ -178,24 +196,25 @@ export const contractMovements = pgTable(
 
     ...baseColumns,
   },
+  (table) => [
+    index('idx_contract_movements_contract_id').on(table.contractId),
 
-  (table) => ({
-    contractIdx: index('idx_contract_movements_contract_id').on(
-      table.contractId,
-    ),
-    uniqueSequence: unique('uq_contract_sequence').on(
-      table.contractId,
-      table.sequenceNumber,
-    ),
-    validDateRange: check(
+    index('idx_contract_movements_type_start_date')
+      .on(table.movementType, table.startDate)
+      .where(sql`${table.isDeleted} = false`),
+
+    unique('uq_contract_sequence').on(table.contractId, table.sequenceNumber),
+
+    check(
       'chk_job_assignments_valid_date_range',
-      sql`${table.endDate} IS NULL OR ${table.endDate} >= ${table.startDate}`,
+      sql`
+      ${table.endDate} IS NULL
+      OR ${table.endDate} >= ${table.startDate}
+    `,
     ),
-    validSequence: check(
-      'sequence_number_whole_number',
-      sql`${table.sequenceNumber} >= 1`,
-    ),
-  }),
+
+    check('sequence_number_whole_number', sql`${table.sequenceNumber} >= 1`),
+  ],
 )
 
 export const compensations = pgTable(
@@ -237,32 +256,40 @@ export const compensationAllowances = pgTable('compensation_allowances', {
   amount: numeric('amount').notNull(),
 })
 
-export const positionItems = pgTable('position_items', {
-  id: uuid('id').defaultRandom().primaryKey(),
+export const positionItems = pgTable(
+  'position_items',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
 
-  oldItemNumber: varchar('old_item_number', { length: 50 }), // to store the original item number from the import file for reference
-  itemNumber: varchar('item_number', { length: 50 }).notNull().unique(),
+    oldItemNumber: varchar('old_item_number', { length: 50 }), // to store the original item number from the import file for reference
+    itemNumber: varchar('item_number', { length: 50 }).notNull().unique(),
 
-  departmentId: uuid('department_id')
-    .notNull()
-    .references(() => departments.id),
+    departmentId: uuid('department_id')
+      .notNull()
+      .references(() => departments.id),
 
-  positionId: uuid('position_id')
-    .notNull()
-    .references(() => positions.id),
+    positionId: uuid('position_id')
+      .notNull()
+      .references(() => positions.id),
 
-  jobGradeId: uuid('job_grade_id').references(() => jobGrades.id),
+    jobGradeId: uuid('job_grade_id').references(() => jobGrades.id),
 
-  workforceCategory: workforceCategoryEnum('workforce_category'), //Physician, Nurse, Allied Health, Administrative, Support Service // workforce classification
-  categoryCode: integer('category_code'), // 1000, 2000, 3000, 4000, 5000 // workforce classification
+    workforceCategory: workforceCategoryEnum('workforce_category'), //Physician, Nurse, Allied Health, Administrative, Support Service // workforce classification
+    categoryCode: integer('category_code'), // 1000, 2000, 3000, 4000, 5000 // workforce classification
 
-  minSalary: numeric('min_salary'),
-  maxSalary: numeric('max_salary'),
+    minSalary: numeric('min_salary'),
+    maxSalary: numeric('max_salary'),
 
-  status: varchar('status', { length: 20 }).default('vacant').notNull(), // vacant, reserved, filled, frozen
+    status: varchar('status', { length: 20 }).default('vacant').notNull(), // vacant, reserved, filled, frozen
 
-  ...baseColumns,
-})
+    ...baseColumns,
+  },
+  (table) => [
+    index('idx_position_items_status')
+      .on(table.status)
+      .where(sql`${table.isDeleted} = false`),
+  ],
+)
 
 export const employeesRelations = relations(employees, ({ one, many }) => ({
   nationality: one(countries, {
