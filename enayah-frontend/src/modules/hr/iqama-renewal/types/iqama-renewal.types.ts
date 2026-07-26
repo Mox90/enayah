@@ -85,7 +85,8 @@ export type ChangeIqamaRenewalStatusPayload = {
   assignedToUserId?: string | null
   governmentRelationsDueDate?: string | null
   denialReason?: string | null
-  notes?: string | null
+  //notes?: string | null
+  comment?: string
   version: number
 }
 

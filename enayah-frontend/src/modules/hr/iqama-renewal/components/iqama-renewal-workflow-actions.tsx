@@ -259,7 +259,8 @@ export function IqamaRenewalWorkflowActions({
   const [governmentRelationsDueDate, setGovernmentRelationsDueDate] =
     useState('')
   const [denialReason, setDenialReason] = useState('')
-  const [notes, setNotes] = useState('')
+  //const [notes, setNotes] = useState('')
+  const [comment, setComment] = useState('')
 
   if (!canManageWorkflow) {
     return null
@@ -293,7 +294,8 @@ export function IqamaRenewalWorkflowActions({
     setAssignedToUserId('')
     setGovernmentRelationsDueDate('')
     setDenialReason('')
-    setNotes('')
+    //setNotes('')
+    setComment('')
   }
 
   function openAction(status: IqamaRenewalStatus) {
@@ -324,8 +326,8 @@ export function IqamaRenewalWorkflowActions({
       version: renewalCase.version,
     }
 
-    if (notes.trim()) {
-      payload.notes = notes.trim()
+    if (comment.trim()) {
+      payload.comment = comment.trim()
     }
 
     if (requiresDenialReason) {
@@ -703,7 +705,7 @@ export function IqamaRenewalWorkflowActions({
                 </section>
               )}
 
-              <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+              {/* <section className='rounded-2xl border bg-card p-5 shadow-sm'>
                 <div className='mb-4 flex items-center gap-3'>
                   <div className='flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white dark:bg-slate-100 dark:text-slate-950'>
                     <MessageSquareText className='h-4 w-4' />
@@ -731,6 +733,40 @@ export function IqamaRenewalWorkflowActions({
                   className='min-h-28 resize-none'
                   onChange={(event) => setNotes(event.target.value)}
                 />
+              </section> */}
+              <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+                <div className='mb-4 flex items-center gap-3'>
+                  <div className='flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white dark:bg-slate-100 dark:text-slate-950'>
+                    <MessageSquareText className='h-4 w-4' />
+                  </div>
+
+                  <div>
+                    <Label
+                      htmlFor='workflowComment'
+                      className='text-sm font-semibold'
+                    >
+                      {t('workflowComment')}
+                    </Label>
+
+                    <p className='mt-0.5 text-xs text-muted-foreground'>
+                      {t('workflowCommentDescription')}
+                    </p>
+                  </div>
+                </div>
+
+                <Textarea
+                  id='workflowComment'
+                  rows={4}
+                  maxLength={2000}
+                  value={comment}
+                  disabled={changeStatus.isPending}
+                  className='min-h-28 resize-none'
+                  onChange={(event) => setComment(event.target.value)}
+                />
+
+                <div className='mt-2 text-end text-xs text-muted-foreground'>
+                  {comment.length}/2000
+                </div>
               </section>
             </div>
 

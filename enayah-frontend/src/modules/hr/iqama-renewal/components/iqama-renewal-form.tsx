@@ -42,12 +42,14 @@ import type {
 import { IqamaRenewalStatusBadge } from './iqama-renewal-status-badge'
 import { IqamaRenewalWorkflowActions } from './iqama-renewal-workflow-actions'
 import { toArabic, toPersianDigits } from '@/utils/utilities'
+import { IqamaRenewalCaseDiscussion } from './iqama-renewal-case-discussion'
 
 interface Props {
   caseId?: string | null
   onCancel: () => void
   onSaved: () => void
   canManageWorkflow?: boolean
+  canCommentOnCase?: boolean
 }
 
 type FormValues = {
@@ -212,6 +214,7 @@ export function IqamaRenewalForm({
   onCancel,
   onSaved,
   canManageWorkflow = false,
+  canCommentOnCase = false,
   //governmentRelationsUsers = [],
 }: Props) {
   const t = useTranslations('iqamaRenewal')
@@ -706,6 +709,13 @@ export function IqamaRenewalForm({
             isGovernmentRelationsUsersError={isGovernmentRelationsUsersError}
           />
         </div>
+      )}
+
+      {existingCase && (
+        <IqamaRenewalCaseDiscussion
+          caseId={existingCase.id}
+          canComment={canCommentOnCase}
+        />
       )}
     </div>
   )

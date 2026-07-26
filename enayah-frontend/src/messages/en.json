@@ -677,6 +677,23 @@
     "mhrsdDeniedAt": "MHRSD Denial Date",
     "loadingAssignees": "Loading Government Relations users...",
     "loadAssigneesFailed": "Failed to load Government Relations users.",
-    "unnamedUser": "Unnamed user"
+    "unnamedUser": "Unnamed user",
+    "caseDiscussion": "Case Discussion",
+    "caseDiscussionDescription": "Comments and replies related to this Iqama renewal process.",
+    "commentCount": "{count, plural, =0 {No comments} =1 {1 comment} other {# comments}}",
+    "writeComment": "Write a comment about this case...",
+    "postComment": "Post Comment",
+    "reply": "Reply",
+    "replyingTo": "Replying to {name}",
+    "writeReply": "Write your reply...",
+    "postReply": "Post Reply",
+    "cancelReply": "Cancel reply",
+    "loadingComments": "Loading discussion...",
+    "loadCommentsFailed": "Unable to load the case discussion.",
+    "noComments": "No comments yet",
+    "noCommentsDescription": "Start the discussion by posting the first comment.",
+    "workflowComment": "Workflow Comment",
+    "workflowCommentDescription": "Optional comment about this workflow action. Case participants will be notified.",
+    "retry": "Retry"
   }
 }

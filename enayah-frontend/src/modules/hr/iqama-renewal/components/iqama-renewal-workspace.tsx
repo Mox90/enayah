@@ -26,6 +26,10 @@ export function IqamaRenewalWorkspace() {
   const mode = requestedView === 'form' ? 'form' : 'directory'
   const canManageWorkflow =
     user?.roles?.some((role) => role.name === 'HR_ADMIN') ?? false
+  const canCommentOnCase =
+    user?.roles?.some((role) =>
+      ['HR_ADMIN', 'HR_GOVERNMENT_RELATION', 'HR_DIRECTOR'].includes(role.name),
+    ) ?? false
   const selectedCaseId = mode === 'form' ? caseIdFromUrl : null
 
   const [page, setPage] = useState(1)
@@ -76,6 +80,7 @@ export function IqamaRenewalWorkspace() {
         onCancel={closeForm}
         onSaved={closeForm}
         canManageWorkflow={canManageWorkflow}
+        canCommentOnCase={canCommentOnCase}
         //governmentRelationsUsers={[]}
       />
     )

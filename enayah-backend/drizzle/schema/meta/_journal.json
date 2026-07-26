@@ -71,6 +71,27 @@
       "when": 1784787389072,
       "tag": "0009_last_energizer",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1784805880920,
+      "tag": "0010_loving_dark_phoenix",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1784806071235,
+      "tag": "0011_warm_squirrel_girl",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1784806526721,
+      "tag": "0012_living_ravenous",
+      "breakpoints": true
     }
   ]
 }

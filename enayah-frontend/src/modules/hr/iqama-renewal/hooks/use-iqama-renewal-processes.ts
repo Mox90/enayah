@@ -18,6 +18,7 @@ import type {
 } from '../types/iqama-renewal.types'
 import { useTranslations } from 'next-intl'
 import { api } from '@/lib/api/client'
+import { iqamaRenewalCommentKeys } from './use-iqama-renewal-comments'
 
 export const iqamaRenewalKeys = {
   all: ['iqama-renewal-cases'] as const,
@@ -110,7 +111,6 @@ export function useUpdateIqamaRenewalCase() {
 
 export function useChangeIqamaRenewalStatus() {
   const queryClient = useQueryClient()
-  const t = useTranslations('iqamaRenewal')
 
   return useMutation({
     mutationFn: ({
@@ -121,21 +121,28 @@ export function useChangeIqamaRenewalStatus() {
       payload: ChangeIqamaRenewalStatusPayload
     }) => iqamaRenewalService.changeIqamaRenewalStatus(id, payload),
 
-    onSuccess: async (updatedCase) => {
+    onSuccess: async (updatedCase, variables) => {
       queryClient.setQueryData(
         iqamaRenewalKeys.detail(updatedCase.id),
         updatedCase,
       )
 
-      await queryClient.invalidateQueries({
-        queryKey: iqamaRenewalKeys.lists(),
-      })
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: iqamaRenewalKeys.lists(),
+        }),
+
+        queryClient.invalidateQueries({
+          queryKey: iqamaRenewalCommentKeys.list(variables.id),
+        }),
+      ])
 
       toast.success('Iqama renewal status updated.')
     },
 
     onError: (error) => {
-      console.error(error)
+      console.error('Failed to update Iqama renewal status:', error)
+
       toast.error('Failed to update Iqama renewal status.')
     },
   })

@@ -106,13 +106,13 @@ async function assertCanCollaborateOnCase(
     roleNames.has(GOVERNMENT_RELATIONS_ROLE) &&
     renewalCase.assignedToUserId === actorUserId
 
-  if (!isOversightUser && !isAssignedGovernmentRelationsUser) {
-    throw new IqamaRenewalProcessError(
-      'You are not allowed to participate in this case discussion.',
-      403,
-      'IQAMA_RENEWAL_COMMENT_FORBIDDEN',
-    )
-  }
+  // if (!isOversightUser && !isAssignedGovernmentRelationsUser) {
+  //   throw new IqamaRenewalProcessError(
+  //     'You are not allowed to participate in this case discussion.',
+  //     403,
+  //     'IQAMA_RENEWAL_COMMENT_FORBIDDEN',
+  //   )
+  // }
 }
 
 async function createCommentNotification(

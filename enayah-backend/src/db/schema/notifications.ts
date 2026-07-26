@@ -1,4 +1,5 @@
 import {
+  AnyPgColumn,
   boolean,
   check,
   date,
@@ -149,7 +150,9 @@ export const iqamaRenewalCaseComments = pgTable(
      *
      * When populated, this is the exact comment being replied to.
      */
-    parentCommentId: uuid('parent_comment_id'),
+    parentCommentId: uuid('parent_comment_id').references(
+      (): AnyPgColumn => iqamaRenewalCaseComments.id,
+    ),
 
     /*
      * Null for top-level comments.
@@ -157,7 +160,9 @@ export const iqamaRenewalCaseComments = pgTable(
      * Every reply points to the top-level comment of the thread.
      * This makes loading and grouping threaded replies inexpensive.
      */
-    threadRootId: uuid('thread_root_id'),
+    threadRootId: uuid('thread_root_id').references(
+      (): AnyPgColumn => iqamaRenewalCaseComments.id,
+    ),
 
     body: text('body').notNull(),
 
@@ -173,25 +178,27 @@ export const iqamaRenewalCaseComments = pgTable(
      *
      * This permits the composite self-referencing foreign keys below.
      */
-    uniqueIndex('uq_iqama_comment_id_case').on(table.id, table.caseId),
+    //unique('uq_iqama_comment_id_case').on(table.id, table.caseId),
 
     /*
      * Ensures the parent comment belongs to the same case.
      */
-    foreignKey({
-      name: 'fk_iqama_comment_parent_same_case',
-      columns: [table.parentCommentId, table.caseId],
-      foreignColumns: [table.id, table.caseId],
-    }).onDelete('restrict'),
+    // foreignKey({
+    //   name: 'fk_iqama_comment_parent_same_case',
+    //   columns: [table.parentCommentId, table.caseId],
+    //   foreignColumns: [table.id, table.caseId],
+    // }),
+    //.onDelete('restrict'),
 
     /*
      * Ensures the thread root also belongs to the same case.
      */
-    foreignKey({
-      name: 'fk_iqama_comment_thread_root_same_case',
-      columns: [table.threadRootId, table.caseId],
-      foreignColumns: [table.id, table.caseId],
-    }).onDelete('restrict'),
+    // foreignKey({
+    //   name: 'fk_iqama_comment_thread_root_same_case',
+    //   columns: [table.threadRootId, table.caseId],
+    //   foreignColumns: [table.id, table.caseId],
+    // }),
+    //.onDelete('restrict'),
 
     index('idx_iqama_comments_case_created_at').on(
       table.caseId,
