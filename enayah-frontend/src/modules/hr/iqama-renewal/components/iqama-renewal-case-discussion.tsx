@@ -71,6 +71,7 @@ function formatCommentDate(value: string, locale: string) {
 }
 
 function getAuthorName(comment: IqamaRenewalCaseComment, isArabic: boolean) {
+  //const t = useLocale('')
   const localizedName = isArabic
     ? comment.authorNameAr || comment.authorNameEn
     : comment.authorNameEn || comment.authorNameAr

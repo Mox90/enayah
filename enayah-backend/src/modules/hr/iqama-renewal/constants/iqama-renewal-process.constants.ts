@@ -17,3 +17,22 @@ export const IQAMA_COMMENT_NOTIFICATION_MILESTONES = {
 } as const
 
 export const IQAMA_RENEWAL_CASE_SOURCE_TYPE = 'iqama_renewal_case' as const
+
+export const IQAMA_WORKFLOW_NOTIFICATION_SOURCE_TYPE =
+  'iqama_renewal_case' as const
+
+export const IQAMA_WORKFLOW_NOTIFICATION_TYPES = {
+  assignedToGovernmentRelations: 'iqama_renewal_assigned_to_gr',
+
+  completedByGovernmentRelations: 'iqama_renewal_completed_by_gr',
+} as const
+
+/*
+ * notification_events.milestone is varchar(20),
+ * so keep these values shorter than 20 characters.
+ */
+export const IQAMA_WORKFLOW_NOTIFICATION_MILESTONES = {
+  assignedToGovernmentRelations: 'sent_to_gr',
+
+  completedByGovernmentRelations: 'iqama_completed',
+} as const

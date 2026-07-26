@@ -135,3 +135,40 @@ export class IqamaRenewalProcessError extends Error {
     this.name = 'IqamaRenewalProcessError'
   }
 }
+
+const nullableTrimmedString = z.string().trim().nullable().optional()
+
+const nullableDateOnly = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format.')
+  .nullable()
+  .optional()
+
+export const completeIqamaRenewalSchema = z.object({
+  version: z.number().int().nonnegative(),
+
+  identification: z.object({
+    identificationNumber: z.string().trim().min(1).max(100),
+
+    issueDate: nullableDateOnly,
+
+    expiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid expiry date.'),
+
+    issueDateHijri: nullableTrimmedString,
+    expiryDateHijri: nullableTrimmedString,
+
+    //dateCalendar: z.enum(['gregorian', 'hijri']).optional(),
+
+    sponsor: nullableTrimmedString,
+    issuingAuthority: nullableTrimmedString,
+    occupation: nullableTrimmedString,
+
+    isCurrent: z.literal(true),
+
+    fileId: z.string().uuid().nullable().optional(),
+  }),
+})
+
+export type CompleteIqamaRenewalInput = z.infer<
+  typeof completeIqamaRenewalSchema
+>

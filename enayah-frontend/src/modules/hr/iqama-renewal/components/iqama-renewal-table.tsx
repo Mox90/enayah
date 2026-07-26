@@ -1,4 +1,4 @@
-// src/modules/hr/iqama-renewal/components/list/iqama-renewal-table.tsx
+// enayah-frontend/src/modules/hr/iqama-renewal/components/list/iqama-renewal-table.tsx
 
 'use client'
 

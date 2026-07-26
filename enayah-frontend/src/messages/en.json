@@ -694,6 +694,10 @@
     "noCommentsDescription": "Start the discussion by posting the first comment.",
     "workflowComment": "Workflow Comment",
     "workflowCommentDescription": "Optional comment about this workflow action. Case participants will be notified.",
-    "retry": "Retry"
+    "retry": "Retry",
+    "updateRenewedIqama": "Update Renewed Iqama",
+    "updateRenewedIqamaDescription": "Enter the renewed Iqama details and complete the process.",
+    "updateRenewedIqamaDialogDescription": "Update the employee's renewed Iqama information. Saving will complete this renewal case.",
+    "saveIqamaAndComplete": "Save Iqama and Complete"
   }
 }

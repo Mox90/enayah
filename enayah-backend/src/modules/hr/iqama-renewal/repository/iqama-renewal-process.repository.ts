@@ -118,7 +118,6 @@ export const IqamaRenewalProcessRepository = {
         ...getTableColumns(iqamaRenewalCases),
 
         employeeNumber: employees.employeeNumber,
-
         employeeNameEn: sql<string | null>`
         nullif(
           concat_ws(
@@ -131,7 +130,6 @@ export const IqamaRenewalProcessRepository = {
           ''
         )
       `.as('employee_name_en'),
-
         employeeNameAr: sql<string | null>`
         nullif(
           concat_ws(
@@ -144,9 +142,25 @@ export const IqamaRenewalProcessRepository = {
           ''
         )
       `.as('employee_name_ar'),
-
         iqamaNumber: employeeIdentifications.identificationNumber,
         expiryDate: employeeIdentifications.expiryDate,
+        //iqamaNumber: employeeIdentifications.identificationNumber,
+        //expiryDate: employeeIdentifications.expiryDate,
+        identification: {
+          id: employeeIdentifications.id,
+          type: employeeIdentifications.type,
+          identificationNumber: employeeIdentifications.identificationNumber,
+          issueDate: employeeIdentifications.issueDate,
+          expiryDate: employeeIdentifications.expiryDate,
+          issueDateHijri: employeeIdentifications.issueDateHijri,
+          expiryDateHijri: employeeIdentifications.expiryDateHijri,
+          //dateCalendar: employeeIdentifications.,
+          sponsor: employeeIdentifications.sponsor,
+          issuingAuthority: employeeIdentifications.issuingAuthority,
+          occupation: employeeIdentifications.occupation,
+          isCurrent: employeeIdentifications.isCurrent,
+          fileId: employeeIdentifications.fileId,
+        },
         assignedToName: sql<string | null>`
         coalesce(
           nullif(
@@ -177,7 +191,11 @@ export const IqamaRenewalProcessRepository = {
       })
       .from(iqamaRenewalCases)
       .leftJoin(employees, eq(employees.id, iqamaRenewalCases.employeeId))
-      .leftJoin(
+      // .leftJoin(
+      //   employeeIdentifications,
+      //   eq(employeeIdentifications.id, iqamaRenewalCases.identificationId),
+      // )
+      .innerJoin(
         employeeIdentifications,
         eq(employeeIdentifications.id, iqamaRenewalCases.identificationId),
       )

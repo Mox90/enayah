@@ -13,6 +13,7 @@ import {
 
 import {
   ChangeIqamaRenewalStatusInput,
+  CompleteIqamaRenewalInput,
   CreateIqamaRenewalCaseInput,
   GOVERNMENT_RELATIONS_ROLE,
   IqamaRenewalCaseActor,
@@ -26,6 +27,7 @@ import {
   IqamaRenewalProcessRepository,
   type UpdateCaseData,
 } from '../repository/iqama-renewal-process.repository'
+import { IqamaRenewalWorkflowNotificationService } from './iqama-renewal-workflow-notification.service'
 
 const allowedTransitions = {
   pending_upload: ['uploaded_to_mhrsd', 'cancelled'],
@@ -496,10 +498,15 @@ export const IqamaRenewalProcessService = {
 
       validateStatusTransition(record.status, input.status)
 
-      if (
-        input.status === 'sent_to_government_relations' &&
-        input.assignedToUserId
-      ) {
+      if (input.status === 'sent_to_government_relations') {
+        if (!input.assignedToUserId) {
+          throw new IqamaRenewalProcessError(
+            'Government Relations assignee is required.',
+            422,
+            'GOVERNMENT_RELATIONS_ASSIGNEE_REQUIRED',
+          )
+        }
+
         await assertGovernmentRelationsAssignee(tx, input.assignedToUserId)
       }
 
@@ -516,7 +523,239 @@ export const IqamaRenewalProcessService = {
 
       const refreshed = await IqamaRenewalProcessRepository.findById(tx, id)
 
-      return assertCaseExists(refreshed)
+      const updatedCase = assertCaseExists(refreshed)
+
+      /*
+       * Notify the assigned Government Relations user
+       * after the case was successfully transferred.
+       */
+      if (input.status === 'sent_to_government_relations') {
+        if (!updatedCase.assignedToUserId) {
+          throw new IqamaRenewalProcessError(
+            'The updated case has no Government Relations assignee.',
+            500,
+            'GOVERNMENT_RELATIONS_ASSIGNEE_MISSING',
+          )
+        }
+
+        await IqamaRenewalWorkflowNotificationService.notifyGovernmentRelationsAssignment(
+          tx,
+          {
+            renewalCase: {
+              id: updatedCase.id,
+              employeeId: updatedCase.employeeId,
+              employeeNumber: updatedCase.employeeNumber ?? null,
+              employeeNameEn: updatedCase.employeeNameEn ?? null,
+              employeeNameAr: updatedCase.employeeNameAr ?? null,
+            },
+
+            actorUserId: actor.userId,
+
+            assignedToUserId: updatedCase.assignedToUserId,
+
+            dueDate: updatedCase.governmentRelationsDueDate ?? null,
+          },
+        )
+      }
+
+      return updatedCase
+    })
+  },
+
+  completeWithIqama: async (
+    id: string,
+    input: CompleteIqamaRenewalInput,
+    actor: IqamaRenewalCaseActor,
+  ) => {
+    return db.transaction(async (tx) => {
+      const current = await IqamaRenewalProcessRepository.findById(tx, id)
+
+      const record = assertCaseExists(current)
+
+      /*
+       * The Iqama can only be updated after
+       * assignment to Government Relations.
+       */
+      if (record.status !== 'sent_to_government_relations') {
+        throw new IqamaRenewalProcessError(
+          'The case is not awaiting Government Relations processing.',
+          409,
+          'IQAMA_RENEWAL_NOT_WITH_GOVERNMENT_RELATIONS',
+        )
+      }
+
+      /*
+       * Only the assigned Government Relations
+       * user may complete this case.
+       */
+      if (record.assignedToUserId !== actor.userId) {
+        throw new IqamaRenewalProcessError(
+          'This Iqama renewal case is assigned to another user.',
+          403,
+          'IQAMA_RENEWAL_NOT_ASSIGNED_TO_USER',
+        )
+      }
+
+      const actorRoles = await tx
+        .select({
+          roleName: roles.name,
+        })
+        .from(userRoles)
+        .innerJoin(roles, eq(roles.id, userRoles.roleId))
+        .where(
+          and(eq(userRoles.userId, actor.userId), eq(userRoles.isActive, true)),
+        )
+
+      const isGovernmentRelationsUser = actorRoles.some(
+        (row) => row.roleName === GOVERNMENT_RELATIONS_ROLE,
+      )
+
+      if (!isGovernmentRelationsUser) {
+        throw new IqamaRenewalProcessError(
+          'Only Government Relations may complete the Iqama renewal.',
+          403,
+          'GOVERNMENT_RELATIONS_ROLE_REQUIRED',
+        )
+      }
+
+      /*
+       * Confirm the identification still exists,
+       * belongs to the case employee, and is an Iqama.
+       */
+      const [identification] = await tx
+        .select({
+          id: employeeIdentifications.id,
+          employeeId: employeeIdentifications.employeeId,
+          type: employeeIdentifications.type,
+        })
+        .from(employeeIdentifications)
+        .where(
+          and(
+            eq(employeeIdentifications.id, record.identificationId),
+            eq(employeeIdentifications.isDeleted, false),
+          ),
+        )
+        .limit(1)
+
+      if (!identification) {
+        throw new IqamaRenewalProcessError(
+          'The Iqama identification was not found.',
+          404,
+          'IQAMA_IDENTIFICATION_NOT_FOUND',
+        )
+      }
+
+      if (identification.employeeId !== record.employeeId) {
+        throw new IqamaRenewalProcessError(
+          'The Iqama does not belong to the case employee.',
+          422,
+          'IQAMA_EMPLOYEE_MISMATCH',
+        )
+      }
+
+      if (identification.type !== 'iqama') {
+        throw new IqamaRenewalProcessError(
+          'The identification is not an Iqama.',
+          422,
+          'IDENTIFICATION_IS_NOT_IQAMA',
+        )
+      }
+
+      const identificationNumber =
+        input.identification.identificationNumber.trim()
+
+      if (!identificationNumber) {
+        throw new IqamaRenewalProcessError(
+          'The Iqama number is required.',
+          422,
+          'IQAMA_NUMBER_REQUIRED',
+        )
+      }
+
+      /*
+       * Update the employee Iqama.
+       */
+      const [updatedIdentification] = await tx
+        .update(employeeIdentifications)
+        .set({
+          identificationNumber,
+          issueDate: input.identification.issueDate ?? null,
+          expiryDate: input.identification.expiryDate,
+          issueDateHijri: input.identification.issueDateHijri ?? null,
+          expiryDateHijri: input.identification.expiryDateHijri ?? null,
+          sponsor: input.identification.sponsor ?? null,
+          issuingAuthority: input.identification.issuingAuthority ?? null,
+          occupation: input.identification.occupation ?? null,
+          isCurrent: true,
+          fileId: input.identification.fileId ?? null,
+          updatedAt: new Date(),
+          updatedBy: actor.userId,
+        })
+        .where(
+          and(
+            eq(employeeIdentifications.id, record.identificationId),
+            eq(employeeIdentifications.employeeId, record.employeeId),
+            eq(employeeIdentifications.isDeleted, false),
+          ),
+        )
+        .returning({
+          id: employeeIdentifications.id,
+        })
+
+      if (!updatedIdentification) {
+        throw new IqamaRenewalProcessError(
+          'Unable to update the employee Iqama.',
+          500,
+          'IQAMA_UPDATE_FAILED',
+        )
+      }
+
+      /*
+       * Complete the case with optimistic locking.
+       */
+      const updatedCase = await IqamaRenewalProcessRepository.updateWithVersion(
+        tx,
+        id,
+        input.version,
+        {
+          status: 'completed',
+          updatedAt: new Date(),
+          updatedBy: actor.userId,
+        },
+      )
+
+      assertVersionUpdateSucceeded(updatedCase)
+
+      /*
+       * Reload the completed case so the response and
+       * notification contain the latest information.
+       */
+      const refreshed = await IqamaRenewalProcessRepository.findById(tx, id)
+
+      //return assertCaseExists(refreshed)
+      const completedCase = assertCaseExists(refreshed)
+
+      /*
+       * Notify all active HR_ADMIN users that
+       * Government Relations updated the employee's
+       * Iqama and completed the renewal process.
+       */
+      await IqamaRenewalWorkflowNotificationService.notifyHrAdminsOfCompletion(
+        tx,
+        {
+          renewalCase: {
+            id: completedCase.id,
+            employeeId: completedCase.employeeId,
+            employeeNumber: completedCase.employeeNumber ?? null,
+            employeeNameEn: completedCase.employeeNameEn ?? null,
+            employeeNameAr: completedCase.employeeNameAr ?? null,
+          },
+
+          actorUserId: actor.userId,
+        },
+      )
+
+      return completedCase
     })
   },
 

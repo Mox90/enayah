@@ -50,6 +50,8 @@ interface Props {
   onSaved: () => void
   canManageWorkflow?: boolean
   canCommentOnCase?: boolean
+  canProcessGovernmentRelations?: boolean
+  currentUserId?: string | null
 }
 
 type FormValues = {
@@ -215,6 +217,8 @@ export function IqamaRenewalForm({
   onSaved,
   canManageWorkflow = false,
   canCommentOnCase = false,
+  canProcessGovernmentRelations = false,
+  currentUserId = null,
   //governmentRelationsUsers = [],
 }: Props) {
   const t = useTranslations('iqamaRenewal')
@@ -702,6 +706,8 @@ export function IqamaRenewalForm({
           <IqamaRenewalWorkflowActions
             renewalCase={existingCase}
             canManageWorkflow={canManageWorkflow}
+            canProcessGovernmentRelations={canProcessGovernmentRelations}
+            currentUserId={currentUserId}
             governmentRelationsUsers={governmentRelationsUsers}
             isLoadingGovernmentRelationsUsers={
               isLoadingGovernmentRelationsUsers

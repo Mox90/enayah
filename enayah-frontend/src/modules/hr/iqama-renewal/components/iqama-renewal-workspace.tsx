@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/hr/iqama-renewal/components/list/iqama-renewal-table.tsx
+
 'use client'
 
 import { useState } from 'react'
@@ -26,6 +28,8 @@ export function IqamaRenewalWorkspace() {
   const mode = requestedView === 'form' ? 'form' : 'directory'
   const canManageWorkflow =
     user?.roles?.some((role) => role.name === 'HR_ADMIN') ?? false
+  const canProcessGovernmentRelations =
+    user?.roles?.some((role) => role.name === 'HR_GOVERNMENT_RELATION') ?? false
   const canCommentOnCase =
     user?.roles?.some((role) =>
       ['HR_ADMIN', 'HR_GOVERNMENT_RELATION', 'HR_DIRECTOR'].includes(role.name),
@@ -81,6 +85,8 @@ export function IqamaRenewalWorkspace() {
         onSaved={closeForm}
         canManageWorkflow={canManageWorkflow}
         canCommentOnCase={canCommentOnCase}
+        canProcessGovernmentRelations={canProcessGovernmentRelations}
+        currentUserId={user?.id ?? null}
         //governmentRelationsUsers={[]}
       />
     )

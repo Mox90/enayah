@@ -696,6 +696,10 @@
     "noCommentsDescription": "ابدأ المناقشة بإضافة أول تعليق.",
     "workflowComment": "تعليق على الإجراء",
     "workflowCommentDescription": "تعليق اختياري حول هذا الإجراء. سيتم إشعار المشاركين في المعاملة.",
-    "retry": "إعادة المحاولة"
+    "retry": "إعادة المحاولة",
+    "updateRenewedIqama": "تحديث الإقامة المجددة",
+    "updateRenewedIqamaDescription": "أدخل بيانات الإقامة المجددة وأكمل الإجراء.",
+    "updateRenewedIqamaDialogDescription": "قم بتحديث بيانات إقامة الموظف المجددة. سيؤدي الحفظ إلى إكمال معاملة التجديد.",
+    "saveIqamaAndComplete": "حفظ الإقامة وإكمال الإجراء"
   }
 }

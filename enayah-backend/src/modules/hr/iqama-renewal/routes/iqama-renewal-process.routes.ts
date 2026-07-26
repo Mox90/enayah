@@ -80,6 +80,13 @@ router.patch(
   IqamaRenewalProcessController.changeStatus,
 )
 
+router.patch(
+  '/:id/complete',
+  //requirePermission('iqama.renewal.government-relations.process'),
+  requirePermission('iqama.renewal.process'),
+  IqamaRenewalProcessController.completeWithIqama,
+)
+
 router.delete(
   '/:id',
   requirePermission('iqama.renewal.delete'),

@@ -1,10 +1,11 @@
-// src/modules/hr/iqama-renewal/services/iqama-renewal.service.ts
+// enayah-frontend/src/modules/hr/iqama-renewal/services/iqama-renewal.service.ts
 
 import { api } from '@/lib/api/client'
 
 import type {
   AssigneeOption,
   ChangeIqamaRenewalStatusPayload,
+  CompleteIqamaRenewalPayload,
   CreateIqamaRenewalCasePayload,
   IqamaRenewalCase,
   IqamaRenewalCaseListResponse,
@@ -12,6 +13,7 @@ import type {
   UpdateIqamaRenewalCasePayload,
 } from '../types/iqama-renewal.types'
 import { API_ENDPOINTS } from '@/lib/api/endpoints'
+import { ApiResponse } from '../../dashboard/types/hr-dashboard.types'
 
 export type IqamaRenewalSortBy =
   | 'createdAt'
@@ -99,5 +101,16 @@ export const iqamaRenewalService = {
       `${API_ENDPOINTS.hr.iqamaRenewal}/assignees/government-relations`,
     )
     return response.data
+  },
+  completeIqamaRenewal: async (
+    id: string,
+    payload: CompleteIqamaRenewalPayload,
+  ): Promise<IqamaRenewalCase> => {
+    const response = await api.patch<ApiResponse<IqamaRenewalCase>>(
+      `${API_ENDPOINTS.hr.iqamaRenewal}/${id}/complete`,
+      payload,
+    )
+
+    return response.data.data
   },
 }

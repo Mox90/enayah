@@ -1,3 +1,5 @@
+import { Identification } from '../../employees/types/employee-personal-details.types'
+
 // src/modules/hr/iqama-renewal/types/iqama-renewal.types.ts
 export interface IqamaRenewalPagination {
   page: number
@@ -50,6 +52,8 @@ export type IqamaRenewalCase = {
 
   createdAt: string
   updatedAt: string
+
+  identification: Identification
 }
 
 export interface IqamaRenewalCaseListResponse {
@@ -63,6 +67,24 @@ export type CreateIqamaRenewalCasePayload = {
   assignedToUserId?: string | null
   governmentRelationsDueDate?: string | null
   notes?: string | null
+  identification: {
+    identificationNumber: string
+
+    issueDate: string | null
+    expiryDate: string
+
+    issueDateHijri: string | null
+    expiryDateHijri: string | null
+
+    //dateCalendar: 'gregorian' | 'hijri'
+
+    sponsor: string | null
+    issuingAuthority: string | null
+    occupation: string | null
+
+    isCurrent: true
+    fileId: string | null
+  }
 }
 
 export type UpdateIqamaRenewalCasePayload = {
@@ -98,6 +120,29 @@ export type AssigneeOption = {
   email?: string
   username?: string
   employeeNumber?: string | null
+}
+
+export type CompleteIqamaRenewalPayload = {
+  version: number
+
+  identification: {
+    identificationNumber: string
+
+    issueDate: string | null
+    expiryDate: string
+
+    issueDateHijri: string | null
+    expiryDateHijri: string | null
+
+    //dateCalendar: 'gregorian' | 'hijri'
+
+    sponsor: string | null
+    issuingAuthority: string | null
+    occupation: string | null
+
+    isCurrent: true
+    fileId: string | null
+  }
 }
 
 export type IqamaRenewalView = 'list' | 'kanban'

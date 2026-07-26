@@ -17,11 +17,17 @@ import {
   UpdateVisaDto,
 } from '../types/employee-personal.dto'
 
-const employeePersonalKey = (id?: string) => ['employee-personal', id]
+//const employeePersonalKey = (id?: string) => ['employee-personal', id]
+export const employeePersonalKeys = {
+  all: ['employee-personal-details'] as const,
+
+  detail: (employeeId?: string) =>
+    [...employeePersonalKeys.all, employeeId] as const,
+}
 
 export function useEmployeePersonal(id?: string) {
   return useQuery({
-    queryKey: ['employee-personal', id],
+    queryKey: employeePersonalKeys.detail(id), //['employee-personal', id],
     queryFn: () => employeeService.getPersonal(id!),
     enabled: !!id,
   })
@@ -32,7 +38,7 @@ export function useEmployeePersonalMutations(employeeId?: string) {
 
   const invalidate = () => {
     queryClient.invalidateQueries({
-      queryKey: employeePersonalKey(employeeId),
+      queryKey: employeePersonalKeys.detail(employeeId), //employeePersonalKey(employeeId),
     })
   }
 
