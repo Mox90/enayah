@@ -60,7 +60,13 @@ async function findActiveHrAdminUserIds(tx: DB) {
     .from(users)
     .innerJoin(userRoles, eq(userRoles.userId, users.id))
     .innerJoin(roles, eq(roles.id, userRoles.roleId))
-    .where(and(eq(roles.name, 'HR_ADMIN'), eq(userRoles.isActive, true)))
+    .where(
+      and(
+        eq(roles.name, 'HR_ADMIN'),
+        eq(userRoles.isActive, true),
+        eq(users.isActive, true),
+      ),
+    )
 }
 
 async function createWorkflowNotification(

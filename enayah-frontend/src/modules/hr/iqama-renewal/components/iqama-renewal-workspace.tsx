@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation' // Added hooks
 import { IqamaRenewalView } from '../types/iqama-renewal.types'
 import { useIqamaRenewalProcesses } from '../hooks/use-iqama-renewal-processes'
@@ -38,14 +38,26 @@ export function IqamaRenewalWorkspace() {
 
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(25)
-  const [search, setSearch] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [sortBy, setSortBy] = useState<IqamaRenewalSortBy>('createdAt')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setPage(1)
+      setDebouncedSearch(searchInput.trim())
+    }, 400)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [searchInput])
 
   const { data, isLoading, isError, error } = useIqamaRenewalProcesses({
     page,
     limit,
-    search,
+    search: debouncedSearch,
     sortBy,
     sortOrder,
   })
@@ -106,16 +118,17 @@ export function IqamaRenewalWorkspace() {
           isLoading={isLoading}
           page={page}
           limit={limit}
-          search={search}
+          search={searchInput}
           sortBy={sortBy}
           sortOrder={sortOrder}
           onOpen={openExistingCase}
           onPageChange={setPage}
           onLimitChange={setLimit}
-          onSearchChange={(value) => {
-            setPage(1)
-            setSearch(value)
-          }}
+          // onSearchChange={(value) => {
+          //   setPage(1)
+          //   setSearch(value)
+          // }}
+          onSearchChange={setSearchInput}
           onSortChange={(nextSortBy, nextSortOrder) => {
             setPage(1)
             setSortBy(nextSortBy)

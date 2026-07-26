@@ -95,9 +95,24 @@ const QueryBooleanSchema = z
   .enum(['true', 'false'])
   .transform((value) => value === 'true')
 
+export const iqamaRenewalSortByValues = [
+  'employeeNumber',
+  'employeeName',
+  'iqamaNumber',
+  'expiryDate',
+  'status',
+  'mhrsdUploadedAt',
+  'mhrsdDecision',
+  'governmentRelationsDueDate',
+  'daysRemaining',
+  'createdAt',
+  'updatedAt',
+] as const
+
 export const ListIqamaRenewalCasesQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().positive().max(100).default(20),
+  limit: z.coerce.number().int().positive().max(100).default(25),
+  search: z.string().trim().max(100).optional(),
   status: z
     .union([IqamaRenewalStatusSchema, z.array(IqamaRenewalStatusSchema)])
     .optional(),
@@ -110,10 +125,7 @@ export const ListIqamaRenewalCasesQuerySchema = z.object({
   createdFrom: z.string().date().optional(),
   createdTo: z.string().date().optional(),
   includeDeleted: QueryBooleanSchema.default(false),
-  sortBy: z
-    .enum(['createdAt', 'updatedAt', 'status', 'governmentRelationsDueDate'])
-    .default('createdAt'),
-
+  sortBy: z.enum(iqamaRenewalSortByValues).default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 })
 
@@ -138,33 +150,34 @@ export class IqamaRenewalProcessError extends Error {
 
 const nullableTrimmedString = z.string().trim().nullable().optional()
 
-const nullableDateOnly = z
+const dateOnlySchema = z
   .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format.')
-  .nullable()
-  .optional()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must use YYYY-MM-DD format.')
+  .refine((value) => {
+    const parsedDate = new Date(`${value}T00:00:00.000Z`)
+
+    return (
+      !Number.isNaN(parsedDate.getTime()) &&
+      parsedDate.toISOString().slice(0, 10) === value
+    )
+  }, 'Invalid date.')
+
+const nullableDateOnly = dateOnlySchema.nullable().optional()
 
 export const completeIqamaRenewalSchema = z.object({
   version: z.number().int().nonnegative(),
 
   identification: z.object({
     identificationNumber: z.string().trim().min(1).max(100),
-
     issueDate: nullableDateOnly,
-
-    expiryDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid expiry date.'),
-
+    expiryDate: dateOnlySchema,
     issueDateHijri: nullableTrimmedString,
     expiryDateHijri: nullableTrimmedString,
-
     //dateCalendar: z.enum(['gregorian', 'hijri']).optional(),
-
     sponsor: nullableTrimmedString,
     issuingAuthority: nullableTrimmedString,
     occupation: nullableTrimmedString,
-
     isCurrent: z.literal(true),
-
     fileId: z.string().uuid().nullable().optional(),
   }),
 })

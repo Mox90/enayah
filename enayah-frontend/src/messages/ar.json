@@ -469,7 +469,7 @@
     "saving": "توفير {item}",
     "degreePlaceHolder": "بكالوريوس العلوم في التمريض",
     "majorPlaceHolder": "تمريض",
-    "institutionPlaceHolder": "اسم الجامعة (يرجى عدم الاختصار)",
+    "institutionPlaceHolder": "اسم الجامعة/المدرسة (يرجى عدم الاختصار)",
     "degreeSub": "تاريخ التخرج أو الإتمام، إن وُجد.",
     "educationSub": "أدخل تفاصيل مؤهلات الموظف."
   },

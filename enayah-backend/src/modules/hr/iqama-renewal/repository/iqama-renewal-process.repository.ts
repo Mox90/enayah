@@ -8,10 +8,12 @@ import {
   eq,
   getTableColumns,
   gte,
+  ilike,
   inArray,
   isNull,
   lte,
   ne,
+  or,
   sql,
   type SQL,
 } from 'drizzle-orm'
@@ -64,21 +66,140 @@ const normalizeStatuses = (
 
 const assignedEmployee = alias(employees, 'assigned_employee')
 
-const getOrderByColumn = (sortBy: ListIqamaRenewalCasesQuery['sortBy']) => {
+const employeeNameEnExpression = sql<string | null>`
+  nullif(
+    concat_ws(
+      ' ',
+      nullif(trim(${employees.firstNameEn}), ''),
+      nullif(trim(${employees.secondNameEn}), ''),
+      nullif(trim(${employees.thirdNameEn}), ''),
+      nullif(trim(${employees.familyNameEn}), '')
+    ),
+    ''
+  )
+`
+
+const employeeNameArExpression = sql<string | null>`
+  nullif(
+    concat_ws(
+      ' ',
+      nullif(trim(${employees.firstNameAr}), ''),
+      nullif(trim(${employees.secondNameAr}), ''),
+      nullif(trim(${employees.thirdNameAr}), ''),
+      nullif(trim(${employees.familyNameAr}), '')
+    ),
+    ''
+  )
+`
+
+const employeeNameSortExpression = sql<string>`
+  lower(
+    coalesce(
+      ${employeeNameEnExpression},
+      ${employeeNameArExpression},
+      ''
+    )
+  )
+`
+
+const currentStageSortExpression = sql<number>`
+  case ${iqamaRenewalCases.status}
+    when 'pending_upload' then 1
+    when 'uploaded_to_mhrsd' then 2
+    when 'under_process' then 3
+    when 'approved_by_mhrsd' then 4
+    when 'denied_by_mhrsd' then 5
+    when 'sent_to_government_relations' then 6
+    when 'eoc_required' then 7
+    when 'completed' then 8
+    when 'cancelled' then 9
+    else 99
+  end
+`
+
+const mhrsdDecisionSortExpression = sql<number>`
+  case
+    when ${iqamaRenewalCases.status} in (
+      'approved_by_mhrsd',
+      'sent_to_government_relations',
+      'completed'
+    ) then 1
+
+    when ${iqamaRenewalCases.status} in (
+      'denied_by_mhrsd',
+      'eoc_required'
+    ) then 2
+
+    else 3
+  end
+`
+
+const daysRemainingSortExpression = sql<number | null>`
+  ${iqamaRenewalCases.governmentRelationsDueDate}
+  - (now() at time zone 'Asia/Riyadh')::date
+`
+
+const searchableStatusExpression = sql<string>`
+  replace(
+    cast(${iqamaRenewalCases.status} as text),
+    '_',
+    ' '
+  )
+`
+
+function normalizeSearchDigits(value: string) {
+  return value
+    .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
+    .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
+}
+
+const getOrderByExpression = (sortBy: ListIqamaRenewalCasesQuery['sortBy']) => {
   switch (sortBy) {
-    case 'updatedAt':
-      return iqamaRenewalCases.updatedAt
+    case 'employeeNumber':
+      return employees.employeeNumber
+
+    case 'employeeName':
+      return employeeNameSortExpression
+
+    case 'iqamaNumber':
+      return employeeIdentifications.identificationNumber
+
+    case 'expiryDate':
+      return employeeIdentifications.expiryDate
 
     case 'status':
-      return iqamaRenewalCases.status
+      return currentStageSortExpression
+
+    case 'mhrsdUploadedAt':
+      return iqamaRenewalCases.mhrsdUploadedAt
+
+    case 'mhrsdDecision':
+      return mhrsdDecisionSortExpression
 
     case 'governmentRelationsDueDate':
       return iqamaRenewalCases.governmentRelationsDueDate
+
+    case 'daysRemaining':
+      return daysRemainingSortExpression
+
+    case 'updatedAt':
+      return iqamaRenewalCases.updatedAt
 
     case 'createdAt':
     default:
       return iqamaRenewalCases.createdAt
   }
+}
+
+const getOrderBy = (
+  sortBy: ListIqamaRenewalCasesQuery['sortBy'],
+  sortOrder: ListIqamaRenewalCasesQuery['sortOrder'],
+) => {
+  const expression = getOrderByExpression(sortBy)
+
+  return sortOrder === 'asc'
+    ? sql`${expression} asc nulls last`
+    : sql`${expression} desc nulls last`
 }
 
 export const IqamaRenewalProcessRepository = {
@@ -298,12 +419,91 @@ export const IqamaRenewalProcessRepository = {
       )
     }
 
+    if (query.search) {
+      const normalizedSearch = normalizeSearchDigits(query.search)
+
+      const searchPattern = `%${normalizedSearch}%`
+
+      const normalizedStatusSearch = normalizedSearch
+        .toLowerCase()
+        .replace(/[_-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+
+      const statusPattern = `%${normalizedStatusSearch}%`
+
+      const searchCondition = or(
+        ilike(employees.employeeNumber, searchPattern),
+
+        ilike(employeeNameEnExpression, searchPattern),
+
+        ilike(employeeNameArExpression, searchPattern),
+
+        ilike(employeeIdentifications.identificationNumber, searchPattern),
+
+        /*
+         * Supports:
+         * 2026-07-26
+         */
+        ilike(
+          sql<string>`
+        to_char(
+          ${employeeIdentifications.expiryDate},
+          'YYYY-MM-DD'
+        )
+      `,
+          searchPattern,
+        ),
+
+        /*
+         * Supports:
+         * 26/07/2026
+         */
+        ilike(
+          sql<string>`
+        to_char(
+          ${employeeIdentifications.expiryDate},
+          'DD/MM/YYYY'
+        )
+      `,
+          searchPattern,
+        ),
+
+        /*
+         * Supports the displayed English format:
+         * 26 Jul 2026
+         */
+        ilike(
+          sql<string>`
+        to_char(
+          ${employeeIdentifications.expiryDate},
+          'DD Mon YYYY'
+        )
+      `,
+          searchPattern,
+        ),
+
+        /*
+         * Allows:
+         * approved_by_mhrsd
+         * approved by mhrsd
+         * under process
+         * sent to government relations
+         */
+        ilike(searchableStatusExpression, statusPattern),
+      )
+
+      if (searchCondition) {
+        conditions.push(searchCondition)
+      }
+    }
+
     const where = conditions.length > 0 ? and(...conditions) : undefined
 
-    const orderByColumn = getOrderByColumn(query.sortBy)
+    //const orderByColumn = getOrderByColumn(query.sortBy)
 
-    const orderBy =
-      query.sortOrder === 'asc' ? asc(orderByColumn) : desc(orderByColumn)
+    //const orderBy = query.sortOrder === 'asc' ? asc(orderByColumn) : desc(orderByColumn)
+    const orderBy = getOrderBy(query.sortBy, query.sortOrder)
 
     const [rows, totalResult] = await Promise.all([
       tx
@@ -312,71 +512,29 @@ export const IqamaRenewalProcessRepository = {
 
           employeeNumber: employees.employeeNumber,
 
-          employeeNameEn: sql<string | null>`
-            nullif(
-              concat_ws(
-                ' ',
-                nullif(trim(${employees.firstNameEn}), ''),
-                nullif(trim(${employees.secondNameEn}), ''),
-                nullif(trim(${employees.thirdNameEn}), ''),
-                nullif(trim(${employees.familyNameEn}), '')
-              ),
-              ''
-            )
-          `.as('employee_name_en'),
+          employeeNameEn: employeeNameEnExpression.as('employee_name_en'),
 
-          employeeNameAr: sql<string | null>`
-            nullif(
-              concat_ws(
-                ' ',
-                nullif(trim(${employees.firstNameAr}), ''),
-                nullif(trim(${employees.secondNameAr}), ''),
-                nullif(trim(${employees.thirdNameAr}), ''),
-                nullif(trim(${employees.familyNameAr}), '')
-              ),
-              ''
-            )
-          `.as('employee_name_ar'),
+          employeeNameAr: employeeNameArExpression.as('employee_name_ar'),
 
           iqamaNumber: employeeIdentifications.identificationNumber,
 
           expiryDate: employeeIdentifications.expiryDate,
 
-          /*
-           * Return the assigned employee's full English name.
-           *
-           * Fallback behavior:
-           * 1. Assigned employee full name
-           * 2. User username
-           * 3. null when no assigned user exists
-           */
           assignedToName: sql<string | null>`
-            coalesce(
-              nullif(
-                concat_ws(
-                  ' ',
-                  nullif(
-                    trim(${assignedEmployee.firstNameEn}),
-                    ''
-                  ),
-                  nullif(
-                    trim(${assignedEmployee.secondNameEn}),
-                    ''
-                  ),
-                  nullif(
-                    trim(${assignedEmployee.thirdNameEn}),
-                    ''
-                  ),
-                  nullif(
-                    trim(${assignedEmployee.familyNameEn}),
-                    ''
-                  )
-                ),
-                ''
-              ),
-              nullif(trim(${users.username}), '')
-            )
-          `.as('assigned_to_name'),
+    coalesce(
+      nullif(
+        concat_ws(
+          ' ',
+          nullif(trim(${assignedEmployee.firstNameEn}), ''),
+          nullif(trim(${assignedEmployee.secondNameEn}), ''),
+          nullif(trim(${assignedEmployee.thirdNameEn}), ''),
+          nullif(trim(${assignedEmployee.familyNameEn}), '')
+        ),
+        ''
+      ),
+      nullif(trim(${users.username}), '')
+    )
+  `.as('assigned_to_name'),
         })
         .from(iqamaRenewalCases)
 
@@ -417,6 +575,11 @@ export const IqamaRenewalProcessRepository = {
           total: count(),
         })
         .from(iqamaRenewalCases)
+        .leftJoin(employees, eq(employees.id, iqamaRenewalCases.employeeId))
+        .leftJoin(
+          employeeIdentifications,
+          eq(employeeIdentifications.id, iqamaRenewalCases.identificationId),
+        )
         .where(where),
     ])
 

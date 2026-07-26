@@ -28,6 +28,7 @@ import {
   type UpdateCaseData,
 } from '../repository/iqama-renewal-process.repository'
 import { IqamaRenewalWorkflowNotificationService } from './iqama-renewal-workflow-notification.service'
+import { getRiyadhTodayDateOnly } from '../../../../core/utils/date'
 
 const allowedTransitions = {
   pending_upload: ['uploaded_to_mhrsd', 'cancelled'],
@@ -601,9 +602,14 @@ export const IqamaRenewalProcessService = {
           roleName: roles.name,
         })
         .from(userRoles)
+        .innerJoin(users, eq(users.id, userRoles.userId))
         .innerJoin(roles, eq(roles.id, userRoles.roleId))
         .where(
-          and(eq(userRoles.userId, actor.userId), eq(userRoles.isActive, true)),
+          and(
+            eq(userRoles.userId, actor.userId),
+            eq(userRoles.isActive, true),
+            eq(users.isActive, true),
+          ),
         )
 
       const isGovernmentRelationsUser = actorRoles.some(
@@ -669,6 +675,16 @@ export const IqamaRenewalProcessService = {
           'The Iqama number is required.',
           422,
           'IQAMA_NUMBER_REQUIRED',
+        )
+      }
+
+      const todayIso = getRiyadhTodayDateOnly()
+
+      if (input.identification.expiryDate <= todayIso) {
+        throw new IqamaRenewalProcessError(
+          'The renewed Iqama expiry date must be in the future.',
+          422,
+          'IQAMA_EXPIRY_DATE_NOT_IN_FUTURE',
         )
       }
 

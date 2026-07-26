@@ -467,7 +467,7 @@
     "saving": "Saving {item}",
     "degreePlaceHolder": "Bachelor of Science in Nursing",
     "majorPlaceHolder": "Nursing",
-    "institutionPlaceHolder": "University Name (Please do not abbreviate)",
+    "institutionPlaceHolder": "University/School Name (Please do not abbreviate)",
     "degreeSub": "Graduation or completion date, if available",
     "educationSub": "Enter the employee's board qualification details."
   },

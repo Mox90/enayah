@@ -14,7 +14,7 @@ export function useHrAdminDashboard(year: number) {
     queryKey: hrDashboardKeys.admin(year),
     queryFn: () => getHrAdminDashboard(year),
     enabled: Number.isInteger(year) && year > 0,
-    staleTime: 60_000,
+    staleTime: 5_000, //60_000,
     refetchOnWindowFocus: false,
   })
 }
