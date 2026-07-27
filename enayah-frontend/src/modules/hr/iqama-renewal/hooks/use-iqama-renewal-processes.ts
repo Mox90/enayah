@@ -1,4 +1,4 @@
-// src/modules/hr/iqama-renewal/hooks/use-iqama-renewal-cases.ts
+// enayah-frontend/src/modules/hr/iqama-renewal/hooks/use-iqama-renewal-cases.ts
 
 import {
   keepPreviousData,
@@ -13,11 +13,14 @@ import type { IqamaRenewalListParams } from '../services/iqama-renewal.service'
 import type {
   AssigneeOption,
   ChangeIqamaRenewalStatusPayload,
+  CompleteIqamaRenewalPayload,
   CreateIqamaRenewalCasePayload,
   UpdateIqamaRenewalCasePayload,
 } from '../types/iqama-renewal.types'
 import { useTranslations } from 'next-intl'
 import { api } from '@/lib/api/client'
+import { iqamaRenewalCommentKeys } from './use-iqama-renewal-comments'
+import { employeePersonalKeys } from '../../employees/hooks/use-employee-personal-details'
 
 export const iqamaRenewalKeys = {
   all: ['iqama-renewal-cases'] as const,
@@ -110,7 +113,6 @@ export function useUpdateIqamaRenewalCase() {
 
 export function useChangeIqamaRenewalStatus() {
   const queryClient = useQueryClient()
-  const t = useTranslations('iqamaRenewal')
 
   return useMutation({
     mutationFn: ({
@@ -121,21 +123,28 @@ export function useChangeIqamaRenewalStatus() {
       payload: ChangeIqamaRenewalStatusPayload
     }) => iqamaRenewalService.changeIqamaRenewalStatus(id, payload),
 
-    onSuccess: async (updatedCase) => {
+    onSuccess: async (updatedCase, variables) => {
       queryClient.setQueryData(
         iqamaRenewalKeys.detail(updatedCase.id),
         updatedCase,
       )
 
-      await queryClient.invalidateQueries({
-        queryKey: iqamaRenewalKeys.lists(),
-      })
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: iqamaRenewalKeys.lists(),
+        }),
+
+        queryClient.invalidateQueries({
+          queryKey: iqamaRenewalCommentKeys.list(variables.id),
+        }),
+      ])
 
       toast.success('Iqama renewal status updated.')
     },
 
     onError: (error) => {
-      console.error(error)
+      console.error('Failed to update Iqama renewal status:', error)
+
       toast.error('Failed to update Iqama renewal status.')
     },
   })
@@ -147,5 +156,66 @@ export function useGovernmentRelationsUsers(enabled = true) {
     queryFn: () => iqamaRenewalService.getGovernmentRelationsUsers(),
     enabled,
     staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useCompleteIqamaRenewal() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string
+      payload: CompleteIqamaRenewalPayload
+    }) => iqamaRenewalService.completeIqamaRenewal(id, payload),
+
+    onSuccess: async (updatedCase) => {
+      /*
+       * Update the currently opened Iqama
+       * renewal case immediately.
+       */
+      queryClient.setQueryData(
+        iqamaRenewalKeys.detail(updatedCase.id),
+        updatedCase,
+      )
+
+      await Promise.all([
+        /*
+         * Refresh the Iqama renewal table.
+         */
+        queryClient.invalidateQueries({
+          queryKey: iqamaRenewalKeys.lists(),
+        }),
+
+        /*
+         * Refresh the case discussion,
+         * especially when completion creates
+         * an automatic workflow comment.
+         */
+        queryClient.invalidateQueries({
+          queryKey: iqamaRenewalCommentKeys.list(updatedCase.id),
+        }),
+
+        /*
+         * Refresh the employee Personal tab.
+         *
+         * This reloads the identifications,
+         * including the renewed Iqama dates.
+         */
+        queryClient.invalidateQueries({
+          queryKey: employeePersonalKeys.detail(updatedCase.employeeId),
+        }),
+      ])
+
+      toast.success('Iqama updated and renewal process completed.')
+    },
+
+    onError: (error) => {
+      console.error('Failed to complete Iqama renewal:', error)
+
+      toast.error('Failed to update the Iqama.')
+    },
   })
 }

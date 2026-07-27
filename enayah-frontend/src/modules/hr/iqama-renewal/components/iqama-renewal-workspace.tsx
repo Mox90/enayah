@@ -1,6 +1,8 @@
+// enayah-frontend/src/modules/hr/iqama-renewal/components/list/iqama-renewal-table.tsx
+
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter, usePathname } from 'next/navigation' // Added hooks
 import { IqamaRenewalView } from '../types/iqama-renewal.types'
 import { useIqamaRenewalProcesses } from '../hooks/use-iqama-renewal-processes'
@@ -26,18 +28,36 @@ export function IqamaRenewalWorkspace() {
   const mode = requestedView === 'form' ? 'form' : 'directory'
   const canManageWorkflow =
     user?.roles?.some((role) => role.name === 'HR_ADMIN') ?? false
+  const canProcessGovernmentRelations =
+    user?.roles?.some((role) => role.name === 'HR_GOVERNMENT_RELATION') ?? false
+  const canCommentOnCase =
+    user?.roles?.some((role) =>
+      ['HR_ADMIN', 'HR_GOVERNMENT_RELATION', 'HR_DIRECTOR'].includes(role.name),
+    ) ?? false
   const selectedCaseId = mode === 'form' ? caseIdFromUrl : null
 
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(25)
-  const [search, setSearch] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [sortBy, setSortBy] = useState<IqamaRenewalSortBy>('createdAt')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setPage(1)
+      setDebouncedSearch(searchInput.trim())
+    }, 400)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [searchInput])
 
   const { data, isLoading, isError, error } = useIqamaRenewalProcesses({
     page,
     limit,
-    search,
+    search: debouncedSearch,
     sortBy,
     sortOrder,
   })
@@ -76,6 +96,9 @@ export function IqamaRenewalWorkspace() {
         onCancel={closeForm}
         onSaved={closeForm}
         canManageWorkflow={canManageWorkflow}
+        canCommentOnCase={canCommentOnCase}
+        canProcessGovernmentRelations={canProcessGovernmentRelations}
+        currentUserId={user?.id ?? null}
         //governmentRelationsUsers={[]}
       />
     )
@@ -95,16 +118,17 @@ export function IqamaRenewalWorkspace() {
           isLoading={isLoading}
           page={page}
           limit={limit}
-          search={search}
+          search={searchInput}
           sortBy={sortBy}
           sortOrder={sortOrder}
           onOpen={openExistingCase}
           onPageChange={setPage}
           onLimitChange={setLimit}
-          onSearchChange={(value) => {
-            setPage(1)
-            setSearch(value)
-          }}
+          // onSearchChange={(value) => {
+          //   setPage(1)
+          //   setSearch(value)
+          // }}
+          onSearchChange={setSearchInput}
           onSortChange={(nextSortBy, nextSortOrder) => {
             setPage(1)
             setSortBy(nextSortBy)

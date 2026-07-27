@@ -5,6 +5,7 @@ import { z } from 'zod'
 
 import {
   ChangeIqamaRenewalStatusSchema,
+  completeIqamaRenewalSchema,
   CreateIqamaRenewalCaseSchema,
   IqamaRenewalCaseIdSchema,
   IqamaRenewalProcessError,
@@ -13,6 +14,7 @@ import {
 } from '../types/iqama-renewal-process.types'
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
 import { IqamaRenewalProcessService } from '../service/iqama-renewal-process.service'
+import { iqamaRenewalCaseParamsSchema } from '../types/iqama-renewal-case-comment.types'
 
 type AuthenticatedRequest = Request & {
   user?: {
@@ -111,4 +113,30 @@ export const IqamaRenewalProcessController = {
       res.status(200).json(users)
     },
   ),
+
+  completeWithIqama: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = iqamaRenewalCaseParamsSchema.parse(req.params)
+
+    const input = completeIqamaRenewalSchema.parse(req.body)
+
+    if (!req.user?.id) {
+      throw new IqamaRenewalProcessError(
+        'Authentication is required.',
+        401,
+        'AUTHENTICATION_REQUIRED',
+      )
+    }
+
+    const updatedCase = await IqamaRenewalProcessService.completeWithIqama(
+      id,
+      input,
+      {
+        userId: req.user.id,
+      },
+    )
+
+    res.status(200).json({
+      data: updatedCase,
+    })
+  }),
 }

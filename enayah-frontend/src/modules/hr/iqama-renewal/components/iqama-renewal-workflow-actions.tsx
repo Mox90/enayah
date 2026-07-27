@@ -2,15 +2,15 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import {
   AlertTriangle,
   ArrowRight,
-  CalendarDays,
   CheckCircle2,
   CircleX,
   Clock3,
+  IdCard,
   MessageSquareText,
   RefreshCcw,
   Send,
@@ -37,7 +37,10 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 
-import { useChangeIqamaRenewalStatus } from '../hooks/use-iqama-renewal-processes'
+import {
+  useChangeIqamaRenewalStatus,
+  useCompleteIqamaRenewal,
+} from '../hooks/use-iqama-renewal-processes'
 
 import {
   AssigneeOption,
@@ -47,10 +50,14 @@ import {
 } from '../types/iqama-renewal.types'
 
 import { IqamaRenewalStatusBadge } from './iqama-renewal-status-badge'
+import { Identification } from '../../employees/types/employee-personal-details.types'
+import { IdentificationDialog } from '@/components/dialogs/personal-detail-dialogs'
 
 interface Props {
   renewalCase: IqamaRenewalCase
   canManageWorkflow?: boolean
+  canProcessGovernmentRelations?: boolean
+  currentUserId?: string | null
   governmentRelationsUsers?: AssigneeOption[]
   isLoadingGovernmentRelationsUsers?: boolean
   isGovernmentRelationsUsersError?: boolean
@@ -68,30 +75,22 @@ type ActionDefinition = {
 const actionToneClasses: Record<ActionTone, string> = {
   default:
     'border-slate-200 bg-slate-50/70 hover:border-slate-300 hover:bg-slate-100/80 dark:border-slate-800 dark:bg-slate-900/40 dark:hover:bg-slate-900/70',
-
   success:
     'border-emerald-200 bg-emerald-50/70 hover:border-emerald-300 hover:bg-emerald-100/70 dark:border-emerald-900/70 dark:bg-emerald-950/30 dark:hover:bg-emerald-950/50',
-
   warning:
     'border-amber-200 bg-amber-50/70 hover:border-amber-300 hover:bg-amber-100/70 dark:border-amber-900/70 dark:bg-amber-950/30 dark:hover:bg-amber-950/50',
-
   danger:
     'border-rose-200 bg-rose-50/70 hover:border-rose-300 hover:bg-rose-100/70 dark:border-rose-900/70 dark:bg-rose-950/30 dark:hover:bg-rose-950/50',
-
   info: 'border-blue-200 bg-blue-50/70 hover:border-blue-300 hover:bg-blue-100/70 dark:border-blue-900/70 dark:bg-blue-950/30 dark:hover:bg-blue-950/50',
 }
 
 const actionIconClasses: Record<ActionTone, string> = {
   default:
     'bg-slate-950 text-white shadow-slate-950/20 dark:bg-slate-100 dark:text-slate-950',
-
   success:
     'bg-emerald-600 text-white shadow-emerald-600/20 dark:bg-emerald-500',
-
   warning: 'bg-amber-500 text-white shadow-amber-500/20',
-
   danger: 'bg-rose-600 text-white shadow-rose-600/20',
-
   info: 'bg-blue-600 text-white shadow-blue-600/20',
 }
 
@@ -185,12 +184,12 @@ function getAvailableActions(status: IqamaRenewalStatus): ActionDefinition[] {
 
     case 'sent_to_government_relations':
       return [
-        {
-          status: 'completed',
-          label: 'Complete Process',
-          icon: CheckCircle2,
-          tone: 'success',
-        },
+        // {
+        //   status: 'completed',
+        //   label: 'Complete Process',
+        //   icon: CheckCircle2,
+        //   tone: 'success',
+        // },
         {
           status: 'eoc_required',
           label: 'EOC Required',
@@ -242,6 +241,8 @@ function getDialogHeaderClass(status: IqamaRenewalStatus | null) {
 export function IqamaRenewalWorkflowActions({
   renewalCase,
   canManageWorkflow = false,
+  canProcessGovernmentRelations = false,
+  currentUserId = null,
   governmentRelationsUsers = [],
   isLoadingGovernmentRelationsUsers = false,
   isGovernmentRelationsUsersError = false,
@@ -250,22 +251,58 @@ export function IqamaRenewalWorkflowActions({
   const locale = useLocale()
   const isRtl = locale.toLowerCase().startsWith('ar')
 
+  /****
+   *
+   *
+   */
   const changeStatus = useChangeIqamaRenewalStatus()
+  const completeIqamaRenewal = useCompleteIqamaRenewal()
 
   const [selectedStatus, setSelectedStatus] =
     useState<IqamaRenewalStatus | null>(null)
 
   const [assignedToUserId, setAssignedToUserId] = useState('')
+
   const [governmentRelationsDueDate, setGovernmentRelationsDueDate] =
     useState('')
+
   const [denialReason, setDenialReason] = useState('')
-  const [notes, setNotes] = useState('')
+  const [comment, setComment] = useState('')
 
-  if (!canManageWorkflow) {
-    return null
-  }
+  const [isIqamaDialogOpen, setIsIqamaDialogOpen] = useState(false)
 
-  const actions = getAvailableActions(renewalCase.status)
+  /*
+   * Keep this before conditional returns because useMemo is a React hook.
+   */
+  const initialIqama = useMemo<Identification>(
+    () => ({
+      ...renewalCase.identification,
+
+      /*
+       * The renewal workflow must always update an Iqama,
+       * and the renewed identification remains current.
+       */
+      type: 'iqama',
+      isCurrent: true,
+    }),
+    [renewalCase.identification],
+  )
+
+  const canUpdateAssignedIqama =
+    canProcessGovernmentRelations &&
+    Boolean(currentUserId) &&
+    renewalCase.status === 'sent_to_government_relations' &&
+    renewalCase.assignedToUserId === currentUserId
+
+  /*
+   * HR Admin receives normal workflow actions.
+   * Government Relations receives only the assigned Iqama update action.
+   */
+  const actions = canManageWorkflow
+    ? getAvailableActions(renewalCase.status)
+    : []
+
+  const visibleActionCount = actions.length + (canUpdateAssignedIqama ? 1 : 0)
 
   const selectedAction =
     actions.find((action) => action.status === selectedStatus) ?? null
@@ -280,6 +317,10 @@ export function IqamaRenewalWorkflowActions({
     isGovernmentRelationsUsersError ||
     governmentRelationsUsers.length === 0
 
+  /**
+   *
+   */
+
   const confirmDisabled =
     changeStatus.isPending ||
     !selectedStatus ||
@@ -293,7 +334,8 @@ export function IqamaRenewalWorkflowActions({
     setAssignedToUserId('')
     setGovernmentRelationsDueDate('')
     setDenialReason('')
-    setNotes('')
+    //setNotes('')
+    setComment('')
   }
 
   function openAction(status: IqamaRenewalStatus) {
@@ -324,8 +366,8 @@ export function IqamaRenewalWorkflowActions({
       version: renewalCase.version,
     }
 
-    if (notes.trim()) {
-      payload.notes = notes.trim()
+    if (comment.trim()) {
+      payload.comment = comment.trim()
     }
 
     if (requiresDenialReason) {
@@ -349,7 +391,57 @@ export function IqamaRenewalWorkflowActions({
     }
   }
 
-  if (actions.length === 0) {
+  async function handleCompleteIqamaRenewal(identification: Identification) {
+    if (identification.id !== renewalCase.identificationId) {
+      throw new Error(
+        'The identification does not belong to this renewal case.',
+      )
+    }
+
+    const identificationNumber = identification.identificationNumber.trim()
+
+    const expiryDate = identification.expiryDate?.trim()
+
+    if (!identificationNumber) {
+      throw new Error('The Iqama number is required.')
+    }
+
+    if (!expiryDate) {
+      throw new Error('The renewed Iqama expiry date is required.')
+    }
+
+    await completeIqamaRenewal.mutateAsync({
+      id: renewalCase.id,
+      payload: {
+        version: renewalCase.version,
+        identification: {
+          identificationNumber,
+          issueDate: identification.issueDate?.trim() || null,
+          expiryDate,
+          issueDateHijri: identification.issueDateHijri?.trim() || null,
+          expiryDateHijri: identification.expiryDateHijri?.trim() || null,
+          //dateCalendar: identification.dateCalendar,
+          sponsor: identification.sponsor?.trim() || null,
+          issuingAuthority: identification.issuingAuthority?.trim() || null,
+          occupation: identification.occupation?.trim() || null,
+          isCurrent: true,
+          fileId: identification.fileId || null,
+        },
+      },
+    })
+
+    setIsIqamaDialogOpen(false)
+  }
+
+  const isTerminalStatus =
+    renewalCase.status === 'completed' || renewalCase.status === 'cancelled'
+
+  if (!isTerminalStatus && visibleActionCount === 0) {
+    return null
+  }
+
+  //if (actions.length === 0) {
+  if (isTerminalStatus) {
     const isCompleted = renewalCase.status === 'completed'
     const StatusIcon = isCompleted ? CheckCircle2 : CircleX
 
@@ -428,11 +520,52 @@ export function IqamaRenewalWorkflowActions({
 
             <div className='flex items-center gap-2 rounded-full border bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur'>
               <Sparkles className='h-3.5 w-3.5 text-amber-500' />
-              {actions.length} {actions.length === 1 ? 'action' : 'actions'}
+              {/* {actions.length} {actions.length === 1 ? 'action' : 'actions'} */}
+              {visibleActionCount}{' '}
+              {visibleActionCount === 1 ? 'action' : 'actions'}
             </div>
           </div>
 
           <div className='mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3'>
+            {canUpdateAssignedIqama && (
+              <Button
+                type='button'
+                variant='outline'
+                disabled={completeIqamaRenewal.isPending}
+                className={cn(
+                  'group h-auto min-h-24 justify-start whitespace-normal rounded-2xl p-4 text-start shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
+                  actionToneClasses.success,
+                )}
+                onClick={() => setIsIqamaDialogOpen(true)}
+              >
+                <div
+                  className={cn(
+                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-md',
+                    actionIconClasses.success,
+                  )}
+                >
+                  <IdCard className='h-5 w-5' />
+                </div>
+
+                <div className='min-w-0 flex-1'>
+                  <div className='font-semibold'>{t('updateRenewedIqama')}</div>
+
+                  <div className='mt-1 text-xs font-normal text-muted-foreground'>
+                    {t('updateRenewedIqamaDescription')}
+                  </div>
+                </div>
+
+                <div className='hidden h-9 w-9 items-center justify-center rounded-full border bg-background shadow-sm lg:flex'>
+                  <ArrowRight
+                    className={cn(
+                      'h-4 w-4 text-muted-foreground',
+                      isRtl && 'rotate-180',
+                    )}
+                  />
+                </div>
+              </Button>
+            )}
+
             {actions.map((action) => {
               const ActionIcon = action.icon
 
@@ -703,7 +836,7 @@ export function IqamaRenewalWorkflowActions({
                 </section>
               )}
 
-              <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+              {/* <section className='rounded-2xl border bg-card p-5 shadow-sm'>
                 <div className='mb-4 flex items-center gap-3'>
                   <div className='flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white dark:bg-slate-100 dark:text-slate-950'>
                     <MessageSquareText className='h-4 w-4' />
@@ -731,6 +864,40 @@ export function IqamaRenewalWorkflowActions({
                   className='min-h-28 resize-none'
                   onChange={(event) => setNotes(event.target.value)}
                 />
+              </section> */}
+              <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+                <div className='mb-4 flex items-center gap-3'>
+                  <div className='flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-white dark:bg-slate-100 dark:text-slate-950'>
+                    <MessageSquareText className='h-4 w-4' />
+                  </div>
+
+                  <div>
+                    <Label
+                      htmlFor='workflowComment'
+                      className='text-sm font-semibold'
+                    >
+                      {t('workflowComment')}
+                    </Label>
+
+                    <p className='mt-0.5 text-xs text-muted-foreground'>
+                      {t('workflowCommentDescription')}
+                    </p>
+                  </div>
+                </div>
+
+                <Textarea
+                  id='workflowComment'
+                  rows={4}
+                  maxLength={2000}
+                  value={comment}
+                  disabled={changeStatus.isPending}
+                  className='min-h-28 resize-none'
+                  onChange={(event) => setComment(event.target.value)}
+                />
+
+                <div className='mt-2 text-end text-xs text-muted-foreground'>
+                  {comment.length}/2000
+                </div>
               </section>
             </div>
 
@@ -753,6 +920,23 @@ export function IqamaRenewalWorkflowActions({
           </>
         )}
       </FormDialog>
+
+      <IdentificationDialog
+        open={isIqamaDialogOpen}
+        onOpenChange={(open) => {
+          if (!completeIqamaRenewal.isPending) {
+            setIsIqamaDialogOpen(open)
+          }
+        }}
+        initialValue={initialIqama}
+        title={t('updateRenewedIqama')}
+        description={t('updateRenewedIqamaDialogDescription')}
+        submitLabel={t('saveIqamaAndComplete')}
+        lockType
+        lockCurrent
+        requireExpiryDate
+        onSubmit={handleCompleteIqamaRenewal}
+      />
     </>
   )
 }

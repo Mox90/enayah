@@ -1,14 +1,16 @@
-// src/modules/hr/iqama-renewal/components/list/iqama-renewal-table.tsx
+// enayah-frontend/src/modules/hr/iqama-renewal/components/list/iqama-renewal-table.tsx
 
 'use client'
 
 import { DataTable } from '@/components/tables'
 import { useTranslations } from 'next-intl'
 
-//import type { IqamaRenewalCaseListResponse } from '../../types/iqama-renewal.types'
 import { useIqamaRenewalColumns } from './use-iqama-renewal-columns'
 import { IqamaRenewalCaseListResponse } from '../types/iqama-renewal.types'
-import { IqamaRenewalSortBy } from '../services/iqama-renewal.service'
+import {
+  isIqamaRenewalSortBy,
+  type IqamaRenewalSortBy,
+} from '../services/iqama-renewal.service'
 
 interface Props {
   data?: IqamaRenewalCaseListResponse
@@ -25,15 +27,6 @@ interface Props {
   onLimitChange: (limit: number) => void
   onSearchChange: (value: string) => void
   onSortChange: (sortBy: IqamaRenewalSortBy, sortOrder: 'asc' | 'desc') => void
-}
-
-function isIqamaRenewalSortBy(value: string): value is IqamaRenewalSortBy {
-  return (
-    value === 'createdAt' ||
-    value === 'updatedAt' ||
-    value === 'status' ||
-    value === 'governmentRelationsDueDate'
-  )
 }
 
 export function IqamaRenewalTable({

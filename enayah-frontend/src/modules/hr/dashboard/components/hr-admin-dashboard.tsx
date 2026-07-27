@@ -3,13 +3,13 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useLocale } from 'next-intl'
+
 import {
   Area,
   AreaChart,
   CartesianGrid,
   Legend,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -25,214 +25,62 @@ import {
 } from '@/components/ui/select'
 
 import StatsCard from '../widgets/stats-card'
+import { useHrAdminDashboard } from '../hooks/use-hr-admin-dashboard'
 
-const hiringTrendByYear = {
-  2022: [
-    {
-      month: 'Jan',
-      physician: 2,
-      nurse: 8,
-      alliedHealth: 3,
-      administrative: 1,
-      supportService: 4,
-    },
-    {
-      month: 'Feb',
-      physician: 1,
-      nurse: 5,
-      alliedHealth: 2,
-      administrative: 0,
-      supportService: 2,
-    },
-    {
-      month: 'Mar',
-      physician: 4,
-      nurse: 10,
-      alliedHealth: 5,
-      administrative: 0,
-      supportService: 6,
-    },
-    {
-      month: 'Apr',
-      physician: 0,
-      nurse: 6,
-      alliedHealth: 4,
-      administrative: 1,
-      supportService: 3,
-    },
-    {
-      month: 'May',
-      physician: 3,
-      nurse: 9,
-      alliedHealth: 2,
-      administrative: 4,
-      supportService: 5,
-    },
-    {
-      month: 'Jun',
-      physician: 2,
-      nurse: 7,
-      alliedHealth: 3,
-      administrative: 2,
-      supportService: 4,
-    },
-    {
-      month: 'Jul',
-      physician: 1,
-      nurse: 4,
-      alliedHealth: 1,
-      administrative: 1,
-      supportService: 2,
-    },
-    {
-      month: 'Aug',
-      physician: 5,
-      nurse: 11,
-      alliedHealth: 6,
-      administrative: 3,
-      supportService: 7,
-    },
-    {
-      month: 'Sep',
-      physician: 3,
-      nurse: 8,
-      alliedHealth: 4,
-      administrative: 2,
-      supportService: 3,
-    },
-    {
-      month: 'Oct',
-      physician: 2,
-      nurse: 6,
-      alliedHealth: 5,
-      administrative: 3,
-      supportService: 5,
-    },
-    {
-      month: 'Nov',
-      physician: 1,
-      nurse: 5,
-      alliedHealth: 2,
-      administrative: 2,
-      supportService: 4,
-    },
-    {
-      month: 'Dec',
-      physician: 4,
-      nurse: 9,
-      alliedHealth: 3,
-      administrative: 1,
-      supportService: 6,
-    },
-  ],
-  2023: [
-    {
-      month: 'Jan',
-      physician: 3,
-      nurse: 7,
-      alliedHealth: 4,
-      administrative: 2,
-      supportService: 5,
-    },
-    {
-      month: 'Feb',
-      physician: 2,
-      nurse: 6,
-      alliedHealth: 3,
-      administrative: 1,
-      supportService: 3,
-    },
-    {
-      month: 'Mar',
-      physician: 5,
-      nurse: 12,
-      alliedHealth: 6,
-      administrative: 4,
-      supportService: 7,
-    },
-    {
-      month: 'Apr',
-      physician: 1,
-      nurse: 8,
-      alliedHealth: 4,
-      administrative: 2,
-      supportService: 4,
-    },
-    {
-      month: 'May',
-      physician: 4,
-      nurse: 10,
-      alliedHealth: 5,
-      administrative: 3,
-      supportService: 6,
-    },
-    {
-      month: 'Jun',
-      physician: 2,
-      nurse: 9,
-      alliedHealth: 3,
-      administrative: 2,
-      supportService: 5,
-    },
-    {
-      month: 'Jul',
-      physician: 2,
-      nurse: 5,
-      alliedHealth: 2,
-      administrative: 1,
-      supportService: 3,
-    },
-    {
-      month: 'Aug',
-      physician: 6,
-      nurse: 13,
-      alliedHealth: 7,
-      administrative: 4,
-      supportService: 8,
-    },
-    {
-      month: 'Sep',
-      physician: 3,
-      nurse: 9,
-      alliedHealth: 4,
-      administrative: 3,
-      supportService: 4,
-    },
-    {
-      month: 'Oct',
-      physician: 2,
-      nurse: 7,
-      alliedHealth: 5,
-      administrative: 2,
-      supportService: 5,
-    },
-    {
-      month: 'Nov',
-      physician: 2,
-      nurse: 6,
-      alliedHealth: 3,
-      administrative: 2,
-      supportService: 4,
-    },
-    {
-      month: 'Dec',
-      physician: 5,
-      nurse: 10,
-      alliedHealth: 4,
-      administrative: 2,
-      supportService: 7,
-    },
-  ],
-}
+const numberFormatter = new Intl.NumberFormat('en-US')
 
 const HRAdminDashboard = () => {
-  const [year, setYear] = useState('2022')
+  const locale = useLocale()
+  const currentYear = new Date().getFullYear()
+
+  const [year, setYear] = useState(currentYear)
+
+  const { data, isLoading, isFetching, isError, refetch } =
+    useHrAdminDashboard(year)
 
   const hiringTrendData = useMemo(() => {
+    const monthFormatter = new Intl.DateTimeFormat(locale, {
+      month: 'short',
+    })
+
     return (
-      hiringTrendByYear[Number(year) as keyof typeof hiringTrendByYear] ?? []
+      data?.hiringTrend.map((item) => ({
+        ...item,
+
+        month: monthFormatter.format(new Date(2000, item.month - 1, 1)),
+      })) ?? []
     )
-  }, [year])
+  }, [data?.hiringTrend, locale])
+
+  const formatValue = (value?: number) => {
+    if (isLoading) {
+      return '—'
+    }
+
+    return numberFormatter.format(value ?? 0)
+  }
+
+  if (isError) {
+    return (
+      <div className='rounded-2xl border border-destructive/30 bg-destructive/5 p-6'>
+        <h2 className='font-semibold text-destructive'>
+          Unable to load the HR dashboard
+        </h2>
+
+        <p className='mt-1 text-sm text-muted-foreground'>
+          Dashboard information could not be retrieved from the server.
+        </p>
+
+        <button
+          type='button'
+          className='mt-4 text-sm font-medium underline'
+          onClick={() => refetch()}
+        >
+          Try again
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className='space-y-6'>
@@ -248,32 +96,56 @@ const HRAdminDashboard = () => {
         <StatsCard
           title='Workforce Overview'
           items={[
-            { label: 'Employees', value: '1,245' },
-            { label: 'Active', value: '1,210' },
+            {
+              label: 'Employees',
+              value: formatValue(data?.summary.employees),
+            },
+            {
+              label: 'Active',
+              value: formatValue(data?.summary.activeEmployees),
+            },
           ]}
         />
 
         <StatsCard
           title='Manpower Planning'
           items={[
-            { label: 'PCN', value: '1,500' },
-            { label: 'Vacant', value: '255' },
+            {
+              label: 'PCN',
+              value: formatValue(data?.summary.positionItems),
+            },
+            {
+              label: 'Vacant',
+              value: formatValue(data?.summary.vacantPositionItems),
+            },
           ]}
         />
 
         <StatsCard
           title='Compliance Alerts'
           items={[
-            { label: 'Licenses', value: '32' },
-            { label: 'Contracts', value: '12' },
+            {
+              label: 'Licenses',
+              value: formatValue(data?.summary.expiringLicenses),
+            },
+            {
+              label: 'Contracts',
+              value: formatValue(data?.summary.expiringContracts),
+            },
           ]}
         />
 
         <StatsCard
           title='Movement Activity'
           items={[
-            { label: 'Transfer', value: '8' },
-            { label: 'Promotion', value: '4' },
+            {
+              label: 'Transfer',
+              value: formatValue(data?.summary.transfers),
+            },
+            {
+              label: 'Promotion',
+              value: formatValue(data?.summary.promotions),
+            },
           ]}
         />
       </div>
@@ -288,29 +160,34 @@ const HRAdminDashboard = () => {
             </p>
           </div>
 
-          <Select value={year} onValueChange={setYear}>
+          <Select
+            value={String(year)}
+            disabled={isLoading || !data?.availableYears.length}
+            onValueChange={(value) => setYear(Number(value))}
+          >
             <SelectTrigger className='w-[140px]'>
               <SelectValue placeholder='Select year' />
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value='2022'>2022</SelectItem>
-              <SelectItem value='2023'>2023</SelectItem>
+              {(data?.availableYears ?? []).map((availableYear) => (
+                <SelectItem key={availableYear} value={String(availableYear)}>
+                  {availableYear}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
 
-        <div className='h-[420px] rounded-2xl border bg-[#111827] p-6 shadow-sm'>
+        <div className='relative h-[420px] rounded-2xl border bg-[#111827] p-6 shadow-sm'>
+          {isFetching && !isLoading && (
+            <div className='absolute right-4 top-4 z-10 rounded-full bg-white/10 px-3 py-1 text-xs text-white'>
+              Updating...
+            </div>
+          )}
+
           <ResponsiveContainer width='100%' height='100%'>
-            <AreaChart
-              data={hiringTrendData}
-              // margin={{
-              //   top: 8,
-              //   right: 40,
-              //   bottom: 8,
-              //   left: 0,
-              // }}
-            >
+            <AreaChart data={hiringTrendData}>
               <defs>
                 <linearGradient
                   id='physicianGradient'
@@ -379,17 +256,12 @@ const HRAdminDashboard = () => {
                 minTickGap={0}
                 tickLine={false}
                 axisLine={false}
-                // padding={{
-                //   left: 12,
-                //   right: 12,
-                // }}
                 tickMargin={8}
                 height={30}
                 padding={{
                   left: 4,
                   right: 4,
                 }}
-                // tick={{ fill: '#9ca3af', fontSize: 13 }}
                 tick={{
                   fill: '#9ca3af',
                   fontSize: 'clamp(10px, 2vw, 13px)',
@@ -401,7 +273,10 @@ const HRAdminDashboard = () => {
                 allowDecimals={false}
                 tickLine={false}
                 axisLine={false}
-                tick={{ fill: '#9ca3af', fontSize: 13 }}
+                tick={{
+                  fill: '#9ca3af',
+                  fontSize: 13,
+                }}
               />
 
               <Tooltip

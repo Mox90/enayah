@@ -1,12 +1,16 @@
 import {
+  AnyPgColumn,
   boolean,
+  check,
   date,
+  foreignKey,
   index,
   jsonb,
   pgTable,
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core'
@@ -15,7 +19,7 @@ import { employees } from './hr'
 import { iqamaRenewalStatusEnum, notificationSeverityEnum } from './enums'
 import { users } from './users'
 import { employeeIdentifications } from './employeePersonalInformation'
-import { relations } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 
 export const notifications = pgTable(
   'notifications',
@@ -124,6 +128,124 @@ export const iqamaRenewalCases = pgTable(
   }),
 )
 
+export const iqamaRenewalCaseComments = pgTable(
+  'iqama_renewal_case_comments',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+
+    caseId: uuid('case_id')
+      .notNull()
+      .references(() => iqamaRenewalCases.id, {
+        onDelete: 'cascade',
+      }),
+
+    authorUserId: uuid('author_user_id')
+      .notNull()
+      .references(() => users.id, {
+        onDelete: 'restrict',
+      }),
+
+    /*
+     * Null means this is a top-level comment.
+     *
+     * When populated, this is the exact comment being replied to.
+     */
+    parentCommentId: uuid('parent_comment_id').references(
+      (): AnyPgColumn => iqamaRenewalCaseComments.id,
+    ),
+
+    /*
+     * Null for top-level comments.
+     *
+     * Every reply points to the top-level comment of the thread.
+     * This makes loading and grouping threaded replies inexpensive.
+     */
+    threadRootId: uuid('thread_root_id').references(
+      (): AnyPgColumn => iqamaRenewalCaseComments.id,
+    ),
+
+    body: text('body').notNull(),
+
+    statusAtTime: iqamaRenewalStatusEnum('status_at_time').notNull(),
+
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+
+  (table) => [
+    /*
+     * PostgreSQL requires the referenced composite columns to have
+     * a unique constraint/index.
+     *
+     * This permits the composite self-referencing foreign keys below.
+     */
+    //unique('uq_iqama_comment_id_case').on(table.id, table.caseId),
+
+    /*
+     * Ensures the parent comment belongs to the same case.
+     */
+    // foreignKey({
+    //   name: 'fk_iqama_comment_parent_same_case',
+    //   columns: [table.parentCommentId, table.caseId],
+    //   foreignColumns: [table.id, table.caseId],
+    // }),
+    //.onDelete('restrict'),
+
+    /*
+     * Ensures the thread root also belongs to the same case.
+     */
+    // foreignKey({
+    //   name: 'fk_iqama_comment_thread_root_same_case',
+    //   columns: [table.threadRootId, table.caseId],
+    //   foreignColumns: [table.id, table.caseId],
+    // }),
+    //.onDelete('restrict'),
+
+    index('idx_iqama_comments_case_created_at').on(
+      table.caseId,
+      table.createdAt,
+    ),
+
+    index('idx_iqama_comments_parent').on(table.parentCommentId),
+
+    index('idx_iqama_comments_thread_created_at').on(
+      table.threadRootId,
+      table.createdAt,
+    ),
+
+    index('idx_iqama_comments_author').on(table.authorUserId),
+
+    check(
+      'chk_iqama_comment_body_length',
+      sql`
+        char_length(btrim(${table.body})) between 1 and 2000
+      `,
+    ),
+
+    /*
+     * Top-level:
+     *   parentCommentId = null
+     *   threadRootId = null
+     *
+     * Reply:
+     *   both are populated
+     */
+    check(
+      'chk_iqama_comment_thread_fields',
+      sql`
+        (
+          ${table.parentCommentId} is null
+          and ${table.threadRootId} is null
+        )
+        or
+        (
+          ${table.parentCommentId} is not null
+          and ${table.threadRootId} is not null
+        )
+      `,
+    ),
+  ],
+)
+
 export const notificationsRelations = relations(
   notifications,
   ({ one, many }) => ({
@@ -162,7 +284,7 @@ export const notificationEventsRelations = relations(
 
 export const iqamaRenewalCasesRelations = relations(
   iqamaRenewalCases,
-  ({ one }) => ({
+  ({ one, many }) => ({
     employee: one(employees, {
       fields: [iqamaRenewalCases.employeeId],
       references: [employees.id],
@@ -173,8 +295,25 @@ export const iqamaRenewalCasesRelations = relations(
       references: [employeeIdentifications.id],
     }),
 
-    assignedTo: one(users, {
+    assignedToUser: one(users, {
       fields: [iqamaRenewalCases.assignedToUserId],
+      references: [users.id],
+    }),
+
+    comments: many(iqamaRenewalCaseComments),
+  }),
+)
+
+export const iqamaRenewalCaseCommentsRelations = relations(
+  iqamaRenewalCaseComments,
+  ({ one }) => ({
+    renewalCase: one(iqamaRenewalCases, {
+      fields: [iqamaRenewalCaseComments.caseId],
+      references: [iqamaRenewalCases.id],
+    }),
+
+    author: one(users, {
+      fields: [iqamaRenewalCaseComments.authorUserId],
       references: [users.id],
     }),
   }),

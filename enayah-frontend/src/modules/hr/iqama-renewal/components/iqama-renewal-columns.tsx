@@ -1,4 +1,4 @@
-// src/modules/hr/iqama-renewal/components/iqama-renewal-columns.tsx
+// enayah-frontend/src/modules/hr/iqama-renewal/components/iqama-renewal-columns.tsx
 
 'use client'
 
@@ -74,6 +74,24 @@ function calculateDaysRemaining(value?: string | null) {
   )
 }
 
+function getMhrsdDecision(
+  status: IqamaRenewalCase['status'],
+): 'approved' | 'denied' | 'pending' {
+  if (
+    status === 'approved_by_mhrsd' ||
+    status === 'sent_to_government_relations' ||
+    status === 'completed'
+  ) {
+    return 'approved'
+  }
+
+  if (status === 'denied_by_mhrsd' || status === 'eoc_required') {
+    return 'denied'
+  }
+
+  return 'pending'
+}
+
 export function getIqamaRenewalColumns(
   sortBy: IqamaRenewalSortBy,
   sortOrder: 'asc' | 'desc',
@@ -84,7 +102,7 @@ export function getIqamaRenewalColumns(
   return [
     {
       accessorKey: 'employeeNumber',
-      enableSorting: false,
+      //enableSorting: false,
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -104,7 +122,8 @@ export function getIqamaRenewalColumns(
 
     {
       id: 'employeeName',
-      enableSorting: false,
+      accessorFn: (row) =>
+        isArabic ? (row.employeeNameAr ?? '') : (row.employeeNameEn ?? ''),
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -124,7 +143,7 @@ export function getIqamaRenewalColumns(
 
     {
       accessorKey: 'iqamaNumber',
-      enableSorting: false,
+      //enableSorting: false,
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -141,7 +160,7 @@ export function getIqamaRenewalColumns(
 
     {
       accessorKey: 'expiryDate',
-      enableSorting: false,
+      //enableSorting: false,
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -173,7 +192,7 @@ export function getIqamaRenewalColumns(
 
     {
       accessorKey: 'assignedToName',
-      enableSorting: false,
+      //enableSorting: false,
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -187,7 +206,7 @@ export function getIqamaRenewalColumns(
 
     {
       accessorKey: 'mhrsdUploadedAt',
-      enableSorting: false,
+      //enableSorting: false,
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}
@@ -201,20 +220,23 @@ export function getIqamaRenewalColumns(
 
     {
       id: 'mhrsdDecision',
-      header: labels.decision,
-      enableSorting: false,
+      accessorFn: (row) => getMhrsdDecision(row.status),
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title={labels.decision}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+        />
+      ),
       cell: ({ row }) => {
-        const status = row.original.status
+        const decision = getMhrsdDecision(row.original.status)
 
-        if (
-          status === 'approved_by_mhrsd' ||
-          status === 'sent_to_government_relations' ||
-          status === 'completed'
-        ) {
+        if (decision === 'approved') {
           return labels.approved
         }
 
-        if (status === 'denied_by_mhrsd' || status === 'eoc_required') {
+        if (decision === 'denied') {
           return labels.denied
         }
 
@@ -237,14 +259,24 @@ export function getIqamaRenewalColumns(
 
     {
       id: 'daysRemaining',
-      header: labels.daysRemaining,
-      enableSorting: false,
+      accessorFn: (row) =>
+        calculateDaysRemaining(row.governmentRelationsDueDate),
+      header: ({ column }) => (
+        <DataTableColumnHeader
+          column={column}
+          title={labels.daysRemaining}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+        />
+      ),
       cell: ({ row }) => {
         const daysRemaining = calculateDaysRemaining(
           row.original.governmentRelationsDueDate,
         )
 
-        if (daysRemaining === null) return '-'
+        if (daysRemaining === null) {
+          return '-'
+        }
 
         if (daysRemaining < 0) {
           return `${Math.abs(daysRemaining)} ${labels.days} ${labels.overdue}`

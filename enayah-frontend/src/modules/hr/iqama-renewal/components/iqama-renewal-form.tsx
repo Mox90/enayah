@@ -42,12 +42,16 @@ import type {
 import { IqamaRenewalStatusBadge } from './iqama-renewal-status-badge'
 import { IqamaRenewalWorkflowActions } from './iqama-renewal-workflow-actions'
 import { toArabic, toPersianDigits } from '@/utils/utilities'
+import { IqamaRenewalCaseDiscussion } from './iqama-renewal-case-discussion'
 
 interface Props {
   caseId?: string | null
   onCancel: () => void
   onSaved: () => void
   canManageWorkflow?: boolean
+  canCommentOnCase?: boolean
+  canProcessGovernmentRelations?: boolean
+  currentUserId?: string | null
 }
 
 type FormValues = {
@@ -212,6 +216,9 @@ export function IqamaRenewalForm({
   onCancel,
   onSaved,
   canManageWorkflow = false,
+  canCommentOnCase = false,
+  canProcessGovernmentRelations = false,
+  currentUserId = null,
   //governmentRelationsUsers = [],
 }: Props) {
   const t = useTranslations('iqamaRenewal')
@@ -699,6 +706,8 @@ export function IqamaRenewalForm({
           <IqamaRenewalWorkflowActions
             renewalCase={existingCase}
             canManageWorkflow={canManageWorkflow}
+            canProcessGovernmentRelations={canProcessGovernmentRelations}
+            currentUserId={currentUserId}
             governmentRelationsUsers={governmentRelationsUsers}
             isLoadingGovernmentRelationsUsers={
               isLoadingGovernmentRelationsUsers
@@ -706,6 +715,13 @@ export function IqamaRenewalForm({
             isGovernmentRelationsUsersError={isGovernmentRelationsUsersError}
           />
         </div>
+      )}
+
+      {existingCase && (
+        <IqamaRenewalCaseDiscussion
+          caseId={existingCase.id}
+          canComment={canCommentOnCase}
+        />
       )}
     </div>
   )

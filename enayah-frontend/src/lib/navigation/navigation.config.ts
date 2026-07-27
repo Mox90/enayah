@@ -74,12 +74,12 @@ export const navigation: NavigationItem[] = [
     permission: 'employee.hire',
   },
 
-  {
-    label: 'contracts',
-    href: '/contracts',
-    icon: FileText,
-    permission: 'contract.view',
-  },
+  // {
+  //   label: 'contracts',
+  //   href: '/contracts',
+  //   icon: FileText,
+  //   permission: 'contract.view',
+  // },
 
   {
     label: 'iqamaRenewal',

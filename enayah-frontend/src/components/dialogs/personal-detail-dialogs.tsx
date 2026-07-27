@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -53,6 +53,16 @@ function createClientId(prefix: string) {
 /* Identification Dialog                                                       */
 /* -------------------------------------------------------------------------- */
 
+type IdentificationDialogProps = DialogProps<Identification> & {
+  title?: ReactNode
+  description?: ReactNode
+  submitLabel?: string
+
+  lockType?: boolean
+  lockCurrent?: boolean
+  requireExpiryDate?: boolean
+}
+
 const emptyIdentification: Identification = {
   id: '',
   type: 'iqama',
@@ -74,7 +84,14 @@ export function IdentificationDialog({
   onOpenChange,
   initialValue,
   onSubmit,
-}: DialogProps<Identification>) {
+  title,
+  description,
+  submitLabel,
+
+  lockType = false,
+  lockCurrent = false,
+  requireExpiryDate = false,
+}: IdentificationDialogProps) {
   const dialogKey = initialValue?.id ?? (open ? 'add-identification' : 'closed')
   const it = useTranslations('identifications')
   const locale = useLocale()
@@ -98,6 +115,10 @@ export function IdentificationDialog({
           initialValue={initialValue}
           onOpenChange={onOpenChange}
           onSubmit={onSubmit}
+          submitLabel={submitLabel}
+          lockType={lockType}
+          lockCurrent={lockCurrent}
+          requireExpiryDate={requireExpiryDate}
         />
       )}
     </FormDialog>
@@ -108,10 +129,18 @@ function IdentificationDialogContent({
   initialValue,
   onOpenChange,
   onSubmit,
+  submitLabel,
+  lockType,
+  lockCurrent,
+  requireExpiryDate,
 }: {
   initialValue?: Identification | null
   onOpenChange: (open: boolean) => void
   onSubmit: (value: Identification) => void | Promise<void>
+  submitLabel?: string
+  lockType: boolean
+  lockCurrent: boolean
+  requireExpiryDate: boolean
 }) {
   const it = useTranslations('identifications')
   const et = useTranslations('employees')
@@ -135,7 +164,10 @@ function IdentificationDialogContent({
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  const formInvalid = !type || !identificationNumber
+  const formInvalid =
+    !type ||
+    !identificationNumber ||
+    (requireExpiryDate && !form.expiryDate?.trim())
 
   function closeDialog() {
     if (isSubmitting) return
@@ -176,6 +208,7 @@ function IdentificationDialogContent({
               <Label>{et('idType')}</Label>
               <Select
                 value={type}
+                disabled={lockType}
                 onValueChange={(v) =>
                   update('type', v as Identification['type'])
                 }
@@ -379,6 +412,7 @@ function IdentificationDialogContent({
             <div className='flex items-center gap-2 pt-8'>
               <Checkbox
                 checked={form.isCurrent}
+                disabled={lockCurrent}
                 onCheckedChange={(v) => update('isCurrent', Boolean(v))}
               />
               <Label>{ct('current')}</Label>
@@ -391,7 +425,7 @@ function IdentificationDialogContent({
         //onCancel={() => onOpenChange(false)}
         onCancel={closeDialog}
         onSave={handleSubmit}
-        label={it('saveIdentification')}
+        label={submitLabel ?? it('saveIdentification')}
         //savingLabel={crt('saving', { item: 'board' })}
         disabled={formInvalid}
         isSaving={isSubmitting}

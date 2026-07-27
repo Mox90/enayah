@@ -8,12 +8,6 @@ import {
 } from '../../../../core/middleware/permission.middleware'
 import { HrDashboardController } from '../controller/hr-dashboard.controller'
 
-//import { requireAuth } from '../../../iam/middleware/require-auth'
-//import { attachPermissions } from '../../../iam/middleware/attach-permissions'
-//import { requirePermission } from '../../../iam/middleware/require-permission'
-
-//import { HrDashboardController } from '../controllers/hr-dashboard.controller'
-
 const router = Router()
 router.use(requireAuth)
 router.use(attachPermissions)

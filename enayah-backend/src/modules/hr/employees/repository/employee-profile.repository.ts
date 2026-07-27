@@ -130,14 +130,14 @@ export const EmployeeProfileRepository = {
         employments,
         and(
           eq(employments.employeeId, employees.id),
-          eq(employments.status, 'active'),
+          //eq(employments.status, 'active'),
         ),
       )
       .leftJoin(
         contracts,
         and(
           eq(contracts.employmentId, employments.id),
-          eq(contracts.status, 'active'),
+          //eq(contracts.status, 'active'),
         ),
       )
       // .leftJoin(latestMovement, eq(latestMovement.contractId, contracts.id))

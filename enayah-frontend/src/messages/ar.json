@@ -469,7 +469,7 @@
     "saving": "توفير {item}",
     "degreePlaceHolder": "بكالوريوس العلوم في التمريض",
     "majorPlaceHolder": "تمريض",
-    "institutionPlaceHolder": "اسم الجامعة (يرجى عدم الاختصار)",
+    "institutionPlaceHolder": "اسم الجامعة/المدرسة (يرجى عدم الاختصار)",
     "degreeSub": "تاريخ التخرج أو الإتمام، إن وُجد.",
     "educationSub": "أدخل تفاصيل مؤهلات الموظف."
   },
@@ -679,6 +679,27 @@
     "mhrsdDeniedAt": "تاريخ رفض وزارة الموارد البشرية",
     "loadingAssignees": "جاري تحميل مستخدمي العلاقات الحكومية...",
     "loadAssigneesFailed": "تعذر تحميل مستخدمي العلاقات الحكومية.",
-    "unnamedUser": "مستخدم بدون اسم"
+    "unnamedUser": "مستخدم بدون اسم",
+    "caseDiscussion": "مناقشة المعاملة",
+    "caseDiscussionDescription": "التعليقات والردود المتعلقة بإجراء تجديد الإقامة.",
+    "commentCount": "{count, plural, =0 {لا توجد تعليقات} =1 {تعليق واحد} =2 {تعليقان} other {# تعليقات}}",
+    "writeComment": "اكتب تعليقاً حول هذه المعاملة...",
+    "postComment": "إضافة تعليق",
+    "reply": "رد",
+    "replyingTo": "الرد على {name}",
+    "writeReply": "اكتب ردك...",
+    "postReply": "إرسال الرد",
+    "cancelReply": "إلغاء الرد",
+    "loadingComments": "جاري تحميل المناقشة...",
+    "loadCommentsFailed": "تعذر تحميل مناقشة المعاملة.",
+    "noComments": "لا توجد تعليقات حتى الآن",
+    "noCommentsDescription": "ابدأ المناقشة بإضافة أول تعليق.",
+    "workflowComment": "تعليق على الإجراء",
+    "workflowCommentDescription": "تعليق اختياري حول هذا الإجراء. سيتم إشعار المشاركين في المعاملة.",
+    "retry": "إعادة المحاولة",
+    "updateRenewedIqama": "تحديث الإقامة المجددة",
+    "updateRenewedIqamaDescription": "أدخل بيانات الإقامة المجددة وأكمل الإجراء.",
+    "updateRenewedIqamaDialogDescription": "قم بتحديث بيانات إقامة الموظف المجددة. سيؤدي الحفظ إلى إكمال معاملة التجديد.",
+    "saveIqamaAndComplete": "حفظ الإقامة وإكمال الإجراء"
   }
 }

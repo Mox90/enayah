@@ -1,4 +1,4 @@
-// src/modules/notifications/repository/notification.repository.ts
+// enayah-backend/src/modules/notifications/repository/notification.repository.ts
 
 import { and, desc, eq } from 'drizzle-orm'
 import {
@@ -144,6 +144,8 @@ export const NotificationRepository = {
       .values({
         employeeId: data.employeeId,
         identificationId: data.identificationId,
+        notes:
+          'To start upload employee data into Ministry of Human Resource Department (MHRSD)',
         status: 'pending_upload',
       })
       .returning()

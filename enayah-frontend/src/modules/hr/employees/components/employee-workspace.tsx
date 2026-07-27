@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { RowSelectionState } from '@tanstack/react-table'
+import { useEffect, useState } from 'react'
+import type { RowSelectionState } from '@tanstack/react-table'
 
-import { EmployeeView } from '../types/employee-view.types'
+import type { EmployeeView } from '../types/employee-view.types'
 import { useEmployeeDirectory } from '../hooks/use-employee-directory'
 
 import { EmployeeToolbar } from './toolbar/employee-toolbar'
@@ -33,23 +33,28 @@ export function EmployeeWorkspace() {
   const [view, setView] = useState<EmployeeView>('list')
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(25)
-  const [search, setSearch] = useState('')
+
+  /*
+   * searchInput:
+   * Immediate value displayed in the input.
+   *
+   * debouncedSearch:
+   * Delayed value sent to the backend.
+   */
+  const [searchInput, setSearchInput] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
   const [sortBy, setSortBy] = useState('employeeNumber')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [filterOpen, setFilterOpen] = useState(false)
-  // const [departmentIds, setDepartmentIds] = useState<string[]>([])
-  // const [positionIds, setPositionIds] = useState<string[]>([])
-  // const [categoryCodes, setCategoryCodes] = useState<number[]>([])
-  // const [genders, setGenders] = useState<string[]>([])
-  // const [nationalities, setNationalities] = useState<string[]>([])
-  // const [employmentStatuses, setEmploymentStatuses] = useState<string[]>([])
+
   const [filters, setFilters] = useState<EmployeeFilters>({
-    departmentIds: [] as string[],
-    positionIds: [] as string[],
-    categoryCodes: [] as number[],
-    genders: [] as string[],
-    nationalities: [] as string[],
-    employmentStatuses: [] as string[],
+    departmentIds: [],
+    positionIds: [],
+    categoryCodes: [],
+    genders: [],
+    nationalities: [],
+    employmentStatuses: [],
 
     hireDateFrom: undefined,
     hireDateTo: undefined,
@@ -58,22 +63,36 @@ export function EmployeeWorkspace() {
     contractEndDateTo: undefined,
   })
 
-  //------------------------------------
-  // IMPORTANT
-  //------------------------------------
-
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+
+  const [mode, setMode] = useState<'directory' | 'onboarding'>('directory')
+
+  /*
+   * Wait 400 milliseconds after the user stops typing
+   * before applying the search to the API request.
+   */
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setPage(1)
+      setDebouncedSearch(searchInput.trim())
+      setRowSelection({})
+    }, 400)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+    }
+  }, [searchInput])
+
   const offset = (page - 1) * limit
+
   const { data, isLoading } = useEmployeeDirectory({
     offset,
     limit,
-    search,
+    search: debouncedSearch,
     sortBy,
     sortOrder,
     ...filters,
   })
-
-  const [mode, setMode] = useState<'directory' | 'onboarding'>('directory')
 
   if (mode === 'onboarding') {
     return (
@@ -95,7 +114,6 @@ export function EmployeeWorkspace() {
         onFilter={() => setFilterOpen(true)}
       />
 
-      {/* Filter Sheet */}
       <EmployeeFilterSheet
         open={filterOpen}
         onOpenChange={setFilterOpen}
@@ -104,9 +122,6 @@ export function EmployeeWorkspace() {
           setFilters({
             departmentIds: newFilters.departmentIds ?? [],
             positionIds: newFilters.positionIds ?? [],
-            // categoryCodes: (newFilters.categoryCodes ?? []).map((x: string) =>
-            //   Number(x),
-            // ),
             categoryCodes: newFilters.categoryCodes ?? [],
             genders: newFilters.genders ?? [],
             nationalities: newFilters.nationalities ?? [],
@@ -118,7 +133,9 @@ export function EmployeeWorkspace() {
             contractEndDateFrom: newFilters.contractEndDateFrom,
             contractEndDateTo: newFilters.contractEndDateTo,
           })
+
           setPage(1)
+          setRowSelection({})
           setFilterOpen(false)
         }}
         onReset={() => {
@@ -136,7 +153,9 @@ export function EmployeeWorkspace() {
             contractEndDateFrom: undefined,
             contractEndDateTo: undefined,
           })
+
           setPage(1)
+          setRowSelection({})
           setFilterOpen(false)
         }}
       />
@@ -147,17 +166,23 @@ export function EmployeeWorkspace() {
           isLoading={isLoading}
           page={page}
           limit={limit}
-          search={search}
+          search={searchInput}
           sortBy={sortBy}
           sortOrder={sortOrder}
           rowSelection={rowSelection}
           onRowSelectionChange={setRowSelection}
           onPageChange={setPage}
-          onLimitChange={setLimit}
-          onSearchChange={setSearch}
-          onSortChange={(sortBy, sortOrder) => {
-            setSortBy(sortBy)
-            setSortOrder(sortOrder)
+          onLimitChange={(nextLimit) => {
+            setPage(1)
+            setLimit(nextLimit)
+            setRowSelection({})
+          }}
+          onSearchChange={setSearchInput}
+          onSortChange={(nextSortBy, nextSortOrder) => {
+            setPage(1)
+            setSortBy(nextSortBy)
+            setSortOrder(nextSortOrder)
+            setRowSelection({})
           }}
         />
       )}

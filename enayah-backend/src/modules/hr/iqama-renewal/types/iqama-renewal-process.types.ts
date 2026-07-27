@@ -20,11 +20,8 @@ export const IqamaRenewalCaseIdSchema = z.object({
 export const CreateIqamaRenewalCaseSchema = z.object({
   employeeId: z.string().uuid(),
   identificationId: z.string().uuid(),
-
   assignedToUserId: z.string().uuid().nullable().optional(),
-
   governmentRelationsDueDate: z.string().date().nullable().optional(),
-
   notes: z.string().trim().max(5000).nullable().optional(),
 })
 
@@ -35,11 +32,8 @@ export type CreateIqamaRenewalCaseInput = z.infer<
 export const UpdateIqamaRenewalCaseSchema = z
   .object({
     assignedToUserId: z.string().uuid().nullable().optional(),
-
     governmentRelationsDueDate: z.string().date().nullable().optional(),
-
     notes: z.string().trim().max(5000).nullable().optional(),
-
     version: z.coerce.number().int().positive(),
   })
   .refine(
@@ -59,15 +53,10 @@ export type UpdateIqamaRenewalCaseInput = z.infer<
 export const ChangeIqamaRenewalStatusSchema = z
   .object({
     status: IqamaRenewalStatusSchema,
-
     assignedToUserId: z.string().uuid().nullable().optional(),
-
     governmentRelationsDueDate: z.string().date().nullable().optional(),
-
     denialReason: z.string().trim().max(5000).nullable().optional(),
-
     notes: z.string().trim().max(5000).nullable().optional(),
-
     version: z.coerce.number().int().positive(),
   })
   .superRefine((data, ctx) => {
@@ -106,37 +95,37 @@ const QueryBooleanSchema = z
   .enum(['true', 'false'])
   .transform((value) => value === 'true')
 
+export const iqamaRenewalSortByValues = [
+  'employeeNumber',
+  'employeeName',
+  'iqamaNumber',
+  'expiryDate',
+  'status',
+  'mhrsdUploadedAt',
+  'mhrsdDecision',
+  'governmentRelationsDueDate',
+  'daysRemaining',
+  'createdAt',
+  'updatedAt',
+] as const
+
 export const ListIqamaRenewalCasesQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
-
-  limit: z.coerce.number().int().positive().max(100).default(20),
-
+  limit: z.coerce.number().int().positive().max(100).default(25),
+  search: z.string().trim().max(100).optional(),
   status: z
     .union([IqamaRenewalStatusSchema, z.array(IqamaRenewalStatusSchema)])
     .optional(),
-
   employeeId: z.string().uuid().optional(),
-
   identificationId: z.string().uuid().optional(),
-
   assignedToUserId: z.string().uuid().optional(),
-
   unassigned: QueryBooleanSchema.optional(),
-
   governmentRelationsDueFrom: z.string().date().optional(),
-
   governmentRelationsDueTo: z.string().date().optional(),
-
   createdFrom: z.string().date().optional(),
-
   createdTo: z.string().date().optional(),
-
   includeDeleted: QueryBooleanSchema.default(false),
-
-  sortBy: z
-    .enum(['createdAt', 'updatedAt', 'status', 'governmentRelationsDueDate'])
-    .default('createdAt'),
-
+  sortBy: z.enum(iqamaRenewalSortByValues).default('createdAt'),
   sortOrder: z.enum(['asc', 'desc']).default('desc'),
 })
 
@@ -158,3 +147,41 @@ export class IqamaRenewalProcessError extends Error {
     this.name = 'IqamaRenewalProcessError'
   }
 }
+
+const nullableTrimmedString = z.string().trim().nullable().optional()
+
+const dateOnlySchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must use YYYY-MM-DD format.')
+  .refine((value) => {
+    const parsedDate = new Date(`${value}T00:00:00.000Z`)
+
+    return (
+      !Number.isNaN(parsedDate.getTime()) &&
+      parsedDate.toISOString().slice(0, 10) === value
+    )
+  }, 'Invalid date.')
+
+const nullableDateOnly = dateOnlySchema.nullable().optional()
+
+export const completeIqamaRenewalSchema = z.object({
+  version: z.number().int().nonnegative(),
+
+  identification: z.object({
+    identificationNumber: z.string().trim().min(1).max(100),
+    issueDate: nullableDateOnly,
+    expiryDate: dateOnlySchema,
+    issueDateHijri: nullableTrimmedString,
+    expiryDateHijri: nullableTrimmedString,
+    //dateCalendar: z.enum(['gregorian', 'hijri']).optional(),
+    sponsor: nullableTrimmedString,
+    issuingAuthority: nullableTrimmedString,
+    occupation: nullableTrimmedString,
+    isCurrent: z.literal(true),
+    fileId: z.string().uuid().nullable().optional(),
+  }),
+})
+
+export type CompleteIqamaRenewalInput = z.infer<
+  typeof completeIqamaRenewalSchema
+>

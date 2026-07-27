@@ -24,6 +24,7 @@ import {
 import { latestContractMovement } from '../../../../core/utils/current-assignment.query'
 import { EmployeeDirectoryQueryDto } from '../dto/employee.request'
 import { latestEmployment } from '../../../../core/utils/latest-employment.query'
+import { latestContract } from '../../../../core/utils/latest-contract.query'
 
 export const EmployeeDirectoryRepository = {
   async findRange(tx: DB, params: EmployeeDirectoryQueryDto) {
@@ -46,6 +47,7 @@ export const EmployeeDirectoryRepository = {
     } = params
     const latestMovement = latestContractMovement(tx)
     const latestEmploymentRow = latestEmployment(tx)
+    const latestContractRow = latestContract(tx)
 
     const conditions = [
       eq(employees.isDeleted, false),
@@ -135,12 +137,19 @@ export const EmployeeDirectoryRepository = {
       conditions.push(lte(latestEmploymentRow.hireDate, hireDateTo))
     }
 
+    // if (contractEndDateFrom) {
+    //   conditions.push(gte(contracts.endDate, contractEndDateFrom))
+    // }
+
+    // if (contractEndDateTo) {
+    //   conditions.push(lte(contracts.endDate, contractEndDateTo))
+    // }
     if (contractEndDateFrom) {
-      conditions.push(gte(contracts.endDate, contractEndDateFrom))
+      conditions.push(gte(latestContractRow.endDate, contractEndDateFrom))
     }
 
     if (contractEndDateTo) {
-      conditions.push(lte(contracts.endDate, contractEndDateTo))
+      conditions.push(lte(latestContractRow.endDate, contractEndDateTo))
     }
 
     //--------------------------------
@@ -211,7 +220,7 @@ export const EmployeeDirectoryRepository = {
         .leftJoin(countries, eq(employees.countryId, countries.id))
 
         //--------------------------------
-        // Active Employment
+        // Employment
         //--------------------------------
 
         // .leftJoin(
@@ -227,15 +236,19 @@ export const EmployeeDirectoryRepository = {
         )
 
         //--------------------------------
-        // Active Contract
+        // Contract
         //--------------------------------
 
+        // .leftJoin(
+        //   contracts,
+        //   and(
+        //     eq(contracts.employmentId, latestEmploymentRow.id),
+        //     eq(contracts.status, 'active'),
+        //   ),
+        // )
         .leftJoin(
-          contracts,
-          and(
-            eq(contracts.employmentId, latestEmploymentRow.id),
-            eq(contracts.status, 'active'),
-          ),
+          latestContractRow,
+          eq(latestContractRow.employmentId, latestEmploymentRow.id),
         )
 
         //--------------------------------
@@ -258,7 +271,11 @@ export const EmployeeDirectoryRepository = {
         //     eq(contractMovements.sequenceNumber, latestMovement.maxSequence),
         //   ),
         // )
-        .leftJoin(latestMovement, eq(latestMovement.contractId, contracts.id))
+        //.leftJoin(latestMovement, eq(latestMovement.contractId, contracts.id))
+        .leftJoin(
+          latestMovement,
+          eq(latestMovement.contractId, latestContractRow.id),
+        )
 
         //--------------------------------
         // PCN
@@ -322,19 +339,21 @@ export const EmployeeDirectoryRepository = {
         // .leftJoin(
         //   contracts,
         //   and(
-        //     eq(contracts.employmentId, employments.id),
+        //     eq(contracts.employmentId, latestEmploymentRow.id),
         //     eq(contracts.status, 'active'),
         //   ),
         // )
+
+        // .leftJoin(latestMovement, eq(latestMovement.contractId, contracts.id))
         .leftJoin(
-          contracts,
-          and(
-            eq(contracts.employmentId, latestEmploymentRow.id),
-            eq(contracts.status, 'active'),
-          ),
+          latestContractRow,
+          eq(latestContractRow.employmentId, latestEmploymentRow.id),
         )
 
-        .leftJoin(latestMovement, eq(latestMovement.contractId, contracts.id))
+        .leftJoin(
+          latestMovement,
+          eq(latestMovement.contractId, latestContractRow.id),
+        )
 
         .leftJoin(
           positionItems,

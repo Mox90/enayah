@@ -1,23 +1,39 @@
-// src/modules/hr/iqama-renewal/services/iqama-renewal.service.ts
-
 import { api } from '@/lib/api/client'
+import { API_ENDPOINTS } from '@/lib/api/endpoints'
 
+import type { ApiResponse } from '../../dashboard/types/hr-dashboard.types'
 import type {
   AssigneeOption,
   ChangeIqamaRenewalStatusPayload,
+  CompleteIqamaRenewalPayload,
   CreateIqamaRenewalCasePayload,
   IqamaRenewalCase,
   IqamaRenewalCaseListResponse,
   IqamaRenewalStatus,
   UpdateIqamaRenewalCasePayload,
 } from '../types/iqama-renewal.types'
-import { API_ENDPOINTS } from '@/lib/api/endpoints'
 
-export type IqamaRenewalSortBy =
-  | 'createdAt'
-  | 'updatedAt'
-  | 'status'
-  | 'governmentRelationsDueDate'
+export const IQAMA_RENEWAL_SORT_FIELDS = [
+  'employeeNumber',
+  'employeeName',
+  'iqamaNumber',
+  'expiryDate',
+  'status',
+  'mhrsdUploadedAt',
+  'mhrsdDecision',
+  'governmentRelationsDueDate',
+  'daysRemaining',
+  'createdAt',
+  'updatedAt',
+] as const
+
+export type IqamaRenewalSortBy = (typeof IQAMA_RENEWAL_SORT_FIELDS)[number]
+
+export function isIqamaRenewalSortBy(
+  value: string,
+): value is IqamaRenewalSortBy {
+  return (IQAMA_RENEWAL_SORT_FIELDS as readonly string[]).includes(value)
+}
 
 export type IqamaRenewalListParams = {
   page: number
@@ -38,7 +54,7 @@ export const iqamaRenewalService = {
         params: {
           page: params.page,
           limit: params.limit,
-          search: params.search || undefined,
+          search: params.search?.trim() || undefined,
           status: params.status || undefined,
           sortBy: params.sortBy || undefined,
           sortOrder: params.sortOrder || undefined,
@@ -46,7 +62,6 @@ export const iqamaRenewalService = {
       },
     )
 
-    //console.log('FROM Service', response.data)
     return response.data
   },
 
@@ -84,8 +99,7 @@ export const iqamaRenewalService = {
   changeIqamaRenewalStatus: async (
     id: string,
     payload: ChangeIqamaRenewalStatusPayload,
-  ) => {
-    console.log(payload)
+  ): Promise<IqamaRenewalCase> => {
     const response = await api.patch<IqamaRenewalCase>(
       `${API_ENDPOINTS.hr.iqamaRenewal}/${id}/status`,
       payload,
@@ -98,6 +112,19 @@ export const iqamaRenewalService = {
     const response = await api.get<AssigneeOption[]>(
       `${API_ENDPOINTS.hr.iqamaRenewal}/assignees/government-relations`,
     )
+
     return response.data
+  },
+
+  completeIqamaRenewal: async (
+    id: string,
+    payload: CompleteIqamaRenewalPayload,
+  ): Promise<IqamaRenewalCase> => {
+    const response = await api.patch<ApiResponse<IqamaRenewalCase>>(
+      `${API_ENDPOINTS.hr.iqamaRenewal}/${id}/complete`,
+      payload,
+    )
+
+    return response.data.data
   },
 }
