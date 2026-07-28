@@ -15,6 +15,7 @@ import type {
   ChangeIqamaRenewalStatusPayload,
   CompleteIqamaRenewalPayload,
   CreateIqamaRenewalCasePayload,
+  ReturnIqamaRenewalToHrPayload,
   UpdateIqamaRenewalCasePayload,
 } from '../types/iqama-renewal.types'
 import { useTranslations } from 'next-intl'
@@ -216,6 +217,49 @@ export function useCompleteIqamaRenewal() {
       console.error('Failed to complete Iqama renewal:', error)
 
       toast.error('Failed to update the Iqama.')
+    },
+  })
+}
+
+export function useReturnIqamaRenewalToHr() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string
+      payload: ReturnIqamaRenewalToHrPayload
+    }) => iqamaRenewalService.returnToHr(id, payload),
+
+    onSuccess: async (updatedCase) => {
+      queryClient.setQueryData(
+        iqamaRenewalKeys.detail(updatedCase.id),
+        updatedCase,
+      )
+
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: iqamaRenewalKeys.lists(),
+        }),
+
+        /*
+         * The transaction created a new
+         * top-level comment.
+         */
+        queryClient.invalidateQueries({
+          queryKey: iqamaRenewalCommentKeys.list(updatedCase.id),
+        }),
+      ])
+
+      toast.success('The case was returned to HR.')
+    },
+
+    onError: (error) => {
+      console.error('Failed to return Iqama renewal case:', error)
+
+      toast.error('Failed to return the case to HR.')
     },
   })
 }

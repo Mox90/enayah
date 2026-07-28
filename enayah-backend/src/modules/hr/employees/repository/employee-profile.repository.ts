@@ -1,32 +1,40 @@
-//import { version } from 'node:os'
 import { AppError } from '../../../../core/errors/AppError'
 import { latestContractMovement } from '../../../../core/utils/current-assignment.query'
+import { latestEmployment } from '../../../../core/utils/latest-employment.query'
+import { latestContract } from '../../../../core/utils/latest-contract.query'
 
 import {
   DB,
   employees,
-  employments,
-  contracts,
   positionItems,
   departments,
   positions,
   countries,
 } from '../../../../db'
 
-import { and, desc, eq, isNull, sql } from 'drizzle-orm'
+import { and, eq, isNull, sql } from 'drizzle-orm'
 
-const isActive = and(
+const isActiveEmployeeRecord = and(
   eq(employees.isDeleted, false),
   isNull(employees.deletedAt),
 )
 
 export const EmployeeProfileRepository = {
   findProfile: async (tx: DB, employeeId: string) => {
-    // ------------------------------------
-    // latest movement per contract
-    // ------------------------------------
-
-    const latestMovement = latestContractMovement(tx)
+    /*
+     * These queries return one deterministic row:
+     *
+     * Employee
+     *   -> latest employment
+     *   -> latest contract
+     *   -> latest contract movement
+     *
+     * They must not be limited to active records because former employees
+     * still need their last known assignment displayed.
+     */
+    const latestEmploymentRow = latestEmployment(tx)
+    const latestContractRow = latestContract(tx)
+    const latestMovementRow = latestContractMovement(tx)
 
     const result = await tx
       .select({
@@ -35,7 +43,6 @@ export const EmployeeProfileRepository = {
         // ---------------------
 
         id: employees.id,
-
         employeeNumber: employees.employeeNumber,
 
         firstNameEn: employees.firstNameEn,
@@ -61,42 +68,40 @@ export const EmployeeProfileRepository = {
           alpha3: countries.alpha3,
           numericCode: countries.numericCode,
         },
+
         version: employees.version,
 
         // ---------------------
-        // Employment
+        // Latest Employment
         // ---------------------
 
-        employmentId: employments.id,
+        employmentId: latestEmploymentRow.id,
 
-        hireDate: employments.hireDate,
-        startDate: employments.startDate,
-        endDate: employments.endDate,
+        hireDate: latestEmploymentRow.hireDate,
+        startDate: latestEmploymentRow.startDate,
+        endDate: latestEmploymentRow.endDate,
 
-        employmentType: employments.employmentType,
-        staffCategory: employments.staffCategory,
-        employmentStatus: employments.status,
-
-        // ---------------------
-        // Contract
-        // ---------------------
-
-        contractId: contracts.id,
-        contractNumber: contracts.contractNumber,
-        contractType: contracts.contractType,
-        contractStartDate: contracts.startDate,
-        contractEndDate: contracts.endDate,
+        employmentType: latestEmploymentRow.employmentType,
+        staffCategory: latestEmploymentRow.staffCategory,
+        employmentStatus: latestEmploymentRow.status,
 
         // ---------------------
-        // Movement
+        // Latest Contract
         // ---------------------
 
-        //movementId: contractMovements.id,
-        //movementType: contractMovements.movementType,
-        //sequenceNumber: contractMovements.sequenceNumber,
-        movementId: latestMovement.id,
-        movementType: latestMovement.movementType,
-        sequenceNumber: latestMovement.sequenceNumber,
+        contractId: latestContractRow.id,
+        contractNumber: latestContractRow.contractNumber,
+        contractType: latestContractRow.contractType,
+        contractStartDate: latestContractRow.startDate,
+        contractEndDate: latestContractRow.endDate,
+
+        // ---------------------
+        // Latest Movement
+        // ---------------------
+
+        movementId: latestMovementRow.id,
+        movementType: latestMovementRow.movementType,
+        sequenceNumber: latestMovementRow.sequenceNumber,
 
         // ---------------------
         // PCN
@@ -123,45 +128,58 @@ export const EmployeeProfileRepository = {
         positionTitleEn: positions.titleEn,
         positionTitleAr: positions.titleAr,
       })
-
       .from(employees)
+
       .leftJoin(countries, eq(employees.countryId, countries.id))
+
+      // Latest employment, including ended/inactive employment.
       .leftJoin(
-        employments,
-        and(
-          eq(employments.employeeId, employees.id),
-          //eq(employments.status, 'active'),
-        ),
+        latestEmploymentRow,
+        eq(latestEmploymentRow.employeeId, employees.id),
       )
+
+      // Latest contract belonging to the latest employment.
       .leftJoin(
-        contracts,
-        and(
-          eq(contracts.employmentId, employments.id),
-          //eq(contracts.status, 'active'),
-        ),
+        latestContractRow,
+        eq(latestContractRow.employmentId, latestEmploymentRow.id),
       )
-      // .leftJoin(latestMovement, eq(latestMovement.contractId, contracts.id))
-      // .leftJoin(
-      //   contractMovements,
-      //   and(
-      //     eq(contractMovements.contractId, latestMovement.contractId),
-      //     eq(contractMovements.sequenceNumber, latestMovement.maxSequence),
-      //   ),
-      // )
-      .leftJoin(latestMovement, eq(latestMovement.contractId, contracts.id))
+
+      // Latest movement belonging to the latest contract.
+      .leftJoin(
+        latestMovementRow,
+        eq(latestMovementRow.contractId, latestContractRow.id),
+      )
+
       .leftJoin(
         positionItems,
-        eq(positionItems.id, latestMovement.positionItemId),
+        eq(positionItems.id, latestMovementRow.positionItemId),
       )
 
       .leftJoin(
         departments,
-        eq(departments.id, latestMovement.officialDepartmentId),
+        eq(departments.id, latestMovementRow.officialDepartmentId),
       )
 
-      .leftJoin(positions, eq(positions.id, latestMovement.officialPositionId))
+      .leftJoin(
+        positions,
+        eq(positions.id, latestMovementRow.officialPositionId),
+      )
 
-      .where(and(eq(employees.id, employeeId), isActive))
+      .where(and(eq(employees.id, employeeId), isActiveEmployeeRecord))
+
+      /*
+       * Defensive deterministic ordering.
+       *
+       * The latest-row helpers should already return only one record each,
+       * but this also prevents an arbitrary result if unexpected duplicate
+       * rows exist.
+       */
+      .orderBy(
+        sql`${latestEmploymentRow.startDate} desc nulls last`,
+        sql`${latestEmploymentRow.hireDate} desc nulls last`,
+        sql`${latestContractRow.startDate} desc nulls last`,
+        sql`${latestMovementRow.sequenceNumber} desc nulls last`,
+      )
       .limit(1)
 
     const employee = result[0]

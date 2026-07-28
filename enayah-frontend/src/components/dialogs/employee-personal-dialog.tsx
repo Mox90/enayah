@@ -135,10 +135,14 @@ export function EmployeePersonalDialog({
       title={et('editPersonalInfo')}
       description={et('editPersonalInfoSub')}
       // 1. Set a responsive max-height (max-h-[90vh]) instead of leaving it unconstrained
-      className='w-[95vw] max-w-4xl overflow-hidden p-0'
-      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+      // className='w-[95vw] max-w-4xl overflow-hidden p-0'
+      // headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+      className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+      headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'
     >
       {/* 2. Wrap the form sections in a scrollable container with overflow-y-auto */}
+      {/* <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
+        <section className='rounded-2xl border bg-card p-5 shadow-sm'> */}
       <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>

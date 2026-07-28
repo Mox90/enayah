@@ -69,9 +69,17 @@ router.get(
 )
 
 router.patch(
-  '/:id',
-  requirePermission('iqama.renewal.update'),
-  IqamaRenewalProcessController.update,
+  '/:id/complete',
+  //requirePermission('iqama.renewal.government-relations.process'),
+  requirePermission('iqama.renewal.process'),
+  IqamaRenewalProcessController.completeWithIqama,
+)
+
+router.patch(
+  '/:id/return-to-hr',
+  //requirePermission('iqama.renewal.government-relations.process'),
+  requirePermission('iqama.renewal.process'),
+  IqamaRenewalProcessController.returnToHr,
 )
 
 router.patch(
@@ -81,10 +89,9 @@ router.patch(
 )
 
 router.patch(
-  '/:id/complete',
-  //requirePermission('iqama.renewal.government-relations.process'),
-  requirePermission('iqama.renewal.process'),
-  IqamaRenewalProcessController.completeWithIqama,
+  '/:id',
+  requirePermission('iqama.renewal.update'),
+  IqamaRenewalProcessController.update,
 )
 
 router.delete(

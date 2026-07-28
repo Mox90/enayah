@@ -46,7 +46,10 @@ export const employmentStatusEnum = pgEnum('employment_status', [
   'resigned',
   'eoc',
   'transferred',
+  'retired',
   'on_leave',
+  'suspended',
+  'deceased',
 ])
 
 export const appraisalStatusEnum = pgEnum('appraisal_status', [

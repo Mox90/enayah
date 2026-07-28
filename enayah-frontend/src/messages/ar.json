@@ -234,7 +234,21 @@
     "movementRemarks": "ملاحظات حول الحركة",
     "contractNotes": "ملاحظات العقد",
     "renewingContract": "جارٍ التجديد...",
-    "renewContractBtn": "تجديد العقد"
+    "renewContractBtn": "تجديد العقد",
+    "revoked": "تم إبطاله",
+    "expired": "منتهي الصلاحية",
+    "suspended": "معلق",
+    "employmentStatuses": {
+      "active": "على رأس العمل",
+      "terminated": "منتهي الخدمة",
+      "resigned": "مستقيل",
+      "eoc": "نهاية العقد",
+      "transferred": "منقول",
+      "retired": "متقاعد",
+      "onLeave": "في إجازة",
+      "suspended": "موقوف",
+      "deceased": "متوفى"
+    }
   },
   "departments": {
     "departmentName": "الأقسام",
@@ -511,7 +525,7 @@
     "expiryDateHijri": "تاريخ الانتهاء بالهجري",
     "occupation": "المهنة",
     "sponsor": "الراعي",
-    "authority": "السلطة",
+    "authority": "سلطة الإصدار",
     "saveIdentification": "حفظ الهوية",
     "idTitleSub": "أدخل تفاصيل الهوية."
   },
@@ -700,6 +714,16 @@
     "updateRenewedIqama": "تحديث الإقامة المجددة",
     "updateRenewedIqamaDescription": "أدخل بيانات الإقامة المجددة وأكمل الإجراء.",
     "updateRenewedIqamaDialogDescription": "قم بتحديث بيانات إقامة الموظف المجددة. سيؤدي الحفظ إلى إكمال معاملة التجديد.",
-    "saveIqamaAndComplete": "حفظ الإقامة وإكمال الإجراء"
+    "saveIqamaAndComplete": "حفظ الإقامة وإكمال الإجراء",
+    "returnCaseToHr": "إعادة المعاملة إلى الموارد البشرية",
+    "returnCaseToHrDescription": "إعادة المعاملة للتصحيح أو إعادة المعالجة.",
+    "returnCaseToHrDialogDescription": "أعد هذه المعاملة إلى الموارد البشرية مع توضيح سبب تعذر إتمام التحديث في الجوازات.",
+    "returnCaseWarningTitle": "إعادة المعاملة إلى الموارد البشرية؟",
+    "returnCaseWarningDescription": "ستعود حالة المعاملة إلى بانتظار الرفع وسيتم إلغاء تعيين موظف العلاقات الحكومية.",
+    "returnReason": "سبب الإعادة",
+    "returnReasonDescription": "وضح سبب عدم نجاح التحديث في الجوازات. سيتم تسجيل السبب في مناقشات المعاملة.",
+    "returnReasonPlaceholder": "اشرح مشكلة الجوازات والإجراء المطلوب من الموارد البشرية...",
+    "confirmReturnToHr": "إعادة إلى الموارد البشرية",
+    "returningCase": "جارٍ إعادة المعاملة..."
   }
 }

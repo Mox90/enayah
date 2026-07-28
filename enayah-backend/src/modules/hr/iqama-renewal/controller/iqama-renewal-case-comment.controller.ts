@@ -17,7 +17,7 @@ import {
   type IqamaRenewalCaseActor,
 } from '../types/iqama-renewal-process.types'
 
-function getAuthenticatedActor(req: Request): IqamaRenewalCaseActor {
+export const getAuthenticatedActor = (req: Request): IqamaRenewalCaseActor => {
   if (!req.user?.id) {
     throw new IqamaRenewalProcessError(
       'Authentication is required.',

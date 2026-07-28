@@ -321,7 +321,6 @@ export const EmployeeDirectoryRepository = {
         })
 
         .from(employees)
-
         .leftJoin(countries, eq(employees.countryId, countries.id))
 
         // .leftJoin(
