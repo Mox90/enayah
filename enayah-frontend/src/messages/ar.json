@@ -43,7 +43,12 @@
     "expiringMessage1": "منتهي الصلاحية في {item} أيام!",
     "expiringMessage2": "منتهي الصلاحية خلال {item} أيام",
     "expiringMessage3": "منتهي الصلاحية في {item} أيام",
-    "current": "حاليا"
+    "current": "حاليا",
+    "valid": "ساري",
+    "expiresInDays": "ينتهي خلال {days} يومًا",
+    "expiresTomorrow": "ينتهي غدًا",
+    "noExpiryDate": "لا يوجد تاريخ انتهاء",
+    "invalidExpiryDate": "تاريخ الانتهاء غير صالح"
   },
 
   "auth": {
@@ -485,7 +490,9 @@
     "majorPlaceHolder": "تمريض",
     "institutionPlaceHolder": "اسم الجامعة/المدرسة (يرجى عدم الاختصار)",
     "degreeSub": "تاريخ التخرج أو الإتمام، إن وُجد.",
-    "educationSub": "أدخل تفاصيل مؤهلات الموظف."
+    "educationSub": "أدخل تفاصيل مؤهلات الموظف.",
+    "institution": "المدرسة / الجهة المانحة",
+    "membershipNumber": "رقم العضوية"
   },
   "payroll": {},
   "attendance": {},

@@ -42,6 +42,31 @@ export const statusBadgeClass: Record<string, string> = {
 
   deceased:
     'border-slate-300 bg-slate-100 text-slate-700 ring-slate-600/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300',
+
+  // Date-based expiry statuses
+  expiry_valid:
+    'border-emerald-200 bg-emerald-50 text-emerald-700 ring-emerald-600/10 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300',
+
+  expiry_61_90:
+    'border-yellow-300 bg-yellow-50 text-yellow-800 ring-yellow-600/10 dark:border-yellow-700 dark:bg-yellow-950/50 dark:text-yellow-300',
+
+  expiry_31_60:
+    'border-orange-300 bg-orange-50 text-orange-800 ring-orange-600/10 dark:border-orange-800 dark:bg-orange-950/50 dark:text-orange-300',
+
+  expiry_2_30:
+    'border-rose-300 bg-rose-50 text-rose-800 ring-rose-600/10 dark:border-rose-800 dark:bg-rose-950/50 dark:text-rose-300',
+
+  expiry_tomorrow:
+    'border-red-900 bg-red-800 text-white ring-red-950/20 dark:border-red-700 dark:bg-red-900 dark:text-red-100',
+
+  expiry_expired:
+    'border-red-950 bg-red-950 text-white ring-red-950/20 dark:border-red-800 dark:bg-red-950 dark:text-red-100',
+
+  expiry_missing:
+    'border-slate-200 bg-slate-50 text-slate-600 ring-slate-600/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300',
+
+  expiry_invalid:
+    'border-slate-200 bg-slate-50 text-slate-600 ring-slate-600/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300',
 }
 
 interface Props {

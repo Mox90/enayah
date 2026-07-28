@@ -2,19 +2,7 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Mail,
-  Phone,
-  IdCard,
-  Users,
-  MapPin,
-  Siren,
-  Plane,
-  Plus,
-  Pencil,
-  MoreVertical,
-  Trash2,
-} from 'lucide-react'
+import { Users, Plus } from 'lucide-react'
 import { format } from 'date-fns'
 import { useLocale, useTranslations } from 'next-intl'
 import { getExpiryStatus, toArabic, toPersianDigits } from '@/utils/utilities'
@@ -23,6 +11,7 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
 import { RowActions } from '@/components/dialogs/row-actions'
+import { ExpiryStatusBadge } from '@/components/badges/expiry-status-badge'
 
 function dash(value?: string | number | boolean | null) {
   if (value === true) return 'Yes'
@@ -210,7 +199,7 @@ export function PersonalDetailsCards({
               // const isExpired = item.expiryDate
               //   ? new Date(item.expiryDate) < new Date()
               //   : false
-              const isExpired = status.diffDays !== null && status.diffDays < 0
+              //const isExpired = status.diffDays !== null && status.diffDays < 0
               return (
                 <div
                   key={item.id}
@@ -233,97 +222,10 @@ export function PersonalDetailsCards({
                       </div>
 
                       <div className='flex shrink-0 flex-wrap items-center justify-end gap-2'>
-                        {/* {isExpired && (
-                          <Badge
-                            variant='destructive'
-                            className='rounded-full px-2.5 py-0.5 text-xs font-bold shadow-sm'
-                          >
-                            🚨 {ct('expired')}
-                          </Badge>
-                        )} */}
-                        {isExpired && (
-                          <div className='relative isolate inline-flex'>
-                            {status.pulseClass && (
-                              <span
-                                aria-hidden='true'
-                                className={cn(
-                                  'pointer-events-none absolute inset-0 z-0 rounded-full bg-red-500/50',
-                                  status.pulseClass,
-                                )}
-                              />
-                            )}
-
-                            <Badge
-                              variant='destructive'
-                              className='relative z-10 rounded-full px-2.5 py-0.5 text-xs font-bold shadow-sm'
-                            >
-                              <span aria-hidden='true'>🚨</span>
-                              <span className='ms-1'>{ct('expired')}</span>
-                            </Badge>
-                          </div>
-                        )}
-
-                        {/* {!isExpired &&
-                          status.diffDays !== null &&
-                          status.diffDays > 0 &&
-                          status.diffDays <= 30 && (
-                            <Badge className='rounded-full border border-red-400 bg-red-600 px-2.5 py-0.5 text-xs font-bold tracking-wide text-white shadow-sm hover:bg-red-600'>
-                              ⚠️{' '}
-                              {ct.rich('expiringMessage1', {
-                                item: status.diffDays,
-                              })}
-                            </Badge
-                            >
-                          )} */}
-                        {!isExpired &&
-                          status.diffDays !== null &&
-                          status.diffDays > 0 &&
-                          status.diffDays <= 30 && (
-                            <div className='relative isolate inline-flex'>
-                              {status.pulseClass && (
-                                <span
-                                  aria-hidden='true'
-                                  className={cn(
-                                    'pointer-events-none absolute inset-0 z-0 rounded-full bg-red-500/50',
-                                    status.pulseClass,
-                                  )}
-                                />
-                              )}
-
-                              <Badge className='relative z-10 rounded-full border border-red-400 bg-red-600 px-2.5 py-0.5 text-xs font-bold tracking-wide text-white shadow-sm hover:bg-red-600'>
-                                <span aria-hidden='true'>⚠️</span>
-
-                                <span className='ms-1'>
-                                  {ct.rich('expiringMessage1', {
-                                    item: status.diffDays,
-                                  })}
-                                </span>
-                              </Badge>
-                            </div>
-                          )}
-
-                        {!isExpired &&
-                          status.diffDays !== null &&
-                          status.diffDays > 30 &&
-                          status.diffDays <= 60 && (
-                            <Badge className='rounded-full bg-orange-500 px-2.5 py-0.5 text-xs font-semibold tracking-wide text-white shadow-sm hover:bg-orange-500'>
-                              {ct.rich('expiringMessage2', {
-                                item: status.diffDays,
-                              })}
-                            </Badge>
-                          )}
-
-                        {!isExpired &&
-                          status.diffDays !== null &&
-                          status.diffDays > 60 &&
-                          status.diffDays <= 90 && (
-                            <Badge className='rounded-full border border-yellow-500/40 bg-yellow-500/20 px-2.5 py-0.5 text-xs font-medium text-yellow-700 dark:text-yellow-400'>
-                              <span className='mr-1 inline-block'>⏰</span>
-                              {ct.rich('expiringMessage3', {
-                                item: status.diffDays,
-                              })}
-                            </Badge>
-                          )}
+                        <ExpiryStatusBadge
+                          expiryDate={item.expiryDate}
+                          showAttentionPulse
+                        />
 
                         {item.isCurrent && (
                           <Badge

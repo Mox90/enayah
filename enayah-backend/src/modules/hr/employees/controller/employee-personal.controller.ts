@@ -13,6 +13,9 @@ import {
   UpdateEmployeeVisaSchema,
 } from '../dto/employee-personal.request'
 import { EmployeePersonalService } from '../service/employee-personal.service'
+import { EmployeeProfileSummaryParamsSchema } from '../dto/employee-profile-summary.types'
+import { EmployeeProfileService } from '../service/employee-profile.service'
+import { db } from '../../../../db'
 
 export const EmployeePersonalController = {
   findByEmployeeId: asyncHandler(async (req: Request, res: Response) => {
@@ -161,4 +164,16 @@ export const EmployeePersonalController = {
 
     res.status(204).send()
   }),
+
+  getEmployeeProfileSummary: asyncHandler(
+    async (req: Request, res: Response) => {
+      const { id } = EmployeeProfileSummaryParamsSchema.parse(req.params)
+
+      const summary = await EmployeeProfileService.findProfileSummary(db, id)
+
+      res.status(200).json({
+        data: summary,
+      })
+    },
+  ),
 }

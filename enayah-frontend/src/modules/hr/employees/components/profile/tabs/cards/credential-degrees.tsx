@@ -1,186 +1,256 @@
+// enayah-frontend/src/modules/hr/employees/components/profile/tabs/cards/credential-degrees.tsx
+
 'use client'
 
-import { format } from 'date-fns'
+import type { ReactNode } from 'react'
+import { format, isValid, parseISO } from 'date-fns'
+import { arSA, enUS } from 'date-fns/locale'
+import { GraduationCap, Plus } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
+
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
 import { VerificationBadge } from '@/components/badges/verification-badge'
-import { DegreeInput } from '@/modules/hr/onboarding/types/onboarding.types'
-import { Plus } from 'lucide-react'
-import { useLocale, useTranslations } from 'next-intl'
-import { toArabic, toPersianDigits } from '@/utils/utilities'
-import { cn } from '@/lib/utils'
 import { RowActions } from '@/components/dialogs/row-actions'
-
-// interface Degree {
-//   id: string
-//   degreeType: string
-//   degreeName: string
-//   major?: string | null
-//   institution: string
-//   graduationDate: string | null
-//   isVerified?: boolean
-// }
+import { DegreeInput } from '@/modules/hr/onboarding/types/onboarding.types'
+import { cn } from '@/lib/utils'
+import { toPersianDigits } from '@/utils/utilities'
 
 interface Props {
-  degrees: DegreeInput[] //Degree[]
+  degrees: DegreeInput[]
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
 }
 
-const degreeTypeLabel: Record<string, string> = {
-  diploma: 'Diploma',
-  associate: 'Associate',
-  bachelor: 'Bachelor',
-  master: 'Master',
-  doctorate: 'Doctorate',
-  other: 'Other',
+interface DetailItemProps {
+  label: string
+  value?: ReactNode
+  valueDirection?: 'ltr' | 'rtl'
 }
 
 const degreeTypeColors: Record<string, string> = {
-  doctorate: 'bg-purple-100 text-purple-800 border-purple-200',
-  master: 'bg-blue-100 text-blue-800 border-blue-200',
-  bachelor: 'bg-green-100 text-green-800 border-green-200',
-  diploma: 'bg-amber-100 text-amber-800 border-amber-200',
-  associate: 'bg-orange-100 text-orange-800 border-orange-200',
-  other: 'bg-gray-100 text-gray-700 border-gray-200',
+  doctorate:
+    'border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300',
+
+  master:
+    'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-300',
+
+  bachelor:
+    'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300',
+
+  diploma:
+    'border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/50 dark:text-amber-300',
+
+  associate:
+    'border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-950/50 dark:text-orange-300',
+
+  other:
+    'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300',
 }
 
-// const statusClass: Record<string, string> = {
-//   active: 'bg-green-100 text-green-700 border-green-200',
-//   on_leave: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-//   transferred: 'bg-blue-100 text-blue-700 border-blue-200',
-//   resigned: 'bg-orange-100 text-orange-700 border-orange-200',
-//   eoc: 'bg-purple-100 text-purple-700 border-purple-200',
-//   terminated: 'bg-red-100 text-red-700 border-red-200',
-// }
+function DetailItem({ label, value, valueDirection }: DetailItemProps) {
+  return (
+    <div className='min-w-0'>
+      <div className='mb-1 text-xs font-medium text-muted-foreground'>
+        {label}
+      </div>
+
+      <div
+        className='break-words text-sm font-medium text-foreground'
+        dir={valueDirection}
+      >
+        {value || '-'}
+      </div>
+    </div>
+  )
+}
+
+function formatDegreeDate(value: string | null | undefined, isRtl: boolean) {
+  if (!value) return '-'
+
+  const parsedDate = parseISO(value)
+
+  if (!isValid(parsedDate)) {
+    return '-'
+  }
+
+  const formattedDate = format(parsedDate, 'dd-MMM-yyyy', {
+    locale: isRtl ? arSA : enUS,
+  })
+
+  return isRtl ? toPersianDigits(formattedDate) : formattedDate
+}
 
 export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
-  //console.log(degrees)
   const ct = useTranslations('credentials')
   const locale = useLocale()
   const isRtl = locale === 'ar'
+
+  const displayedCount = isRtl
+    ? toPersianDigits(degrees.length)
+    : degrees.length
+
   return (
-    <Card>
-      <CardHeader className='flex flex-row items-center justify-between'>
-        <CardTitle>
-          🎓 {ct('highestEducationalLabel')} (
-          {isRtl ? toPersianDigits(degrees.length) : degrees.length})
-        </CardTitle>
-
-        <Button size='sm' onClick={onAdd}>
-          {/* <Plus className={`${isRtl ? 'ml-2' : 'mr-2'} h-4 w-4`} /> */}
-          <Plus className={cn('h-4 w-4', isRtl ? 'ml-2' : 'mr-4')} />
-          {ct('addDegree')}
-        </Button>
-      </CardHeader>
-
-      <CardContent className='space-y-4'>
-        {degrees.length === 0 && (
-          <div className='text-sm text-muted-foreground'>
-            {ct.rich('noRecFound', { item: isRtl ? 'تعليم' : 'Education' })}
-          </div>
-        )}
-        <div className='text-sm text-muted-foreground'>
-          {ct('highestEducationalSub')}
-        </div>
-        {degrees.map((degree, index) => {
-          const degreeId = degree.id
-          return (
-            <div
-              key={degree.id ?? `${degree.degreeName}-${index}`}
-              className='rounded-lg border p-4'
-            >
-              <div className='flex justify-between'>
-                <div className='space-y-1'>
-                  <div className='font-semibold'>{degree.degreeName}</div>
-
-                  <div className='text-sm text-muted-foreground'>
-                    {degree.institution}
-                  </div>
-
-                  {degree.major && (
-                    <div className='text-sm'>
-                      {ct('major')}: {degree.major}
-                    </div>
-                  )}
-
-                  {degree.graduationDate && (
-                    <div className='text-sm'>
-                      {ct('graduated')}:{' '}
-                      {isRtl
-                        ? toArabic(degree.graduationDate, 1)
-                        : format(
-                            new Date(degree.graduationDate),
-                            'dd-MMM-yyyy',
-                          )}
-                    </div>
-                  )}
-
-                  <div className='text-sm'>
-                    {ct('type')}: {ct(degree.degreeType)}
-                  </div>
-
-                  <VerificationBadge verified={degree.isVerified ?? false} />
-                </div>
-
-                {/* <div className='flex flex-col items-end gap-2'>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button size='icon' variant='ghost'>
-                      <MoreVertical className='h-4 w-4 text-green-700' />
-                    </Button>
-                  </DropdownMenuTrigger>
-
-                  <DropdownMenuContent>
-                    {onEdit && (
-                      <DropdownMenuItem
-                        className={
-                          isRtl
-                            ? 'justify-end text-right'
-                            : 'justify-start text-left'
-                        }
-                        onClick={() => {
-                          if (!degree.id) return
-                          onEdit(degree.id)
-                        }}
-                      >
-                        {ct('edit')}
-                      </DropdownMenuItem>
-                    )}
-
-                    {onDelete && (
-                      <DropdownMenuItem
-                        className={`text-red-600 ${
-                          isRtl
-                            ? 'justify-end text-right'
-                            : 'justify-start text-left'
-                        }`}
-                        onClick={() => {
-                          if (!degree.id) return
-                          onDelete(degree.id)
-                        }}
-                      >
-                        {ct('delete')}
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div> */}
-                <RowActions
-                  onEdit={
-                    degreeId && onEdit ? () => onEdit(degreeId) : undefined
-                  }
-                  onDelete={
-                    degreeId && onDelete ? () => onDelete(degreeId) : undefined
-                  }
+    <Card className='overflow-hidden'>
+      <CardHeader className='border-b bg-muted/20'>
+        <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between'>
+          <div className='min-w-0'>
+            <CardTitle className='flex items-center gap-3'>
+              <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10'>
+                <GraduationCap
+                  aria-hidden='true'
+                  className='h-5 w-5 text-emerald-600 dark:text-emerald-400'
                 />
               </div>
+
+              <div className='flex min-w-0 items-center gap-2'>
+                <span className='truncate text-base font-semibold'>
+                  {ct('highestEducationalLabel')}
+                </span>
+
+                <span className='inline-flex min-w-6 shrink-0 items-center justify-center rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground'>
+                  {displayedCount}
+                </span>
+              </div>
+            </CardTitle>
+
+            <p className='mt-2 ps-[52px] text-sm text-muted-foreground'>
+              {ct('highestEducationalSub')}
+            </p>
+          </div>
+
+          {onAdd && (
+            <Button
+              type='button'
+              size='sm'
+              onClick={onAdd}
+              className='w-full shrink-0 sm:w-auto'
+            >
+              <Plus aria-hidden='true' className='me-2 h-4 w-4' />
+              {ct('addDegree')}
+            </Button>
+          )}
+        </div>
+      </CardHeader>
+
+      <CardContent className='p-5'>
+        {degrees.length === 0 ? (
+          <div className='rounded-xl border border-dashed bg-muted/10 px-6 py-10 text-center'>
+            <div className='mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-muted'>
+              <GraduationCap
+                aria-hidden='true'
+                className='h-5 w-5 text-muted-foreground'
+              />
             </div>
-          )
-        })}
+
+            <p className='text-sm text-muted-foreground'>
+              {ct('noRecFound', {
+                item: ct('highestEducationalLabel'),
+              })}
+            </p>
+
+            {onAdd && (
+              <Button
+                type='button'
+                variant='outline'
+                size='sm'
+                className='mt-4'
+                onClick={onAdd}
+              >
+                <Plus aria-hidden='true' className='me-2 h-4 w-4' />
+                {ct('addDegree')}
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className='space-y-4'>
+            {degrees.map((degree, index) => {
+              const degreeId = degree.id
+
+              const degreeTypeClass =
+                degreeTypeColors[degree.degreeType] ?? degreeTypeColors.other
+
+              return (
+                <article
+                  key={
+                    degreeId ??
+                    `${degree.degreeName}-${degree.institution}-${index}`
+                  }
+                  className='relative rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md sm:p-5'
+                >
+                  <div className='mb-5 flex items-start justify-between gap-4 border-b pb-4'>
+                    <div className='min-w-0'>
+                      <h3 className='break-words text-base font-semibold text-foreground'>
+                        {degree.degreeName || '-'}
+                      </h3>
+
+                      {degree.institution && (
+                        <p className='mt-1 break-words text-sm text-muted-foreground'>
+                          {degree.institution}
+                        </p>
+                      )}
+
+                      <div className='mt-3 flex flex-wrap items-center gap-2'>
+                        <VerificationBadge
+                          verified={degree.isVerified ?? false}
+                        />
+
+                        <Badge
+                          variant='outline'
+                          className={cn(
+                            'justify-center whitespace-nowrap rounded-full',
+                            'px-2.5 py-1 text-xs font-semibold',
+                            'shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
+                            degreeTypeClass,
+                          )}
+                        >
+                          {ct.has(degree.degreeType)
+                            ? ct(degree.degreeType)
+                            : degree.degreeType
+                                .replaceAll('_', ' ')
+                                .replace(/\b\w/g, (character) =>
+                                  character.toUpperCase(),
+                                )}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className='relative z-20 shrink-0'>
+                      <RowActions
+                        onEdit={
+                          degreeId && onEdit
+                            ? () => onEdit(degreeId)
+                            : undefined
+                        }
+                        onDelete={
+                          degreeId && onDelete
+                            ? () => onDelete(degreeId)
+                            : undefined
+                        }
+                      />
+                    </div>
+                  </div>
+
+                  <div className='grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3'>
+                    <DetailItem
+                      label={ct('institution')}
+                      value={degree.institution}
+                    />
+
+                    <DetailItem label={ct('major')} value={degree.major} />
+
+                    <DetailItem
+                      label={ct('graduated')}
+                      value={formatDegreeDate(degree.graduationDate, isRtl)}
+                    />
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   )

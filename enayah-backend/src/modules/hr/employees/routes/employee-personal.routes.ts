@@ -23,6 +23,14 @@ router.get(
   EmployeePersonalController.findByEmployeeId,
 )
 
+router.get(
+  '/:id/profile-summary',
+  //requireAuth,
+  //attachPermissions,
+  requirePermission('employee.view'),
+  EmployeePersonalController.getEmployeeProfileSummary,
+)
+
 router.post(
   '/personal/:id',
   requirePermission('employee.update'),

@@ -30,3 +30,20 @@ export type UpdateEmergencyContactDto = Partial<CreateEmergencyContactDto>
 
 export type CreateVisaDto = Omit<Visa, 'id'>
 export type UpdateVisaDto = Partial<CreateVisaDto>
+
+export type EmployeeCredentialBreakdown = {
+  degrees: number
+  boards: number
+  fellowships: number
+  licenses: number
+  lifeSupport: number
+  malpractice: number
+  memberships: number
+}
+
+export type EmployeeProfileSummary = {
+  credentialsCount: number
+  trainingCount: number
+  cpdCount: number
+  credentialBreakdown: EmployeeCredentialBreakdown
+}

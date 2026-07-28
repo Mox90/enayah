@@ -10,9 +10,22 @@ import {
   departments,
   positions,
   countries,
+  employeeDegrees,
+  employeeBoards,
+  employeeFellowships,
+  employeeLicenses,
+  employeeLifeSupportCertifications,
+  employeeMalpracticeInsurance,
+  employeeMemberships,
+  employeeTrainingRecords,
+  employeeCpdRecords,
 } from '../../../../db'
 
 import { and, eq, isNull, sql } from 'drizzle-orm'
+import {
+  EmployeeProfileSummary,
+  EmployeeProfileSummaryCounts,
+} from '../dto/employee-profile-summary.types'
 
 const isActiveEmployeeRecord = and(
   eq(employees.isDeleted, false),
@@ -189,5 +202,190 @@ export const EmployeeProfileRepository = {
     }
 
     return employee
+  },
+
+  findProfileSummary: async (
+    tx: DB,
+    employeeId: string,
+  ): Promise<EmployeeProfileSummaryCounts | null> => {
+    const [summary] = await tx
+      .select({
+        degreesCount: sql<number>`
+        (
+          SELECT COUNT(*)::int
+          FROM ${employeeDegrees}
+          WHERE
+            ${employeeDegrees.employeeId} = ${employeeId}
+            AND ${employeeDegrees.isDeleted} = false
+            AND ${employeeDegrees.deletedAt} IS NULL
+        )
+      `.mapWith(Number),
+
+        boardsCount: sql<number>`
+        (
+          SELECT COUNT(*)::int
+          FROM ${employeeBoards}
+          WHERE
+            ${employeeBoards.employeeId} = ${employeeId}
+            AND ${employeeBoards.isDeleted} = false
+            AND ${employeeBoards.deletedAt} IS NULL
+        )
+      `.mapWith(Number),
+
+        fellowshipsCount: sql<number>`
+        (
+          SELECT COUNT(*)::int
+          FROM ${employeeFellowships}
+          WHERE
+            ${employeeFellowships.employeeId} = ${employeeId}
+            AND ${employeeFellowships.isDeleted} = false
+            AND ${employeeFellowships.deletedAt} IS NULL
+        )
+      `.mapWith(Number),
+
+        licensesCount: sql<number>`
+        (
+          SELECT COUNT(*)::int
+          FROM (
+            SELECT
+              ROW_NUMBER() OVER (
+                PARTITION BY COALESCE(
+                  NULLIF(
+                    LOWER(
+                      BTRIM(${employeeLicenses.licenseNumber})
+                    ),
+                    ''
+                  ),
+                  CONCAT(
+                    '__license_row__:',
+                    ${employeeLicenses.id}::text
+                  )
+                )
+                ORDER BY
+                  ${employeeLicenses.createdAt} DESC,
+                  ${employeeLicenses.id} DESC
+              ) AS row_number
+            FROM ${employeeLicenses}
+            WHERE
+              ${employeeLicenses.employeeId} = ${employeeId}
+              AND ${employeeLicenses.isDeleted} = false
+              AND ${employeeLicenses.deletedAt} IS NULL
+          ) ranked_licenses
+          WHERE ranked_licenses.row_number = 1
+        )
+      `.mapWith(Number),
+
+        lifeSupportCount: sql<number>`
+        (
+          SELECT COUNT(*)::int
+          FROM (
+            SELECT
+              ROW_NUMBER() OVER (
+                PARTITION BY LOWER(
+                  BTRIM(
+                    ${employeeLifeSupportCertifications.type}::text
+                  )
+                )
+                ORDER BY
+                  ${employeeLifeSupportCertifications.expiryDate} DESC,
+                  ${employeeLifeSupportCertifications.issueDate} DESC,
+                  ${employeeLifeSupportCertifications.createdAt} DESC,
+                  ${employeeLifeSupportCertifications.id} DESC
+              ) AS row_number
+            FROM ${employeeLifeSupportCertifications}
+            WHERE
+              ${employeeLifeSupportCertifications.employeeId} = ${employeeId}
+
+              AND ${employeeLifeSupportCertifications.isDeleted} = false
+              AND ${employeeLifeSupportCertifications.deletedAt} IS NULL
+
+              AND ${employeeLifeSupportCertifications.issueDate} IS NOT NULL
+              AND ${employeeLifeSupportCertifications.issueDate}
+                <= CURRENT_DATE
+
+              AND ${employeeLifeSupportCertifications.expiryDate} IS NOT NULL
+              AND ${employeeLifeSupportCertifications.expiryDate}
+                >= CURRENT_DATE
+
+              AND NULLIF(
+                BTRIM(
+                  ${employeeLifeSupportCertifications.type}::text
+                ),
+                ''
+              ) IS NOT NULL
+          ) ranked_life_support
+          WHERE ranked_life_support.row_number = 1
+        )
+      `.mapWith(Number),
+
+        malpracticeCount: sql<number>`
+        (
+          SELECT COUNT(*)::int
+          FROM ${employeeMalpracticeInsurance}
+          WHERE
+            ${employeeMalpracticeInsurance.employeeId} = ${employeeId}
+
+            AND ${employeeMalpracticeInsurance.isDeleted} = false
+            AND ${employeeMalpracticeInsurance.deletedAt} IS NULL
+
+            AND ${employeeMalpracticeInsurance.startDate} IS NOT NULL
+            AND ${employeeMalpracticeInsurance.startDate}
+              <= CURRENT_DATE
+
+            AND ${employeeMalpracticeInsurance.expiryDate} IS NOT NULL
+            AND ${employeeMalpracticeInsurance.expiryDate}
+              >= CURRENT_DATE
+        )
+      `.mapWith(Number),
+
+        membershipsCount: sql<number>`
+        (
+          SELECT COUNT(*)::int
+          FROM ${employeeMemberships}
+          WHERE
+            ${employeeMemberships.employeeId} = ${employeeId}
+            AND ${employeeMemberships.isDeleted} = false
+            AND ${employeeMemberships.deletedAt} IS NULL
+        )
+      `.mapWith(Number),
+
+        trainingCount: sql<number>`
+        (
+          SELECT COUNT(*)::int
+          FROM ${employeeTrainingRecords}
+          WHERE
+            ${employeeTrainingRecords.employeeId} = ${employeeId}
+            AND ${employeeTrainingRecords.isDeleted} = false
+            AND ${employeeTrainingRecords.deletedAt} IS NULL
+        )
+      `.mapWith(Number),
+
+        cpdCount: sql<number>`
+        (
+          SELECT COUNT(*)::int
+          FROM ${employeeCpdRecords}
+          WHERE
+            ${employeeCpdRecords.employeeId} = ${employeeId}
+            AND ${employeeCpdRecords.isDeleted} = false
+            AND ${employeeCpdRecords.deletedAt} IS NULL
+        )
+      `.mapWith(Number),
+      })
+      .from(employees)
+      .where(
+        and(
+          eq(employees.id, employeeId),
+          eq(employees.isDeleted, false),
+          isNull(employees.deletedAt),
+        ),
+      )
+      .limit(1)
+
+    // console.log('Raw profile summary counts:', {
+    //   employeeId,
+    //   summary,
+    // })
+
+    return summary ?? null
   },
 }
