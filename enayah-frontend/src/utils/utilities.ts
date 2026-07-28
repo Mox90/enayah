@@ -107,28 +107,21 @@ export function toPersianDigits(
   return String(value).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)])
 }
 
-// export function toPersianDigits(
-//   value: string | number | null | undefined,
-// ): string {
-//   if (value == null) return ''
-
-//   const stringValue = String(value)
-//   const hasPlus = stringValue.startsWith('+')
-
-//   // Clean the string to process only digits
-//   const cleanValue = hasPlus ? stringValue.slice(1) : stringValue
-//   const converted = cleanValue.replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)])
-
-//   // \u200E forces the '+' to stay on the left in RTL layouts
-//   return hasPlus ? `\u200E+${converted}` : converted
-// }
-
 export function toArabicDigits(
   value: string | number | null | undefined,
 ): string {
   if (value == null) return ''
   return String(value).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)])
 }
+
+const finiteAttentionPulse =
+  'motion-safe:animate-[pulse_1s_ease-in-out_3] motion-reduce:animate-none'
+const urgentAttentionClass = [
+  'motion-safe:animate-ping',
+  'motion-safe:[animation-iteration-count:5]',
+  'motion-safe:[animation-fill-mode:forwards]',
+  'motion-reduce:hidden',
+].join(' ')
 
 export const getExpiryStatus = (
   expiryDateStr: string | null | undefined,
@@ -157,8 +150,8 @@ export const getExpiryStatus = (
       borderClass: isRtl
         ? 'border-r-red-600 border-red-500/30'
         : 'border-l-red-600 border-red-500/30',
-      pulseClass:
-        'animate-[pulse_0.5s_infinite] shadow-[0_0_15px_rgba(239,68,68,0.2)]',
+      //pulseClass: 'animate-[pulse_0.5s_infinite] shadow-[0_0_15px_rgba(239,68,68,0.2)]',
+      pulseClass: urgentAttentionClass,
       diffDays,
     }
   }
@@ -168,7 +161,8 @@ export const getExpiryStatus = (
       borderClass: isRtl
         ? 'border-r-red-500 border-red-500/20'
         : 'border-l-red-500 border-red-500/20',
-      pulseClass: 'animate-[pulse_0.7s_infinite]',
+      //pulseClass: 'animate-[pulse_0.7s_infinite]',
+      pulseClass: urgentAttentionClass,
       diffDays,
     }
   }
@@ -178,7 +172,8 @@ export const getExpiryStatus = (
       borderClass: isRtl
         ? 'border-r-amber-500 border-amber-500/20'
         : 'border-l-amber-500 border-amber-500/20',
-      pulseClass: 'animate-[pulse_0.9s_infinite]',
+      //pulseClass: 'animate-[pulse_0.9s_infinite]',
+      pulseClass: '',
       diffDays,
     }
   }
@@ -188,7 +183,8 @@ export const getExpiryStatus = (
       borderClass: isRtl
         ? 'border-r-yellow-500 border-yellow-500/20'
         : 'border-l-yellow-500 border-yellow-500/20',
-      pulseClass: 'animate-pulse',
+      //pulseClass: 'animate-pulse',
+      pulseClass: '',
       diffDays,
     }
   }

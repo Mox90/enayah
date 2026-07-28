@@ -10,11 +10,13 @@ import {
   IqamaRenewalCaseIdSchema,
   IqamaRenewalProcessError,
   ListIqamaRenewalCasesQuerySchema,
+  ReturnIqamaRenewalToHrSchema,
   UpdateIqamaRenewalCaseSchema,
 } from '../types/iqama-renewal-process.types'
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
 import { IqamaRenewalProcessService } from '../service/iqama-renewal-process.service'
 import { iqamaRenewalCaseParamsSchema } from '../types/iqama-renewal-case-comment.types'
+import { getAuthenticatedActor } from './iqama-renewal-case-comment.controller'
 
 type AuthenticatedRequest = Request & {
   user?: {
@@ -133,6 +135,24 @@ export const IqamaRenewalProcessController = {
       {
         userId: req.user.id,
       },
+    )
+
+    res.status(200).json({
+      data: updatedCase,
+    })
+  }),
+
+  returnToHr: asyncHandler(async (req: Request, res: Response) => {
+    const { id } = IqamaRenewalCaseIdSchema.parse(req.params)
+
+    const input = ReturnIqamaRenewalToHrSchema.parse(req.body)
+
+    const actor = getAuthenticatedActor(req)
+
+    const updatedCase = await IqamaRenewalProcessService.returnToHr(
+      id,
+      input,
+      actor,
     )
 
     res.status(200).json({

@@ -8,6 +8,80 @@ import { DataTableColumnHeader } from '@/components/tables'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { toArabic, toPersianDigits } from '@/utils/utilities'
+import { cn } from '@/lib/utils'
+import { StatusBadge } from '@/components/badges/status-badge'
+
+export type EmploymentStatus =
+  | 'active'
+  | 'terminated'
+  | 'resigned'
+  | 'eoc'
+  | 'transferred'
+  | 'retired'
+  | 'on_leave'
+  | 'suspended'
+  | 'deceased'
+
+export type EmploymentStatusStyle = {
+  //badgeClassName: string
+  dotClassName: string
+  rowClassName: string
+}
+
+export const employmentStatusStyles = {
+  active: {
+    dotClassName: 'bg-emerald-500 dark:bg-emerald-400',
+    rowClassName: '',
+  },
+
+  terminated: {
+    dotClassName: 'bg-rose-500 dark:bg-rose-400',
+    rowClassName:
+      'bg-rose-50/35 hover:bg-rose-50/60 dark:bg-rose-950/10 dark:hover:bg-rose-950/20',
+  },
+
+  resigned: {
+    dotClassName: 'bg-orange-500 dark:bg-orange-400',
+    rowClassName:
+      'bg-orange-50/30 hover:bg-orange-50/55 dark:bg-orange-950/10 dark:hover:bg-orange-950/20',
+  },
+
+  eoc: {
+    dotClassName: 'bg-amber-500 dark:bg-amber-400',
+    rowClassName:
+      'bg-amber-50/30 hover:bg-amber-50/55 dark:bg-amber-950/10 dark:hover:bg-amber-950/20',
+  },
+
+  transferred: {
+    dotClassName: 'bg-cyan-500 dark:bg-cyan-400',
+    rowClassName:
+      'bg-cyan-50/25 hover:bg-cyan-50/50 dark:bg-cyan-950/10 dark:hover:bg-cyan-950/20',
+  },
+
+  retired: {
+    dotClassName: 'bg-violet-500 dark:bg-violet-400',
+    rowClassName:
+      'bg-violet-50/25 hover:bg-violet-50/50 dark:bg-violet-950/10 dark:hover:bg-violet-950/20',
+  },
+
+  on_leave: {
+    dotClassName: 'bg-blue-500 dark:bg-blue-400',
+    rowClassName:
+      'bg-blue-50/30 hover:bg-blue-50/55 dark:bg-blue-950/10 dark:hover:bg-blue-950/20',
+  },
+
+  suspended: {
+    dotClassName: 'bg-yellow-500 dark:bg-yellow-400',
+    rowClassName:
+      'bg-yellow-50/45 hover:bg-yellow-50/70 dark:bg-yellow-950/15 dark:hover:bg-yellow-950/25',
+  },
+
+  deceased: {
+    dotClassName: 'bg-slate-500 dark:bg-slate-400',
+    rowClassName:
+      'bg-slate-100/50 hover:bg-slate-100/75 dark:bg-slate-900/25 dark:hover:bg-slate-900/40',
+  },
+} satisfies Record<EmploymentStatus, EmploymentStatusStyle>
 
 export function useEmployeeColumns(
   sortBy: string,
@@ -16,6 +90,18 @@ export function useEmployeeColumns(
   const t = useTranslations('employees')
   const locale = useLocale()
   const isRtl = locale === 'ar'
+
+  const employmentStatusLabels: Record<EmploymentStatus, string> = {
+    active: t('employmentStatuses.active'),
+    terminated: t('employmentStatuses.terminated'),
+    resigned: t('employmentStatuses.resigned'),
+    eoc: t('employmentStatuses.eoc'),
+    transferred: t('employmentStatuses.transferred'),
+    retired: t('employmentStatuses.retired'),
+    on_leave: t('employmentStatuses.onLeave'),
+    suspended: t('employmentStatuses.suspended'),
+    deceased: t('employmentStatuses.deceased'),
+  }
 
   return [
     {
@@ -41,6 +127,7 @@ export function useEmployeeColumns(
       meta: {
         label: t('employeeNumber'),
       },
+
       header: ({ column }) => (
         <div className={isRtl ? 'text-right' : 'text-left'}>
           <DataTableColumnHeader
@@ -51,6 +138,50 @@ export function useEmployeeColumns(
           />
         </div>
       ),
+
+      cell: ({ row }) => {
+        const employeeNumber = row.original.employeeNumber
+        const status = row.original.employmentStatus as
+          | EmploymentStatus
+          | null
+          | undefined
+
+        const config =
+          status && status in employmentStatusStyles
+            ? employmentStatusStyles[status]
+            : null
+
+        return (
+          <div className='inline-flex items-center gap-2 whitespace-nowrap'>
+            {config && (
+              <span className='relative flex size-2 shrink-0'>
+                {status === 'active' && (
+                  <span
+                    aria-hidden='true'
+                    className={cn(
+                      'absolute inline-flex size-full rounded-full opacity-30',
+                      config.dotClassName,
+                    )}
+                  />
+                )}
+
+                <span
+                  aria-hidden='true'
+                  className={cn(
+                    'relative inline-flex size-2 rounded-full',
+                    'ring-2 ring-background',
+                    config.dotClassName,
+                  )}
+                />
+              </span>
+            )}
+
+            <span className='font-medium tabular-nums text-foreground'>
+              {isRtl ? toPersianDigits(employeeNumber) : employeeNumber}
+            </span>
+          </div>
+        )
+      },
     },
 
     {
@@ -173,28 +304,68 @@ export function useEmployeeColumns(
       },
     },
 
+    // {
+    //   accessorKey: 'employmentStatus',
+    //   meta: {
+    //     label: t('status'),
+    //   },
+    //   header: t('status'),
+
+    //   cell: ({ row }) => {
+    //     const status = row.original.employmentStatus as
+    //       | EmploymentStatus
+    //       | null
+    //       | undefined
+
+    //     if (!status || !(status in employmentStatusStyles)) {
+    //       return (
+    //         <Badge
+    //           variant='outline'
+    //           className='min-w-[7rem] justify-center rounded-full border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400'
+    //         >
+    //           -
+    //         </Badge>
+    //       )
+    //     }
+
+    //     const config = employmentStatusStyles[status]
+
+    //     return (
+    //       <Badge
+    //         variant='outline'
+    //         className={cn(
+    //           'min-w-28 justify-center gap-1.5 whitespace-nowrap rounded-full',
+    //           'px-2.5 py-1 text-xs font-semibold',
+    //           'shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
+    //           'ring-1 ring-inset',
+    //           config.badgeClassName,
+    //         )}
+    //       >
+    //         <span>{employmentStatusLabels[status]}</span>
+    //       </Badge>
+    //     )
+    //   },
+    // },
     {
       accessorKey: 'employmentStatus',
       meta: {
         label: t('status'),
       },
       header: t('status'),
-      cell: ({ row }) => {
-        const status = row.original.employmentStatus
 
-        const statusClass: Record<string, string> = {
-          active: 'bg-green-100 text-green-700 border-green-200',
-          terminated: 'bg-red-100 text-red-700 border-red-200',
-          resigned: 'bg-orange-100 text-orange-700 border-orange-200',
-          retired: 'bg-purple-100 text-purple-700 border-purple-200',
-          suspended: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-          deceased: 'bg-gray-100 text-gray-700 border-gray-200',
-        }
+      cell: ({ row }) => {
+        const status = row.original.employmentStatus as
+          | EmploymentStatus
+          | null
+          | undefined
+
+        const label =
+          status && status in employmentStatusLabels
+            ? employmentStatusLabels[status]
+            : undefined
 
         return (
-          <Badge variant='outline' className={statusClass[status ?? ''] ?? ''}>
-            {status?.replaceAll('_', ' ') ?? '-'}
-          </Badge>
+          <StatusBadge status={status} label={label} className='min-w-28' />
         )
       },
     },

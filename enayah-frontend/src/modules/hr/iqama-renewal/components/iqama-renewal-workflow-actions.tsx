@@ -16,6 +16,7 @@ import {
   Send,
   ShieldAlert,
   Sparkles,
+  Undo2,
   Upload,
   UserRoundCheck,
   Workflow,
@@ -40,6 +41,7 @@ import { Textarea } from '@/components/ui/textarea'
 import {
   useChangeIqamaRenewalStatus,
   useCompleteIqamaRenewal,
+  useReturnIqamaRenewalToHr,
 } from '../hooks/use-iqama-renewal-processes'
 
 import {
@@ -257,19 +259,18 @@ export function IqamaRenewalWorkflowActions({
    */
   const changeStatus = useChangeIqamaRenewalStatus()
   const completeIqamaRenewal = useCompleteIqamaRenewal()
+  const returnToHr = useReturnIqamaRenewalToHr()
 
   const [selectedStatus, setSelectedStatus] =
     useState<IqamaRenewalStatus | null>(null)
-
   const [assignedToUserId, setAssignedToUserId] = useState('')
-
   const [governmentRelationsDueDate, setGovernmentRelationsDueDate] =
     useState('')
-
   const [denialReason, setDenialReason] = useState('')
   const [comment, setComment] = useState('')
-
   const [isIqamaDialogOpen, setIsIqamaDialogOpen] = useState(false)
+  const [isReturnToHrDialogOpen, setIsReturnToHrDialogOpen] = useState(false)
+  const [returnReason, setReturnReason] = useState('')
 
   /*
    * Keep this before conditional returns because useMemo is a React hook.
@@ -288,11 +289,19 @@ export function IqamaRenewalWorkflowActions({
     [renewalCase.identification],
   )
 
-  const canUpdateAssignedIqama =
+  const canHandleAssignedGovernmentRelationsCase =
     canProcessGovernmentRelations &&
     Boolean(currentUserId) &&
     renewalCase.status === 'sent_to_government_relations' &&
     renewalCase.assignedToUserId === currentUserId
+
+  const canUpdateAssignedIqama = canHandleAssignedGovernmentRelationsCase
+  //canProcessGovernmentRelations &&
+  //Boolean(currentUserId) &&
+  //renewalCase.status === 'sent_to_government_relations' &&
+  //renewalCase.assignedToUserId === currentUserId
+
+  const canReturnAssignedCaseToHr = canHandleAssignedGovernmentRelationsCase
 
   /*
    * HR Admin receives normal workflow actions.
@@ -302,7 +311,11 @@ export function IqamaRenewalWorkflowActions({
     ? getAvailableActions(renewalCase.status)
     : []
 
-  const visibleActionCount = actions.length + (canUpdateAssignedIqama ? 1 : 0)
+  //const visibleActionCount = actions.length + (canUpdateAssignedIqama ? 1 : 0)
+  const visibleActionCount =
+    actions.length +
+    (canUpdateAssignedIqama ? 1 : 0) +
+    (canReturnAssignedCaseToHr ? 1 : 0)
 
   const selectedAction =
     actions.find((action) => action.status === selectedStatus) ?? null
@@ -433,11 +446,49 @@ export function IqamaRenewalWorkflowActions({
     setIsIqamaDialogOpen(false)
   }
 
+  async function handleReturnToHr() {
+    const reason = returnReason.trim()
+
+    if (!reason || returnToHr.isPending) {
+      return
+    }
+
+    try {
+      await returnToHr.mutateAsync({
+        id: renewalCase.id,
+
+        payload: {
+          version: renewalCase.version,
+
+          reason,
+        },
+      })
+
+      setReturnReason('')
+      setIsReturnToHrDialogOpen(false)
+    } catch {
+      /*
+       * The mutation hook displays the error.
+       * Keep the dialog open so the user does
+       * not lose the entered justification.
+       */
+    }
+  }
+
   const isTerminalStatus =
     renewalCase.status === 'completed' || renewalCase.status === 'cancelled'
 
   if (!isTerminalStatus && visibleActionCount === 0) {
     return null
+  }
+
+  function closeReturnToHrDialog() {
+    if (returnToHr.isPending) {
+      return
+    }
+
+    setIsReturnToHrDialogOpen(false)
+    setReturnReason('')
   }
 
   //if (actions.length === 0) {
@@ -552,6 +603,50 @@ export function IqamaRenewalWorkflowActions({
 
                   <div className='mt-1 text-xs font-normal text-muted-foreground'>
                     {t('updateRenewedIqamaDescription')}
+                  </div>
+                </div>
+
+                <div className='hidden h-9 w-9 items-center justify-center rounded-full border bg-background shadow-sm lg:flex'>
+                  <ArrowRight
+                    className={cn(
+                      'h-4 w-4 text-muted-foreground',
+                      isRtl && 'rotate-180',
+                    )}
+                  />
+                </div>
+              </Button>
+            )}
+
+            {canReturnAssignedCaseToHr && (
+              <Button
+                type='button'
+                variant='outline'
+                disabled={
+                  returnToHr.isPending || completeIqamaRenewal.isPending
+                }
+                className={cn(
+                  'group h-auto min-h-24 justify-start whitespace-normal rounded-2xl p-4 text-start shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
+                  actionToneClasses.warning,
+                )}
+                onClick={() => {
+                  setReturnReason('')
+                  setIsReturnToHrDialogOpen(true)
+                }}
+              >
+                <div
+                  className={cn(
+                    'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-md',
+                    actionIconClasses.warning,
+                  )}
+                >
+                  <Undo2 className='h-5 w-5' />
+                </div>
+
+                <div className='min-w-0 flex-1'>
+                  <div className='font-semibold'>{t('returnCaseToHr')}</div>
+
+                  <div className='mt-1 text-xs font-normal text-muted-foreground'>
+                    {t('returnCaseToHrDescription')}
                   </div>
                 </div>
 
@@ -919,6 +1014,117 @@ export function IqamaRenewalWorkflowActions({
             />
           </>
         )}
+      </FormDialog>
+
+      <FormDialog
+        open={isReturnToHrDialogOpen}
+        onOpenChange={(open) => {
+          if (!open) {
+            closeReturnToHrDialog()
+          }
+        }}
+        title={t('returnCaseToHr')}
+        description={t('returnCaseToHrDialogDescription')}
+        className='md:w-[80vw] md:max-w-3xl'
+        headerClassName='shrink-0 border-b bg-gradient-to-r from-amber-950 via-amber-900 to-slate-900 px-6 py-5 text-white'
+      >
+        <>
+          <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-6 py-5'>
+            <section className='rounded-2xl border border-amber-200 bg-amber-50/50 p-5 shadow-sm dark:border-amber-900/70 dark:bg-amber-950/20'>
+              <div className='flex items-start gap-3'>
+                <AlertTriangle className='mt-0.5 h-5 w-5 shrink-0 text-amber-600' />
+
+                <div>
+                  <h3 className='font-semibold'>
+                    {t('returnCaseWarningTitle')}
+                  </h3>
+
+                  <p className='mt-1 text-sm leading-6 text-muted-foreground'>
+                    {t('returnCaseWarningDescription')}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+              <div className='grid items-stretch gap-4 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]'>
+                <div className='rounded-xl border bg-muted/30 p-4'>
+                  <div className='mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+                    {t('currentStage')}
+                  </div>
+
+                  <IqamaRenewalStatusBadge status={renewalCase.status} />
+                </div>
+
+                <div className='hidden items-center justify-center md:flex'>
+                  <ArrowRight
+                    className={cn(
+                      'h-4 w-4 text-muted-foreground',
+                      isRtl && 'rotate-180',
+                    )}
+                  />
+                </div>
+
+                <div className='rounded-xl border border-amber-200 bg-amber-50/50 p-4 dark:border-amber-900/70 dark:bg-amber-950/20'>
+                  <div className='mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+                    {t('newStatus')}
+                  </div>
+
+                  <IqamaRenewalStatusBadge status='pending_upload' />
+                </div>
+              </div>
+            </section>
+
+            <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+              <div className='mb-4 flex items-center gap-3'>
+                <div className='flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500 text-white'>
+                  <MessageSquareText className='h-4 w-4' />
+                </div>
+
+                <div>
+                  <Label
+                    htmlFor='returnReason'
+                    className='text-sm font-semibold'
+                  >
+                    {t('returnReason')}
+                    <span className='ms-1 text-destructive'>*</span>
+                  </Label>
+
+                  <p className='mt-0.5 text-xs text-muted-foreground'>
+                    {t('returnReasonDescription')}
+                  </p>
+                </div>
+              </div>
+
+              <Textarea
+                id='returnReason'
+                rows={6}
+                required
+                maxLength={2000}
+                value={returnReason}
+                disabled={returnToHr.isPending}
+                className='min-h-36 resize-none'
+                placeholder={t('returnReasonPlaceholder')}
+                onChange={(event) => setReturnReason(event.target.value)}
+              />
+
+              <div className='mt-2 text-end text-xs text-muted-foreground'>
+                {returnReason.length}/2000
+              </div>
+            </section>
+          </div>
+
+          <Footer
+            onCancel={closeReturnToHrDialog}
+            onSave={handleReturnToHr}
+            label={t('confirmReturnToHr')}
+            savingLabel={t('returningCase')}
+            disabled={!returnReason.trim() || returnToHr.isPending}
+            isSaving={returnToHr.isPending}
+            saveVariant='default'
+            saveIcon={<Undo2 className='h-4 w-4' />}
+          />
+        </>
       </FormDialog>
 
       <IdentificationDialog

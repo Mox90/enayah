@@ -21,13 +21,7 @@ import { getExpiryStatus, toArabic, toPersianDigits } from '@/utils/utilities'
 import { EmployeePersonalDetails } from '@/modules/hr/employees/types/employee-personal-details.types'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu'
+
 import { RowActions } from '@/components/dialogs/row-actions'
 
 function dash(value?: string | number | boolean | null) {
@@ -99,57 +93,6 @@ function EmptyState() {
     </div>
   )
 }
-
-// function RowActions({
-//   onEdit,
-//   onDelete,
-// }: {
-//   onEdit?: () => void
-//   onDelete?: () => void
-// }) {
-//   const ct = useTranslations('common')
-//   const locale = useLocale()
-//   const isRtl = locale === 'ar'
-//   if (!onEdit && !onDelete) return null
-//   return (
-//     <DropdownMenu dir={isRtl ? 'rtl' : 'ltr'}>
-//       <DropdownMenuTrigger asChild>
-//         <Button size='icon' variant='ghost' aria-label='Row actions'>
-//           <MoreVertical className='h-4 w-4 text-green-700' />
-//         </Button>
-//       </DropdownMenuTrigger>
-
-//       <DropdownMenuContent align='end'>
-//         {onEdit && (
-//           <DropdownMenuItem onClick={onEdit}>
-//             <Pencil className='mr-2 h-4 w-4' />
-//             {ct('edit')}
-//           </DropdownMenuItem>
-//         )}
-
-//         {/* <DropdownMenuSeparator /> */}
-//         {onEdit && onDelete && <DropdownMenuSeparator />}
-
-//         {/* <DropdownMenuItem
-//           className='text-destructive focus:text-destructive'
-//           onClick={onDelete}
-//         >
-//           <Trash2 className='mr-2 h-4 w-4' />
-//           Delete
-//         </DropdownMenuItem> */}
-//         {onDelete && (
-//           <DropdownMenuItem
-//             className='text-destructive focus:text-destructive'
-//             onClick={onDelete}
-//           >
-//             <Trash2 className='mr-2 h-4 w-4' />
-//             {ct('delete')}
-//           </DropdownMenuItem>
-//         )}
-//       </DropdownMenuContent>
-//     </DropdownMenu>
-//   )
-// }
 
 interface Props {
   personalDetails?: EmployeePersonalDetails
@@ -264,13 +207,22 @@ export function PersonalDetailsCards({
               const status = getExpiryStatus(item.expiryDate, isRtl)
               //const isExpired = new Date(item.expiryDate) < new Date()
               //console.log('Expiry Status: ', item.type)
-              const isExpired = item.expiryDate
-                ? new Date(item.expiryDate) < new Date()
-                : false
+              // const isExpired = item.expiryDate
+              //   ? new Date(item.expiryDate) < new Date()
+              //   : false
+              const isExpired = status.diffDays !== null && status.diffDays < 0
               return (
                 <div
                   key={item.id}
-                  className={`relative overflow-hidden rounded-xl border border-muted-foreground/10 p-5 shadow-sm transition-all hover:shadow-md ${isRtl ? 'border-r-4' : 'border-l-4'} ${status.bgClass} ${status.borderClass} ${status.pulseClass}`}
+                  //className={`relative overflow-hidden rounded-xl border border-muted-foreground/10 p-5 shadow-sm transition-all hover:shadow-md ${isRtl ? 'border-r-4' : 'border-l-4'} ${status.bgClass} ${status.borderClass} ${status.pulseClass}`}
+                  className={cn(
+                    'relative overflow-hidden rounded-xl border',
+                    'border-muted-foreground/10 p-5 shadow-sm',
+                    'transition-all hover:shadow-md',
+                    isRtl ? 'border-r-4' : 'border-l-4',
+                    status.bgClass,
+                    status.borderClass,
+                  )}
                 >
                   {/* Header Section */}
                   <div className='mb-5 border-b border-muted/50 pb-3'>
@@ -281,16 +233,37 @@ export function PersonalDetailsCards({
                       </div>
 
                       <div className='flex shrink-0 flex-wrap items-center justify-end gap-2'>
-                        {isExpired && (
+                        {/* {isExpired && (
                           <Badge
                             variant='destructive'
                             className='rounded-full px-2.5 py-0.5 text-xs font-bold shadow-sm'
                           >
                             🚨 {ct('expired')}
                           </Badge>
+                        )} */}
+                        {isExpired && (
+                          <div className='relative isolate inline-flex'>
+                            {status.pulseClass && (
+                              <span
+                                aria-hidden='true'
+                                className={cn(
+                                  'pointer-events-none absolute inset-0 z-0 rounded-full bg-red-500/50',
+                                  status.pulseClass,
+                                )}
+                              />
+                            )}
+
+                            <Badge
+                              variant='destructive'
+                              className='relative z-10 rounded-full px-2.5 py-0.5 text-xs font-bold shadow-sm'
+                            >
+                              <span aria-hidden='true'>🚨</span>
+                              <span className='ms-1'>{ct('expired')}</span>
+                            </Badge>
+                          </div>
                         )}
 
-                        {!isExpired &&
+                        {/* {!isExpired &&
                           status.diffDays !== null &&
                           status.diffDays > 0 &&
                           status.diffDays <= 30 && (
@@ -299,7 +272,34 @@ export function PersonalDetailsCards({
                               {ct.rich('expiringMessage1', {
                                 item: status.diffDays,
                               })}
-                            </Badge>
+                            </Badge
+                            >
+                          )} */}
+                        {!isExpired &&
+                          status.diffDays !== null &&
+                          status.diffDays > 0 &&
+                          status.diffDays <= 30 && (
+                            <div className='relative isolate inline-flex'>
+                              {status.pulseClass && (
+                                <span
+                                  aria-hidden='true'
+                                  className={cn(
+                                    'pointer-events-none absolute inset-0 z-0 rounded-full bg-red-500/50',
+                                    status.pulseClass,
+                                  )}
+                                />
+                              )}
+
+                              <Badge className='relative z-10 rounded-full border border-red-400 bg-red-600 px-2.5 py-0.5 text-xs font-bold tracking-wide text-white shadow-sm hover:bg-red-600'>
+                                <span aria-hidden='true'>⚠️</span>
+
+                                <span className='ms-1'>
+                                  {ct.rich('expiringMessage1', {
+                                    item: status.diffDays,
+                                  })}
+                                </span>
+                              </Badge>
+                            </div>
                           )}
 
                         {!isExpired &&
@@ -334,10 +334,12 @@ export function PersonalDetailsCards({
                           </Badge>
                         )}
 
-                        <RowActions
-                          onEdit={() => onEditIdentification?.(item.id)}
-                          onDelete={() => onDeleteIdentification?.(item.id)}
-                        />
+                        <div className='relative z-20 shrink-0'>
+                          <RowActions
+                            onEdit={() => onEditIdentification?.(item.id)}
+                            onDelete={() => onDeleteIdentification?.(item.id)}
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

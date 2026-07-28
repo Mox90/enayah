@@ -146,3 +146,8 @@ export type CompleteIqamaRenewalPayload = {
 }
 
 export type IqamaRenewalView = 'list' | 'kanban'
+
+export type ReturnIqamaRenewalToHrPayload = {
+  version: number
+  reason: string
+}

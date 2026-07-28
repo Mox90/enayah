@@ -4,11 +4,21 @@ import { api } from '@/lib/api/client'
 
 type NotificationSeverity = 'info' | 'warning' | 'success' | 'error'
 
+type NotificationActivityType =
+  | 'assigned_to_government_relations'
+  | 'completed_by_government_relations'
+  | 'returned_to_hr'
+
 type NotificationMetadata = {
   documentType?: string
-  employeeNumber?: string
+  employeeNumber?: string | null
+  employeeId?: string
   milestone?: string
   iqamaRenewalCaseId?: string
+
+  action?: 'open_iqama_renewal_case'
+
+  activityType?: NotificationActivityType
 }
 
 export type NotificationItem = {

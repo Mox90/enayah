@@ -231,7 +231,21 @@
     "deleteAllowance": "Delete Allowance",
     "noAllowanceMessage": "No allowances added for this renewal.",
     "movementRemarks": "Movement Remarks",
-    "contractNotes": "Contract Notes"
+    "contractNotes": "Contract Notes",
+    "revoked": "Revoked",
+    "expired": "Expired",
+    "suspended": "Suspended",
+    "employmentStatuses": {
+      "active": "Active",
+      "terminated": "Terminated",
+      "resigned": "Resigned",
+      "eoc": "End of Contract",
+      "transferred": "Transferred",
+      "retired": "Retired",
+      "onLeave": "On Leave",
+      "suspended": "Suspended",
+      "deceased": "Deceased"
+    }
   },
   "departments": {
     "departmentName": "Departments",
@@ -509,7 +523,7 @@
     "expiryDateHijri": "Expiry Date in Hijri",
     "occupation": "Occupation",
     "sponsor": "Sponsor",
-    "authority": "Authority",
+    "authority": "Issuing Authority",
     "saveIdentification": "Save Identification",
     "idTitleSub": "Enter employee identification details."
   },
@@ -698,6 +712,16 @@
     "updateRenewedIqama": "Update Renewed Iqama",
     "updateRenewedIqamaDescription": "Enter the renewed Iqama details and complete the process.",
     "updateRenewedIqamaDialogDescription": "Update the employee's renewed Iqama information. Saving will complete this renewal case.",
-    "saveIqamaAndComplete": "Save Iqama and Complete"
+    "saveIqamaAndComplete": "Save Iqama and Complete",
+    "returnCaseToHr": "Return Case to HR",
+    "returnCaseToHrDescription": "Return the case for correction or reprocessing.",
+    "returnCaseToHrDialogDescription": "Return this case to HR and provide the reason why the Jawazat update could not be completed.",
+    "returnCaseWarningTitle": "Return this case to HR?",
+    "returnCaseWarningDescription": "The case status will return to Pending Upload and the Government Relations assignment will be removed.",
+    "returnReason": "Return reason",
+    "returnReasonDescription": "Explain why the Jawazat update was unsuccessful. This reason will be recorded in the case discussion.",
+    "returnReasonPlaceholder": "Describe the Jawazat issue and any action HR must take...",
+    "confirmReturnToHr": "Return to HR",
+    "returningCase": "Returning case..."
   }
 }

@@ -20,6 +20,7 @@ import {
   IqamaRenewalProcessError,
   IqamaRenewalStatus,
   ListIqamaRenewalCasesQuery,
+  ReturnIqamaRenewalToHrInput,
   UpdateIqamaRenewalCaseInput,
 } from '../types/iqama-renewal-process.types'
 
@@ -29,6 +30,7 @@ import {
 } from '../repository/iqama-renewal-process.repository'
 import { IqamaRenewalWorkflowNotificationService } from './iqama-renewal-workflow-notification.service'
 import { getRiyadhTodayDateOnly } from '../../../../core/utils/date'
+import { IqamaRenewalCaseCommentRepository } from '../repository/iqama-renewal-case-comment.repository'
 
 const allowedTransitions = {
   pending_upload: ['uploaded_to_mhrsd', 'cancelled'],
@@ -512,7 +514,6 @@ export const IqamaRenewalProcessService = {
       }
 
       const updateData = buildStatusUpdate(input, actor)
-
       const updated = await IqamaRenewalProcessRepository.updateWithVersion(
         tx,
         id,
@@ -523,7 +524,6 @@ export const IqamaRenewalProcessService = {
       assertVersionUpdateSucceeded(updated)
 
       const refreshed = await IqamaRenewalProcessRepository.findById(tx, id)
-
       const updatedCase = assertCaseExists(refreshed)
 
       /*
@@ -549,11 +549,8 @@ export const IqamaRenewalProcessService = {
               employeeNameEn: updatedCase.employeeNameEn ?? null,
               employeeNameAr: updatedCase.employeeNameAr ?? null,
             },
-
             actorUserId: actor.userId,
-
             assignedToUserId: updatedCase.assignedToUserId,
-
             dueDate: updatedCase.governmentRelationsDueDate ?? null,
           },
         )
@@ -772,6 +769,152 @@ export const IqamaRenewalProcessService = {
       )
 
       return completedCase
+    })
+  },
+
+  returnToHr: async (
+    id: string,
+    input: ReturnIqamaRenewalToHrInput,
+    actor: IqamaRenewalCaseActor,
+  ) => {
+    return db.transaction(async (tx) => {
+      const current = await IqamaRenewalProcessRepository.findById(tx, id)
+
+      const record = assertCaseExists(current)
+
+      /*
+       * A case can only be returned while it is
+       * assigned to Government Relations.
+       */
+      if (record.status !== 'sent_to_government_relations') {
+        throw new IqamaRenewalProcessError(
+          'Only a case awaiting Government Relations processing can be returned to HR.',
+          409,
+          'IQAMA_RENEWAL_NOT_WITH_GOVERNMENT_RELATIONS',
+        )
+      }
+
+      /*
+       * Only the assigned Government Relations
+       * user may return the case.
+       */
+      if (record.assignedToUserId !== actor.userId) {
+        throw new IqamaRenewalProcessError(
+          'This Iqama renewal case is assigned to another user.',
+          403,
+          'IQAMA_RENEWAL_NOT_ASSIGNED_TO_USER',
+        )
+      }
+
+      /*
+       * Verify that the actor really has the
+       * Government Relations role.
+       */
+      const actorRoles = await tx
+        .select({
+          roleName: roles.name,
+        })
+        .from(userRoles)
+        .innerJoin(roles, eq(roles.id, userRoles.roleId))
+        .where(
+          and(eq(userRoles.userId, actor.userId), eq(userRoles.isActive, true)),
+        )
+
+      const isGovernmentRelationsUser = actorRoles.some(
+        (row) => row.roleName === GOVERNMENT_RELATIONS_ROLE,
+      )
+
+      if (!isGovernmentRelationsUser) {
+        throw new IqamaRenewalProcessError(
+          'Only Government Relations may return this case to HR.',
+          403,
+          'GOVERNMENT_RELATIONS_ROLE_REQUIRED',
+        )
+      }
+
+      const reason = input.reason.trim()
+
+      if (!reason) {
+        throw new IqamaRenewalProcessError(
+          'A return reason is required.',
+          422,
+          'IQAMA_RETURN_REASON_REQUIRED',
+        )
+      }
+
+      /*
+       * Return the case to HR.
+       *
+       * Clear the GR assignment because the case is
+       * no longer waiting for Government Relations.
+       */
+      const updated = await IqamaRenewalProcessRepository.updateWithVersion(
+        tx,
+        id,
+        input.version,
+        {
+          status: 'pending_upload',
+          assignedToUserId: null,
+          governmentRelationsDueDate: null,
+          updatedAt: new Date(),
+          updatedBy: actor.userId,
+        },
+      )
+
+      assertVersionUpdateSucceeded(updated)
+
+      /*
+       * Store the required reason as an append-only,
+       * top-level case comment.
+       */
+      const createdComment = await IqamaRenewalCaseCommentRepository.create(
+        tx,
+        {
+          caseId: record.id,
+          authorUserId: actor.userId,
+          body: reason,
+
+          /*
+           * The comment records the resulting
+           * workflow state.
+           */
+          statusAtTime: 'pending_upload',
+          parentCommentId: null,
+          threadRootId: null,
+        },
+      )
+
+      if (!createdComment) {
+        throw new IqamaRenewalProcessError(
+          'Unable to save the return reason.',
+          500,
+          'IQAMA_RETURN_COMMENT_CREATE_FAILED',
+        )
+      }
+
+      const refreshed = await IqamaRenewalProcessRepository.findById(tx, id)
+
+      const returnedCase = assertCaseExists(refreshed)
+
+      //return assertCaseExists(refreshed)
+      /*
+       * Notify HR Admin after both the case update
+       * and required comment creation succeeded.
+       */
+      await IqamaRenewalWorkflowNotificationService.notifyHrAdminsOfReturn(tx, {
+        renewalCase: {
+          id: returnedCase.id,
+          employeeId: returnedCase.employeeId,
+          employeeNumber: returnedCase.employeeNumber ?? null,
+          employeeNameEn: returnedCase.employeeNameEn ?? null,
+          employeeNameAr: returnedCase.employeeNameAr ?? null,
+        },
+        actorUserId: actor.userId,
+        caseVersion: returnedCase.version,
+        reason,
+      })
+
+      return returnedCase
     })
   },
 

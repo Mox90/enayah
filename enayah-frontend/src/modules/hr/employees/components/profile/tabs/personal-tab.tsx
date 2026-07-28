@@ -34,7 +34,6 @@ import {
   PhoneNumber,
   Visa,
 } from '../../../types/employee-personal-details.types'
-import { useState } from 'react'
 import { useDialogState } from '@/hooks/useDialogState'
 import {
   AddressDialog,

@@ -1,4 +1,4 @@
-import { IqamaRenewalProcessError } from '../../modules/hr/iqama-renewal/types/iqama-renewal-process.types'
+// enayaha-backend/src/core/utils/date.ts
 
 export const addDays = (date: Date, days: number): Date => {
   const result = new Date(date)
@@ -33,11 +33,12 @@ export const getRiyadhTodayDateOnly = (): string => {
   const day = parts.find((part) => part.type === 'day')?.value
 
   if (!year || !month || !day) {
-    throw new IqamaRenewalProcessError(
-      'Unable to determine the current business date.',
-      500,
-      'BUSINESS_DATE_RESOLUTION_FAILED',
-    )
+    // throw new IqamaRenewalProcessError(
+    //   'Unable to determine the current business date.',
+    //   500,
+    //   'BUSINESS_DATE_RESOLUTION_FAILED',
+    // )
+    throw new Error('Unable to determine the current business date.')
   }
 
   return `${year}-${month}-${day}`

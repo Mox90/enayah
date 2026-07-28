@@ -202,6 +202,10 @@ const getOrderBy = (
     : sql`${expression} desc nulls last`
 }
 
+const escapeLikePattern = (value: string) => {
+  return value.replace(/[\\%_]/g, (char) => `\\${char}`)
+}
+
 export const IqamaRenewalProcessRepository = {
   create: async (tx: DB, data: CreateCaseData) => {
     const [created] = await tx
@@ -422,7 +426,8 @@ export const IqamaRenewalProcessRepository = {
     if (query.search) {
       const normalizedSearch = normalizeSearchDigits(query.search)
 
-      const searchPattern = `%${normalizedSearch}%`
+      //const searchPattern = `%${normalizedSearch}%`
+      const searchPattern = `%${escapeLikePattern(normalizedSearch)}%`
 
       const normalizedStatusSearch = normalizedSearch
         .toLowerCase()
@@ -430,7 +435,8 @@ export const IqamaRenewalProcessRepository = {
         .replace(/\s+/g, ' ')
         .trim()
 
-      const statusPattern = `%${normalizedStatusSearch}%`
+      //const statusPattern = `%${normalizedStatusSearch}%`
+      const statusPattern = `%${escapeLikePattern(normalizedStatusSearch)}%`
 
       const searchCondition = or(
         ilike(employees.employeeNumber, searchPattern),

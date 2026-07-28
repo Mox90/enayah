@@ -3,6 +3,7 @@
 import { z } from 'zod'
 
 import { iqamaRenewalStatusEnum } from '../../../../db'
+import { iqamaRenewalCommentBodySchema } from './iqama-renewal-case-comment.types'
 
 export const IqamaRenewalStatusSchema = z.enum(
   iqamaRenewalStatusEnum.enumValues,
@@ -184,4 +185,13 @@ export const completeIqamaRenewalSchema = z.object({
 
 export type CompleteIqamaRenewalInput = z.infer<
   typeof completeIqamaRenewalSchema
+>
+
+export const ReturnIqamaRenewalToHrSchema = z.object({
+  version: z.number().int().nonnegative(),
+  reason: z.string().trim().min(1).max(2000),
+})
+
+export type ReturnIqamaRenewalToHrInput = z.infer<
+  typeof ReturnIqamaRenewalToHrSchema
 >

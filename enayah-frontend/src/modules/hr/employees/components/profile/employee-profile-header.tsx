@@ -25,7 +25,6 @@ import {
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 
-import { Badge } from '@/components/ui/badge'
 import { useLocale, useTranslations } from 'next-intl'
 import { EmployeeProfile } from '../../types/employee-profile.types'
 import { StatusBadge } from '@/components/badges/status-badge'
@@ -37,37 +36,22 @@ import { useRenewContract } from '@/modules/hr/contracts/hooks/use-renew-contrac
 import { ContractRenewalDialog } from '@/components/dialogs/contract-renewal-dialog'
 import { useContractRenewalDefaults } from '@/modules/hr/contracts/hooks/use-contract-renewal-defaults'
 
-const statusClass: Record<string, string> = {
-  active: 'bg-green-100 text-green-700 border-green-200',
-  on_leave: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  transferred: 'bg-blue-100 text-blue-700 border-blue-200',
-  resigned: 'bg-orange-100 text-orange-700 border-orange-200',
-  eoc: 'bg-purple-100 text-purple-700 border-purple-200',
-  terminated: 'bg-red-100 text-red-700 border-red-200',
-}
-
-const statusLabel: Record<string, string> = {
-  active: 'Active',
-  on_leave: 'On Leave',
-  transferred: 'Transferred',
-  resigned: 'Resigned',
-  eoc: 'End of Contract',
-  terminated: 'Terminated',
-}
+type EmploymentStatus =
+  | 'active'
+  | 'terminated'
+  | 'resigned'
+  | 'eoc'
+  | 'transferred'
+  | 'retired'
+  | 'on_leave'
+  | 'suspended'
+  | 'deceased'
 
 function nextDay(date: string) {
   const d = new Date(date)
   d.setDate(d.getDate() + 1)
   return d.toISOString().slice(0, 10)
 }
-
-// const workforceLabel: Record<string, string> = {
-//   physician: 'Physician', // 1000
-//   nurse: 'Nurse', // 2000
-//   allied_health: 'Allied Health/Technician', // 3000
-//   administrative: 'Administrative', // 4000
-//   support_service: 'Support Service', //5000
-// }
 
 interface Props {
   profile: EmployeeProfile
@@ -81,6 +65,25 @@ export function EmployeeProfileHeader({ profile }: Props) {
   const cont = useTranslations('contracts')
   const et = useTranslations('employees')
   const isRtl = locale === 'ar'
+
+  const employmentStatusLabels: Record<EmploymentStatus, string> = {
+    active: et('employmentStatuses.active'),
+    terminated: et('employmentStatuses.terminated'),
+    resigned: et('employmentStatuses.resigned'),
+    eoc: et('employmentStatuses.eoc'),
+    transferred: et('employmentStatuses.transferred'),
+    retired: et('employmentStatuses.retired'),
+    on_leave: et('employmentStatuses.onLeave'),
+    suspended: et('employmentStatuses.suspended'),
+    deceased: et('employmentStatuses.deceased'),
+  }
+
+  const employmentStatus = e?.status as EmploymentStatus | null | undefined
+
+  const employmentStatusLabel =
+    employmentStatus && employmentStatus in employmentStatusLabels
+      ? employmentStatusLabels[employmentStatus]
+      : undefined
 
   //console.log('Version receive from Props is ' + p.version)
   // console.log('Profile ')
@@ -183,29 +186,12 @@ export function EmployeeProfileHeader({ profile }: Props) {
 
       <div className='p-6'>
         <div className='flex flex-col items-center gap-6 lg:flex-row lg:items-center lg:justify-start'>
-          <div className='flex flex-col items-center gap-6 lg:flex-row lg:items-center'>
+          <div
+            dir={isRtl ? 'rtl' : 'ltr'}
+            className='flex w-full flex-col items-center gap-6 lg:flex-row lg:items-center'
+          >
             {/* Avatar */}
             <div className='relative flex h-35 w-35 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-gradient-to-br from-slate-100 to-slate-200 text-6xl shadow-md dark:from-slate-800 dark:to-slate-900'>
-              {/* {profile.personal?.avatar ? (
-                <Image
-                  src={profile.personal?.avatar}
-                  alt={name.filter(Boolean).join(' ')}
-                  fill
-                  className='object-cover'
-                  sizes='140px'
-                  priority
-                />
-              ) : (
-                // <span>👤</span>
-                <Image
-                  src='/MODHS3.png'
-                  alt='Default profile image'
-                  fill
-                  className='object-cover'
-                  sizes='140px'
-                  priority
-                />
-              )} */}
               <Image
                 src={avatar || '/MODHS3.png'}
                 alt={avatar ? fullName : 'Default profile image'}
@@ -217,15 +203,16 @@ export function EmployeeProfileHeader({ profile }: Props) {
             </div>
 
             {/* Identity */}
-            <div className='min-w-0 flex-1 space-y-3 text-center lg:text-left'>
-              <div className='flex flex-col items-center gap-3 lg:flex-row'>
-                <h1 className='text-center text-3xl font-bold tracking-tight lg:text-left xl:text-4xl'>
+            <div className='min-w-0 w-full flex-1 space-y-3 text-center lg:text-start'>
+              <div className='flex flex-col items-center gap-3 lg:flex-row lg:justify-start'>
+                <h1 className='text-center text-3xl font-bold tracking-tight lg:text-start xl:text-4xl'>
                   {name.filter(Boolean).join(' ')}
                 </h1>
 
                 <StatusBadge
+                  status={employmentStatus}
+                  label={employmentStatusLabel}
                   className='self-center lg:self-auto'
-                  status={e?.status}
                 />
               </div>
 
@@ -246,21 +233,23 @@ export function EmployeeProfileHeader({ profile }: Props) {
                   ? (e?.movement.officialPosition.titleAr ??
                     e?.movement.officialPosition.titleEn)
                   : e?.movement.officialPosition.titleEn}
+
                 <span className='mx-2'>•</span>
+
                 {isRtl
                   ? (e?.movement.officialDepartment.nameAr ??
                     e?.movement.officialDepartment.nameEn)
                   : e?.movement.officialDepartment.nameEn}
+
                 <span className='mx-2'>•</span>
-                {/* <span className='font-medium'>{et('pcnText')}</span>{' '} */}
+
                 {e?.movement.positionItem.itemNumber}
+
                 <span className='mx-2'>•</span>
-                {/* <span className='font-medium'>{et('category')}</span>{' '} */}
+
                 {isRtl
                   ? toPersianDigits(e?.movement.positionItem.categoryCode)
                   : e?.movement.positionItem.categoryCode}
-                {/* <span className='mx-2'>•</span>
-                <span className='font-medium'>{et('workforce')}</span> {et(wf)} */}
               </div>
             </div>
           </div>

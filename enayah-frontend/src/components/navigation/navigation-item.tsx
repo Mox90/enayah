@@ -1,8 +1,6 @@
 'use client'
 
-import { LucideIcon } from 'lucide-react'
-
-//import { Link, usePathname } from '@/i18n/navigation'
+import type { LucideIcon } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { Link, usePathname } from '../../../i18n/navigation'
@@ -22,7 +20,8 @@ const NavigationItem = ({
 }: NavigationItemProps) => {
   const pathname = usePathname()
 
-  const isActive = pathname === href
+  const isActive =
+    pathname === href || (href !== '/' && pathname.startsWith(`${href}/`))
 
   return (
     <Link

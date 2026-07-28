@@ -192,7 +192,7 @@ export function getIqamaRenewalColumns(
 
     {
       accessorKey: 'assignedToName',
-      //enableSorting: false,
+      enableSorting: false,
       header: ({ column }) => (
         <DataTableColumnHeader
           column={column}

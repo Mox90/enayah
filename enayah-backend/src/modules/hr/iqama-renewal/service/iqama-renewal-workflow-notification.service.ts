@@ -1,13 +1,9 @@
 // enayah-backendsrc/modules/hr/iqama-renewal-process/service/iqama-renewal-workflow-notification.service.ts
 
 import { and, eq } from 'drizzle-orm'
-
 import { roles, userRoles, users, type DB } from '../../../../db'
-
 import { NotificationRepository } from '../../../notifications/repository/notification.repository'
-
 import { IqamaRenewalProcessError } from '../types/iqama-renewal-process.types'
-
 import {
   IQAMA_WORKFLOW_NOTIFICATION_MILESTONES,
   IQAMA_WORKFLOW_NOTIFICATION_SOURCE_TYPE,
@@ -25,22 +21,17 @@ type WorkflowNotificationCase = {
 
 type CreateWorkflowNotificationInput = {
   renewalCase: WorkflowNotificationCase
-
   actorUserId: string
-
   recipientUserIds: string[]
-
   type: string
   milestone: string
-
   title: string
   message: string
-
   dueDate: string | null
-
   activityType:
     | 'assigned_to_government_relations'
     | 'completed_by_government_relations'
+    | 'returned_to_hr'
 }
 
 function getEmployeeLabel(renewalCase: WorkflowNotificationCase) {
@@ -91,9 +82,7 @@ async function createWorkflowNotification(
    */
   const event = await NotificationRepository.reserveEventIfNotExists(tx, {
     sourceType: IQAMA_WORKFLOW_NOTIFICATION_SOURCE_TYPE,
-
     sourceId: input.renewalCase.id,
-
     milestone: input.milestone,
   })
 
@@ -103,33 +92,21 @@ async function createWorkflowNotification(
 
   const notification = await NotificationRepository.createNotification(tx, {
     employeeId: input.renewalCase.employeeId,
-
     type: input.type,
-
     title: input.title,
-
     message: input.message,
-
     sourceType: IQAMA_WORKFLOW_NOTIFICATION_SOURCE_TYPE,
-
     /*
      * sourceId points directly to the case.
      */
     sourceId: input.renewalCase.id,
-
     dueDate: input.dueDate,
-
     severity: 'info',
-
     metadata: {
       iqamaRenewalCaseId: input.renewalCase.id,
-
       employeeId: input.renewalCase.employeeId,
-
       employeeNumber: input.renewalCase.employeeNumber,
-
       activityType: input.activityType,
-
       action: 'open_iqama_renewal_case',
     },
   })
@@ -144,7 +121,6 @@ async function createWorkflowNotification(
 
   await NotificationRepository.attachNotificationToEvent(tx, {
     eventId: event.id,
-
     notificationId: notification.id,
   })
 
@@ -179,25 +155,17 @@ export const IqamaRenewalWorkflowNotificationService = {
 
     return createWorkflowNotification(tx, {
       renewalCase: input.renewalCase,
-
       actorUserId: input.actorUserId,
-
       recipientUserIds: [input.assignedToUserId],
-
       type: IQAMA_WORKFLOW_NOTIFICATION_TYPES.assignedToGovernmentRelations,
-
       milestone:
         IQAMA_WORKFLOW_NOTIFICATION_MILESTONES.assignedToGovernmentRelations,
-
       title: 'Iqama renewal assigned to you',
-
       message:
         `${employeeLabel}'s Iqama renewal ` +
         `has been assigned to you for processing.` +
         dueDateMessage,
-
       dueDate: input.dueDate,
-
       activityType: 'assigned_to_government_relations',
     })
   },
@@ -229,6 +197,52 @@ export const IqamaRenewalWorkflowNotificationService = {
         `renewal process was completed.`,
       dueDate: null,
       activityType: 'completed_by_government_relations',
+    })
+  },
+
+  /**
+   * Government Relations could not complete
+   * the Jawazat update and returned the case
+   * to HR for correction or reprocessing.
+   */
+  notifyHrAdminsOfReturn: async (
+    tx: DB,
+    input: {
+      renewalCase: WorkflowNotificationCase
+      actorUserId: string
+      /*
+       * Use the updated case version so another
+       * return cycle can create another event.
+       */
+      caseVersion: number
+      reason: string
+    },
+  ) => {
+    const hrAdminUsers = await findActiveHrAdminUserIds(tx)
+    const employeeLabel = getEmployeeLabel(input.renewalCase)
+    const reason = input.reason.trim()
+
+    /*
+     * notification_events has a unique constraint
+     * on sourceType + sourceId + milestone.
+     *
+     * Including the version permits repeated
+     * returns of the same case.
+     */
+    const milestone = `${IQAMA_WORKFLOW_NOTIFICATION_MILESTONES.returnedToHrPrefix}${input.caseVersion}`
+    return createWorkflowNotification(tx, {
+      renewalCase: input.renewalCase,
+      actorUserId: input.actorUserId,
+      recipientUserIds: hrAdminUsers.map((row) => row.userId),
+      type: IQAMA_WORKFLOW_NOTIFICATION_TYPES.returnedToHr,
+      milestone,
+      title: 'Iqama renewal returned to HR',
+      message:
+        `${employeeLabel}'s Iqama renewal case ` +
+        `was returned by Government Relations. ` +
+        `Reason: ${reason}`,
+      dueDate: null,
+      activityType: 'returned_to_hr',
     })
   },
 }

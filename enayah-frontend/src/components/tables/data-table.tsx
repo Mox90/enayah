@@ -27,6 +27,12 @@ import { DataTableToolbar } from './data-table-toolbar'
 import { DataTableEmpty } from './data-table-empty'
 import { DataTableSkeleton } from './data-table-skeleton'
 import { useLocale } from 'next-intl'
+import { EmployeeDirectoryRow } from '@/modules/hr/employees/types/employee-directory.types'
+import {
+  EmploymentStatus,
+  employmentStatusStyles,
+} from '@/modules/hr/employees/components/list/use-employee-columns'
+import { cn } from '@/lib/utils'
 
 interface DataTableSelectionProps {
   rowSelection?: RowSelectionState
@@ -175,6 +181,42 @@ export function DataTable<TData extends { id: string }, TValue>({
                 </TableRow>
               ))
             ) : (
+              // table.getRowModel().rows.map((row) => {
+              //   const original = row.original as EmployeeDirectoryRow
+
+              //   const status = original.employmentStatus as
+              //     | EmploymentStatus
+              //     | null
+              //     | undefined
+
+              //   const statusConfig =
+              //     status && status in employmentStatusStyles
+              //       ? employmentStatusStyles[status]
+              //       : null
+
+              //   return (
+              //     <TableRow
+              //       key={row.id}
+              //       data-state={row.getIsSelected() && 'selected'}
+              //       className={cn(
+              //         'transition-colors duration-150',
+              //         statusConfig?.rowClassName,
+
+              //         row.getIsSelected() &&
+              //           'bg-primary/10 hover:bg-primary/15',
+              //       )}
+              //     >
+              //       {row.getVisibleCells().map((cell) => (
+              //         <TableCell key={cell.id}>
+              //           {flexRender(
+              //             cell.column.columnDef.cell,
+              //             cell.getContext(),
+              //           )}
+              //         </TableCell>
+              //       ))}
+              //     </TableRow>
+              //   )
+              // })
               <DataTableEmpty columns={columns.length} />
             )}
           </TableBody>

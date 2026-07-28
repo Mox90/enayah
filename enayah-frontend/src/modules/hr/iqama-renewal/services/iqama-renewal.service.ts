@@ -10,6 +10,7 @@ import type {
   IqamaRenewalCase,
   IqamaRenewalCaseListResponse,
   IqamaRenewalStatus,
+  ReturnIqamaRenewalToHrPayload,
   UpdateIqamaRenewalCasePayload,
 } from '../types/iqama-renewal.types'
 
@@ -122,6 +123,18 @@ export const iqamaRenewalService = {
   ): Promise<IqamaRenewalCase> => {
     const response = await api.patch<ApiResponse<IqamaRenewalCase>>(
       `${API_ENDPOINTS.hr.iqamaRenewal}/${id}/complete`,
+      payload,
+    )
+
+    return response.data.data
+  },
+
+  returnToHr: async (
+    id: string,
+    payload: ReturnIqamaRenewalToHrPayload,
+  ): Promise<IqamaRenewalCase> => {
+    const response = await api.patch<ApiResponse<IqamaRenewalCase>>(
+      `${API_ENDPOINTS.hr.iqamaRenewal}/${id}/return-to-hr`,
       payload,
     )
 
