@@ -815,9 +815,15 @@ export const IqamaRenewalProcessService = {
           roleName: roles.name,
         })
         .from(userRoles)
+        .innerJoin(users, eq(users.id, userRoles.userId))
         .innerJoin(roles, eq(roles.id, userRoles.roleId))
         .where(
-          and(eq(userRoles.userId, actor.userId), eq(userRoles.isActive, true)),
+          //and(eq(userRoles.userId, actor.userId), eq(userRoles.isActive, true)),
+          and(
+            eq(userRoles.userId, actor.userId),
+            eq(userRoles.isActive, true),
+            eq(users.isActive, true),
+          ),
         )
 
       const isGovernmentRelationsUser = actorRoles.some(

@@ -93,7 +93,7 @@ export function EmployeeProfileHeader({ profile }: Props) {
     ? [p.firstNameAr, p.secondNameAr, p.thirdNameAr, p.familyNameAr]
     : [p.firstNameEn, p.secondNameEn, p.thirdNameEn, p.familyNameEn]
 
-  const wf = e?.movement.positionItem.workforceCategory ?? ''
+  //const wf = e?.movement.positionItem.workforceCategory ?? ''
 
   const [editOpen, setEditOpen] = useState(false)
   const updatePersonalMutation = useUpdatePersonalMutation()
@@ -105,7 +105,7 @@ export function EmployeeProfileHeader({ profile }: Props) {
   const fullName = name.filter(Boolean).join(' ') || 'Employee profile image'
 
   const currentContract = e?.contract
-  const currentMovement = e?.movement
+  //const currentMovement = e?.movement
 
   const { data: renewalDefaults, isLoading: isRenewalDefaultsLoading } =
     useContractRenewalDefaults(currentContract?.id, renewOpen)
