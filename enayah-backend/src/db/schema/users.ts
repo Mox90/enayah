@@ -9,6 +9,7 @@ import {
   index,
   check,
   text,
+  AnyPgColumn,
 } from 'drizzle-orm/pg-core'
 import { baseColumns } from './base'
 import { authProviderEnum } from './enums'
@@ -58,23 +59,21 @@ export const users = pgTable(
 
     employeeId: uuid('employee_id')
       .notNull()
-      .references(() => employees.id, {
+      .references((): AnyPgColumn => employees.id, {
         onDelete: 'restrict',
       }),
 
     ...baseColumns,
   },
-  (table) => {
-    return {
-      emailIdx: uniqueIndex('users_email_unique').on(table.email),
-      usernameIdx: uniqueIndex('users_username_unique').on(table.username),
-      employeeIdx: uniqueIndex('users_employee_unique').on(table.employeeId),
-      mfaConstraint: check(
-        'users_mfa_enabled_requires_secret',
-        sql`${table.mfaEnabled} = false OR ${table.mfaSecret} IS NOT NULL`,
-      ),
-    }
-  },
+  (table) => [
+    uniqueIndex('users_email_unique').on(table.email),
+    uniqueIndex('users_username_unique').on(table.username),
+    uniqueIndex('users_employee_unique').on(table.employeeId),
+    check(
+      'users_mfa_enabled_requires_secret',
+      sql`${table.mfaEnabled} = false OR ${table.mfaSecret} IS NOT NULL`,
+    ),
+  ],
 )
 
 /*export const usersRelations = relations(users, ({ many }) => ({
