@@ -1,41 +1,45 @@
+// enayah-frontend/src/modules/hr/employees/components/profile/tabs/cards/credential-malpractice.tsx
+
 'use client'
 
-import { format } from 'date-fns'
-import { MoreHorizontal, MoreVertical, Plus } from 'lucide-react'
-
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { VerificationBadge } from '@/components/badges/verification-badge'
-import { MalpracticeInput } from '@/modules/hr/onboarding/types/onboarding.types'
+import type { ReactNode } from 'react'
+import { format, isValid, parseISO } from 'date-fns'
+import { arSA, enUS } from 'date-fns/locale'
+import { Plus, ShieldCheck } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { cn } from '@/lib/utils'
-import { toArabic, toArabicDigits, toPersianDigits } from '@/utils/utilities'
+
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { VerificationBadge } from '@/components/badges/verification-badge'
+import { ExpiryStatusBadge } from '@/components/badges/expiry-status-badge'
 import { RowActions } from '@/components/dialogs/row-actions'
-
-//import { VerificationBadge } from '@/components/common/verification-badge'
-
-// interface Malpractice {
-//   id: string
-//   insuranceCompany: string
-//   policyNumber: string
-//   coverageAmount: string | number | null
-//   startDate: string | null
-//   expiryDate: string | null
-//   isVerified: boolean
-// }
+import { MalpracticeInput } from '@/modules/hr/onboarding/types/onboarding.types'
+import { formatDate, toPersianDigits } from '@/utils/utilities'
+import { DetailItem } from '@/components/forms/form-detail-item'
 
 interface Props {
   malpractice: MalpracticeInput[]
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
+}
+
+function formatCoverageAmount(
+  value: string | number | null | undefined,
+  isRtl: boolean,
+) {
+  if (value === null || value === undefined || value === '') {
+    return '-'
+  }
+
+  const formattedValue =
+    typeof value === 'number'
+      ? new Intl.NumberFormat('en-US', {
+          maximumFractionDigits: 2,
+        }).format(value)
+      : value
+
+  return isRtl ? toPersianDigits(String(formattedValue)) : formattedValue
 }
 
 export function CredentialMalpractice({
@@ -47,74 +51,172 @@ export function CredentialMalpractice({
   const locale = useLocale()
   const ct = useTranslations('credentials')
   const isRtl = locale === 'ar'
-  return (
-    <Card>
-      <CardHeader className='flex flex-row items-center justify-between'>
-        <CardTitle>
-          🛡️ {ct('malpracticeLabel')} (
-          {isRtl ? toPersianDigits(malpractice.length) : malpractice.length})
-        </CardTitle>
 
-        <Button size='sm' onClick={onAdd}>
-          <Plus className={cn('h-4 w-4', isRtl ? 'ml-2' : 'mr-2')} />
-          {ct('addMalpractice')}
-        </Button>
+  const displayedCount = isRtl
+    ? toPersianDigits(malpractice.length)
+    : malpractice.length
+
+  return (
+    <Card className='overflow-hidden'>
+      <CardHeader className='border-b bg-muted/20'>
+        <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
+          <CardTitle className='flex min-w-0 items-center gap-3'>
+            <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10'>
+              <ShieldCheck
+                aria-hidden='true'
+                className='h-5 w-5 text-indigo-600 dark:text-indigo-400'
+              />
+            </div>
+
+            <div className='flex min-w-0 items-center gap-2'>
+              <span className='truncate text-base font-semibold'>
+                {ct('malpracticeLabel')}
+              </span>
+
+              <span className='inline-flex min-w-6 shrink-0 items-center justify-center rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground'>
+                {displayedCount}
+              </span>
+            </div>
+          </CardTitle>
+
+          {onAdd && (
+            <Button
+              type='button'
+              size='sm'
+              onClick={onAdd}
+              className='w-full shrink-0 sm:w-auto'
+            >
+              <Plus aria-hidden='true' className='me-2 h-4 w-4' />
+
+              {ct('addMalpractice')}
+            </Button>
+          )}
+        </div>
       </CardHeader>
 
-      <CardContent className='space-y-4'>
-        {malpractice.length === 0 && (
-          <div className='text-sm text-muted-foreground'>
-            {ct('noRecFound', { item: 'Malpractice Insurance' })}
+      <CardContent className='p-5'>
+        {malpractice.length === 0 ? (
+          <div className='rounded-xl border border-dashed bg-muted/10 px-6 py-10 text-center'>
+            <div className='mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-muted'>
+              <ShieldCheck
+                aria-hidden='true'
+                className='h-5 w-5 text-muted-foreground'
+              />
+            </div>
+
+            <p className='text-sm text-muted-foreground'>
+              {ct('noRecFound', {
+                item: ct('malpracticeLabel'),
+              })}
+            </p>
+
+            {onAdd && (
+              <Button
+                type='button'
+                variant='outline'
+                size='sm'
+                className='mt-4'
+                onClick={onAdd}
+              >
+                <Plus aria-hidden='true' className='me-2 h-4 w-4' />
+
+                {ct('addMalpractice')}
+              </Button>
+            )}
           </div>
-        )}
+        ) : (
+          <div className='space-y-4'>
+            {malpractice.map((insurance, index) => {
+              const insuranceId = insurance.id
 
-        {malpractice.map((x) => {
-          const xId = x.id
-          return (
-            <div key={x.id} className='rounded-lg border p-4'>
-              <div className='flex justify-between'>
-                <div className='space-y-1'>
-                  <div className='font-semibold'>{x.insuranceCompany}</div>
+              const displayedPolicyNumber =
+                insurance.policyNumber && isRtl
+                  ? toPersianDigits(insurance.policyNumber)
+                  : insurance.policyNumber
 
-                  <div className='text-sm text-muted-foreground'>
-                    {ct('policyNum')}: {x.policyNumber}
+              return (
+                <article
+                  key={
+                    insuranceId ??
+                    `${insurance.insuranceCompany}-${insurance.policyNumber}-${index}`
+                  }
+                  className='group/credential relative rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md sm:p-5'
+                >
+                  <div className='mb-5 flex items-start justify-between gap-4 border-b pb-4'>
+                    <div className='min-w-0'>
+                      <h3 className='break-words text-base font-semibold text-foreground'>
+                        {insurance.insuranceCompany || '-'}
+                      </h3>
+
+                      {insurance.policyNumber && (
+                        <p
+                          className='mt-1 break-all text-sm text-muted-foreground'
+                          dir='ltr'
+                        >
+                          {displayedPolicyNumber}
+                        </p>
+                      )}
+
+                      <div className='mt-3 flex flex-wrap items-center gap-2'>
+                        <VerificationBadge
+                          verified={insurance.isVerified ?? false}
+                        />
+
+                        <ExpiryStatusBadge
+                          expiryDate={insurance.expiryDate}
+                          pulseOnParentHover
+                          pulseOnInView
+                        />
+                      </div>
+                    </div>
+
+                    <div className='relative z-20 shrink-0'>
+                      <RowActions
+                        onEdit={
+                          insuranceId && onEdit
+                            ? () => onEdit(insuranceId)
+                            : undefined
+                        }
+                        onDelete={
+                          insuranceId && onDelete
+                            ? () => onDelete(insuranceId)
+                            : undefined
+                        }
+                      />
+                    </div>
                   </div>
 
-                  {x.coverageAmount && (
-                    <div className='text-sm'>
-                      {ct('amount')}: {x.coverageAmount}
-                    </div>
-                  )}
+                  <div className='grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3'>
+                    <DetailItem
+                      label={ct('policyNum')}
+                      value={displayedPolicyNumber}
+                      valueDirection='ltr'
+                    />
 
-                  {x.startDate && (
-                    <div className='text-sm'>
-                      {ct('startDate')}:{' '}
-                      {isRtl
-                        ? toArabic(x.startDate, 1)
-                        : format(new Date(x.startDate), 'dd-MMM-yyyy')}
-                    </div>
-                  )}
+                    <DetailItem
+                      label={ct('amount')}
+                      value={formatCoverageAmount(
+                        insurance.coverageAmount,
+                        isRtl,
+                      )}
+                      valueDirection='ltr'
+                    />
 
-                  {x.expiryDate && (
-                    <div className='text-sm'>
-                      {ct('expires')}:{' '}
-                      {isRtl
-                        ? toArabic(x.expiryDate, 1)
-                        : format(new Date(x.expiryDate), 'dd-MMM-yyyy')}
-                    </div>
-                  )}
+                    <DetailItem
+                      label={ct('startDate')}
+                      value={formatDate(insurance.startDate, isRtl)}
+                    />
 
-                  <VerificationBadge verified={x.isVerified ?? false} />
-                </div>
-
-                <RowActions
-                  onEdit={xId && onEdit ? () => onEdit(xId) : undefined}
-                  onDelete={xId && onDelete ? () => onDelete(xId) : undefined}
-                />
-              </div>
-            </div>
-          )
-        })}
+                    <DetailItem
+                      label={ct('expires')}
+                      value={formatDate(insurance.expiryDate, isRtl)}
+                    />
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        )}
       </CardContent>
     </Card>
   )

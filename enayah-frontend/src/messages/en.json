@@ -43,7 +43,12 @@
     "expiringMessage1": "Expiring in {item} days!",
     "expiringMessage2": "Expiring within {item} days",
     "expiringMessage3": "Expiring in {item} days",
-    "current": "Current"
+    "current": "Current",
+    "valid": "Valid",
+    "expiresInDays": "Expires in {days} days",
+    "expiresTomorrow": "Expires tomorrow",
+    "noExpiryDate": "No expiry date",
+    "invalidExpiryDate": "Invalid expiry date"
   },
   "auth": {
     "loginTitle": "Login to Your Account",
@@ -245,7 +250,8 @@
       "onLeave": "On Leave",
       "suspended": "Suspended",
       "deceased": "Deceased"
-    }
+    },
+    "saving": "Saving {item}"
   },
   "departments": {
     "departmentName": "Departments",
@@ -483,7 +489,9 @@
     "majorPlaceHolder": "Nursing",
     "institutionPlaceHolder": "University/School Name (Please do not abbreviate)",
     "degreeSub": "Graduation or completion date, if available",
-    "educationSub": "Enter the employee's board qualification details."
+    "educationSub": "Enter the employee's board qualification details.",
+    "institution": "School / Provider",
+    "membershipNumber": "Membership Number"
   },
   "payroll": {},
   "attendance": {},

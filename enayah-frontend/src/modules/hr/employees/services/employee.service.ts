@@ -22,6 +22,7 @@ import {
   CreateIdentificationDto,
   CreatePhoneDto,
   CreateVisaDto,
+  EmployeeProfileSummary,
   UpdateAddressDto,
   UpdateDependentDto,
   UpdateEmailDto,
@@ -33,6 +34,10 @@ import {
 
 //import { Employee } from '../types/employee.types'
 const base = `${API_ENDPOINTS.hr.employees}/personal`
+
+type EmployeeProfileSummaryResponse = {
+  data: EmployeeProfileSummary
+}
 
 export const employeeService = {
   //----------------------------------
@@ -271,4 +276,12 @@ export const employeeService = {
     api.patch(`${base}/visas/${id}`, data),
 
   deleteVisa: async (id: string) => api.delete(`${base}/visas/${id}`),
+
+  getCredentialSummary: async (id: string): Promise<EmployeeProfileSummary> => {
+    const response = await api.get<EmployeeProfileSummaryResponse>(
+      `${API_ENDPOINTS.hr.employees}/${id}/profile-summary`,
+    )
+
+    return response.data.data
+  },
 }

@@ -1,11 +1,13 @@
 import {
   bigint,
   boolean,
+  check,
   date,
   index,
   integer,
   numeric,
   pgTable,
+  uniqueIndex,
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core'
@@ -53,16 +55,62 @@ import { relations, sql } from 'drizzle-orm'
  * 
  */
 
-export const files = pgTable('files', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  fileName: varchar('file_name', { length: 255 }).notNull(),
-  originalName: varchar('original_name', { length: 255 }).notNull(),
-  mimeType: varchar('mime_type', { length: 100 }).notNull(),
-  fileSize: bigint('file_size', { mode: 'number' }).notNull(),
-  storagePath: varchar('storage_path', { length: 500 }).notNull(),
-  checksum: varchar('checksum', { length: 255 }),
-  ...baseColumns,
-})
+// export const files = pgTable('files', {
+//   id: uuid('id').defaultRandom().primaryKey(),
+//   fileName: varchar('file_name', { length: 255 }).notNull(),
+//   originalName: varchar('original_name', { length: 255 }).notNull(),
+//   mimeType: varchar('mime_type', { length: 100 }).notNull(),
+//   fileSize: bigint('file_size', { mode: 'number' }).notNull(),
+//   storagePath: varchar('storage_path', { length: 500 }).notNull(),
+//   checksum: varchar('checksum', { length: 255 }),
+//   ...baseColumns,
+// })
+
+export const files = pgTable(
+  'files',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+
+    storedName: varchar('stored_name', {
+      length: 255,
+    }).notNull(),
+
+    originalName: varchar('original_name', {
+      length: 255,
+    }).notNull(),
+
+    mimeType: varchar('mime_type', {
+      length: 100,
+    }).notNull(),
+
+    fileSize: bigint('file_size', {
+      mode: 'number',
+    }).notNull(),
+
+    storageKey: varchar('storage_key', {
+      length: 500,
+    }).notNull(),
+
+    checksumSha256: varchar('checksum_sha256', {
+      length: 64,
+    }),
+
+    ...baseColumns,
+  },
+  (table) => [
+    uniqueIndex('uq_files_storage_key').on(table.storageKey),
+
+    index('idx_files_checksum_sha256').on(table.checksumSha256),
+
+    check(
+      'chk_files_file_size',
+      sql`
+        ${table.fileSize} > 0
+        AND ${table.fileSize} <= 2097152
+      `,
+    ),
+  ],
+)
 
 export const employeeDegrees = pgTable('employee_degrees', {
   id: uuid('id').defaultRandom().primaryKey(),
@@ -77,7 +125,9 @@ export const employeeDegrees = pgTable('employee_degrees', {
   institution: varchar('institution', { length: 255 }).notNull(),
   countryId: uuid('country_id').references(() => countries.id),
   graduationDate: date('graduation_date'),
-  documentFileId: uuid('document_file_id').references(() => files.id),
+  documentFileId: uuid('document_file_id').references(() => files.id, {
+    onDelete: 'restrict',
+  }),
   ...verificationColumns,
   ...baseColumns,
 })

@@ -302,14 +302,16 @@ const EmploymentTab = ({ employeeId }: Props) => {
 
                       <div className='space-y-1'>
                         <div className='text-sm text-muted-foreground'>
-                          {isRtl
+                          {/* {isRtl
                             ? toArabic(movement.startDate, 1)
-                            : formatDate(movement.startDate)}{' '}
+                            : formatDate(movement.startDate)} */}
+                          {formatDate(movement.startDate, isRtl)}{' '}
                           {isRtl ? '←' : '→'}{' '}
                           {movement.endDate
-                            ? isRtl
-                              ? toArabic(movement.endDate, 1)
-                              : formatDate(movement.endDate)
+                            ? // isRtl
+                              //   ? toArabic(movement.endDate, 1)
+                              //   : formatDate(movement.endDate)
+                              formatDate(movement.endDate, isRtl)
                             : '-'}
                           {movement.movementType !== 'initial' && (
                             <span

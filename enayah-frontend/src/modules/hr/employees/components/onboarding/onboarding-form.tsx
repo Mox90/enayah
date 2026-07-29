@@ -17,6 +17,7 @@ import { useRouter } from '../../../../../../i18n/navigation'
 import { useOnboardEmployee } from '@/modules/hr/onboarding/hooks/use-onboarding'
 import { toast } from 'sonner'
 import { AxiosError } from 'axios'
+import { toPersianDigits } from '@/utils/utilities'
 //import { emptyToUndefined } from '@/utils/utilities'
 
 type Step =
@@ -49,6 +50,7 @@ export function OnboardingForm({ onCancel }: Props) {
   const et = useTranslations('errors')
   const router = useRouter()
   const locale = useLocale()
+  const isRtl = locale === 'ar'
   const onboardMutation = useOnboardEmployee()
 
   const steps: { key: Step; label: string }[] = [
@@ -410,7 +412,11 @@ export function OnboardingForm({ onCancel }: Props) {
                     .filter(Boolean)
                     .join(' ')}
                 >
-                  {completed ? '✓' : index + 1}
+                  {completed
+                    ? '✓'
+                    : isRtl
+                      ? toPersianDigits(index + 1)
+                      : index + 1}
                 </span>
 
                 <span
