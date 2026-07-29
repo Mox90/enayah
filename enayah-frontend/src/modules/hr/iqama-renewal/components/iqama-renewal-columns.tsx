@@ -17,7 +17,7 @@ import {
 import type { IqamaRenewalSortBy } from '../services/iqama-renewal.service'
 import type { IqamaRenewalCase } from '../types/iqama-renewal.types'
 import { IqamaRenewalStatusBadge } from './iqama-renewal-status-badge'
-import { toArabic, toPersianDigits } from '@/utils/utilities'
+import { formatDate, toArabic, toPersianDigits } from '@/utils/utilities'
 
 type Labels = {
   employeeNumber: string
@@ -39,21 +39,21 @@ type Labels = {
   days: string
 }
 
-function formatDate(value?: string | null) {
-  if (!value) return '-'
+// function formatDate(value?: string | null) {
+//   if (!value) return '-'
 
-  const date = new Date(value)
+//   const date = new Date(value)
 
-  if (Number.isNaN(date.getTime())) {
-    return '-'
-  }
+//   if (Number.isNaN(date.getTime())) {
+//     return '-'
+//   }
 
-  return new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  }).format(date)
-}
+//   return new Intl.DateTimeFormat('en-GB', {
+//     day: '2-digit',
+//     month: 'short',
+//     year: 'numeric',
+//   }).format(date)
+// }
 
 function calculateDaysRemaining(value?: string | null) {
   if (!value) return null
@@ -170,9 +170,10 @@ export function getIqamaRenewalColumns(
         />
       ),
       cell: ({ row }) =>
-        isArabic
-          ? toArabic(row.original.expiryDate, 1) || '-'
-          : formatDate(row.original.expiryDate),
+        // isArabic
+        //   ? toArabic(row.original.expiryDate, 1) || '-'
+        //   : formatDate(row.original.expiryDate),
+        formatDate(row.original.expiryDate, isArabic),
     },
 
     {
@@ -215,7 +216,7 @@ export function getIqamaRenewalColumns(
           sortOrder={sortOrder}
         />
       ),
-      cell: ({ row }) => formatDate(row.original.mhrsdUploadedAt),
+      cell: ({ row }) => formatDate(row.original.mhrsdUploadedAt, isArabic),
     },
 
     {
@@ -254,7 +255,8 @@ export function getIqamaRenewalColumns(
           sortOrder={sortOrder}
         />
       ),
-      cell: ({ row }) => formatDate(row.original.governmentRelationsDueDate),
+      cell: ({ row }) =>
+        formatDate(row.original.governmentRelationsDueDate, isArabic),
     },
 
     {

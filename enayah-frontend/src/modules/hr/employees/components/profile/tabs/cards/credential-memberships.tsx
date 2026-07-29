@@ -15,55 +15,14 @@ import { VerificationBadge } from '@/components/badges/verification-badge'
 import { ExpiryStatusBadge } from '@/components/badges/expiry-status-badge'
 import { RowActions } from '@/components/dialogs/row-actions'
 import { MembershipInput } from '@/modules/hr/onboarding/types/onboarding.types'
-import { toPersianDigits } from '@/utils/utilities'
+import { formatDate, toPersianDigits } from '@/utils/utilities'
+import { DetailItem } from '@/components/forms/form-detail-item'
 
 interface Props {
   memberships: MembershipInput[]
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
-}
-
-interface DetailItemProps {
-  label: string
-  value?: ReactNode
-  valueDirection?: 'ltr' | 'rtl'
-}
-
-function DetailItem({ label, value, valueDirection }: DetailItemProps) {
-  return (
-    <div className='min-w-0'>
-      <div className='mb-1 text-xs font-medium text-muted-foreground'>
-        {label}
-      </div>
-
-      <div
-        className='break-words text-sm font-medium text-foreground'
-        dir={valueDirection}
-      >
-        {value || '-'}
-      </div>
-    </div>
-  )
-}
-
-function formatMembershipDate(
-  value: string | null | undefined,
-  isRtl: boolean,
-) {
-  if (!value) return '-'
-
-  const parsedDate = parseISO(value)
-
-  if (!isValid(parsedDate)) {
-    return '-'
-  }
-
-  const formattedDate = format(parsedDate, 'dd-MMM-yyyy', {
-    locale: isRtl ? arSA : enUS,
-  })
-
-  return isRtl ? toPersianDigits(formattedDate) : formattedDate
 }
 
 function formatMembershipLevel(value: string) {
@@ -237,12 +196,12 @@ export function CredentialMemberships({
 
                     <DetailItem
                       label={ct('issued')}
-                      value={formatMembershipDate(membership.startDate, isRtl)}
+                      value={formatDate(membership.startDate, isRtl)}
                     />
 
                     <DetailItem
                       label={ct('expires')}
-                      value={formatMembershipDate(membership.expiryDate, isRtl)}
+                      value={formatDate(membership.expiryDate, isRtl)}
                     />
                   </div>
                 </article>

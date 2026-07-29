@@ -1,4 +1,5 @@
-import { format } from 'date-fns'
+import { format, isValid, parseISO } from 'date-fns'
+import { arSA, enUS } from 'date-fns/locale'
 
 export const getStatusVariant = (status: string) => {
   switch (status) {
@@ -64,8 +65,24 @@ export function humanize(value?: string | null) {
   return value.replaceAll('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
-export function formatDate(value?: string | null) {
-  return value ? format(new Date(value), 'dd-MMM-yyyy') : '-'
+// export function formatDate(value?: string | null) {
+//   return value ? format(new Date(value), 'dd-MMM-yyyy') : '-'
+// }
+
+export function formatDate(value: string | null | undefined, isRtl: boolean) {
+  if (!value) return '-'
+
+  const parsedDate = parseISO(value)
+
+  if (!isValid(parsedDate)) {
+    return '-'
+  }
+
+  const formattedDate = format(parsedDate, 'dd-MMM-yyyy', {
+    locale: isRtl ? arSA : enUS,
+  })
+
+  return isRtl ? toPersianDigits(formattedDate) : formattedDate
 }
 
 export function toArabic(date: string | null | undefined, indicator: number) {

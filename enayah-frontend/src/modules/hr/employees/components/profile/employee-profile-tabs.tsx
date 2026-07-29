@@ -80,9 +80,6 @@ export function EmployeeProfileTabs({ employeeId, profile }: Props) {
               variant='secondary'
               className='h-5 min-w-5 rounded-full px-1.5 text-[10px] tabular-nums'
             >
-              {/* {isRtl
-                ? toPersianDigits(profileSummary?.credentialsCount ?? 0)
-                : (profileSummary?.credentialsCount ?? 0)} */}
               {profileSummary?.credentialsCount ?? 0}
             </UiBadge>
           )}
@@ -95,32 +92,28 @@ export function EmployeeProfileTabs({ employeeId, profile }: Props) {
           <GraduationCap className='size-4 text-muted-foreground group-data-[state=active]:text-primary' />
           <span>{et('training')}</span>
 
-          <UiBadge
-            variant='secondary'
-            className='h-5 min-w-5 rounded-full px-1.5 text-[10px]'
-          >
-            {/* {isRtl
-              ? toPersianDigits(profileSummary?.trainingCount ?? 0)
-              : (profileSummary?.trainingCount ?? 0)} */}
-            {profileSummary?.trainingCount ?? 0}
-          </UiBadge>
+          {!isProfileSummaryLoading && !isProfileSummaryError && (
+            <UiBadge
+              variant='secondary'
+              className='h-5 min-w-5 rounded-full px-1.5 text-[10px]'
+            >
+              {profileSummary?.trainingCount ?? 0}
+            </UiBadge>
+          )}
         </TabsTrigger>
 
         <TabsTrigger value='cpd' className='group min-w-fit gap-2 px-3 py-2.5'>
           <BookOpenCheck className='size-4 text-muted-foreground group-data-[state=active]:text-primary' />
           <span>{et('cpd')}</span>
 
-          <UiBadge
-            variant='secondary'
-            className='h-5 min-w-5 rounded-full px-1.5 text-[10px]'
-          >
-            {/* {isRtl
-              ? (profileSummary?.cpdCount ?? 0 > 0)
-                ? toPersianDigits(profileSummary?.cpdCount ?? 0)
-                : 0
-              : (profileSummary?.cpdCount ?? 0)} */}
-            {profileSummary?.cpdCount ?? 0}
-          </UiBadge>
+          {!isProfileSummaryLoading && !isProfileSummaryError && (
+            <UiBadge
+              variant='secondary'
+              className='h-5 min-w-5 rounded-full px-1.5 text-[10px]'
+            >
+              {profileSummary?.cpdCount ?? 0}
+            </UiBadge>
+          )}
         </TabsTrigger>
 
         {/* <TabsTrigger

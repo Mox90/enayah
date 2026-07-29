@@ -30,7 +30,15 @@ export function EmployeeProfileWorkspace() {
 
   return (
     <div className='space-y-6'>
-      <EmployeeProfileHeader profile={data} />
+      <EmployeeProfileHeader
+        profile={data}
+        onAvatarUpload={async (file) => {
+          const formData = new FormData()
+          formData.append('avatar', file)
+
+          //await employeeService.uploadAvatar(data.personal.id, formData)
+        }}
+      />
 
       <EmployeeProfileTabs employeeId={id} profile={data} />
     </div>

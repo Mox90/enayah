@@ -1,13 +1,11 @@
 'use client'
 
-import { format } from 'date-fns'
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
 import { HireEmployeePayload } from '@/modules/hr/onboarding/types/onboarding.types'
 import { useLocale, useTranslations } from 'next-intl'
-import { humanize } from '@/utils/utilities'
+import { formatDate, humanize } from '@/utils/utilities'
 
 interface Props {
   value: HireEmployeePayload
@@ -22,9 +20,9 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   )
 }
 
-function formatDate(value?: string | null) {
-  return value ? format(new Date(value), 'dd-MMM-yyyy') : '-'
-}
+// function formatDate(value?: string | null) {
+//   return value ? format(new Date(value), 'dd-MMM-yyyy') : '-'
+// }
 
 export function ReviewStep({ value }: Props) {
   //console.log(value)
@@ -72,7 +70,7 @@ export function ReviewStep({ value }: Props) {
           <Field label='Gender' value={humanize(employee.gender)} />
           <Field
             label='Date of Birth'
-            value={formatDate(employee.dateOfBirth)}
+            value={formatDate(employee.dateOfBirth, isRtl)}
           />
           <Field
             label='Nationality / Country ID'
@@ -91,9 +89,18 @@ export function ReviewStep({ value }: Props) {
         </CardHeader>
 
         <CardContent className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
-          <Field label='Hire Date' value={formatDate(employment.hireDate)} />
-          <Field label='Start Date' value={formatDate(employment.startDate)} />
-          <Field label='End Date' value={formatDate(employment.endDate)} />
+          <Field
+            label='Hire Date'
+            value={formatDate(employment.hireDate, isRtl)}
+          />
+          <Field
+            label='Start Date'
+            value={formatDate(employment.startDate, isRtl)}
+          />
+          <Field
+            label='End Date'
+            value={formatDate(employment.endDate, isRtl)}
+          />
           <Field
             label='Employment Type'
             value={humanize(employment.employmentType)}
@@ -105,9 +112,12 @@ export function ReviewStep({ value }: Props) {
 
           <Field
             label='Contract Start'
-            value={formatDate(contract.startDate)}
+            value={formatDate(contract.startDate, isRtl)}
           />
-          <Field label='Contract End' value={formatDate(contract.endDate)} />
+          <Field
+            label='Contract End'
+            value={formatDate(contract.endDate, isRtl)}
+          />
           <Field
             label='Contract Type'
             value={humanize(contract.contractType)}
@@ -146,7 +156,7 @@ export function ReviewStep({ value }: Props) {
               <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3'>
                 <Field
                   label='Effective Date'
-                  value={formatDate(compensation.effectiveDate)}
+                  value={formatDate(compensation.effectiveDate, isRtl)}
                 />
                 <Field
                   label='Base Salary'

@@ -250,7 +250,8 @@
       "onLeave": "On Leave",
       "suspended": "Suspended",
       "deceased": "Deceased"
-    }
+    },
+    "saving": "Saving {item}"
   },
   "departments": {
     "departmentName": "Departments",

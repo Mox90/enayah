@@ -2,8 +2,6 @@
 
 'use client'
 
-import { format, isValid, parseISO } from 'date-fns'
-import { arSA, enUS } from 'date-fns/locale'
 import { Award, Plus } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 
@@ -13,52 +11,14 @@ import { VerificationBadge } from '@/components/badges/verification-badge'
 import { ExpiryStatusBadge } from '@/components/badges/expiry-status-badge'
 import { RowActions } from '@/components/dialogs/row-actions'
 import { BoardInput } from '@/modules/hr/onboarding/types/onboarding.types'
-import { toPersianDigits } from '@/utils/utilities'
+import { formatDate, toPersianDigits } from '@/utils/utilities'
+import { DetailItem } from '@/components/forms/form-detail-item'
 
 interface Props {
   boards: BoardInput[]
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
-}
-
-interface DetailItemProps {
-  label: string
-  value?: React.ReactNode
-  valueDirection?: 'ltr' | 'rtl'
-}
-
-function DetailItem({ label, value, valueDirection }: DetailItemProps) {
-  return (
-    <div className='min-w-0'>
-      <div className='mb-1 text-xs font-medium text-muted-foreground'>
-        {label}
-      </div>
-
-      <div
-        className='break-words text-sm font-medium text-foreground'
-        dir={valueDirection}
-      >
-        {value || '-'}
-      </div>
-    </div>
-  )
-}
-
-function formatBoardDate(value: string | null | undefined, isRtl: boolean) {
-  if (!value) return '-'
-
-  const parsedDate = parseISO(value)
-
-  if (!isValid(parsedDate)) {
-    return '-'
-  }
-
-  const formattedDate = format(parsedDate, 'dd-MMM-yyyy', {
-    locale: isRtl ? arSA : enUS,
-  })
-
-  return isRtl ? toPersianDigits(formattedDate) : formattedDate
 }
 
 export function CredentialBoards({ boards, onAdd, onEdit, onDelete }: Props) {
@@ -190,12 +150,12 @@ export function CredentialBoards({ boards, onAdd, onEdit, onDelete }: Props) {
 
                     <DetailItem
                       label={ct('issued')}
-                      value={formatBoardDate(board.issueDate, isRtl)}
+                      value={formatDate(board.issueDate, isRtl)}
                     />
 
                     <DetailItem
                       label={ct('expires')}
-                      value={formatBoardDate(board.expiryDate, isRtl)}
+                      value={formatDate(board.expiryDate, isRtl)}
                     />
                   </div>
                 </article>

@@ -15,7 +15,8 @@ import { VerificationBadge } from '@/components/badges/verification-badge'
 import { RowActions } from '@/components/dialogs/row-actions'
 import { DegreeInput } from '@/modules/hr/onboarding/types/onboarding.types'
 import { cn } from '@/lib/utils'
-import { toPersianDigits } from '@/utils/utilities'
+import { formatDate, toPersianDigits } from '@/utils/utilities'
+import { DetailItem } from '@/components/forms/form-detail-item'
 
 interface Props {
   degrees: DegreeInput[]
@@ -24,11 +25,11 @@ interface Props {
   onDelete?: (id: string) => void
 }
 
-interface DetailItemProps {
-  label: string
-  value?: ReactNode
-  valueDirection?: 'ltr' | 'rtl'
-}
+// interface DetailItemProps {
+//   label: string
+//   value?: ReactNode
+//   valueDirection?: 'ltr' | 'rtl'
+// }
 
 const degreeTypeColors: Record<string, string> = {
   doctorate:
@@ -50,38 +51,22 @@ const degreeTypeColors: Record<string, string> = {
     'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300',
 }
 
-function DetailItem({ label, value, valueDirection }: DetailItemProps) {
-  return (
-    <div className='min-w-0'>
-      <div className='mb-1 text-xs font-medium text-muted-foreground'>
-        {label}
-      </div>
+// function DetailItem({ label, value, valueDirection }: DetailItemProps) {
+//   return (
+//     <div className='min-w-0'>
+//       <div className='mb-1 text-xs font-medium text-muted-foreground'>
+//         {label}
+//       </div>
 
-      <div
-        className='break-words text-sm font-medium text-foreground'
-        dir={valueDirection}
-      >
-        {value || '-'}
-      </div>
-    </div>
-  )
-}
-
-function formatDegreeDate(value: string | null | undefined, isRtl: boolean) {
-  if (!value) return '-'
-
-  const parsedDate = parseISO(value)
-
-  if (!isValid(parsedDate)) {
-    return '-'
-  }
-
-  const formattedDate = format(parsedDate, 'dd-MMM-yyyy', {
-    locale: isRtl ? arSA : enUS,
-  })
-
-  return isRtl ? toPersianDigits(formattedDate) : formattedDate
-}
+//       <div
+//         className='break-words text-sm font-medium text-foreground'
+//         dir={valueDirection}
+//       >
+//         {value || '-'}
+//       </div>
+//     </div>
+//   )
+// }
 
 export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
   const ct = useTranslations('credentials')
@@ -243,7 +228,7 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
 
                     <DetailItem
                       label={ct('graduated')}
-                      value={formatDegreeDate(degree.graduationDate, isRtl)}
+                      value={formatDate(degree.graduationDate, isRtl)}
                     />
                   </div>
                 </article>

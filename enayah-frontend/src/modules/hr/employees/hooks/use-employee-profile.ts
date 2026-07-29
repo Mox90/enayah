@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/hr/contracts/hooks/use-employee-profile.ts
+
 import { useQuery } from '@tanstack/react-query'
 
 import { employeeService } from '../services/employee.service'
@@ -22,7 +24,8 @@ export function useEmployeeProfile(id?: string) {
 
 export function useCredentialSummary(id?: string) {
   return useQuery<EmployeeProfileSummary>({
-    queryKey: ['employees', 'profile-summary', id],
+    //queryKey: ['employees', 'profile-summary', id],
+    queryKey: employeeQueryKeys.profile(id ?? ''),
     queryFn: () => employeeService.getCredentialSummary(id!),
     enabled: Boolean(id),
   })

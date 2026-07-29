@@ -253,7 +253,8 @@
       "onLeave": "في إجازة",
       "suspended": "موقوف",
       "deceased": "متوفى"
-    }
+    },
+    "saving": "توفير {item}"
   },
   "departments": {
     "departmentName": "الأقسام",

@@ -5,7 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Plus } from 'lucide-react'
 import { format } from 'date-fns'
 import { useLocale, useTranslations } from 'next-intl'
-import { getExpiryStatus, toArabic, toPersianDigits } from '@/utils/utilities'
+import {
+  formatDate,
+  getExpiryStatus,
+  toArabic,
+  toPersianDigits,
+} from '@/utils/utilities'
 import { EmployeePersonalDetails } from '@/modules/hr/employees/types/employee-personal-details.types'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -19,10 +24,10 @@ function dash(value?: string | number | boolean | null) {
   return value ?? '-'
 }
 
-function formatDate(value?: string | null, isRtl?: boolean) {
-  if (!value) return '-'
-  return isRtl ? toArabic(value, 1) : format(new Date(value), 'dd-MMM-yyyy')
-}
+// function formatDate(value?: string | null, isRtl?: boolean) {
+//   if (!value) return '-'
+//   return isRtl ? toArabic(value, 1) : format(new Date(value), 'dd-MMM-yyyy')
+// }
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (

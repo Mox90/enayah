@@ -9,10 +9,11 @@ import { StatusBadge } from '@/components/badges/status-badge'
 import { LicenseInput } from '@/modules/hr/onboarding/types/onboarding.types'
 import { useLocale, useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
-import { toPersianDigits } from '@/utils/utilities'
+import { formatDate, toPersianDigits } from '@/utils/utilities'
 import { RowActions } from '@/components/dialogs/row-actions'
 import { ExpiryStatusBadge } from '@/components/badges/expiry-status-badge'
 import { arSA, enUS } from 'date-fns/locale'
+import { DetailItem } from '@/components/forms/form-detail-item'
 
 // interface Props {
 //   licenses: LicenseInput[]
@@ -109,45 +110,6 @@ interface Props {
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
-}
-
-interface DetailItemProps {
-  label: string
-  value?: React.ReactNode
-  valueDirection?: 'ltr' | 'rtl'
-}
-
-function DetailItem({ label, value, valueDirection }: DetailItemProps) {
-  return (
-    <div className='min-w-0'>
-      <div className='mb-1 text-xs font-medium text-muted-foreground'>
-        {label}
-      </div>
-
-      <div
-        className='break-words text-sm font-medium text-foreground'
-        dir={valueDirection}
-      >
-        {value || '-'}
-      </div>
-    </div>
-  )
-}
-
-function formatLicenseDate(value: string | null | undefined, isRtl: boolean) {
-  if (!value) return '-'
-
-  const parsedDate = parseISO(value)
-
-  if (!isValid(parsedDate)) {
-    return '-'
-  }
-
-  const formattedDate = format(parsedDate, 'dd-MMM-yyyy', {
-    locale: isRtl ? arSA : enUS,
-  })
-
-  return isRtl ? toPersianDigits(formattedDate) : formattedDate
 }
 
 export function CredentialLicenses({
@@ -301,12 +263,12 @@ export function CredentialLicenses({
 
                     <DetailItem
                       label={ct('issued')}
-                      value={formatLicenseDate(license.issueDate, isRtl)}
+                      value={formatDate(license.issueDate, isRtl)}
                     />
 
                     <DetailItem
                       label={ct('expires')}
-                      value={formatLicenseDate(license.expiryDate, isRtl)}
+                      value={formatDate(license.expiryDate, isRtl)}
                     />
                   </div>
                 </article>
