@@ -359,7 +359,7 @@ import { StatusBadge } from '@/components/badges/status-badge'
 import { EmployeePersonalDialog } from '@/components/dialogs/employee-personal-dialog'
 import { ContractRenewalDialog } from '@/components/dialogs/contract-renewal-dialog'
 import { cn } from '@/lib/utils'
-import { toArabic, toPersianDigits } from '@/utils/utilities'
+import { formatDate, toArabic, toPersianDigits } from '@/utils/utilities'
 
 import { EmployeeProfile } from '../../types/employee-profile.types'
 import { useUpdatePersonalMutation } from '../../hooks/use-update-employee-profile'
@@ -454,23 +454,23 @@ function getNextDay(date: string) {
   return format(addDays(parsedDate, 1), 'yyyy-MM-dd')
 }
 
-function formatProfileDate(value: string | null | undefined, isRtl: boolean) {
-  if (!value) {
-    return '-'
-  }
+// function formatProfileDate(value: string | null | undefined, isRtl: boolean) {
+//   if (!value) {
+//     return '-'
+//   }
 
-  if (isRtl) {
-    return toArabic(value, 3)
-  }
+//   if (isRtl) {
+//     return toArabic(value, 3)
+//   }
 
-  const parsedDate = parseISO(value)
+//   const parsedDate = parseISO(value)
 
-  if (!isValid(parsedDate)) {
-    return '-'
-  }
+//   if (!isValid(parsedDate)) {
+//     return '-'
+//   }
 
-  return format(parsedDate, 'dd MMM yyyy')
-}
+//   return format(parsedDate, 'dd MMM yyyy')
+// }
 
 function localizeValue(
   value: string | number | null | undefined,
@@ -734,7 +734,7 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
                 isRtl={isRtl}
                 icon={<CalendarDays aria-hidden='true' className='h-4 w-4' />}
                 label={et('hireDate')}
-                value={formatProfileDate(employment?.hireDate, isRtl)}
+                value={formatDate(employment?.hireDate, isRtl)}
                 valueDirection='ltr'
               />
 
