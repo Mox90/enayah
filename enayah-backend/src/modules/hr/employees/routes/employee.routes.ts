@@ -20,9 +20,7 @@ router.get('/me/profile', EmployeeController.getMyProfile)
 
 router.post(
   '/:id/avatar',
-  //requireAuth,
-  //attachPermissions,
-  requirePermission('employee.update'),
+  requirePermission('employee.avatar.upload'),
   uploadEmployeeAvatarMiddleware,
   employeeAvatarController.upload,
 )
@@ -82,12 +80,6 @@ router.post(
   EmployeeController.create,
 )
 
-// router.get(
-//   '/:id/profile',
-//   requirePermission('employee.view'),
-//   EmployeeController.getProfile,
-// )
-
 router.get(
   '/:id',
   requirePermission('employee.view'),
@@ -100,9 +92,6 @@ router.patch(
   audit('EMPLOYEE_UPDATE', {
     resource: 'EMPLOYEE',
     getResourceId: (req) => getParam(req.params.id),
-    // sanitize: {
-    //   redactFields: ['email', 'phone'],
-    // },
   }),
   EmployeeController.update,
 )

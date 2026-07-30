@@ -33,7 +33,7 @@ export function useEmployeePersonal(id?: string) {
   })
 }
 
-export function useEmployeePersonalMutations(employeeId?: string) {
+export function useEmployeePersonalMutations(employeeId: string) {
   const queryClient = useQueryClient()
 
   const invalidate = () => {
@@ -47,7 +47,7 @@ export function useEmployeePersonalMutations(employeeId?: string) {
 
     createIdentification: useMutation({
       mutationFn: (data: CreateIdentificationDto) =>
-        employeeService.createIdentification(employeeId!, data),
+        employeeService.createIdentification(employeeId, data),
 
       onSuccess: invalidate,
     }),
@@ -59,7 +59,7 @@ export function useEmployeePersonalMutations(employeeId?: string) {
       }: {
         id: string
         data: UpdateIdentificationDto
-      }) => employeeService.updateIdentification(id, data),
+      }) => employeeService.updateIdentification(employeeId, id, data),
 
       onSuccess: invalidate,
     }),
@@ -74,7 +74,7 @@ export function useEmployeePersonalMutations(employeeId?: string) {
 
     createPhone: useMutation({
       mutationFn: (data: CreatePhoneDto) =>
-        employeeService.createPhone(employeeId!, data),
+        employeeService.createPhone(employeeId, data),
 
       onSuccess: invalidate,
     }),
@@ -96,7 +96,7 @@ export function useEmployeePersonalMutations(employeeId?: string) {
 
     createEmail: useMutation({
       mutationFn: (data: CreateEmailDto) =>
-        employeeService.createEmail(employeeId!, data),
+        employeeService.createEmail(employeeId, data),
 
       onSuccess: invalidate,
     }),
@@ -118,7 +118,7 @@ export function useEmployeePersonalMutations(employeeId?: string) {
 
     createAddress: useMutation({
       mutationFn: (data: CreateAddressDto) =>
-        employeeService.createAddress(employeeId!, data),
+        employeeService.createAddress(employeeId, data),
 
       onSuccess: invalidate,
     }),
@@ -140,7 +140,7 @@ export function useEmployeePersonalMutations(employeeId?: string) {
 
     createDependent: useMutation({
       mutationFn: (data: CreateDependentDto) =>
-        employeeService.createDependent(employeeId!, data),
+        employeeService.createDependent(employeeId, data),
 
       onSuccess: invalidate,
     }),
@@ -162,7 +162,7 @@ export function useEmployeePersonalMutations(employeeId?: string) {
 
     createEmergencyContact: useMutation({
       mutationFn: (data: CreateEmergencyContactDto) =>
-        employeeService.createEmergencyContact(employeeId!, data),
+        employeeService.createEmergencyContact(employeeId, data),
 
       onSuccess: invalidate,
     }),
@@ -189,7 +189,7 @@ export function useEmployeePersonalMutations(employeeId?: string) {
 
     createVisa: useMutation({
       mutationFn: (data: CreateVisaDto) =>
-        employeeService.createVisa(employeeId!, data),
+        employeeService.createVisa(employeeId, data),
 
       onSuccess: invalidate,
     }),

@@ -165,7 +165,7 @@ export const employeeDegrees = pgTable(
     ...baseColumns,
   },
   (table) => [
-    uniqueIndex('uq_employee_degree_avatar_file_id').on(table.documentFileId),
+    uniqueIndex('uq_employee_degree_document_file_id').on(table.documentFileId),
   ],
 )
 

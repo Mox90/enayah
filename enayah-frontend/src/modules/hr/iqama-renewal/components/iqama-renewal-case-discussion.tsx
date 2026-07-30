@@ -280,7 +280,7 @@ export function IqamaRenewalCaseDiscussion({
     isFetching,
   } = useIqamaRenewalCaseComments(caseId)
 
-  console.log(comments)
+  //console.log(comments)
 
   const createComment = useCreateIqamaRenewalCaseComment(caseId)
 

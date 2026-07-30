@@ -4,7 +4,6 @@
 
 import { AlertCircle, Loader2 } from 'lucide-react'
 
-//import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { useMyEmployeeProfile } from '../../../hooks/use-my-employee-profile'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -27,7 +26,10 @@ export function MyEmployeeProfile() {
     refetch,
   } = useMyEmployeeProfile()
 
-  const uploadAvatarMutation = useUploadEmployeeAvatar(employeeId)
+  //const uploadAvatarMutation = useUploadEmployeeAvatar(employeeId)
+  const uploadAvatarMutation = useUploadEmployeeAvatar(
+    (employeeId || profile?.personal.id) ?? '',
+  )
 
   const onAvatarUpload = async (file: File): Promise<void> => {
     await uploadAvatarMutation.mutateAsync(file)

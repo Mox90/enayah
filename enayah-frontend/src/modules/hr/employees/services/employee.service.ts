@@ -43,6 +43,11 @@ type EmployeeProfileSummaryResponse = {
   data: EmployeeProfileSummary
 }
 
+const normalizeDigits = (value: string): string =>
+  value
+    .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
+    .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
+
 export const employeeService = {
   //----------------------------------
   // Paginated EMployees
@@ -127,67 +132,71 @@ export const employeeService = {
     await api.delete(`${API_ENDPOINTS.hr.employees}/${id}`)
   },
 
-  /*getEmployeesByRange: async (params: {
-    offset: number
-    limit: number
-    search?: string
-    sortBy?: string
-    sortOrder?: 'asc' | 'desc'
-  }) => {
-    const response = await api.get<EmployeeListResponse>(
-      `${API_ENDPOINTS.hr.employees}`,
-      {
-        params,
-      },
-    )
-    return response.data
-  },
-
-  getOrganizationTreeView: async (): Promise<DepartmentHierarchyNode[]> => {
-    const response = await api.get(`${API_ENDPOINTS.org.departments}/tree`)
-    return response.data
-  },
-
-  getManpowerView: async () => {
-    const response = await api.get(
-      `${API_ENDPOINTS.hr.positionItems}/manpower-view`,
-    )
-    return response.data
-  },
-
-  getEmployeeDirectory: async (params: EmployeeDirectoryParams) => {
-    const response = await api.get<EmployeeDirectoryResponse>(
-      `${API_ENDPOINTS.hr.employees}/directory`,
-      {
-        params,
-      },
-    )
-    return response.data
-  },
-
-  getEmployeeProfile: async (id: string): Promise<EmployeeProfile> => {
-    const response = await api.get(
-      `${API_ENDPOINTS.hr.employees}/${id}/profile`,
-    )
-    return response.data
-  },*/
   // ------------------------------------------------------------------
   // IDENTIFICATIONS
   // ------------------------------------------------------------------
 
+  // createIdentification: async (
+  //   employeeId: string,
+  //   data: CreateIdentificationDto,
+  // ) => {
+  //   const { ...payload } = data
+  //   const response = await api.post(`${base}/${employeeId}`, {
+  //     identifications: [payload],
+  //   })
+  //   return response.data
+  // },
   createIdentification: async (
     employeeId: string,
     data: CreateIdentificationDto,
   ) => {
-    const { ...payload } = data
+    const payload = {
+      type: data.type,
+      identificationNumber: data.identificationNumber.trim(),
+      isCurrent: data.isCurrent,
+
+      ...(data.issueDate ? { issueDate: data.issueDate } : {}),
+      ...(data.expiryDate ? { expiryDate: data.expiryDate } : {}),
+
+      ...(data.issueDateHijri
+        ? {
+            issueDateHijri: normalizeDigits(data.issueDateHijri),
+          }
+        : {}),
+
+      ...(data.expiryDateHijri
+        ? {
+            expiryDateHijri: normalizeDigits(data.expiryDateHijri),
+          }
+        : {}),
+
+      ...(data.issuingAuthority?.trim()
+        ? { issuingAuthority: data.issuingAuthority.trim() }
+        : {}),
+
+      ...(data.occupation?.trim()
+        ? { occupation: data.occupation.trim() }
+        : {}),
+
+      ...(data.sponsor?.trim() ? { sponsor: data.sponsor.trim() } : {}),
+    }
+
     const response = await api.post(`${base}/${employeeId}`, {
       identifications: [payload],
     })
+
     return response.data
   },
 
-  updateIdentification: async (id: string, data: UpdateIdentificationDto) =>
-    api.patch(`${base}/identifications/${id}`, data),
+  updateIdentification: async (
+    employeeId: string,
+    id: string,
+    data: UpdateIdentificationDto,
+  ) =>
+    api.patch(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/identifications/${id}`,
+      data,
+    ),
 
   deleteIdentification: async (id: string) =>
     api.delete(`${base}/identifications/${id}`),

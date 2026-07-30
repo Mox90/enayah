@@ -32,6 +32,9 @@ export const globalErrorHandler: ErrorRequestHandler = (
 ): void => {
   const normalizedError: ErrorWithStatus = isErrorWithStatus(error) ? error : {}
 
+  const isSqlState = (code?: string): boolean =>
+    /^[0-9A-Z]{5}$/.test(code ?? '')
+
   /*
    * Zod validation errors
    */
@@ -97,12 +100,14 @@ export const globalErrorHandler: ErrorRequestHandler = (
    * PostgreSQL code may be on error.cause or directly
    * on the error object.
    */
-  const databaseError: DatabaseErrorDetails | undefined = normalizedError.cause
-    ?.code
-    ? normalizedError.cause
-    : normalizedError.code
-      ? normalizedError
-      : undefined
+  const databaseError: DatabaseErrorDetails | undefined =
+    // ?.code
+    normalizedError.cause?.code && isSqlState(normalizedError.cause.code)
+      ? normalizedError.cause
+      : // : normalizedError.code
+        isSqlState(normalizedError.code)
+        ? normalizedError
+        : undefined
 
   if (databaseError?.code) {
     logger.error({

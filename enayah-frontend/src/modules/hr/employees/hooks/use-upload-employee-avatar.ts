@@ -38,6 +38,10 @@ export function useUploadEmployeeAvatar(employeeId: string) {
         queryKey: employeeQueryKeys.profile(employeeId),
       })
 
+      await queryClient.invalidateQueries({
+        queryKey: ['my-employee-profile'],
+      })
+
       toast.success('Employee photo uploaded successfully.')
     },
   })

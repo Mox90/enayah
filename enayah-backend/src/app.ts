@@ -14,6 +14,8 @@ import { AppError } from './core/errors/AppError'
 
 const app = express()
 
+app.set('trust proxy', 1)
+
 const allowedOrigins =
   process.env.CORS_ORIGINS?.split(',')
     .map((origin) => origin.trim())

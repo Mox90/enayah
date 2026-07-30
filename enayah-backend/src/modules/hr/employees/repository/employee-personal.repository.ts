@@ -76,7 +76,8 @@ const softDeleteRecord = async (
 const updateRecord = async <T extends Table>(
   tx: DB,
   table: any,
-  id: string,
+  employeeId: string,
+  recordId: string,
   data: Record<string, any>,
 ) => {
   const cleanData = removeUndefined(data)
@@ -87,7 +88,13 @@ const updateRecord = async <T extends Table>(
       ...cleanData,
       updatedAt: new Date(),
     })
-    .where(and(eq(table.id, id), eq(table.isDeleted, false)))
+    .where(
+      and(
+        eq(table.id, recordId),
+        eq(table.employeeId, employeeId),
+        eq(table.isDeleted, false),
+      ),
+    )
     .returning()
 
   if (!updated) {
@@ -308,30 +315,52 @@ export const EmployeePersonalRepository = {
 
   updateIdentification: (
     tx: DB,
+    employeeId: string,
     id: string,
     data: UpdateEmployeeIdentificationDto,
-  ) => updateRecord(tx, employeeIdentifications, id, data),
+  ) => updateRecord(tx, employeeIdentifications, employeeId, id, data),
 
-  updateEmail: (tx: DB, id: string, data: UpdateEmployeeEmailDto) =>
-    updateRecord(tx, employeeEmails, id, data),
+  updateEmail: (
+    tx: DB,
+    employeeId: string,
+    id: string,
+    data: UpdateEmployeeEmailDto,
+  ) => updateRecord(tx, employeeEmails, employeeId, id, data),
 
-  updatePhoneNumber: (tx: DB, id: string, data: UpdateEmployeePhoneNumberDto) =>
-    updateRecord(tx, employeePhoneNumbers, id, data),
+  updatePhoneNumber: (
+    tx: DB,
+    employeeId: string,
+    id: string,
+    data: UpdateEmployeePhoneNumberDto,
+  ) => updateRecord(tx, employeePhoneNumbers, employeeId, id, data),
 
-  updateDependent: (tx: DB, id: string, data: UpdateEmployeeDependentDto) =>
-    updateRecord(tx, employeeDependents, id, data),
+  updateDependent: (
+    tx: DB,
+    employeeId: string,
+    id: string,
+    data: UpdateEmployeeDependentDto,
+  ) => updateRecord(tx, employeeDependents, employeeId, id, data),
 
-  updateAddress: (tx: DB, id: string, data: UpdateEmployeeAddressDto) =>
-    updateRecord(tx, employeeAddresses, id, data),
+  updateAddress: (
+    tx: DB,
+    employeeId: string,
+    id: string,
+    data: UpdateEmployeeAddressDto,
+  ) => updateRecord(tx, employeeAddresses, employeeId, id, data),
 
   updateEmergencyContact: (
     tx: DB,
+    employeeId: string,
     id: string,
     data: UpdateEmployeeEmergencyContactDto,
-  ) => updateRecord(tx, employeeEmergencyContacts, id, data),
+  ) => updateRecord(tx, employeeEmergencyContacts, employeeId, id, data),
 
-  updateVisa: (tx: DB, id: string, data: UpdateEmployeeVisaDto) =>
-    updateRecord(tx, employeeVisas, id, data),
+  updateVisa: (
+    tx: DB,
+    employeeId: string,
+    id: string,
+    data: UpdateEmployeeVisaDto,
+  ) => updateRecord(tx, employeeVisas, employeeId, id, data),
 
   // =====================================================
   // SOFT DELETE SINGLE RECORD

@@ -15,8 +15,8 @@ export interface LoginDTO {
 
 export const jwtPayloadSchema = z.object({
   sid: z.uuid(),
-  sub: z.string(),
-  employeeId: z.string().optional(),
+  sub: z.uuid(),
+  employeeId: z.uuid().optional(),
   roles: z.array(z.string()).optional(),
   permissions: z.array(z.string()).optional(),
   iat: z.number().optional(),

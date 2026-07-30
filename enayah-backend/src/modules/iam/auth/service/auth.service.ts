@@ -174,10 +174,18 @@ export const AuthService = {
 
     return { token }
     */
-    const session = await SessionService.createSession(user.id, {
-      ip,
-      userAgent: userAgent ?? 'unknown',
-    })
+    // const session = await SessionService.createSession(user.id, {
+    //   ip,
+    //   userAgent: userAgent ?? 'unknown',
+    // })
+    const session = await SessionService.createSession(
+      user.id,
+      {
+        ip,
+        userAgent: userAgent ?? 'unknown',
+      },
+      user.employeeId,
+    )
 
     await auditLogger.log({
       userId: user.id,
@@ -225,10 +233,18 @@ export const AuthService = {
     }
 
     // 🔑 create session
-    const session = await SessionService.createSession(user.id, {
-      ip,
-      userAgent,
-    })
+    // const session = await SessionService.createSession(user.id, {
+    //   ip,
+    //   userAgent,
+    // })
+    const session = await SessionService.createSession(
+      user.id,
+      {
+        ip,
+        userAgent: userAgent ?? 'unknown',
+      },
+      user.employeeId,
+    )
 
     await auditLogger.log({
       userId: user.id,

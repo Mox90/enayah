@@ -1,4 +1,4 @@
-// constants/permissions.ts
+// enayah-frontend/src/constants/permissions.ts
 export const PERMISSIONS = {
   SYSTEM_MONITOR: 'system.monitor',
   ANALYTICS_VIEW: 'analytics.view',

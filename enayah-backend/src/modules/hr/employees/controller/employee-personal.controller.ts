@@ -39,57 +39,103 @@ export const EmployeePersonalController = {
     res.status(201).json(result)
   }),
 
+  //   createAll: asyncHandler(async (req: Request, res: Response) => {
+  //   const { id } = EmployeeIdSchema.parse(req.params)
+  //   const body = CreateEmployeePersonalSchema.parse(req.body)
+
+  //   const permissions = req.user?.permissions ?? []
+  //   const canManageAnyEmployee = permissions.includes('employee.update')
+  //   const isOwnProfile = req.user?.employeeId === id
+
+  //   if (
+  //     isOwnProfile &&
+  //     !canManageAnyEmployee &&
+  //     body.dependents &&
+  //     body.dependents.length > 0
+  //   ) {
+  //     throw new AppError(
+  //       'Employees are not permitted to create dependent records',
+  //       403,
+  //     )
+  //   }
+
+  //   const result = await EmployeePersonalService.createAll(id, body)
+
+  //   res.status(201).json(result)
+  // }),
+
   updateIdentification: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = PersonalRecordIdSchema.parse(req.params)
+    const { employeeId, recordId } = PersonalRecordIdSchema.parse(req.params)
     const body = UpdateEmployeeIdentificationSchema.parse(req.body)
 
-    const result = await EmployeePersonalService.updateIdentification(id, body)
+    const result = await EmployeePersonalService.updateIdentification(
+      employeeId,
+      recordId,
+      body,
+    )
 
     res.status(200).json(result)
   }),
 
   updateEmail: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = PersonalRecordIdSchema.parse(req.params)
+    const { employeeId, recordId } = PersonalRecordIdSchema.parse(req.params)
     const body = UpdateEmployeeEmailSchema.parse(req.body)
 
-    const result = await EmployeePersonalService.updateEmail(id, body)
+    const result = await EmployeePersonalService.updateEmail(
+      employeeId,
+      recordId,
+      body,
+    )
 
     res.status(200).json(result)
   }),
 
   updatePhoneNumber: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = PersonalRecordIdSchema.parse(req.params)
+    const { employeeId, recordId } = PersonalRecordIdSchema.parse(req.params)
     const body = UpdateEmployeePhoneNumberSchema.parse(req.body)
 
-    const result = await EmployeePersonalService.updatePhoneNumber(id, body)
+    const result = await EmployeePersonalService.updatePhoneNumber(
+      employeeId,
+      recordId,
+      body,
+    )
 
     res.status(200).json(result)
   }),
 
   updateDependent: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = PersonalRecordIdSchema.parse(req.params)
+    const { employeeId, recordId } = PersonalRecordIdSchema.parse(req.params)
     const body = UpdateEmployeeDependentSchema.parse(req.body)
 
-    const result = await EmployeePersonalService.updateDependent(id, body)
+    const result = await EmployeePersonalService.updateDependent(
+      employeeId,
+      recordId,
+      body,
+    )
 
     res.status(200).json(result)
   }),
 
   updateAddress: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = PersonalRecordIdSchema.parse(req.params)
+    const { employeeId, recordId } = PersonalRecordIdSchema.parse(req.params)
     const body = UpdateEmployeeAddressSchema.parse(req.body)
 
-    const result = await EmployeePersonalService.updateAddress(id, body)
+    const result = await EmployeePersonalService.updateAddress(
+      employeeId,
+      recordId,
+      body,
+    )
 
     res.status(200).json(result)
   }),
 
   updateEmergencyContact: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = PersonalRecordIdSchema.parse(req.params)
+    const { employeeId, recordId } = PersonalRecordIdSchema.parse(req.params)
     const body = UpdateEmployeeEmergencyContactSchema.parse(req.body)
 
     const result = await EmployeePersonalService.updateEmergencyContact(
-      id,
+      employeeId,
+      recordId,
       body,
     )
 
@@ -97,70 +143,80 @@ export const EmployeePersonalController = {
   }),
 
   updateVisa: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = PersonalRecordIdSchema.parse(req.params)
+    const { employeeId, recordId } = PersonalRecordIdSchema.parse(req.params)
     const body = UpdateEmployeeVisaSchema.parse(req.body)
 
-    const result = await EmployeePersonalService.updateVisa(id, body)
+    const result = await EmployeePersonalService.updateVisa(
+      employeeId,
+      recordId,
+      body,
+    )
 
     res.status(200).json(result)
   }),
 
   softDeleteIdentification: asyncHandler(
     async (req: Request, res: Response) => {
-      const { id } = PersonalRecordIdSchema.parse(req.params)
+      const { recordId } = PersonalRecordIdSchema.parse(req.params)
 
-      await EmployeePersonalService.softDeleteIdentification(id, req.user?.id)
+      await EmployeePersonalService.softDeleteIdentification(
+        recordId,
+        req.user?.id,
+      )
 
       res.status(204).send()
     },
   ),
 
   softDeleteEmail: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = PersonalRecordIdSchema.parse(req.params)
+    const { recordId } = PersonalRecordIdSchema.parse(req.params)
 
-    await EmployeePersonalService.softDeleteEmail(id, req.user?.id)
+    await EmployeePersonalService.softDeleteEmail(recordId, req.user?.id)
 
     res.status(204).send()
   }),
 
   softDeletePhoneNumber: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = PersonalRecordIdSchema.parse(req.params)
+    const { recordId } = PersonalRecordIdSchema.parse(req.params)
 
-    await EmployeePersonalService.softDeletePhoneNumber(id, req.user?.id)
+    await EmployeePersonalService.softDeletePhoneNumber(recordId, req.user?.id)
 
     res.status(204).send()
   }),
 
   softDeleteDependent: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = PersonalRecordIdSchema.parse(req.params)
+    const { recordId } = PersonalRecordIdSchema.parse(req.params)
 
-    await EmployeePersonalService.softDeleteDependent(id, req.user?.id)
+    await EmployeePersonalService.softDeleteDependent(recordId, req.user?.id)
 
     res.status(204).send()
   }),
 
   softDeleteAddress: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = PersonalRecordIdSchema.parse(req.params)
+    const { recordId } = PersonalRecordIdSchema.parse(req.params)
 
-    await EmployeePersonalService.softDeleteAddress(id, req.user?.id)
+    await EmployeePersonalService.softDeleteAddress(recordId, req.user?.id)
 
     res.status(204).send()
   }),
 
   softDeleteEmergencyContact: asyncHandler(
     async (req: Request, res: Response) => {
-      const { id } = PersonalRecordIdSchema.parse(req.params)
+      const { recordId } = PersonalRecordIdSchema.parse(req.params)
 
-      await EmployeePersonalService.softDeleteEmergencyContact(id, req.user?.id)
+      await EmployeePersonalService.softDeleteEmergencyContact(
+        recordId,
+        req.user?.id,
+      )
 
       res.status(204).send()
     },
   ),
 
   softDeleteVisa: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = PersonalRecordIdSchema.parse(req.params)
+    const { recordId } = PersonalRecordIdSchema.parse(req.params)
 
-    await EmployeePersonalService.softDeleteVisa(id, req.user?.id)
+    await EmployeePersonalService.softDeleteVisa(recordId, req.user?.id)
 
     res.status(204).send()
   }),

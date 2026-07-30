@@ -41,7 +41,7 @@ export function EmployeeProfileTabs({ employeeId, profile }: Props) {
   } = useCredentialSummary(employeeId)
 
   //console.log(profile.personal)
-  console.log(profileSummary)
+  //console.log(profileSummary)
   return (
     <Tabs
       value={tab}

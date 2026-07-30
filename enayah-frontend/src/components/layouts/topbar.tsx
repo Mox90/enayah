@@ -23,6 +23,7 @@ import { Link, useRouter } from '../../../i18n/navigation'
 import { transform } from 'zod'
 import { NotificationBell } from '@/modules/notifications/components/notification-bell'
 import { useEmployeeProfile } from '@/modules/hr/employees/hooks/use-employee-profile'
+import { useMyEmployeeProfile } from '@/modules/hr/employees/hooks/use-my-employee-profile'
 //import { router } from 'next/client'
 
 const Topbar = () => {
@@ -30,9 +31,10 @@ const Topbar = () => {
   const router = useRouter()
   const locale = useLocale()
   const user = useAuthStore((state) => state.user)
-  const { data: employeeProfile } = useEmployeeProfile(
-    (user?.employeeId || user?.employee?.id) ?? undefined,
-  )
+  // const { data: employeeProfile } = useEmployeeProfile(
+  //   (user?.employeeId || user?.employee?.id) ?? undefined,
+  // )
+  const { data: employeeProfile } = useMyEmployeeProfile()
 
   const avatar = employeeProfile?.personal.avatar ?? null
   const logout = useAuthStore((state) => state.logout)

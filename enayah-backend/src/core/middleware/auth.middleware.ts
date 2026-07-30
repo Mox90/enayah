@@ -53,6 +53,10 @@ export const requireAuth = async (
       throw new AppError('Session not found', 401)
     }
 
+    if (session.userId !== payload.sub) {
+      throw new AppError('Invalid session ownership', 401)
+    }
+
     if (session.isRevoked) {
       throw new AppError('Session revoked', 401)
     }
@@ -68,9 +72,17 @@ export const requireAuth = async (
     await SessionRepository.touch(payload.sid)
 
     // 🔐 4. Attach user (minimal identity only)
+    // req.user = {
+    //   id: payload.sub,
+    //   ...(payload.employeeId && { employeeId: payload.employeeId }),
+    // }
     req.user = {
       id: payload.sub,
-      ...(payload.employeeId && { employeeId: payload.employeeId }),
+      ...(payload.employeeId
+        ? {
+            employeeId: payload.employeeId,
+          }
+        : {}),
     }
 
     // 🔍 5. Optional: attach request metadata (for audit/logging)
