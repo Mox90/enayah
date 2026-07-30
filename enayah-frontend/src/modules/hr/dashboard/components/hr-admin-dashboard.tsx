@@ -186,7 +186,15 @@ const HRAdminDashboard = () => {
             </div>
           )}
 
-          <ResponsiveContainer width='100%' height='100%'>
+          <ResponsiveContainer
+            width='100%'
+            height='100%'
+            minWidth={0}
+            initialDimension={{
+              width: 800,
+              height: 372,
+            }}
+          >
             <AreaChart data={hiringTrendData}>
               <defs>
                 <linearGradient

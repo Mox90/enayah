@@ -31,7 +31,6 @@ import {
   toPositionItemUpdateDB,
 } from '../dto/positionItem.mapper'
 import { Tx } from '../../../../core/types/db.types'
-import { PositionItemHierarchy } from '../dto/positionItem.response'
 
 const isActive = eq(positionItems.isDeleted, false)
 

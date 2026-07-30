@@ -1,16 +1,7 @@
 import { InferInsertModel } from 'drizzle-orm'
-import { AppError } from '../../../../core/errors/AppError'
 import { db, employments } from '../../../../db'
-import {
-  toDepartmentHierarchyResponse,
-  toHierarchyResponse,
-  toOrganizationHierarchyResponse,
-  toPositionItemDB,
-  toPositionItemResponse,
-} from '../dto/positionItem.mapper'
+import { toPositionItemResponse } from '../dto/positionItem.mapper'
 import { PositionItemRepository } from '../repository/positionItem.repository'
-import { validatePositionItemAssignment } from '../validators/positionItem.validator'
-import { EmployeeRepository } from '../../employees/repository/employee.repository'
 import {
   CreatePositionItemDTO,
   JobPositionItemQueryDTO,
@@ -27,19 +18,18 @@ export const PositionItemService = {
     return db.transaction(async (tx) => {
       // 🔥 1. atomic check + update
       const item = await PositionItemRepository.assignIfAvailable(
+        tx,
         positionItemId,
-        tx as any, // pass transaction
       )
 
       // 🔥 2. insert employment
       await tx.insert(employments).values({
         employeeId,
-        positionItemId,
         hireDate: today,
         startDate: today,
       })
 
-      return { message: 'Employee assigned successfully' }
+      return { message: 'Employee assigned successfully', positionItem: item }
     })
   },
 
@@ -87,17 +77,4 @@ export const PositionItemService = {
       return existing
     })
   },
-
-  // employee.service.ts
-
-  // findManpowerView: async () => {
-  //   const items = await PositionItemRepository.findHierarchyData(db)
-  //   //return toHierarchyResponse(items)
-  //   return toDepartmentHierarchyResponse(items)
-  // },
-
-  // findOrganizationHierarchyView: async () => {
-  //   const items = await PositionItemRepository.findHierarchyData(db)
-  //   return toOrganizationHierarchyResponse(items)
-  // },
 }

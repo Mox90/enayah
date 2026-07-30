@@ -9,6 +9,12 @@ import { ButtonGroup } from '@/components/ui/button-group'
 import { cn } from '@/lib/utils'
 import { IqamaRenewalView } from '../types/iqama-renewal.types'
 import { useTranslations } from 'next-intl'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 //import type { IqamaRenewalView } from '../../types/iqama-renewal-view.types'
 
@@ -31,44 +37,54 @@ const views = [
 ] as const
 
 export function IqamaRenewalViewSwitcher({ view, onViewChange }: Props) {
-  const t = useTranslations('iqamaRenewal')
+  const t = useTranslations('tooltip')
   return (
-    <div className='w-full overflow-x-auto sm:w-auto'>
-      <div dir='ltr' className='inline-flex'>
-        {/* <ButtonGroup className='w-full sm:w-auto'> */}
-        <ButtonGroup
-          className={cn(
-            'w-fit',
-            '[&>button:first-child]:rounded-l-xl',
-            '[&>button:last-child]:rounded-r-xl',
-            'w-full sm:w-auto',
-          )}
-        >
-          {views.map((item) => {
-            const Icon = item.icon
-            const active = view === item.value
-            //console.log(item.label)
+    <TooltipProvider delayDuration={300}>
+      <div className='w-full overflow-x-auto sm:w-auto'>
+        <div dir='ltr' className='inline-flex'>
+          {/* <ButtonGroup className='w-full sm:w-auto'> */}
+          <ButtonGroup
+            className={cn(
+              'w-fit',
+              '[&>button:first-child]:rounded-l-xl',
+              '[&>button:last-child]:rounded-r-xl',
+              'w-full sm:w-auto',
+            )}
+          >
+            {views.map((item) => {
+              const Icon = item.icon
+              const active = view === item.value
+              //console.log(item.label)
 
-            return (
-              <Button
-                key={item.value}
-                type='button'
-                variant={active ? 'default' : 'outline'}
-                size='icon'
-                aria-label={item.label}
-                title={item.label}
-                onClick={() => onViewChange(item.value)}
-                className={cn(
-                  'h-10 min-w-10 rounded-xl transition-all',
-                  active && 'shadow-sm',
-                )}
-              >
-                <Icon className='h-4 w-4' />
-              </Button>
-            )
-          })}
-        </ButtonGroup>
+              return (
+                <Tooltip key={item.value}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      key={item.value}
+                      type='button'
+                      variant={active ? 'default' : 'outline'}
+                      size='icon'
+                      aria-label={item.label}
+                      //title={item.label}
+                      onClick={() => onViewChange(item.value)}
+                      className={cn(
+                        'h-10 min-w-10 rounded-xl transition-all',
+                        active && 'shadow-sm',
+                      )}
+                    >
+                      <Icon className='h-4 w-4' aria-hidden='true' />
+                    </Button>
+                  </TooltipTrigger>
+
+                  <TooltipContent side='bottom' sideOffset={1}>
+                    <p>{t(item.value)}</p>
+                  </TooltipContent>
+                </Tooltip>
+              )
+            })}
+          </ButtonGroup>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   )
 }

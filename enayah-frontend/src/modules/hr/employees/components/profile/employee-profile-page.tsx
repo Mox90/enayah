@@ -3,14 +3,33 @@
 import { useParams } from 'next/navigation'
 
 import { useEmployeeProfile } from '../../hooks/use-employee-profile'
+import { useUploadEmployeeAvatar } from '../../hooks/use-upload-employee-avatar'
+
 import { EmployeeProfileTabs } from './employee-profile-tabs'
 import { EmployeeProfileHeader } from './employee-profile-header'
 
 export function EmployeeProfileWorkspace() {
-  const params = useParams()
-  const id = params.id as string
-  const { data, isLoading, error, isError } = useEmployeeProfile(id)
-  //console.log('Version received from backend is ' + data?.personal.version)
+  const params = useParams<{
+    id: string
+  }>()
+
+  const employeeId = params.id
+
+  const {
+    data: profile,
+    isLoading,
+    error,
+    isError,
+  } = useEmployeeProfile(employeeId)
+
+  /*
+   * Hooks must be called before any conditional return.
+   */
+  const uploadAvatarMutation = useUploadEmployeeAvatar(employeeId)
+
+  const onAvatarUpload = async (file: File): Promise<void> => {
+    await uploadAvatarMutation.mutateAsync(file)
+  }
 
   if (isLoading) {
     return <>Loading...</>
@@ -24,23 +43,18 @@ export function EmployeeProfileWorkspace() {
     )
   }
 
-  if (!data) {
+  if (!profile) {
     return <div>Employee not found.</div>
   }
 
   return (
     <div className='space-y-6'>
       <EmployeeProfileHeader
-        profile={data}
-        onAvatarUpload={async (file) => {
-          const formData = new FormData()
-          formData.append('avatar', file)
-
-          //await employeeService.uploadAvatar(data.personal.id, formData)
-        }}
+        profile={profile}
+        onAvatarUpload={onAvatarUpload}
       />
 
-      <EmployeeProfileTabs employeeId={id} profile={data} />
+      <EmployeeProfileTabs employeeId={employeeId} profile={profile} />
     </div>
   )
 }

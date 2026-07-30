@@ -107,6 +107,7 @@ export function EmployeeAvatarUploader({
     try {
       setIsUploading(true)
       await onUpload?.(file)
+      setPreviewUrl(null)
     } catch {
       setError(
         isRtl
@@ -122,6 +123,9 @@ export function EmployeeAvatarUploader({
   }
 
   const displayedAvatar = previewUrl || avatar || '/MODHS3.png'
+
+  const isUploadedAvatar =
+    Boolean(previewUrl) || Boolean(avatar?.startsWith('/uploads/'))
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -152,7 +156,9 @@ export function EmployeeAvatarUploader({
               }
               fill
               priority
-              unoptimized={Boolean(previewUrl)}
+              //unoptimized={Boolean(previewUrl)}
+              //unoptimized={isUploadedAvatar}
+              unoptimized
               sizes='(max-width: 640px) 112px, 128px'
               className='object-cover'
             />

@@ -295,6 +295,45 @@ async function createCaseCommentActivity(
   return created
 }
 
+type CommentListRow = Awaited<
+  ReturnType<typeof IqamaRenewalCaseCommentRepository.listByCaseId>
+>[number]
+
+const PUBLIC_UPLOADS_URL = process.env.PUBLIC_UPLOADS_URL ?? '/uploads'
+
+function buildAuthorAvatarUrl(
+  storageKey: string | null,
+  fileId: string | null,
+): string | null {
+  if (!storageKey || !fileId) {
+    return null
+  }
+
+  const baseUrl = PUBLIC_UPLOADS_URL.replace(/\/+$/, '')
+  const normalizedStorageKey = storageKey.replace(/^\/+/, '')
+
+  /*
+   * fileId is used as a cache-busting version.
+   *
+   * When an avatar is replaced, the new file ID generates
+   * a different URL and the browser loads the new image.
+   */
+  return `${baseUrl}/${normalizedStorageKey}?v=${encodeURIComponent(fileId)}`
+}
+
+function mapCommentListItem(comment: CommentListRow) {
+  const { authorAvatarFileId, authorAvatarStorageKey, ...rest } = comment
+
+  return {
+    ...rest,
+
+    authorAvatar: buildAuthorAvatarUrl(
+      authorAvatarStorageKey,
+      authorAvatarFileId,
+    ),
+  }
+}
+
 export const IqamaRenewalCaseCommentService = {
   list: async (caseId: string, actor: IqamaRenewalCaseActor) => {
     return db.transaction(async (tx) => {
@@ -313,7 +352,13 @@ export const IqamaRenewalCaseCommentService = {
 
       await assertCanCollaborateOnCase(tx, renewalCase, actor.userId)
 
-      return IqamaRenewalCaseCommentRepository.listByCaseId(tx, caseId)
+      //return IqamaRenewalCaseCommentRepository.listByCaseId(tx, caseId)
+      const comments = await IqamaRenewalCaseCommentRepository.listByCaseId(
+        tx,
+        caseId,
+      )
+
+      return comments.map(mapCommentListItem)
     })
   },
 

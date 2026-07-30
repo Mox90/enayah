@@ -34,7 +34,8 @@ export const JobGradeController = {
 
   delete: asyncHandler(async (req: Request, res: Response) => {
     const { id } = jobGradeIdSchema.parse(req.params)
-    const userId = req.user?.id // from auth middleware
+    const userId = req.user?.id
+    if (!userId) throw new Error('Unauthorized')
     await JobGradeService.delete(id, userId)
     res.status(204).send()
   }),

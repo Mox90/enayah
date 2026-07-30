@@ -1,3 +1,5 @@
+// enayah-frontend/src/api/client.tsx
+
 'use client'
 
 import { useAuthStore } from '@/modules/iam/stores/auth.store'

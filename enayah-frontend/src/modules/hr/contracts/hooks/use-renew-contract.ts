@@ -5,8 +5,9 @@ import { toast } from 'sonner'
 
 import { contractService } from '../services/contract.service'
 import { RenewContractPayload } from '../types/contract-renewal.types'
-import { employeeQueryKeys } from '../../employees/hooks/use-employee-profile'
+//import { employeeQueryKeys } from '../../employees/hooks/use-employee-profile'
 import axios from 'axios'
+import { employeeQueryKeys } from '../../employees/hooks/employee-query-keys'
 
 type ApiErrorResponse = {
   message?: string

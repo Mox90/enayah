@@ -30,6 +30,7 @@ import type {
 
 import { buildIqamaRenewalCommentTree } from './iqama-renewal-comment-tree'
 import { IqamaRenewalStatusBadge } from './iqama-renewal-status-badge'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 interface Props {
   caseId: string
@@ -124,9 +125,22 @@ function CommentItem({
     >
       <article className='rounded-2xl border border-border/60 bg-background p-4 shadow-sm transition-shadow hover:shadow-md'>
         <div className='flex items-start gap-3'>
-          <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-primary/10 text-sm font-semibold text-primary'>
+          {/* <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-primary/10 text-sm font-semibold text-primary'>
             {getAuthorInitial(authorName)}
-          </div>
+          </div> */}
+          <Avatar className='h-8 w-8 shrink-0 border border-primary/15'>
+            {comment.authorAvatar && (
+              <AvatarImage
+                src={comment.authorAvatar ?? undefined}
+                alt={authorName}
+                className='object-cover'
+              />
+            )}
+
+            <AvatarFallback className='bg-primary/10 text-sm font-semibold text-primary'>
+              {getAuthorInitial(authorName)}
+            </AvatarFallback>
+          </Avatar>
 
           <div className='min-w-0 flex-1'>
             <div className='flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between'>
@@ -265,6 +279,8 @@ export function IqamaRenewalCaseDiscussion({
     refetch,
     isFetching,
   } = useIqamaRenewalCaseComments(caseId)
+
+  console.log(comments)
 
   const createComment = useCreateIqamaRenewalCaseComment(caseId)
 

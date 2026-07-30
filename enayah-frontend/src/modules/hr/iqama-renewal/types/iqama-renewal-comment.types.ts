@@ -18,6 +18,9 @@ export type IqamaRenewalCaseComment = {
   authorEmail: string | null
   authorNameEn: string | null
   authorNameAr: string | null
+
+  employeeId: string | null
+  authorAvatar: string | null
 }
 
 export type IqamaRenewalCaseCommentNode = IqamaRenewalCaseComment & {

@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/iam/component/auth/protected-route.tsx
+
 'use client'
 
 import { useRouter } from 'next/navigation'

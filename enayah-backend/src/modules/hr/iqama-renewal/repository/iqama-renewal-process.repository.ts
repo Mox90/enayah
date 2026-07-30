@@ -243,6 +243,7 @@ export const IqamaRenewalProcessRepository = {
         ...getTableColumns(iqamaRenewalCases),
 
         employeeNumber: employees.employeeNumber,
+        //employeeId: employees.id,
         employeeNameEn: sql<string | null>`
         nullif(
           concat_ws(

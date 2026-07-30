@@ -12,7 +12,10 @@ import {
   UpdateEmployeeDto,
 } from '../types/employee-request.types'
 import { Employee } from '../types/employee.types'
-import { EmployeeProfile } from '../types/employee-profile.types'
+import {
+  EmployeeAvatarUploadResponse,
+  EmployeeProfile,
+} from '../types/employee-profile.types'
 import { EmployeePersonalDetails } from '../types/employee-personal-details.types'
 import {
   CreateAddressDto,
@@ -31,6 +34,7 @@ import {
   UpdatePhoneDto,
   UpdateVisaDto,
 } from '../types/employee-personal.dto'
+import { ApiResponse } from '../../dashboard/types/hr-dashboard.types'
 
 //import { Employee } from '../types/employee.types'
 const base = `${API_ENDPOINTS.hr.employees}/personal`
@@ -70,6 +74,23 @@ export const employeeService = {
     //console.log('data is')
     //console.log(response.data)
     return response.data
+  },
+
+  uploadAvatar: async (
+    employeeId: string,
+    file: File,
+  ): Promise<EmployeeAvatarUploadResponse> => {
+    const formData = new FormData()
+
+    // Must match upload.single('avatar') in Multer.
+    formData.append('avatar', file)
+
+    const response = await api.post<ApiResponse<EmployeeAvatarUploadResponse>>(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/avatar`,
+      formData,
+    )
+
+    return response.data.data
   },
 
   getPersonal: async (id: string): Promise<EmployeePersonalDetails> => {
@@ -281,7 +302,15 @@ export const employeeService = {
     const response = await api.get<EmployeeProfileSummaryResponse>(
       `${API_ENDPOINTS.hr.employees}/${id}/profile-summary`,
     )
-
+    //console.log(response.data.data)
     return response.data.data
+  },
+
+  getMyProfile: async (): Promise<EmployeeProfile> => {
+    const response = await api.get<EmployeeProfile>(
+      `${API_ENDPOINTS.hr.employees}/me/profile`,
+    )
+
+    return response.data
   },
 }

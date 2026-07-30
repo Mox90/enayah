@@ -91,9 +91,6 @@ export const employments = pgTable(
     causeOfLeaving: varchar('cause_of_leaving', { length: 255 }),
     ...baseColumns,
   },
-  // (table) => ({
-  //   employeeIdx: index('idx_employments_employee_id').on(table.employeeId),
-  // }),
   (table) => [
     index('idx_employments_employee_id').on(table.employeeId),
     index('idx_employments_hire_date_active')

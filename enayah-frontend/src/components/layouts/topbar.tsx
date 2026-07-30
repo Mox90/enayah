@@ -2,7 +2,7 @@
 
 import { useTheme } from 'next-themes'
 import { useAuthStore } from '@/modules/iam/stores/auth.store'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
 
@@ -22,6 +22,7 @@ import { api } from '@/lib/api/client'
 import { Link, useRouter } from '../../../i18n/navigation'
 import { transform } from 'zod'
 import { NotificationBell } from '@/modules/notifications/components/notification-bell'
+import { useEmployeeProfile } from '@/modules/hr/employees/hooks/use-employee-profile'
 //import { router } from 'next/client'
 
 const Topbar = () => {
@@ -29,6 +30,11 @@ const Topbar = () => {
   const router = useRouter()
   const locale = useLocale()
   const user = useAuthStore((state) => state.user)
+  const { data: employeeProfile } = useEmployeeProfile(
+    (user?.employeeId || user?.employee?.id) ?? undefined,
+  )
+
+  const avatar = employeeProfile?.personal.avatar ?? null
   const logout = useAuthStore((state) => state.logout)
   const { resolvedTheme, setTheme } = useTheme()
   const isRtl = locale === 'ar'
@@ -122,6 +128,14 @@ const Topbar = () => {
           <DropdownMenuTrigger>
             <div className='cursor-pointer'>
               <Avatar className='h-10 w-10 border'>
+                {avatar && (
+                  <AvatarImage
+                    src={avatar}
+                    alt={fullName || user?.username || 'User'}
+                    className='object-cover'
+                  />
+                )}
+
                 <AvatarFallback>{displayInitials || 'US'}</AvatarFallback>
               </Avatar>
             </div>

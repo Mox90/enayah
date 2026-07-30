@@ -143,25 +143,31 @@ export const files = pgTable(
   ],
 )
 
-export const employeeDegrees = pgTable('employee_degrees', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  employeeId: uuid('employee_id')
-    .notNull()
-    .references(() => employees.id, { onDelete: 'cascade' }),
-  degreeType: degreeTypeEnum('degree_type').notNull(),
-  degreeName: varchar('degree_name', {
-    length: 255,
-  }).notNull(),
-  major: varchar('major', { length: 255 }),
-  institution: varchar('institution', { length: 255 }).notNull(),
-  countryId: uuid('country_id').references(() => countries.id),
-  graduationDate: date('graduation_date'),
-  documentFileId: uuid('document_file_id').references(() => files.id, {
-    onDelete: 'restrict',
-  }),
-  ...verificationColumns,
-  ...baseColumns,
-})
+export const employeeDegrees = pgTable(
+  'employee_degrees',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    employeeId: uuid('employee_id')
+      .notNull()
+      .references(() => employees.id, { onDelete: 'cascade' }),
+    degreeType: degreeTypeEnum('degree_type').notNull(),
+    degreeName: varchar('degree_name', {
+      length: 255,
+    }).notNull(),
+    major: varchar('major', { length: 255 }),
+    institution: varchar('institution', { length: 255 }).notNull(),
+    countryId: uuid('country_id').references(() => countries.id),
+    graduationDate: date('graduation_date'),
+    documentFileId: uuid('document_file_id').references(() => files.id, {
+      onDelete: 'restrict',
+    }),
+    ...verificationColumns,
+    ...baseColumns,
+  },
+  (table) => [
+    uniqueIndex('uq_employee_degree_avatar_file_id').on(table.documentFileId),
+  ],
+)
 
 export const employeeBoards = pgTable('employee_boards', {
   id: uuid('id').defaultRandom().primaryKey(),

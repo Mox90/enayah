@@ -1,9 +1,10 @@
 import { ca } from 'zod/locales'
 import { db } from '../../../../db'
 import {
+  appointments,
   employees,
   employments,
-  jobAssignments,
+  //jobAssignments,
   permissions,
   positionRoles,
   roleLevels,
@@ -12,7 +13,7 @@ import {
   userRoles,
   users,
 } from '../../../../db/schema'
-import { and, eq, inArray, isNull, or } from 'drizzle-orm'
+import { and, desc, eq, gte, inArray, isNull, lte, or } from 'drizzle-orm'
 
 export const findUserByEmail = (email: string) =>
   db.query.users.findFirst({
@@ -31,6 +32,11 @@ export const findUserByEmailOrUsername = async (
   return db.query.users.findFirst({
     where: or(eq(users.email, email), eq(users.username, username)),
   })
+}
+
+export interface PositionResult {
+  positionId: string | null
+  departmentId: string | null
 }
 
 export const findUserCredentialsByUsername = async (username: string) => {
@@ -186,15 +192,39 @@ export interface PositionResult {
 export const getCurrentPosition = async (
   employeeId: string,
 ): Promise<PositionResult[]> => {
+  const today = new Date().toISOString().split('T')[0]!
+
   return db
     .select({
-      positionId: jobAssignments.positionId,
-      departmentId: jobAssignments.departmentId,
+      positionId: appointments.actualPositionId,
+      departmentId: appointments.actualDepartmentId,
     })
     .from(employees)
     .innerJoin(employments, eq(employments.employeeId, employees.id))
-    .innerJoin(jobAssignments, eq(jobAssignments.employmentId, employments.id))
-    .where(and(eq(employees.id, employeeId), isNull(jobAssignments.endDate)))
+    .innerJoin(appointments, eq(appointments.employmentId, employments.id))
+    .where(
+      and(
+        eq(employees.id, employeeId),
+
+        // Employee record must be active.
+        eq(employees.isDeleted, false),
+        isNull(employees.deletedAt),
+
+        // Employment must currently be active.
+        eq(employments.isDeleted, false),
+        isNull(employments.deletedAt),
+        eq(employments.status, 'active'),
+        lte(employments.startDate, today),
+        or(isNull(employments.endDate), gte(employments.endDate, today)),
+
+        // Appointment must currently be active.
+        eq(appointments.isDeleted, false),
+        isNull(appointments.deletedAt),
+        lte(appointments.startDate, today),
+        or(isNull(appointments.endDate), gte(appointments.endDate, today)),
+      ),
+    )
+    .orderBy(desc(appointments.startDate))
     .limit(1)
 }
 

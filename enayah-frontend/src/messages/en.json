@@ -731,5 +731,11 @@
     "returnReasonPlaceholder": "Describe the Jawazat issue and any action HR must take...",
     "confirmReturnToHr": "Return to HR",
     "returningCase": "Returning case..."
+  },
+  "tooltip": {
+    "list": "List View",
+    "kanban": "Kanban View",
+    "tree": "Tree View",
+    "hierarchy": "Organizational Chart View"
   }
 }
