@@ -211,7 +211,8 @@ export const EmployeePersonalRepository = {
         and(
           eq(employeeIdentifications.id, recordId),
           eq(employeeIdentifications.employeeId, employeeId),
-          isNull(employeeIdentifications.deletedAt),
+          //isNull(employeeIdentifications.deletedAt),
+          eq(employeeIdentifications.isDeleted, false),
         ),
       )
       .limit(1)
