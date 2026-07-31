@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FormDialog } from '../forms'
@@ -63,9 +62,9 @@ function LicenseDialogContent({
 
   const authority = form.authority.trim()
   const licenseNumber = form.licenseNumber.trim()
-  const specialty = form.specialty?.trim()
+  //const specialty = form.specialty?.trim()
   const profession = form.profession.trim()
-  const issueDate = form.issueDate?.trim()
+  //const issueDate = form.issueDate?.trim()
   const expiryDate = form.expiryDate.trim()
 
   function update<K extends keyof LicenseFormValue>(
@@ -116,6 +115,7 @@ function LicenseDialogContent({
     } catch (error) {
       // Keep the dialog open.
       // The parent mutation hook can display the error toast.
+      console.log(error)
     } finally {
       setIsSubmitting(false)
     }

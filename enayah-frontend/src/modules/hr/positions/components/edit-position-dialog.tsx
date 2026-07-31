@@ -2,9 +2,8 @@
 
 import React, { useEffect } from 'react'
 import { Position } from '../types/position.types'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { useUpdatePosition } from '../hooks/use-update-position'
-import { usePositions } from '../hooks/use-positions'
 import { useForm } from 'react-hook-form'
 import {
   CreatePositionFormValues,
@@ -22,26 +21,26 @@ interface Props {
 
 const EditPositionDialog = ({ position, open, onOpenChange }: Props) => {
   const t = useTranslations('positions')
-  const locale = useLocale()
+  //const locale = useLocale()
 
   const updatePosition = useUpdatePosition()
 
-  const { data: positionsResponse } = usePositions({
-    page: 1,
-    limit: 100,
-    search: '',
-    sortBy: 'titleEn',
-    sortOrder: 'asc',
-  })
+  // const { data: positionsResponse } = usePositions({
+  //   page: 1,
+  //   limit: 100,
+  //   search: '',
+  //   sortBy: 'titleEn',
+  //   sortOrder: 'asc',
+  // })
 
-  const positions = positionsResponse?.data ?? []
+  // const positions = positionsResponse?.data ?? []
 
-  const positionOptions = positions.map(
-    (position: { id: string; titleEn: string; titleAr: string }) => ({
-      label: locale === 'ar' ? position.titleAr : position.titleEn,
-      value: position.id,
-    }),
-  )
+  // const positionOptions = positions.map(
+  //   (position: { id: string; titleEn: string; titleAr: string }) => ({
+  //     label: locale === 'ar' ? position.titleAr : position.titleEn,
+  //     value: position.id,
+  //   }),
+  // )
 
   const form = useForm<CreatePositionFormValues>({
     resolver: zodResolver(createPositionSchema),

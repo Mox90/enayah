@@ -358,7 +358,7 @@ import { StatusBadge } from '@/components/badges/status-badge'
 import { EmployeePersonalDialog } from '@/components/dialogs/employee-personal-dialog'
 import { ContractRenewalDialog } from '@/components/dialogs/contract-renewal-dialog'
 import { cn } from '@/lib/utils'
-import { formatDate, toArabic, toPersianDigits } from '@/utils/utilities'
+import { formatDate, toPersianDigits } from '@/utils/utilities'
 
 import { EmployeeProfile } from '../../types/employee-profile.types'
 import { useUpdatePersonalMutation } from '../../hooks/use-update-employee-profile'

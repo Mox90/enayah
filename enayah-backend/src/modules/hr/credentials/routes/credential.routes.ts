@@ -7,6 +7,7 @@ import {
   requirePermission,
 } from '../../../../core/middleware/permission.middleware'
 import { CredentialController } from '../controller/credential.controller'
+import { requireEmployeeAccess } from '../../../../core/middleware/employee-access.middleware'
 
 const router = Router()
 
@@ -15,7 +16,12 @@ router.use(attachPermissions)
 
 router.get(
   '/employee/:employeeId',
-  requirePermission('employee.credentials.view'),
+  //requirePermission('employee.credentials.view'),
+  requireEmployeeAccess({
+    employeeIdParam: 'id',
+    anyEmployeePermission: 'employee.credentials.view',
+    selfPermission: 'employee.self.view',
+  }),
   CredentialController.findByEmployeeId,
 )
 

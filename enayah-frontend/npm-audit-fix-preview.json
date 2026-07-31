@@ -1,0 +1,94 @@
+change brace-expansion 1.1.15 => 1.1.18
+{
+  "add": [],
+  "added": 0,
+  "audited": 656,
+  "change": [
+    {
+      "from": {
+        "name": "brace-expansion",
+        "version": "1.1.15",
+        "path": "/Users/moctarsandalo/iUniverse/enayah/enayah-frontend/node_modules/brace-expansion"
+      },
+      "to": {
+        "name": "brace-expansion",
+        "version": "1.1.18",
+        "path": "/Users/moctarsandalo/iUniverse/enayah/enayah-frontend/node_modules/brace-expansion"
+      }
+    }
+  ],
+  "changed": 1,
+  "funding": 211,
+  "remove": [],
+  "removed": 0,
+  "audit": {
+    "auditReportVersion": 2,
+    "vulnerabilities": {
+      "brace-expansion": {
+        "name": "brace-expansion",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1123897,
+            "name": "brace-expansion",
+            "dependency": "brace-expansion",
+            "title": "brace-expansion: DoS via exponential-time expansion of consecutive non-expanding {} groups",
+            "url": "https://github.com/advisories/GHSA-3jxr-9vmj-r5cp",
+            "severity": "high",
+            "cwe": [
+              "CWE-400",
+              "CWE-407"
+            ],
+            "cvss": {
+              "score": 5.3,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:L"
+            },
+            "range": "<1.1.16"
+          },
+          {
+            "source": 1124334,
+            "name": "brace-expansion",
+            "dependency": "brace-expansion",
+            "title": "brace-expansion: DoS via unbounded expansion length causing an out-of-memory process crash",
+            "url": "https://github.com/advisories/GHSA-mh99-v99m-4gvg",
+            "severity": "high",
+            "cwe": [
+              "CWE-400",
+              "CWE-770"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<=5.0.7"
+          }
+        ],
+        "effects": [],
+        "range": "<=5.0.7",
+        "nodes": [
+          ""
+        ],
+        "fixAvailable": true
+      }
+    },
+    "metadata": {
+      "vulnerabilities": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 1,
+        "critical": 0,
+        "total": 1
+      },
+      "dependencies": {
+        "prod": 233,
+        "dev": 348,
+        "optional": 125,
+        "peer": 0,
+        "peerOptional": 0,
+        "total": 655
+      }
+    }
+  }
+}

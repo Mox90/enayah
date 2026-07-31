@@ -5,7 +5,6 @@
 import { useAuthStore } from '@/modules/iam/stores/auth.store'
 import axios from 'axios'
 import { refreshAccessToken } from './refresh-token'
-import { useLocale } from 'next-intl'
 //import qs from 'qs'
 
 export const api = axios.create({

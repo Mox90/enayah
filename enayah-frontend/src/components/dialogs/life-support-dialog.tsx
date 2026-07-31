@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -89,8 +88,8 @@ function LifeSupportDialogContent({
   const type = form.type.trim()
   const provider = form.provider.trim()
   const expiryDate = form.expiryDate.trim()
-  const certificateNumber = form.certificateNumber?.trim()
-  const issueDate = form.issueDate?.trim()
+  //const certificateNumber = form.certificateNumber?.trim()
+  //const issueDate = form.issueDate?.trim()
 
   function update<K extends keyof LifeSupportFormValue>(
     field: K,
@@ -137,6 +136,7 @@ function LifeSupportDialogContent({
     } catch (error) {
       // Keep the dialog open.
       // The parent mutation can display the error toast.
+      console.log(error)
     } finally {
       setIsSubmitting(false)
     }

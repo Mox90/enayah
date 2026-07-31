@@ -17,4 +17,10 @@ export interface PaginatedPositions {
 
 export interface PositionListResponse {
   data: Position[]
+  meta: {
+    page: number
+    limit: number
+    total: number
+    totalPages: number
+  }
 }

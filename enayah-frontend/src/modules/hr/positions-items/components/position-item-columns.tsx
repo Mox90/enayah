@@ -2,10 +2,8 @@ import { ColumnDef } from '@tanstack/react-table'
 import { PositionItem } from '../types/position.item.types'
 import { DataTableColumnHeader } from '@/components/tables'
 import { PositionItemActions } from './position-item-action'
-//import { Badge } from 'lucide-react'
 import { getStatusVariant } from '@/utils/utilities'
 import { Badge } from '@/components/ui/badge'
-import { useLocale } from 'next-intl'
 
 type PositionItemColumns = {
   itemNumber: string

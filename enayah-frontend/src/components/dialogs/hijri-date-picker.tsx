@@ -34,6 +34,7 @@ export function HijriDatePicker({
       })
     } catch (e) {
       return undefined
+      console.log(e)
     }
   }, [value])
 

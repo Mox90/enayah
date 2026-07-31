@@ -1,22 +1,11 @@
 'use client'
 
 import { format } from 'date-fns'
-import {
-  Calendar,
-  Earth,
-  Globe,
-  Hash,
-  IdCard,
-  IdCardLanyard,
-  Layers,
-  Pencil,
-  User,
-} from 'lucide-react'
+import { Calendar, Hash, User } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { useLocale, useTranslations } from 'next-intl'
-import { humanize, toArabic, toPersianDigits } from '@/utils/utilities'
+import { toArabic, toPersianDigits } from '@/utils/utilities'
 import {
   useEmployeePersonal,
   useEmployeePersonalMutations,
@@ -24,6 +13,17 @@ import {
 import { PersonalDetailsCards } from './cards/personal-details'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { buttonVariants } from '@/components/ui/button'
 import {
   Address,
   Dependent,
@@ -44,6 +44,7 @@ import {
   PhoneDialog,
   VisaDialog,
 } from '@/components/dialogs/personal-detail-dialogs'
+import { useState } from 'react'
 
 export type Gender = 'male' | 'female'
 
@@ -93,6 +94,39 @@ interface FieldProps {
   isRtl?: boolean
 }
 
+//type IdentificationDeleteTarget = Pick<Identification, 'id' | 'type'>
+
+type PersonalDetailDeleteTarget =
+  | {
+      kind: 'identification'
+      id: string
+      identificationType: Identification['type']
+    }
+  | {
+      kind: 'phone'
+      id: string
+    }
+  | {
+      kind: 'email'
+      id: string
+    }
+  | {
+      kind: 'address'
+      id: string
+    }
+  | {
+      kind: 'dependent'
+      id: string
+    }
+  | {
+      kind: 'emergencyContact'
+      id: string
+    }
+  | {
+      kind: 'visa'
+      id: string
+    }
+
 function Field({ label, value, icon, isRtl = false }: FieldProps) {
   return (
     <div className='rounded-xl border bg-background p-4 transition-colors hover:bg-muted/30'>
@@ -111,8 +145,12 @@ function Field({ label, value, icon, isRtl = false }: FieldProps) {
 const PersonalTab = ({ personal }: Props) => {
   const at = useTranslations('auth')
   const et = useTranslations('employees')
+  const pt = useTranslations('employeePersonal')
+  const ct = useTranslations('common')
   const locale = useLocale()
   const isRtl = locale === 'ar'
+  const [deleteTarget, setDeleteTarget] =
+    useState<PersonalDetailDeleteTarget | null>(null)
   const {
     data: personalDetails,
     isLoading,
@@ -137,6 +175,149 @@ const PersonalTab = ({ personal }: Props) => {
   const visa = useDialogState<EmployeePersonalDetails['visas'][number]>()
 
   const employeePersonal = useEmployeePersonalMutations(personal.id)
+
+  const getIdentificationLabel = (type: Identification['type']): string => {
+    switch (type) {
+      case 'national_id':
+        return pt('types.nationalId')
+
+      case 'iqama':
+        return pt('identifications.types.iqama')
+
+      case 'gcc_id':
+        return pt('types.gccId')
+
+      case 'passport':
+        return pt('types.passport')
+
+      case 'other':
+        return pt('types.other')
+    }
+  }
+
+  const getDeleteTargetLabel = (
+    target: PersonalDetailDeleteTarget | null,
+  ): string => {
+    if (!target) {
+      return ''
+    }
+
+    switch (target.kind) {
+      case 'identification':
+        return getIdentificationLabel(target.identificationType)
+
+      case 'phone':
+        return pt('entities.phone')
+
+      case 'email':
+        return pt('entities.email')
+
+      case 'address':
+        return pt('entities.address')
+
+      case 'dependent':
+        return pt('entities.dependent')
+
+      case 'emergencyContact':
+        return pt('entities.emergencyContact')
+
+      case 'visa':
+        return pt('entities.visa')
+    }
+  }
+
+  const deleteTargetLabel = getDeleteTargetLabel(deleteTarget)
+
+  // const deleteTypeLabel = deleteTarget ? getIdentificationLabel(deleteTarget.type) : ''
+
+  const isDeletePending = (() => {
+    if (!deleteTarget) {
+      return false
+    }
+
+    switch (deleteTarget.kind) {
+      case 'identification':
+        return employeePersonal.deleteIdentification.isPending
+
+      case 'phone':
+        return employeePersonal.deletePhone.isPending
+
+      case 'email':
+        return employeePersonal.deleteEmail.isPending
+
+      case 'address':
+        return employeePersonal.deleteAddress.isPending
+
+      case 'dependent':
+        return employeePersonal.deleteDependent.isPending
+
+      case 'emergencyContact':
+        return employeePersonal.deleteEmergencyContact.isPending
+
+      case 'visa':
+        return employeePersonal.deleteVisa.isPending
+    }
+  })()
+
+  const confirmDelete = (): void => {
+    if (!deleteTarget) {
+      return
+    }
+
+    const onSuccess = () => {
+      setDeleteTarget(null)
+    }
+
+    switch (deleteTarget.kind) {
+      case 'identification':
+        employeePersonal.deleteIdentification.mutate(
+          {
+            id: deleteTarget.id,
+            type: deleteTarget.identificationType,
+          },
+          {
+            onSuccess,
+          },
+        )
+        break
+
+      case 'phone':
+        employeePersonal.deletePhone.mutate(deleteTarget.id, {
+          onSuccess,
+        })
+        break
+
+      case 'email':
+        employeePersonal.deleteEmail.mutate(deleteTarget.id, {
+          onSuccess,
+        })
+        break
+
+      case 'address':
+        employeePersonal.deleteAddress.mutate(deleteTarget.id, {
+          onSuccess,
+        })
+        break
+
+      case 'dependent':
+        employeePersonal.deleteDependent.mutate(deleteTarget.id, {
+          onSuccess,
+        })
+        break
+
+      case 'emergencyContact':
+        employeePersonal.deleteEmergencyContact.mutate(deleteTarget.id, {
+          onSuccess,
+        })
+        break
+
+      case 'visa':
+        employeePersonal.deleteVisa.mutate(deleteTarget.id, {
+          onSuccess,
+        })
+        break
+    }
+  }
 
   return (
     <div className='space-y-6'>
@@ -313,7 +494,19 @@ const PersonalTab = ({ personal }: Props) => {
               identification.edit(item)
             }}
             onDeleteIdentification={(id) => {
-              employeePersonal.deleteIdentification.mutate(id)
+              const item = personalDetails?.identifications.find(
+                (identification: Identification) => identification.id === id,
+              )
+
+              if (!item) {
+                return
+              }
+
+              setDeleteTarget({
+                kind: 'identification',
+                id: item.id,
+                identificationType: item.type,
+              })
             }}
             onAddPhone={phone.add}
             onEditPhone={(id) => {
@@ -324,7 +517,10 @@ const PersonalTab = ({ personal }: Props) => {
               phone.edit(item)
             }}
             onDeletePhone={(id) => {
-              employeePersonal.deletePhone.mutate(id)
+              setDeleteTarget({
+                kind: 'phone',
+                id,
+              })
             }}
             onAddEmail={email.add}
             onEditEmail={(id) => {
@@ -335,7 +531,10 @@ const PersonalTab = ({ personal }: Props) => {
               email.edit(item)
             }}
             onDeleteEmail={(id) => {
-              employeePersonal.deleteEmail.mutate(id)
+              setDeleteTarget({
+                kind: 'email',
+                id,
+              })
             }}
             onAddAddress={address.add}
             onEditAddress={(id) => {
@@ -346,7 +545,10 @@ const PersonalTab = ({ personal }: Props) => {
               address.edit(item)
             }}
             onDeleteAddress={(id) => {
-              employeePersonal.deleteAddress.mutate(id)
+              setDeleteTarget({
+                kind: 'address',
+                id,
+              })
             }}
             onAddDependent={dependent.add}
             onEditDependent={(id) => {
@@ -357,7 +559,10 @@ const PersonalTab = ({ personal }: Props) => {
               dependent.edit(item)
             }}
             onDeleteDependent={(id) => {
-              employeePersonal.deleteDependent.mutate(id)
+              setDeleteTarget({
+                kind: 'dependent',
+                id,
+              })
             }}
             onAddEmergencyContact={emergencyContact.add}
             onEditEmergencyContact={(id) => {
@@ -368,7 +573,10 @@ const PersonalTab = ({ personal }: Props) => {
               emergencyContact.edit(item)
             }}
             onDeleteEmergencyContact={(id) => {
-              employeePersonal.deleteEmergencyContact.mutate(id)
+              setDeleteTarget({
+                kind: 'emergencyContact',
+                id,
+              })
             }}
             onAddVisa={visa.add}
             onEditVisa={(id) => {
@@ -377,9 +585,58 @@ const PersonalTab = ({ personal }: Props) => {
               visa.edit(item)
             }}
             onDeleteVisa={(id) => {
-              employeePersonal.deleteVisa.mutate(id)
+              setDeleteTarget({
+                kind: 'visa',
+                id,
+              })
             }}
           />
+
+          <AlertDialog
+            open={deleteTarget !== null}
+            onOpenChange={(open) => {
+              if (!open && !isDeletePending) {
+                setDeleteTarget(null)
+              }
+            }}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>
+                  {pt('deleteConfirmation.title', {
+                    item: deleteTargetLabel,
+                  })}
+                </AlertDialogTitle>
+
+                <AlertDialogDescription>
+                  {pt('deleteConfirmation.description', {
+                    item: deleteTargetLabel,
+                  })}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isDeletePending}>
+                  {ct('cancel')}
+                </AlertDialogCancel>
+
+                <AlertDialogAction
+                  className={buttonVariants({
+                    variant: 'destructive',
+                  })}
+                  disabled={!deleteTarget || isDeletePending}
+                  onClick={(event) => {
+                    event.preventDefault()
+                    confirmDelete()
+                  }}
+                >
+                  {isDeletePending
+                    ? pt('deleteConfirmation.deleting')
+                    : ct('delete')}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           <IdentificationDialog
             open={identification.open}
@@ -390,6 +647,7 @@ const PersonalTab = ({ personal }: Props) => {
                 employeePersonal.updateIdentification.mutate({
                   id: identification.editing.id,
                   data: value,
+                  currentType: identification.editing.type,
                 })
               } else {
                 employeePersonal.createIdentification.mutate(value)

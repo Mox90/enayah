@@ -99,7 +99,7 @@ export type BoardInput = {
   issueDate?: string | null
   expiryDate?: string | null
   isLifetime?: boolean | null
-  isVerified?: boolean
+  isVerified?: boolean | null
 }
 
 export type FellowshipInput = {

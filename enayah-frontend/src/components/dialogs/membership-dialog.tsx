@@ -1,12 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FormDialog } from '../forms'
 import { useLocale, useTranslations } from 'next-intl'
-import { DialogFooter } from '../ui/dialog'
 import { Footer } from '../footer/footer'
 import { Save } from 'lucide-react'
 
@@ -61,9 +59,9 @@ function MembershipDialogContent({
   const isRtl = locale.toLowerCase().startsWith('ar')
 
   const organization = form.organization.trim()
-  const membershipNumber = form.membershipNumber?.trim()
-  const startDate = form.startDate?.trim()
-  const expiryDate = form.expiryDate?.trim()
+  // const membershipNumber = form.membershipNumber?.trim()
+  // const startDate = form.startDate?.trim()
+  // const expiryDate = form.expiryDate?.trim()
 
   function update<K extends keyof MembershipFormValue>(
     field: K,
@@ -112,6 +110,7 @@ function MembershipDialogContent({
     } catch (error) {
       // Keep the dialog open.
       // The parent mutation can display the error toast.
+      console.log(error)
     } finally {
       setIsSubmitting(false)
     }

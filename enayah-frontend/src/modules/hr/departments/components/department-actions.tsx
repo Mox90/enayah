@@ -12,7 +12,7 @@ import { Department } from '../types/department.types'
 import { useState } from 'react'
 import { DeleteDepartmentDialog } from './delete-department-dialog'
 import { EditDepartmentDialog } from './edit-department-dialog'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 
 interface DepartmentActionsProps {
   department: Department

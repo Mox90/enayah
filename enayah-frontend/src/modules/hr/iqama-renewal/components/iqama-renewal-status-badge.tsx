@@ -46,11 +46,11 @@ const statusClass: Record<IqamaRenewalStatus, string> = {
     'border-slate-300 bg-slate-100 text-slate-600 ring-slate-600/10 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400',
 }
 
-function humanize(value: string) {
-  return value
-    .replaceAll('_', ' ')
-    .replace(/\b\w/g, (letter) => letter.toUpperCase())
-}
+// function humanize(value: string) {
+//   return value
+//     .replaceAll('_', ' ')
+//     .replace(/\b\w/g, (letter) => letter.toUpperCase())
+// }
 
 export function IqamaRenewalStatusBadge({
   status,

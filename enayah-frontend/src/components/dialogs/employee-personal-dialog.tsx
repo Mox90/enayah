@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { EmployeeProfile } from '@/modules/hr/employees/types/employee-profile.types'
@@ -122,6 +121,7 @@ export function EmployeePersonalDialog({
       onOpenChange(false)
     } catch (error) {
       // keep dialog open; error is surfaced via mutation onError
+      console.log(error)
     } finally {
       setIsSubmitting(false)
     }

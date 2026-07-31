@@ -10,7 +10,7 @@ import { EmployeeToolbar } from './toolbar/employee-toolbar'
 import { EmployeesTable } from './list/employees-table'
 import { EmployeeKanbanView } from './kanban/employee-kanban-view'
 import { EmployeeTreeView } from './tree/employee-tree-view'
-import { EmployeeHierarchyView } from './hierarchy/employee-hierarchy-view'
+//import { EmployeeHierarchyView } from './hierarchy/employee-hierarchy-view'
 import { EmployeeFilterSheet } from './filter/employee-filter-sheet'
 import { OnboardingForm } from './onboarding/onboarding-form'
 
@@ -196,7 +196,7 @@ export function EmployeeWorkspace() {
 
       {view === 'tree' && <EmployeeTreeView />}
 
-      {view === 'hierarchy' && <EmployeeHierarchyView />}
+      {/* {view === 'hierarchy' && <EmployeeHierarchyView />} */}
     </div>
   )
 }

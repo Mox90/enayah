@@ -81,23 +81,23 @@ const emptyIdentification: Identification = {
   fileId: null,
 }
 
-interface ApiErrorResponse {
-  message?: string
+// interface ApiErrorResponse {
+//   message?: string
 
-  error?: {
-    message?: string
+//   error?: {
+//     message?: string
 
-    issues?: Array<{
-      path?: Array<string | number>
-      message?: string
-    }>
-  }
+//     issues?: Array<{
+//       path?: Array<string | number>
+//       message?: string
+//     }>
+//   }
 
-  issues?: Array<{
-    path?: Array<string | number>
-    message?: string
-  }>
-}
+//   issues?: Array<{
+//     path?: Array<string | number>
+//     message?: string
+//   }>
+// }
 
 type ApiErrorFallbacks = {
   validationFailed: string
@@ -148,8 +148,8 @@ export function IdentificationDialog({
   onOpenChange,
   initialValue,
   onSubmit,
-  title,
-  description,
+  // title,
+  // description,
   submitLabel,
 
   lockType = false,
@@ -158,8 +158,8 @@ export function IdentificationDialog({
 }: IdentificationDialogProps) {
   const dialogKey = initialValue?.id ?? (open ? 'add-identification' : 'closed')
   const it = useTranslations('identifications')
-  const locale = useLocale()
-  const isRtl = locale === 'ar'
+  // const locale = useLocale()
+  // const isRtl = locale === 'ar'
 
   return (
     <FormDialog
@@ -219,7 +219,7 @@ function IdentificationDialogContent({
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const type = form.type.trim()
-  const identificationNumber = form.identificationNumber.trim()
+  //const identificationNumber = form.identificationNumber.trim()
 
   const [fieldErrors, setFieldErrors] = useState<IdentificationFieldErrors>({})
 
@@ -289,10 +289,10 @@ function IdentificationDialogContent({
     }
   }
 
-  const formInvalid =
-    !type ||
-    !identificationNumber ||
-    (requireExpiryDate && !form.expiryDate?.trim())
+  // const formInvalid =
+  //   !type ||
+  //   !identificationNumber ||
+  //   (requireExpiryDate && !form.expiryDate?.trim())
 
   function closeDialog() {
     if (isSubmitting) return
@@ -672,8 +672,8 @@ export function PhoneDialog({
 }: DialogProps<PhoneNumber>) {
   const dialogKey = initialValue?.id ?? (open ? 'add-phone' : 'closed')
   const pt = useTranslations('phoneNumber')
-  const locale = useLocale()
-  const isRtl = locale === 'ar'
+  //const locale = useLocale()
+  //const isRtl = locale === 'ar'
 
   return (
     <FormDialog
@@ -1285,8 +1285,8 @@ function DependentDialogContent({
   const [form, setForm] = useState<Dependent>(initialValue ?? emptyDependent)
   const dt = useTranslations('dependents')
   const et = useTranslations('employees')
-  const locale = useLocale()
-  const isRtl = locale === 'ar'
+  //const locale = useLocale()
+  //const isRtl = locale === 'ar'
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -1682,8 +1682,8 @@ function VisaDialogContent({
 }) {
   const [form, setForm] = useState<Visa>(initialValue ?? emptyVisa)
   const vt = useTranslations('visas')
-  const locale = useLocale()
-  const isRtl = locale === 'ar'
+  // const locale = useLocale()
+  // const isRtl = locale === 'ar'
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 

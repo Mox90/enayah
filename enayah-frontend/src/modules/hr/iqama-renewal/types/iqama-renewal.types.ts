@@ -67,24 +67,22 @@ export type CreateIqamaRenewalCasePayload = {
   assignedToUserId?: string | null
   governmentRelationsDueDate?: string | null
   notes?: string | null
-  identification: {
-    identificationNumber: string
+  // identification: {
+  //   identificationNumber: string
 
-    issueDate: string | null
-    expiryDate: string
+  //   issueDate: string | null
+  //   expiryDate: string
 
-    issueDateHijri: string | null
-    expiryDateHijri: string | null
+  //   issueDateHijri: string | null
+  //   expiryDateHijri: string | null
 
-    //dateCalendar: 'gregorian' | 'hijri'
+  //   sponsor: string | null
+  //   issuingAuthority: string | null
+  //   occupation: string | null
 
-    sponsor: string | null
-    issuingAuthority: string | null
-    occupation: string | null
-
-    isCurrent: true
-    fileId: string | null
-  }
+  //   isCurrent: true
+  //   fileId: string | null
+  // }
 }
 
 export type UpdateIqamaRenewalCasePayload = {

@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import { useCreatePosition } from '../hooks/use-create-position'
-import { usePositions } from '../hooks/use-positions'
-import { useLocale, useTranslations } from 'next-intl'
+import { useTranslations } from 'next-intl'
 import { useForm } from 'react-hook-form'
 import {
   CreatePositionFormValues,
@@ -13,23 +12,22 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { FormDialog, FormInput, FormSubmitButton } from '@/components/forms'
 import { Form } from '@/components/ui/form'
-import { FormCombobox } from '@/components/forms/form-combobox'
 
 export function CreatePositionDialog() {
   const [open, setOpen] = useState(false)
 
   const createPosition = useCreatePosition()
 
-  const { data: positionResponse } = usePositions({
-    page: 1,
-    limit: 100,
-    search: '',
-    sortBy: 'titleEn',
-    sortOrder: 'asc',
-  })
+  // const { data: positionResponse } = usePositions({
+  //   page: 1,
+  //   limit: 100,
+  //   search: '',
+  //   sortBy: 'titleEn',
+  //   sortOrder: 'asc',
+  // })
 
   const t = useTranslations('positions')
-  const locale = useLocale()
+  //const locale = useLocale()
 
   const form = useForm<CreatePositionFormValues>({
     resolver: zodResolver(createPositionSchema),
@@ -46,14 +44,14 @@ export function CreatePositionDialog() {
     setOpen(false)
   }
 
-  const positions = positionResponse?.data ?? []
+  // const positions = positionResponse?.data ?? []
 
-  const positionOptions = positions.map(
-    (position: { id: string; titleEn: string; titleAr: string }) => ({
-      label: locale === 'ar' ? position.titleAr : position.titleEn,
-      value: position.id,
-    }),
-  )
+  // const positionOptions = positions.map(
+  //   (position: { id: string; titleEn: string; titleAr: string }) => ({
+  //     label: locale === 'ar' ? position.titleAr : position.titleEn,
+  //     value: position.id,
+  //   }),
+  // )
 
   return (
     <>

@@ -1,64 +1,49 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { ButtonGroup } from '@/components/ui/button-group'
+import { useState } from 'react'
 
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-import { useLocale } from 'next-intl'
+import { Button } from '@/components/ui/button'
+import { ButtonGroup } from '@/components/ui/button-group'
+import { Input } from '@/components/ui/input'
 import { useDirection } from '@/hooks/useDirection'
+
+interface Range {
+  start: number
+  end: number
+}
 
 interface Props {
   hidden?: boolean
-
   total: number
-
-  range: {
-    start: number
-    end: number
-  }
-
-  onRangeChange: (range: { start: number; end: number }) => void
+  range: Range
+  onRangeChange: (range: Range) => void
 }
 
-export function EmployeePagination({
-  hidden,
-  range,
-  total,
-  onRangeChange,
-}: Props) {
-  const locale = useLocale()
-  //const isRTL = locale === 'ar'
-  const [inputValue, setInputValue] = useState(`${range.start}-${range.end}`)
-  const [error, setError] = useState<string>('')
-  const { dir, isRTL = locale === 'ar' } = useDirection()
+interface RangeInputProps {
+  range: Range
+  total: number
+  onRangeChange: (range: Range) => void
+}
 
-  useEffect(() => {
-    if (range.start === range.end) {
-      setInputValue(range.start.toString())
-      return
-    }
+function formatRange(range: Range): string {
+  return range.start === range.end
+    ? range.start.toString()
+    : `${range.start}-${range.end}`
+}
 
-    setInputValue(`${range.start}-${range.end}`)
-  }, [range])
+function RangeInput({ range, total, onRangeChange }: RangeInputProps) {
+  const initialValue = formatRange(range)
 
-  if (hidden) return null
+  const [inputValue, setInputValue] = useState(initialValue)
+  const [error, setError] = useState('')
 
   const commitRange = () => {
     const value = inputValue.trim()
 
     setError('')
 
-    /**
-     * Single Record
-     *
-     * 1
-     * 2
-     * 3
-     */
     if (/^\d+$/.test(value)) {
       const record = Number(value)
 
@@ -75,14 +60,8 @@ export function EmployeePagination({
       return
     }
 
-    /**
-     * Range
-     *
-     * 1-10
-     * 4-8
-     * 2-2
-     */
-    const match = value.match(/^(\d+)-(\d+)$/)
+    const match = value.match(/^(\d+)\s*-\s*(\d+)$/)
+
     if (match) {
       const start = Number(match[1])
       const end = Number(match[2])
@@ -113,26 +92,79 @@ export function EmployeePagination({
     setError('Invalid format. Use 5 or 5-10')
   }
 
+  const cancelEditing = () => {
+    setInputValue(initialValue)
+    setError('')
+  }
+
+  return (
+    <div className='flex flex-col items-end gap-1'>
+      <div className='flex items-center text-sm font-medium text-foreground'>
+        <Input
+          aria-label='Employee record range'
+          className='h-auto w-14 rounded-none border-0 border-b border-transparent bg-transparent p-0 text-right shadow-none focus-visible:border-primary focus-visible:ring-0 focus-visible:ring-offset-0'
+          value={inputValue}
+          onChange={(event) => {
+            setInputValue(event.target.value)
+
+            if (error) {
+              setError('')
+            }
+          }}
+          onBlur={commitRange}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.currentTarget.blur()
+            }
+
+            if (event.key === 'Escape') {
+              cancelEditing()
+              event.currentTarget.blur()
+            }
+          }}
+        />
+
+        <span className='text-muted-foreground'>/{total.toLocaleString()}</span>
+      </div>
+
+      {error && <p className='text-xs text-destructive'>{error}</p>}
+    </div>
+  )
+}
+
+export function EmployeePagination({
+  hidden,
+  range,
+  total,
+  onRangeChange,
+}: Props) {
+  const { isRTL } = useDirection()
+
+  if (hidden) {
+    return null
+  }
+
   const handleNext = () => {
     const count = range.end - range.start + 1
     const newStart = range.end + 1
-    if (newStart > total) return
 
-    const newEnd = Math.min(total, newStart + count - 1)
+    if (newStart > total) {
+      return
+    }
 
     onRangeChange({
       start: newStart,
-      end: newEnd,
+      end: Math.min(total, newStart + count - 1),
     })
   }
 
   const handlePrevious = () => {
     const count = range.end - range.start + 1
     const newStart = Math.max(1, range.start - count)
-    const newEnd = Math.min(total, newStart + count - 1)
+
     onRangeChange({
       start: newStart,
-      end: newEnd,
+      end: Math.min(total, newStart + count - 1),
     })
   }
 
@@ -140,56 +172,45 @@ export function EmployeePagination({
   const canGoNext = range.end < total
 
   return (
-    <div className='flex flex-col items-end gap-1'>
-      <div className='flex items-center gap-2'>
-        <div className='flex items-center text-sm font-medium text-foreground'>
-          <Input
-            className='h-auto w-14 rounded-none border-0 border-b border-transparent bg-transparent p-0 text-right shadow-none focus-visible:border-primary focus-visible:ring-0 focus-visible:ring-offset-0'
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onBlur={commitRange}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                commitRange()
-              }
-            }}
-          />
+    <div className='flex items-start gap-2'>
+      <RangeInput
+        key={`${range.start}-${range.end}`}
+        range={range}
+        total={total}
+        onRangeChange={onRangeChange}
+      />
 
-          <span className='text-muted-foreground'>
-            /{total.toLocaleString()}
-          </span>
-        </div>
+      <ButtonGroup>
+        <Button
+          type='button'
+          variant='outline'
+          size='icon'
+          aria-label='Previous records'
+          onClick={handlePrevious}
+          disabled={!canGoPrevious}
+        >
+          {isRTL ? (
+            <ChevronRight className='h-4 w-4' />
+          ) : (
+            <ChevronLeft className='h-4 w-4' />
+          )}
+        </Button>
 
-        <ButtonGroup>
-          <Button
-            variant='outline'
-            size='icon'
-            onClick={handlePrevious}
-            disabled={!canGoPrevious}
-          >
-            {isRTL ? (
-              <ChevronRight className='h-4 w-4' />
-            ) : (
-              <ChevronLeft className='h-4 w-4' />
-            )}
-          </Button>
-
-          <Button
-            variant='outline'
-            size='icon'
-            onClick={handleNext}
-            disabled={!canGoNext}
-          >
-            {isRTL ? (
-              <ChevronLeft className='h-4 w-4' />
-            ) : (
-              <ChevronRight className='h-4 w-4' />
-            )}
-          </Button>
-        </ButtonGroup>
-      </div>
-
-      {error && <p className='text-destructive text-xs'>{error}</p>}
+        <Button
+          type='button'
+          variant='outline'
+          size='icon'
+          aria-label='Next records'
+          onClick={handleNext}
+          disabled={!canGoNext}
+        >
+          {isRTL ? (
+            <ChevronLeft className='h-4 w-4' />
+          ) : (
+            <ChevronRight className='h-4 w-4' />
+          )}
+        </Button>
+      </ButtonGroup>
     </div>
   )
 }

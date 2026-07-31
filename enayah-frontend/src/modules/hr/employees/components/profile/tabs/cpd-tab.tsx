@@ -1,7 +1,7 @@
 'use client'
 
 const CPDTab = ({ cpd }: { cpd: any }) => {
-  return <div>CPDTab</div>
+  return <div>CPDTab ${cpd}</div>
 }
 
 export default CPDTab

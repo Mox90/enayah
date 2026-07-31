@@ -27,12 +27,6 @@ import { DataTableToolbar } from './data-table-toolbar'
 import { DataTableEmpty } from './data-table-empty'
 import { DataTableSkeleton } from './data-table-skeleton'
 import { useLocale } from 'next-intl'
-import { EmployeeDirectoryRow } from '@/modules/hr/employees/types/employee-directory.types'
-import {
-  EmploymentStatus,
-  employmentStatusStyles,
-} from '@/modules/hr/employees/components/list/use-employee-columns'
-import { cn } from '@/lib/utils'
 
 interface DataTableSelectionProps {
   rowSelection?: RowSelectionState

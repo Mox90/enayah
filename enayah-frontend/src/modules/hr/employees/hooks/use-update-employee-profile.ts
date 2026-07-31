@@ -16,7 +16,7 @@ export const useUpdatePersonalMutation = () => {
     mutationFn: ({ id, data }: UpdateEmployeePayload) =>
       employeeService.update(id, data),
 
-    onSuccess: (a) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['employee-profile'],
       })

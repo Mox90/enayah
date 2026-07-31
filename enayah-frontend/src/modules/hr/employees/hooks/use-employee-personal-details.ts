@@ -1,4 +1,9 @@
+'use client'
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTranslations } from 'next-intl'
+import { toast } from 'sonner'
+
 import { employeeService } from '../services/employee.service'
 import {
   CreateAddressDto,
@@ -17,7 +22,6 @@ import {
   UpdateVisaDto,
 } from '../types/employee-personal.dto'
 
-//const employeePersonalKey = (id?: string) => ['employee-personal', id]
 export const employeePersonalKeys = {
   all: ['employee-personal-details'] as const,
 
@@ -25,53 +29,138 @@ export const employeePersonalKeys = {
     [...employeePersonalKeys.all, employeeId] as const,
 }
 
+type IdentificationType = CreateIdentificationDto['type']
+
+type UpdateIdentificationVariables = {
+  id: string
+  data: UpdateIdentificationDto
+  currentType: IdentificationType
+}
+
+type DeleteIdentificationVariables = {
+  id: string
+  type: IdentificationType
+}
+
 export function useEmployeePersonal(id?: string) {
   return useQuery({
-    queryKey: employeePersonalKeys.detail(id), //['employee-personal', id],
+    queryKey: employeePersonalKeys.detail(id),
     queryFn: () => employeeService.getPersonal(id!),
-    enabled: !!id,
+    enabled: Boolean(id),
   })
 }
 
 export function useEmployeePersonalMutations(employeeId: string) {
   const queryClient = useQueryClient()
+  const it = useTranslations('employeePersonal')
 
-  const invalidate = () => {
+  const invalidate = () =>
     queryClient.invalidateQueries({
-      queryKey: employeePersonalKeys.detail(employeeId), //employeePersonalKey(employeeId),
+      queryKey: employeePersonalKeys.detail(employeeId),
     })
+
+  const getIdentificationLabel = (type: IdentificationType): string => {
+    switch (type) {
+      case 'national_id':
+        return it('types.nationalId')
+
+      case 'iqama':
+        return it('types.iqama')
+
+      case 'gcc_id':
+        return it('types.gccId')
+
+      case 'passport':
+        return it('types.passport')
+
+      case 'other':
+        return it('types.other')
+    }
   }
 
   return {
+    // ------------------------------------------------------------------
     // Identifications
+    // ------------------------------------------------------------------
 
     createIdentification: useMutation({
       mutationFn: (data: CreateIdentificationDto) =>
         employeeService.createIdentification(employeeId, data),
 
-      onSuccess: invalidate,
+      onSuccess: async (_, variables) => {
+        const typeLabel = getIdentificationLabel(variables.type)
+
+        toast.success(
+          it('notifications.createdTitle', {
+            type: typeLabel,
+          }),
+          {
+            description: it('notifications.createdDescription', {
+              type: typeLabel,
+            }),
+            duration: 5000,
+          },
+        )
+
+        await invalidate()
+      },
     }),
 
     updateIdentification: useMutation({
-      mutationFn: ({
-        id,
-        data,
-      }: {
-        id: string
-        data: UpdateIdentificationDto
-      }) => employeeService.updateIdentification(employeeId, id, data),
+      mutationFn: ({ id, data }: UpdateIdentificationVariables) =>
+        employeeService.updateIdentification(employeeId, id, data),
 
-      onSuccess: invalidate,
+      onSuccess: async (_, variables) => {
+        /*
+         * UpdateIdentificationDto is partial, so data.type may be absent.
+         * Use the stored type supplied by the calling component as fallback.
+         */
+        const effectiveType = variables.data.type ?? variables.currentType
+
+        const typeLabel = getIdentificationLabel(effectiveType)
+
+        toast.success(
+          it('notifications.updatedTitle', {
+            type: typeLabel,
+          }),
+          {
+            description: it('notifications.updatedDescription', {
+              type: typeLabel,
+            }),
+            duration: 5000,
+          },
+        )
+
+        await invalidate()
+      },
     }),
 
     deleteIdentification: useMutation({
-      mutationFn: (id: string) =>
+      mutationFn: ({ id }: DeleteIdentificationVariables) =>
         employeeService.deleteIdentification(employeeId, id),
 
-      onSuccess: invalidate,
+      onSuccess: async (_, variables) => {
+        const typeLabel = getIdentificationLabel(variables.type)
+
+        toast.success(
+          it('notifications.deletedTitle', {
+            type: typeLabel,
+          }),
+          {
+            description: it('notifications.deletedDescription', {
+              type: typeLabel,
+            }),
+            duration: 5000,
+          },
+        )
+
+        await invalidate()
+      },
     }),
 
+    // ------------------------------------------------------------------
     // Phones
+    // ------------------------------------------------------------------
 
     createPhone: useMutation({
       mutationFn: (data: CreatePhoneDto) =>
@@ -93,7 +182,9 @@ export function useEmployeePersonalMutations(employeeId: string) {
       onSuccess: invalidate,
     }),
 
+    // ------------------------------------------------------------------
     // Emails
+    // ------------------------------------------------------------------
 
     createEmail: useMutation({
       mutationFn: (data: CreateEmailDto) =>
@@ -115,7 +206,9 @@ export function useEmployeePersonalMutations(employeeId: string) {
       onSuccess: invalidate,
     }),
 
+    // ------------------------------------------------------------------
     // Addresses
+    // ------------------------------------------------------------------
 
     createAddress: useMutation({
       mutationFn: (data: CreateAddressDto) =>
@@ -137,7 +230,9 @@ export function useEmployeePersonalMutations(employeeId: string) {
       onSuccess: invalidate,
     }),
 
+    // ------------------------------------------------------------------
     // Dependents
+    // ------------------------------------------------------------------
 
     createDependent: useMutation({
       mutationFn: (data: CreateDependentDto) =>
@@ -160,7 +255,9 @@ export function useEmployeePersonalMutations(employeeId: string) {
       onSuccess: invalidate,
     }),
 
+    // ------------------------------------------------------------------
     // Emergency Contacts
+    // ------------------------------------------------------------------
 
     createEmergencyContact: useMutation({
       mutationFn: (data: CreateEmergencyContactDto) =>
@@ -188,7 +285,9 @@ export function useEmployeePersonalMutations(employeeId: string) {
       onSuccess: invalidate,
     }),
 
+    // ------------------------------------------------------------------
     // Visas
+    // ------------------------------------------------------------------
 
     createVisa: useMutation({
       mutationFn: (data: CreateVisaDto) =>

@@ -10,7 +10,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { CountryCombobox } from '@/modules/countries/components/country-combobox'
-import { CountryLookup } from '@/modules/countries/components/country-lookup'
 import { PersonalErrors } from '@/modules/hr/onboarding/types/onboarding-errors.types'
 import { HireEmployeePayload } from '@/modules/hr/onboarding/types/onboarding.types'
 import { useLocale, useTranslations } from 'next-intl'

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
@@ -12,7 +12,6 @@ import { FormDialog, FormInput, FormSubmitButton } from '@/components/forms'
 import { FormCombobox } from '@/components/forms/form-combobox'
 import { Button } from '@/components/ui/button'
 import { useCreateDepartment } from '../hooks/use-create-department'
-import { useDepartments } from '../hooks/use-departments'
 import { useLocale, useTranslations } from 'next-intl'
 import { useDepartmentLookup } from '../hooks/use-department-lookup'
 

@@ -5,7 +5,6 @@ import {
 } from '../schemas/department.schema'
 import { Department, DepartmentListResponse } from '../types/department.types'
 import { API_ENDPOINTS } from '@/lib/api/endpoints'
-import { number } from 'zod'
 
 export const departmentService = {
   findAll: async () => {

@@ -17,7 +17,7 @@ export function DataTableColumnHeader<TData, TValue>({
   sortBy,
   sortOrder,
 }: DataTableColumnHeaderProps<TData, TValue>) {
-  const sorted = column.getIsSorted()
+  //const sorted = column.getIsSorted()
   const isSortedColumn = sortBy === column.id
   //console.log('HEADER', title, sorted)
 
