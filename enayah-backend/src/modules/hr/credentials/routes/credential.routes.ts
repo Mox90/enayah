@@ -18,7 +18,7 @@ router.get(
   '/employee/:employeeId',
   //requirePermission('employee.credentials.view'),
   requireEmployeeAccess({
-    employeeIdParam: 'id',
+    employeeIdParam: 'employeeId',
     anyEmployeePermission: 'employee.credentials.view',
     selfPermission: 'employee.self.view',
   }),

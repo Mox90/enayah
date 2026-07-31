@@ -33,8 +33,8 @@ export function HijriDatePicker({
         format: 'YYYY-MM-DD',
       })
     } catch (e) {
-      return undefined
       console.log(e)
+      return undefined
     }
   }, [value])
 

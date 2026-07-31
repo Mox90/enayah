@@ -70,8 +70,8 @@ export function NotificationBell() {
   const isRtl = locale.toLowerCase().startsWith('ar')
   const userId = useAuthStore((state) => state.user?.id)
   const { data = [], isLoading, isError } = useNotifications(userId)
-  const markRead = useMarkNotificationRead()
-  const archive = useArchiveNotification()
+  const markRead = useMarkNotificationRead(userId)
+  const archive = useArchiveNotification(userId)
   const unreadCount = data.filter((item) => !item.isRead).length
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
 

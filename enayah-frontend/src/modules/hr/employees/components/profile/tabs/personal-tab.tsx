@@ -182,7 +182,7 @@ const PersonalTab = ({ personal }: Props) => {
         return pt('types.nationalId')
 
       case 'iqama':
-        return pt('identifications.types.iqama')
+        return pt('types.iqama')
 
       case 'gcc_id':
         return pt('types.gccId')

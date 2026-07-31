@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -38,6 +38,8 @@ function RangeInput({ range, total, onRangeChange }: RangeInputProps) {
 
   const [inputValue, setInputValue] = useState(initialValue)
   const [error, setError] = useState('')
+
+  const cancelBlurRef = useRef(false)
 
   const commitRange = () => {
     const value = inputValue.trim()
@@ -111,13 +113,23 @@ function RangeInput({ range, total, onRangeChange }: RangeInputProps) {
               setError('')
             }
           }}
-          onBlur={commitRange}
+          onBlur={() => {
+            if (cancelBlurRef.current) {
+              cancelBlurRef.current = false
+              return
+            }
+
+            commitRange()
+          }}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
               event.currentTarget.blur()
+              return
             }
 
             if (event.key === 'Escape') {
+              event.preventDefault()
+              cancelBlurRef.current = true
               cancelEditing()
               event.currentTarget.blur()
             }
