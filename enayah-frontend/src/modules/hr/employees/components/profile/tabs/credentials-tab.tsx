@@ -14,10 +14,6 @@ import {
   DegreeFormValue,
 } from '@/components/dialogs/degree-dialog'
 import {
-  DegreeInput,
-  MalpracticeInput,
-} from '@/modules/hr/onboarding/types/onboarding.types'
-import {
   useCreateDegree,
   useDeleteDegree,
   useUpdateDegree,
@@ -89,7 +85,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
     | 'malpractice'
     | null
   >(null)
-  const { data, isLoading, error, isError } = useEmployeeCredentials(employeeId)
+  const { data, isLoading, error } = useEmployeeCredentials(employeeId)
   //const [open, setOpen] = useState(false)
 
   const [editingDegree, setEditingDegree] = useState<DegreeFormValue | null>(

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FormDialog } from '../forms'
@@ -15,7 +14,7 @@ export type MalpracticeFormValue = {
   policyNumber: string
   coverageAmount?: string | number | null
   startDate?: string | null
-  expiryDate: string
+  expiryDate: string | null
   documentFileId?: string | null
   isVerified?: boolean
 }

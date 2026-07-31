@@ -11,10 +11,9 @@ import {
   CreateDepartmentFormValues,
 } from '../schemas/department.schema'
 import { useUpdateDepartment } from '../hooks/use-update-department'
-import { useEffect, useTransition } from 'react'
+import { useEffect } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import { FormCombobox } from '@/components/forms/form-combobox'
-import { useDepartments } from '../hooks/use-departments'
 import { useDepartmentLookup } from '../hooks/use-department-lookup'
 
 interface Props {

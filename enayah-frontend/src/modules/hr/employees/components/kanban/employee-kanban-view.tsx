@@ -10,6 +10,7 @@ interface Props {
 }
 
 export function EmployeeKanbanView({ employees, isLoading }: Props) {
+  console.log(employees)
   const locale = useLocale() as 'en' | 'ar'
   if (isLoading) {
     return

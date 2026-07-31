@@ -3,14 +3,8 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, Plus } from 'lucide-react'
-import { format } from 'date-fns'
 import { useLocale, useTranslations } from 'next-intl'
-import {
-  formatDate,
-  getExpiryStatus,
-  toArabic,
-  toPersianDigits,
-} from '@/utils/utilities'
+import { formatDate, getExpiryStatus, toPersianDigits } from '@/utils/utilities'
 import { EmployeePersonalDetails } from '@/modules/hr/employees/types/employee-personal-details.types'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'

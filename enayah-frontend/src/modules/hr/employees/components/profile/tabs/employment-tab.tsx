@@ -1,14 +1,8 @@
 'use client'
 
-import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useEmploymentTimeline } from '@/modules/hr/employments/hooks/use-employment-timeline'
-import {
-  formatDate,
-  humanize,
-  toArabic,
-  toPersianDigits,
-} from '@/utils/utilities'
+import { formatDate, humanize, toPersianDigits } from '@/utils/utilities'
 import { useLocale, useTranslations } from 'next-intl'
 
 type ContractMovement = {
@@ -44,41 +38,41 @@ type Contract = {
   movements?: ContractMovement[]
 }
 
-type Employment = {
-  id: string
-  hireDate: string
-  startDate: string
-  endDate?: string | null
-  employmentType: string
-  staffCategory: string
-  status: string
-  contracts?: Contract[]
-}
+// type Employment = {
+//   id: string
+//   hireDate: string
+//   startDate: string
+//   endDate?: string | null
+//   employmentType: string
+//   staffCategory: string
+//   status: string
+//   contracts?: Contract[]
+// }
 
 interface Props {
   employeeId: string
 }
 
-function Field({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className='space-y-1'>
-      <div className='text-xs text-muted-foreground'>{label}</div>
-      <div className='font-medium'>{value ?? '-'}</div>
-    </div>
-  )
-}
+// function Field({ label, value }: { label: string; value: React.ReactNode }) {
+//   return (
+//     <div className='space-y-1'>
+//       <div className='text-xs text-muted-foreground'>{label}</div>
+//       <div className='font-medium'>{value ?? '-'}</div>
+//     </div>
+//   )
+// }
 
-const statusClass: Record<string, string> = {
-  active: 'bg-green-100 text-green-700 border-green-200',
-  draft: 'bg-gray-100 text-gray-700 border-gray-200',
-  expired: 'bg-red-100 text-red-700 border-red-200',
-  superseded: 'bg-orange-100 text-orange-700 border-orange-200',
-  cancelled: 'bg-red-100 text-red-700 border-red-200',
-  terminated: 'bg-red-100 text-red-700 border-red-200',
-  resigned: 'bg-orange-100 text-orange-700 border-orange-200',
-  eoc: 'bg-purple-100 text-purple-700 border-purple-200',
-  on_leave: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-}
+// const statusClass: Record<string, string> = {
+//   active: 'bg-green-100 text-green-700 border-green-200',
+//   draft: 'bg-gray-100 text-gray-700 border-gray-200',
+//   expired: 'bg-red-100 text-red-700 border-red-200',
+//   superseded: 'bg-orange-100 text-orange-700 border-orange-200',
+//   cancelled: 'bg-red-100 text-red-700 border-red-200',
+//   terminated: 'bg-red-100 text-red-700 border-red-200',
+//   resigned: 'bg-orange-100 text-orange-700 border-orange-200',
+//   eoc: 'bg-purple-100 text-purple-700 border-purple-200',
+//   on_leave: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+// }
 
 const EmploymentTab = ({ employeeId }: Props) => {
   const { data, isLoading, error } = useEmploymentTimeline(employeeId)

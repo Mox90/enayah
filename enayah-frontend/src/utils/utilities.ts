@@ -131,8 +131,8 @@ export function toArabicDigits(
   return String(value).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)])
 }
 
-const finiteAttentionPulse =
-  'motion-safe:animate-[pulse_1s_ease-in-out_3] motion-reduce:animate-none'
+// const finiteAttentionPulse =
+//   'motion-safe:animate-[pulse_1s_ease-in-out_3] motion-reduce:animate-none'
 const urgentAttentionClass = [
   'motion-safe:animate-ping',
   'motion-safe:[animation-iteration-count:5]',

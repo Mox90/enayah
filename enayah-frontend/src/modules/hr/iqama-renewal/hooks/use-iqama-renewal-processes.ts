@@ -11,15 +11,12 @@ import { toast } from 'sonner'
 import { iqamaRenewalService } from '../services/iqama-renewal.service'
 import type { IqamaRenewalListParams } from '../services/iqama-renewal.service'
 import type {
-  AssigneeOption,
   ChangeIqamaRenewalStatusPayload,
   CompleteIqamaRenewalPayload,
   CreateIqamaRenewalCasePayload,
   ReturnIqamaRenewalToHrPayload,
   UpdateIqamaRenewalCasePayload,
 } from '../types/iqama-renewal.types'
-import { useTranslations } from 'next-intl'
-import { api } from '@/lib/api/client'
 import { iqamaRenewalCommentKeys } from './use-iqama-renewal-comments'
 import { employeePersonalKeys } from '../../employees/hooks/use-employee-personal-details'
 
@@ -60,7 +57,7 @@ export function useIqamaRenewalProcess(id?: string | null) {
 
 export function useCreateIqamaRenewalProcess() {
   const queryClient = useQueryClient()
-  const t = useTranslations('iqamaRenewal')
+  //const t = useTranslations('iqamaRenewal')
 
   return useMutation({
     mutationFn: (payload: CreateIqamaRenewalCasePayload) =>
@@ -85,7 +82,7 @@ export function useCreateIqamaRenewalProcess() {
 
 export function useUpdateIqamaRenewalCase() {
   const queryClient = useQueryClient()
-  const t = useTranslations('iqamaRenewal')
+  //const t = useTranslations('iqamaRenewal')
 
   return useMutation({
     mutationFn: ({

@@ -2,13 +2,10 @@
 
 import { useState } from 'react'
 
-import { Button } from '@/components/ui/button'
-
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FormDialog } from '../forms'
 import { useLocale, useTranslations } from 'next-intl'
-import { DialogFooter } from '../ui/dialog'
 import { Footer } from '../footer/footer'
 import { Save } from 'lucide-react'
 
@@ -114,6 +111,7 @@ function FellowshipDialogContent({
     } catch (error) {
       // Keep the dialog open.
       // The parent mutation hook can display the error toast.
+      console.log(error)
     } finally {
       setIsSubmitting(false)
     }

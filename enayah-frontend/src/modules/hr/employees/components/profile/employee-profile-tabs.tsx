@@ -19,9 +19,7 @@ import {
   UserRound,
 } from 'lucide-react'
 import { Badge as UiBadge } from '@/components/ui/badge'
-import { useEmployeeCredentials } from '@/modules/hr/credentials/hooks/use-employee-credentials'
 import { useCredentialSummary } from '../../hooks/use-employee-profile'
-import { toPersianDigits } from '@/utils/utilities'
 
 interface Props {
   employeeId: string

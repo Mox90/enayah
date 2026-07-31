@@ -124,8 +124,8 @@ export function EmployeeAvatarUploader({
 
   const displayedAvatar = previewUrl || avatar || '/MODHS3.png'
 
-  const isUploadedAvatar =
-    Boolean(previewUrl) || Boolean(avatar?.startsWith('/uploads/'))
+  // const isUploadedAvatar =
+  //   Boolean(previewUrl) || Boolean(avatar?.startsWith('/uploads/'))
 
   return (
     <TooltipProvider delayDuration={300}>

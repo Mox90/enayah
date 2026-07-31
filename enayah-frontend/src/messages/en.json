@@ -757,5 +757,38 @@
     "kanban": "Kanban View",
     "tree": "Tree View",
     "hierarchy": "Organizational Chart View"
+  },
+  "employeePersonal": {
+    "types": {
+      "nationalId": "National ID",
+      "iqama": "Iqama",
+      "gccId": "GCC ID",
+      "passport": "Passport",
+      "other": "Identification"
+    },
+    "actions": {
+      "delete": "Delete identification"
+    },
+    "notifications": {
+      "createdTitle": "{type} created successfully",
+      "createdDescription": "The {type} has been added to the employee's personal records.",
+      "updatedTitle": "{type} updated successfully",
+      "updatedDescription": "The latest {type} information has been saved.",
+      "deletedTitle": "{type} deleted successfully",
+      "deletedDescription": "The {type} has been removed from the employee's personal records."
+    },
+    "entities": {
+      "phone": "phone number",
+      "email": "email address",
+      "address": "address",
+      "dependent": "dependent",
+      "emergencyContact": "emergency contact",
+      "visa": "visa"
+    },
+    "deleteConfirmation": {
+      "title": "Delete {item}?",
+      "description": "Are you sure you want to delete this {item}? This action cannot be undone.",
+      "deleting": "Deleting..."
+    }
   }
 }

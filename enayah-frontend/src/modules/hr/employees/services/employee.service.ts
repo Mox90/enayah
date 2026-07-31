@@ -369,6 +369,8 @@ export const employeeService = {
       `${API_ENDPOINTS.hr.employees}/me/profile`,
     )
 
+    //console.log(response.data)
+
     return response.data
   },
 }

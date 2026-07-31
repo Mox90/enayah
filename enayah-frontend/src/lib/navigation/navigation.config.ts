@@ -6,7 +6,6 @@ import {
   Calendar,
   ClipboardList,
   Database,
-  FileText,
   FolderOpen,
   GraduationCap,
   LayoutDashboard,
@@ -17,13 +16,11 @@ import {
   Wallet,
   CheckSquare,
   UserCheck,
-  PickaxeIcon,
   Waypoints,
   TrafficCone,
   FileClock,
   LucideIcon,
 } from 'lucide-react'
-import React from 'react'
 
 export interface NavigationItem {
   label: string

@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { EnterpriseFilterConfig } from './enterprise-filter-types'
 import { EnterpriseFilterGroup } from './enterprise-filter-group'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 type EnterpriseFilterValues = Record<string, string[]>

@@ -23,6 +23,7 @@ import {
 
 import type { NotificationItem } from '../services/notification.service'
 import { useState } from 'react'
+import { useAuthStore } from '@/modules/iam/stores/auth.store'
 
 const severityClass: Record<string, string> = {
   info: 'bg-blue-500',
@@ -67,9 +68,10 @@ export function NotificationBell() {
   const router = useRouter()
   const locale = useLocale()
   const isRtl = locale.toLowerCase().startsWith('ar')
-  const { data = [], isLoading, isError } = useNotifications()
-  const markRead = useMarkNotificationRead()
-  const archive = useArchiveNotification()
+  const userId = useAuthStore((state) => state.user?.id)
+  const { data = [], isLoading, isError } = useNotifications(userId)
+  const markRead = useMarkNotificationRead(userId)
+  const archive = useArchiveNotification(userId)
   const unreadCount = data.filter((item) => !item.isRead).length
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
 

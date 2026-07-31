@@ -17,7 +17,7 @@ import {
 import type { IqamaRenewalSortBy } from '../services/iqama-renewal.service'
 import type { IqamaRenewalCase } from '../types/iqama-renewal.types'
 import { IqamaRenewalStatusBadge } from './iqama-renewal-status-badge'
-import { formatDate, toArabic, toPersianDigits } from '@/utils/utilities'
+import { formatDate, toPersianDigits } from '@/utils/utilities'
 
 type Labels = {
   employeeNumber: string

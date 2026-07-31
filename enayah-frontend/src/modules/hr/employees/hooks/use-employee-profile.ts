@@ -4,16 +4,16 @@ import { useQuery } from '@tanstack/react-query'
 
 import { employeeService } from '../services/employee.service'
 import { EmployeeProfileSummary } from '../types/employee-personal.dto'
-import { employeeQueryKeys } from './employee-query-keys'
+//import { employeeQueryKeys } from './employee-query-keys'
 
-// export const employeeQueryKeys = {
-//   all: ['employees'] as const,
+export const employeeQueryKeys = {
+  all: ['employees'] as const,
 
-//   profile: (id: string) => [...employeeQueryKeys.all, 'profile', id] as const,
+  profile: (id: string) => [...employeeQueryKeys.all, 'profile', id] as const,
 
-//   profileSummary: (id: string) =>
-//     [...employeeQueryKeys.all, 'profile-summary', id] as const,
-// }
+  profileSummary: (id: string) =>
+    [...employeeQueryKeys.all, 'profile-summary', id] as const,
+}
 
 export function useEmployeeProfile(id?: string) {
   return useQuery({

@@ -20,12 +20,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { useQueryClient } from '@tanstack/react-query'
 
 const Login = () => {
   const t = useTranslations('auth')
   const locale = useLocale()
   const router = useRouter()
   const isRtl = locale === 'ar'
+  const queryClient = useQueryClient()
 
   const login = useAuthStore((state) => state.login)
   const setPermissions = usePermissionStore((state) => state.setPermissions)
@@ -48,11 +50,31 @@ const Login = () => {
         password,
       })
 
+      /*
+       * Stop requests and remove cached data belonging
+       * to the previously authenticated user.
+       */
+      await queryClient.cancelQueries()
+      queryClient.clear()
+
+      /*
+       * Store the newly authenticated user only after
+       * the previous user's query cache has been cleared.
+       */
       login(response.accessToken, response.user)
+
+      //console.log(response.user?.roles)
 
       const permissions =
         response.user?.roles?.flatMap(
-          (role: any) => role.permissions?.map((perm: any) => perm.code) || [],
+          (role: {
+            id: string
+            name: string
+            permissions: [{ id: string; code: string }]
+          }) =>
+            role.permissions?.map(
+              (perm: { id: string; code: string }) => perm.code,
+            ) || [],
         ) || []
 
       setPermissions(permissions)

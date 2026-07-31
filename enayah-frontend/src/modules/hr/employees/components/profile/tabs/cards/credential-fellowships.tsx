@@ -2,13 +2,9 @@
 
 'use client'
 
-import type { ReactNode } from 'react'
-import { format, isValid, parseISO } from 'date-fns'
-import { arSA, enUS } from 'date-fns/locale'
 import { Medal, Plus } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { VerificationBadge } from '@/components/badges/verification-badge'

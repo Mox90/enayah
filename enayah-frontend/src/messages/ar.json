@@ -759,5 +759,38 @@
     "kanban": "طريقة عرض كانبان ",
     "tree": "عرض شجري",
     "hierarchy": "عرض الهيكل التنظيمي"
+  },
+  "employeePersonal": {
+    "types": {
+      "nationalId": "الهوية الوطنية",
+      "iqama": "الإقامة",
+      "gccId": "هوية مجلس التعاون الخليجي",
+      "passport": "جواز السفر",
+      "other": "الهوية"
+    },
+    "actions": {
+      "delete": "حذف الهوية"
+    },
+    "notifications": {
+      "createdTitle": "تم إنشاء {type} بنجاح",
+      "createdDescription": "تمت إضافة {type} إلى السجلات الشخصية للموظف.",
+      "updatedTitle": "تم تحديث {type} بنجاح",
+      "updatedDescription": "تم حفظ أحدث معلومات {type}.",
+      "deletedTitle": "تم حذف {type} بنجاح",
+      "deletedDescription": "تمت إزالة {type} من السجلات الشخصية للموظف."
+    },
+    "entities": {
+      "phone": "رقم الهاتف",
+      "email": "البريد الإلكتروني",
+      "address": "العنوان",
+      "dependent": "التابع",
+      "emergencyContact": "جهة اتصال الطوارئ",
+      "visa": "التأشيرة"
+    },
+    "deleteConfirmation": {
+      "title": "حذف {item}؟",
+      "description": "هل أنت متأكد من رغبتك في حذف {item}؟ لا يمكن التراجع عن هذا الإجراء.",
+      "deleting": "جارٍ الحذف..."
+    }
   }
 }

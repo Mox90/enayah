@@ -37,7 +37,7 @@ export function CountryCombobox({ value, onChange, placeholder }: Props) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
-  const { data, isLoading, error } = useCountries({
+  const { data } = useCountries({
     search,
     limit: 20,
   })

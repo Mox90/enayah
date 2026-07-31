@@ -7,6 +7,7 @@ import {
 import { audit } from '../../../../core/middleware/audit.middleware'
 import { getParam } from '../../../../core/utils/request.utils'
 import { EmploymentController } from '../controller/employment.controller'
+import { requireEmployeeAccess } from '../../../../core/middleware/employee-access.middleware'
 
 const router = Router()
 
@@ -15,7 +16,12 @@ router.use(attachPermissions)
 
 router.get(
   '/employee/:employeeId',
-  requirePermission('employee.view'),
+  //requirePermission('employee.view'),
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.view',
+    selfPermission: 'employee.self.view',
+  }),
   EmploymentController.getEmploymentTimeline,
 )
 

@@ -3,32 +3,54 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { notificationService } from '../services/notification.service'
 
-export function useNotifications() {
+export const notificationQueryKeys = {
+  all: ['notifications'] as const,
+
+  mine: (userId: string) =>
+    [...notificationQueryKeys.all, 'mine', userId] as const,
+}
+
+export function useNotifications(userId?: string) {
   return useQuery({
-    queryKey: ['notifications'],
+    queryKey: notificationQueryKeys.mine(userId ?? ''),
     queryFn: notificationService.mine,
-    refetchInterval: 5_000, //60_000,
+    enabled: Boolean(userId),
+    refetchInterval: userId ? 5_000 : false,
   })
 }
 
-export function useMarkNotificationRead() {
+export function useMarkNotificationRead(userId?: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: notificationService.markAsRead,
+
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] })
+      if (!userId) {
+        return
+      }
+
+      queryClient.invalidateQueries({
+        queryKey: notificationQueryKeys.mine(userId),
+      })
     },
   })
 }
 
-export function useArchiveNotification() {
+export function useArchiveNotification(userId?: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: notificationService.archive,
+
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] })
+      if (!userId) {
+        return
+      }
+
+      queryClient.invalidateQueries({
+        queryKey: notificationQueryKeys.mine(userId),
+      })
     },
   })
 }

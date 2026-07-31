@@ -8,23 +8,24 @@ import { Button } from '@/components/ui/button'
 import { useMyEmployeeProfile } from '../../../hooks/use-my-employee-profile'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { EmployeeProfileHeader } from '../employee-profile-header'
-import { useParams } from 'next/navigation'
 import { useUploadEmployeeAvatar } from '../../../hooks/use-upload-employee-avatar'
 import { EmployeeProfileTabs } from '../employee-profile-tabs'
+import { useAuthStore } from '@/modules/iam/stores/auth.store'
 
 export function MyEmployeeProfile() {
-  const params = useParams<{
-    id: string
-  }>()
+  // const params = useParams<{
+  //   id: string
+  // }>()
+  const user = useAuthStore((state) => state.user)
 
-  const employeeId = params.id
+  //const employeeId = params.id
   const {
     data: profile,
     isLoading,
     isError,
     error,
     refetch,
-  } = useMyEmployeeProfile()
+  } = useMyEmployeeProfile(user?.id)
 
   //const uploadAvatarMutation = useUploadEmployeeAvatar(employeeId)
   const resolvedEmployeeId = profile?.personal.id ?? ''

@@ -14,16 +14,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-import { Bell, Globe, Moon, Sun, User, LogOut, Settings } from 'lucide-react'
+import { Moon, Sun, User, LogOut, Settings } from 'lucide-react'
 import LanguageSwitcher from './language-switcher'
 import { useLocale, useTranslations } from 'next-intl'
 import MobileSidebar from './mobile-sidebar'
 import { api } from '@/lib/api/client'
 import { Link, useRouter } from '../../../i18n/navigation'
-import { transform } from 'zod'
 import { NotificationBell } from '@/modules/notifications/components/notification-bell'
-import { useEmployeeProfile } from '@/modules/hr/employees/hooks/use-employee-profile'
 import { useMyEmployeeProfile } from '@/modules/hr/employees/hooks/use-my-employee-profile'
+import { useQueryClient } from '@tanstack/react-query'
 //import { router } from 'next/client'
 
 const Topbar = () => {
@@ -31,10 +30,11 @@ const Topbar = () => {
   const router = useRouter()
   const locale = useLocale()
   const user = useAuthStore((state) => state.user)
+  const queryClient = useQueryClient()
   // const { data: employeeProfile } = useEmployeeProfile(
   //   (user?.employeeId || user?.employee?.id) ?? undefined,
   // )
-  const { data: employeeProfile } = useMyEmployeeProfile()
+  const { data: employeeProfile } = useMyEmployeeProfile(user?.id)
 
   const avatar = employeeProfile?.personal.avatar ?? null
   const logout = useAuthStore((state) => state.logout)
@@ -47,9 +47,11 @@ const Topbar = () => {
     } catch (error) {
       console.error(error)
     } finally {
+      await queryClient.cancelQueries()
       logout()
       //window.location.href = `/${locale}/login`
       //router.replace(`/${locale}/login`)
+      queryClient.clear()
       router.replace(`/login`)
     }
   }

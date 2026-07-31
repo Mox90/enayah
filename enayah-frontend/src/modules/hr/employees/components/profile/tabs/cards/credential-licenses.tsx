@@ -1,18 +1,14 @@
 'use client'
 
-import { format, isValid, parseISO } from 'date-fns'
 import { FileBadge2, Plus } from 'lucide-react'
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { VerificationBadge } from '@/components/badges/verification-badge'
-import { StatusBadge } from '@/components/badges/status-badge'
 import { LicenseInput } from '@/modules/hr/onboarding/types/onboarding.types'
 import { useLocale, useTranslations } from 'next-intl'
-import { cn } from '@/lib/utils'
 import { formatDate, toPersianDigits } from '@/utils/utilities'
 import { RowActions } from '@/components/dialogs/row-actions'
 import { ExpiryStatusBadge } from '@/components/badges/expiry-status-badge'
-import { arSA, enUS } from 'date-fns/locale'
 import { DetailItem } from '@/components/forms/form-detail-item'
 
 // interface Props {
