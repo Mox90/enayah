@@ -51,3 +51,9 @@ Iqama.xlsx
 *.tar.gz
 
 backups/
+
+storage/public/*
+storage/private/*
+
+!storage/public/.gitkeep
+!storage/private/.gitkeep

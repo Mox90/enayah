@@ -1,69 +1,19 @@
-// 'use client'
-
-// import { LayoutGrid } from 'lucide-react'
-// import { List } from 'lucide-react'
-// import { Network } from 'lucide-react'
-// import { GitBranch } from 'lucide-react'
-
-// import { Button } from '@/components/ui/button'
-
-// import { EmployeeView } from '../../types/employee-view.types'
-// import { ButtonGroup } from '@/components/ui/button-group'
-
-// interface Props {
-//   view: EmployeeView
-
-//   onViewChange: (view: EmployeeView) => void
-// }
-
-// export function EmployeeViewSwitcher({ view, onViewChange }: Props) {
-//   return (
-//     <div className='flex items-center gap-1'>
-//       <ButtonGroup>
-//         <Button
-//           variant={view === 'list' ? 'default' : 'outline'}
-//           size='icon'
-//           onClick={() => onViewChange('list')}
-//         >
-//           <List />
-//         </Button>
-
-//         <Button
-//           variant={view === 'kanban' ? 'default' : 'outline'}
-//           size='icon'
-//           onClick={() => onViewChange('kanban')}
-//         >
-//           <LayoutGrid />
-//         </Button>
-
-//         <Button
-//           variant={view === 'tree' ? 'default' : 'outline'}
-//           size='icon'
-//           onClick={() => onViewChange('tree')}
-//         >
-//           <GitBranch />
-//         </Button>
-
-//         <Button
-//           variant={view === 'hierarchy' ? 'default' : 'outline'}
-//           size='icon'
-//           onClick={() => onViewChange('hierarchy')}
-//         >
-//           <Network />
-//         </Button>
-//       </ButtonGroup>
-//     </div>
-//   )
-// }
-
 'use client'
 
-import { LayoutGrid, List, Network, GitBranch } from 'lucide-react'
+import { GitBranch, LayoutGrid, List, Network } from 'lucide-react'
+
 import { Button } from '@/components/ui/button'
-import { EmployeeView } from '../../types/employee-view.types'
 import { ButtonGroup } from '@/components/ui/button-group'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
-import { useLocale } from 'next-intl'
+
+import { EmployeeView } from '../../types/employee-view.types'
+import { useTranslations } from 'next-intl'
 
 interface Props {
   view: EmployeeView
@@ -71,46 +21,79 @@ interface Props {
 }
 
 const views = [
-  { value: 'list', icon: List },
-  { value: 'kanban', icon: LayoutGrid },
-  { value: 'tree', icon: GitBranch },
-  { value: 'hierarchy', icon: Network },
-] as const
+  {
+    value: 'list',
+    label: 'List View',
+    icon: List,
+  },
+  {
+    value: 'kanban',
+    label: 'Kanban View',
+    icon: LayoutGrid,
+  },
+  {
+    value: 'tree',
+    label: 'Tree View',
+    icon: GitBranch,
+  },
+  {
+    value: 'hierarchy',
+    label: 'Organizational View',
+    icon: Network,
+  },
+] as const satisfies ReadonlyArray<{
+  value: EmployeeView
+  label: string
+  icon: typeof List
+}>
 
 export function EmployeeViewSwitcher({ view, onViewChange }: Props) {
+  const t = useTranslations('tooltip')
   return (
-    <div className='w-full overflow-x-auto sm:w-auto'>
-      <div dir='ltr' className='inline-flex'>
-        {/* <ButtonGroup className='w-full sm:w-auto'> */}
-        <ButtonGroup
-          className={cn(
-            'w-fit',
-            '[&>button:first-child]:rounded-l-xl',
-            '[&>button:last-child]:rounded-r-xl',
-            'w-full sm:w-auto',
-          )}
-        >
-          {views.map((item) => {
-            const Icon = item.icon
-            const active = view === item.value
+    <TooltipProvider delayDuration={300}>
+      <div className='w-full overflow-x-auto sm:w-auto'>
+        <div dir='ltr' className='inline-flex'>
+          <ButtonGroup
+            className={cn(
+              'w-fit',
+              'w-full sm:w-auto',
+              '[&>button:first-child]:rounded-l-xl',
+              '[&>button:last-child]:rounded-r-xl',
+            )}
+          >
+            {views.map((item) => {
+              const Icon = item.icon
+              const active = view === item.value
 
-            return (
-              <Button
-                key={item.value}
-                variant={active ? 'default' : 'outline'}
-                size='icon'
-                onClick={() => onViewChange(item.value)}
-                className={cn(
-                  'h-10 min-w-10 rounded-xl transition-all',
-                  active && 'shadow-sm',
-                )}
-              >
-                <Icon className='h-4 w-4' />
-              </Button>
-            )
-          })}
-        </ButtonGroup>
+              return (
+                <Tooltip key={item.value}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type='button'
+                      variant={active ? 'default' : 'outline'}
+                      size='icon'
+                      aria-label={item.label}
+                      aria-pressed={active}
+                      onClick={() => onViewChange(item.value)}
+                      className={cn(
+                        'h-10 min-w-10 rounded-xl transition-all',
+                        active && 'shadow-sm',
+                      )}
+                    >
+                      <Icon className='h-4 w-4' aria-hidden='true' />
+                    </Button>
+                  </TooltipTrigger>
+
+                  <TooltipContent side='bottom' sideOffset={1}>
+                    {/* <p>{t(item.label)}</p> */}
+                    <p>{t(item.value)}</p>
+                  </TooltipContent>
+                </Tooltip>
+              )
+            })}
+          </ButtonGroup>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   )
 }

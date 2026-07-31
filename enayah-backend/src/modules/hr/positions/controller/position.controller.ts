@@ -48,6 +48,7 @@ export const PositionController = {
   delete: asyncHandler(async (req: Request, res: Response) => {
     const { id } = positionIdSchema.parse(req.params)
     const userId = req.user?.id // from auth middleware
+    if (!userId) throw new Error('Authenticated user required')
     await PositionService.delete(id, userId)
     res.status(204).send()
   }),

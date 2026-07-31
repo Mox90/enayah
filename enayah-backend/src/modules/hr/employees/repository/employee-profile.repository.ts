@@ -19,6 +19,8 @@ import {
   employeeMemberships,
   employeeTrainingRecords,
   employeeCpdRecords,
+  files,
+  users,
 } from '../../../../db'
 
 import { and, eq, isNull, sql } from 'drizzle-orm'
@@ -26,6 +28,9 @@ import {
   EmployeeProfileSummary,
   EmployeeProfileSummaryCounts,
 } from '../dto/employee-profile-summary.types'
+import { alias } from 'drizzle-orm/pg-core'
+
+const employeeAvatarFiles = alias(files, 'employee_avatar_files')
 
 const isActiveEmployeeRecord = and(
   eq(employees.isDeleted, false),
@@ -33,6 +38,21 @@ const isActiveEmployeeRecord = and(
 )
 
 export const EmployeeProfileRepository = {
+  findEmployeeIdByUserId: async (
+    tx: DB,
+    userId: string,
+  ): Promise<string | null> => {
+    const [result] = await tx
+      .select({
+        employeeId: users.employeeId,
+      })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1)
+
+    return result?.employeeId ?? null
+  },
+
   findProfile: async (tx: DB, employeeId: string) => {
     /*
      * These queries return one deterministic row:
@@ -70,6 +90,10 @@ export const EmployeeProfileRepository = {
 
         gender: employees.gender,
         dateOfBirth: employees.dateOfBirth,
+
+        avatarFileId: employees.avatarFileId,
+        avatarStorageKey: employeeAvatarFiles.storageKey,
+        avatarMimeType: employeeAvatarFiles.mimeType,
 
         nationality: {
           id: countries.id,
@@ -142,6 +166,17 @@ export const EmployeeProfileRepository = {
         positionTitleAr: positions.titleAr,
       })
       .from(employees)
+
+      .leftJoin(
+        employeeAvatarFiles,
+        and(
+          eq(employees.avatarFileId, employeeAvatarFiles.id),
+          eq(employeeAvatarFiles.visibility, 'public'),
+          eq(employeeAvatarFiles.category, 'employee_avatar'),
+          eq(employeeAvatarFiles.isDeleted, false),
+          isNull(employeeAvatarFiles.deletedAt),
+        ),
+      )
 
       .leftJoin(countries, eq(employees.countryId, countries.id))
 

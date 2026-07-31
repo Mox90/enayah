@@ -305,3 +305,22 @@ export const iqamaRenewalStatusEnum = pgEnum('iqama_renewal_status', [
   'eoc_required',
   'cancelled',
 ])
+
+export const fileVisibilityEnum = pgEnum('file_visibility', [
+  'public',
+  'private',
+])
+
+export const fileCategoryEnum = pgEnum('file_category', [
+  'employee_avatar',
+  'employee_degree',
+  'employee_license',
+  'employee_board',
+  'employee_fellowship',
+  'employee_membership',
+  'employee_life_support',
+  'employee_malpractice',
+  'employee_identification',
+  'employee_contract',
+  'other',
+])

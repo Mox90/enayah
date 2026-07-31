@@ -174,6 +174,9 @@ export function toEmployeeProfileResponse(employee: any) {
       gender: employee.gender,
       dateOfBirth: employee.dateOfBirth,
 
+      avatarFileId: employee.avatarFileId ?? null,
+      avatar: employee.avatar ?? null,
+
       nationality: employee.nationality?.id ? employee.nationality : null,
       version: employee.version,
     },

@@ -324,7 +324,6 @@
 
 import type { ReactNode } from 'react'
 import { useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { addDays, format, isValid, parseISO } from 'date-fns'
 import {
@@ -453,24 +452,6 @@ function getNextDay(date: string) {
 
   return format(addDays(parsedDate, 1), 'yyyy-MM-dd')
 }
-
-// function formatProfileDate(value: string | null | undefined, isRtl: boolean) {
-//   if (!value) {
-//     return '-'
-//   }
-
-//   if (isRtl) {
-//     return toArabic(value, 3)
-//   }
-
-//   const parsedDate = parseISO(value)
-
-//   if (!isValid(parsedDate)) {
-//     return '-'
-//   }
-
-//   return format(parsedDate, 'dd MMM yyyy')
-// }
 
 function localizeValue(
   value: string | number | null | undefined,

@@ -1,36 +1,67 @@
+// ebayah-backend/src/core/middleware/permission.middleware.ts
+
 import { Request, Response, NextFunction } from 'express'
 import { AppError } from '../errors/AppError'
 import { resolvePermissions } from '../security/permissionResolver'
 
+// export const requirePermission =
+//   (...requiredPermissions: string[]) =>
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     const user = req.user
+
+//     if (!user) {
+//       throw new AppError('Unauthorized', 401)
+//     }
+
+//     //const permissions: string[] = user.permissions ?? []
+//     const permissions = user.permissions ?? (await resolvePermissions(user.id))
+
+//     if (permissions.length === 0) {
+//       throw new AppError('Forbidden: No permissions', 403)
+//     }
+
+//     const hasPermission = requiredPermissions.every((perm) =>
+//       permissions.includes(perm),
+//     )
+
+//     if (!hasPermission) {
+//       throw new AppError('Forbidden: Insufficient permissions', 403)
+//     }
+
+//     if (!user.permissions) {
+//       user.permissions = permissions
+//     }
+
+//     next()
+//   }
 export const requirePermission =
   (...requiredPermissions: string[]) =>
-  async (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user
+  (req: Request, _res: Response, next: NextFunction) => {
+    try {
+      const user = req.user
 
-    if (!user) {
-      throw new AppError('Unauthorized', 401)
+      if (!user) {
+        throw new AppError('Unauthorized', 401)
+      }
+
+      const permissions = user.permissions ?? []
+
+      if (permissions.length === 0) {
+        throw new AppError('Forbidden: No permissions', 403)
+      }
+
+      const hasAllPermissions = requiredPermissions.every((permission) =>
+        permissions.includes(permission),
+      )
+
+      if (!hasAllPermissions) {
+        throw new AppError('Forbidden: Insufficient permissions', 403)
+      }
+
+      next()
+    } catch (error) {
+      next(error)
     }
-
-    //const permissions: string[] = user.permissions ?? []
-    const permissions = user.permissions ?? (await resolvePermissions(user.id))
-
-    if (permissions.length === 0) {
-      throw new AppError('Forbidden: No permissions', 403)
-    }
-
-    const hasPermission = requiredPermissions.every((perm) =>
-      permissions.includes(perm),
-    )
-
-    if (!hasPermission) {
-      throw new AppError('Forbidden: Insufficient permissions', 403)
-    }
-
-    if (!user.permissions) {
-      user.permissions = permissions
-    }
-
-    next()
   }
 
 export const attachPermissions = async (

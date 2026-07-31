@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/iam/component/auth/auth-provider.tsx
+
 'use client'
 
 import { useEffect } from 'react'

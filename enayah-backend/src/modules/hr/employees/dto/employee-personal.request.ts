@@ -1,7 +1,8 @@
 import { z } from 'zod'
 
 export const PersonalRecordIdSchema = z.object({
-  id: z.uuid(),
+  employeeId: z.uuid(),
+  recordId: z.uuid(),
 })
 
 export const EmployeePersonalEmployeeIdSchema = z.object({
@@ -19,64 +20,152 @@ const optionalUuid = z.uuid().nullable().optional()
 // Identification
 // ----------------------------------
 
-export const EmployeeIdentificationSchema = z.object({
-  type: z.enum(['national_id', 'iqama', 'gcc_id', 'passport', 'other']),
+const normalizeDigits = (value: string): string =>
+  value
+    .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
+    .replace(/[۰-۹]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
+// const normalizeDigits = (value: string): string =>
+//   value.replace(/[\u0660-\u0669\u06F0-\u06F9]/g, (digit) => {
+//     const code = digit.codePointAt(0)!
+//     const base = code >= 0x06f0 ? 0x06f0 : 0x0660
+//     return String(code - base)
+//   })
 
-  identificationNumber: z.string().trim().min(1).max(30),
+const optionalHijriDate = z.preprocess(
+  (value) => {
+    if (value === null || value === undefined) {
+      return value
+    }
 
-  issueDate: optionalDate,
-  issueDateHijri: z
+    if (typeof value === 'string') {
+      const normalized = normalizeDigits(value.trim())
+
+      return normalized === '' ? undefined : normalized
+    }
+
+    return value
+  },
+  z
     .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .regex(/^\d{4}-\d{2}-\d{2}$/, {
+      error: 'Hijri date must use YYYY-MM-DD format',
+    })
     .nullable()
     .optional(),
+)
 
-  expiryDate: optionalDate,
-  expiryDateHijri: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
-    .nullable()
-    .optional(),
+type IdentificationType =
+  | 'national_id'
+  | 'iqama'
+  | 'gcc_id'
+  | 'passport'
+  | 'other'
 
-  sponsor: z.string().trim().max(255).nullable().optional(),
-  issuingAuthority: z.string().trim().max(100).nullable().optional(),
-  occupation: z.string().trim().max(150).nullable().optional(),
+type IdentificationValidationInput = {
+  type?: IdentificationType | undefined
+  identificationNumber?: string | undefined
+}
 
-  isCurrent: z.boolean().default(true),
+type IdentificationDateInput = {
+  issueDate?: string | null | undefined
+  expiryDate?: string | null | undefined
+}
 
-  fileId: optionalUuid,
-})
+const validateIdentificationDates = (
+  value: IdentificationDateInput,
+  ctx: z.RefinementCtx,
+): void => {
+  if (
+    value.issueDate &&
+    value.expiryDate &&
+    value.issueDate > value.expiryDate
+  ) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['expiryDate'],
+      message: 'Expiry date must not be earlier than issue date',
+    })
+  }
+}
 
-//export const UpdateEmployeeIdentificationSchema =
-//  EmployeeIdentificationSchema.partial()
+const validateIdentification = (
+  value: IdentificationValidationInput,
+  ctx: z.RefinementCtx,
+): void => {
+  if (value.type !== 'iqama' || value.identificationNumber === undefined) {
+    return
+  }
+
+  const normalizedNumber = normalizeDigits(value.identificationNumber.trim())
+
+  if (!/^[A-Za-z0-9-]+$/.test(normalizedNumber)) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['identificationNumber'],
+      message: 'Iqama number may contain only letters, numbers, and hyphens',
+    })
+  }
+}
+
+export const EmployeeIdentificationSchema = z
+  .object({
+    type: z.enum(['national_id', 'iqama', 'gcc_id', 'passport', 'other']),
+
+    identificationNumber: z
+      .string()
+      .trim()
+      .min(1)
+      .max(30)
+      .transform(normalizeDigits),
+
+    issueDate: optionalDate,
+    issueDateHijri: optionalHijriDate,
+
+    expiryDate: optionalDate,
+    expiryDateHijri: optionalHijriDate,
+
+    sponsor: z.string().trim().max(255).nullable().optional(),
+    issuingAuthority: z.string().trim().max(100).nullable().optional(),
+    occupation: z.string().trim().max(150).nullable().optional(),
+
+    isCurrent: z.boolean().default(true),
+    fileId: optionalUuid,
+  })
+  .superRefine(validateIdentification)
+  .superRefine(validateIdentificationDates)
+
 export const UpdateEmployeeIdentificationSchema = z
   .object({
     type: z
       .enum(['national_id', 'iqama', 'gcc_id', 'passport', 'other'])
       .optional(),
-    identificationNumber: z.string().trim().min(1).max(30).optional(),
-    issueDate: optionalDate,
-    issueDateHijri: z
+
+    identificationNumber: z
       .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/)
-      .nullable()
+      .trim()
+      .min(1)
+      .max(30)
+      .transform(normalizeDigits)
       .optional(),
 
+    issueDate: optionalDate,
+    issueDateHijri: optionalHijriDate,
+
     expiryDate: optionalDate,
-    expiryDateHijri: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/)
-      .nullable()
-      .optional(),
+    expiryDateHijri: optionalHijriDate,
+
     sponsor: z.string().trim().max(255).nullable().optional(),
     issuingAuthority: z.string().trim().max(100).nullable().optional(),
     occupation: z.string().trim().max(150).nullable().optional(),
+
     isCurrent: z.boolean().optional(),
     fileId: optionalUuid,
   })
-  .refine((v) => Object.keys(v).length > 0, {
+  .refine((value) => Object.keys(value).length > 0, {
     error: 'At least one field is required',
   })
+  .superRefine(validateIdentification)
+  .superRefine(validateIdentificationDates)
 
 export type EmployeeIdentificationDto = z.infer<
   typeof EmployeeIdentificationSchema
@@ -165,11 +254,8 @@ export const EmployeeDependentSchema = z.object({
   familyNameAr: z.string().trim().min(1).max(100),
 
   relationship: z.enum(['spouse', 'child', 'father', 'mother', 'other']),
-
   gender: z.enum(['male', 'female', 'not_specified']).nullable().optional(),
-
   dateOfBirth: optionalDate,
-
   countryId: optionalUuid,
 })
 

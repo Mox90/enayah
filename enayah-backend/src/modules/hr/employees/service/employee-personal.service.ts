@@ -3,14 +3,17 @@ import { db } from '../../../../db/client'
 import { EmployeePersonalRepository } from '../repository/employee-personal.repository'
 import {
   CreateEmployeePersonalDto,
+  EmployeeIdentificationSchema,
   UpdateEmployeeAddressDto,
   UpdateEmployeeDependentDto,
   UpdateEmployeeEmailDto,
   UpdateEmployeeEmergencyContactDto,
   UpdateEmployeeIdentificationDto,
+  UpdateEmployeeIdentificationSchema,
   UpdateEmployeePhoneNumberDto,
   UpdateEmployeeVisaDto,
 } from '../dto/employee-personal.request'
+import { AppError } from '../../../../core/errors/AppError'
 
 export const EmployeePersonalService = {
   findByEmployeeId: async (employeeId: string) => {
@@ -24,50 +27,97 @@ export const EmployeePersonalService = {
   },
 
   updateIdentification: async (
-    id: string,
+    employeeId: string,
+    recordId: string,
     data: UpdateEmployeeIdentificationDto,
   ) => {
+    return db.transaction(async (tx) => {
+      const existing = await EmployeePersonalRepository.findIdentificationById(
+        tx,
+        employeeId,
+        recordId,
+      )
+
+      if (!existing) {
+        throw new AppError('Employee identification was not found', 404)
+      }
+
+      EmployeeIdentificationSchema.parse({
+        ...existing,
+        ...data,
+      })
+
+      return EmployeePersonalRepository.updateIdentification(
+        tx,
+        employeeId,
+        recordId,
+        data,
+      )
+    })
+  },
+
+  updateEmail: async (
+    employeeId: string,
+    id: string,
+    data: UpdateEmployeeEmailDto,
+  ) => {
     return db.transaction((tx) =>
-      EmployeePersonalRepository.updateIdentification(tx, id, data),
+      EmployeePersonalRepository.updateEmail(tx, employeeId, id, data),
     )
   },
 
-  updateEmail: async (id: string, data: UpdateEmployeeEmailDto) => {
+  updatePhoneNumber: async (
+    employeeId: string,
+    id: string,
+    data: UpdateEmployeePhoneNumberDto,
+  ) => {
     return db.transaction((tx) =>
-      EmployeePersonalRepository.updateEmail(tx, id, data),
+      EmployeePersonalRepository.updatePhoneNumber(tx, employeeId, id, data),
     )
   },
 
-  updatePhoneNumber: async (id: string, data: UpdateEmployeePhoneNumberDto) => {
+  updateDependent: async (
+    employeeId: string,
+    id: string,
+    data: UpdateEmployeeDependentDto,
+  ) => {
     return db.transaction((tx) =>
-      EmployeePersonalRepository.updatePhoneNumber(tx, id, data),
+      EmployeePersonalRepository.updateDependent(tx, employeeId, id, data),
     )
   },
 
-  updateDependent: async (id: string, data: UpdateEmployeeDependentDto) => {
+  updateAddress: async (
+    employeeId: string,
+    id: string,
+    data: UpdateEmployeeAddressDto,
+  ) => {
     return db.transaction((tx) =>
-      EmployeePersonalRepository.updateDependent(tx, id, data),
-    )
-  },
-
-  updateAddress: async (id: string, data: UpdateEmployeeAddressDto) => {
-    return db.transaction((tx) =>
-      EmployeePersonalRepository.updateAddress(tx, id, data),
+      EmployeePersonalRepository.updateAddress(tx, employeeId, id, data),
     )
   },
 
   updateEmergencyContact: async (
+    employeeId: string,
     id: string,
     data: UpdateEmployeeEmergencyContactDto,
   ) => {
     return db.transaction((tx) =>
-      EmployeePersonalRepository.updateEmergencyContact(tx, id, data),
+      EmployeePersonalRepository.updateEmergencyContact(
+        tx,
+        employeeId,
+        id,
+        data,
+      ),
     )
   },
 
-  updateVisa: async (id: string, data: UpdateEmployeeVisaDto) => {
+  updateVisa: async (
+    employeeId: string,
+    id: string,
+    data: UpdateEmployeeVisaDto,
+  ) => {
     return db.transaction((tx) =>
-      EmployeePersonalRepository.updateVisa(tx, id, data),
+      EmployeePersonalRepository.updateVisa(tx, employeeId, id, data),
     )
   },
 

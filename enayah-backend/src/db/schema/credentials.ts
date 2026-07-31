@@ -1,4 +1,5 @@
 import {
+  AnyPgColumn,
   bigint,
   boolean,
   check,
@@ -15,12 +16,15 @@ import { baseColumns, verificationColumns } from './base'
 import {
   degreeTypeEnum,
   employeeDocumentTypeEnum,
+  fileCategoryEnum,
+  fileVisibilityEnum,
   licenseStatusEnum,
   lifeSupportTypeEnum,
 } from './enums'
 import { employees } from './hr'
 import { countries } from './countries'
 import { relations, sql } from 'drizzle-orm'
+import { users } from './users'
 
 /** Sample  */
 
@@ -66,42 +70,69 @@ import { relations, sql } from 'drizzle-orm'
 //   ...baseColumns,
 // })
 
+// export const files = pgTable(
+//   'files',
+//   {
+//     id: uuid('id').defaultRandom().primaryKey(),
+//     storedName: varchar('stored_name', {
+//       length: 255,
+//     }).notNull(),
+//     originalName: varchar('original_name', {
+//       length: 255,
+//     }).notNull(),
+//     mimeType: varchar('mime_type', {
+//       length: 100,
+//     }).notNull(),
+//     fileSize: bigint('file_size', {
+//       mode: 'number',
+//     }).notNull(),
+//     storageKey: varchar('storage_key', {
+//       length: 500,
+//     }).notNull(),
+//     checksumSha256: varchar('checksum_sha256', {
+//       length: 64,
+//     }),
+//     ...baseColumns,
+//   },
+//   (table) => [
+//     uniqueIndex('uq_files_storage_key').on(table.storageKey),
+//     index('idx_files_checksum_sha256').on(table.checksumSha256),
+//     check(
+//       'chk_files_file_size',
+//       sql`
+//         ${table.fileSize} > 0
+//         AND ${table.fileSize} <= 2097152
+//       `,
+//     ),
+//   ],
+// )
+
 export const files = pgTable(
   'files',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-
-    storedName: varchar('stored_name', {
-      length: 255,
-    }).notNull(),
-
-    originalName: varchar('original_name', {
-      length: 255,
-    }).notNull(),
-
-    mimeType: varchar('mime_type', {
-      length: 100,
-    }).notNull(),
-
-    fileSize: bigint('file_size', {
-      mode: 'number',
-    }).notNull(),
-
-    storageKey: varchar('storage_key', {
-      length: 500,
-    }).notNull(),
-
-    checksumSha256: varchar('checksum_sha256', {
-      length: 64,
-    }),
-
+    storedName: varchar('stored_name', { length: 255 }).notNull(),
+    originalName: varchar('original_name', { length: 255 }).notNull(),
+    mimeType: varchar('mime_type', { length: 100 }).notNull(),
+    fileSize: bigint('file_size', { mode: 'number' }).notNull(),
+    storageKey: varchar('storage_key', { length: 500 }).notNull(),
+    checksumSha256: varchar('checksum_sha256', { length: 64 }),
+    visibility: fileVisibilityEnum('visibility').notNull().default('private'),
+    category: fileCategoryEnum('category').notNull().default('other'),
+    uploadedByUserId: uuid('uploaded_by_user_id').references(
+      (): AnyPgColumn => users.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
     ...baseColumns,
   },
   (table) => [
     uniqueIndex('uq_files_storage_key').on(table.storageKey),
-
     index('idx_files_checksum_sha256').on(table.checksumSha256),
-
+    index('idx_files_visibility').on(table.visibility),
+    index('idx_files_category').on(table.category),
+    index('idx_files_uploaded_by_user_id').on(table.uploadedByUserId),
     check(
       'chk_files_file_size',
       sql`
@@ -112,25 +143,31 @@ export const files = pgTable(
   ],
 )
 
-export const employeeDegrees = pgTable('employee_degrees', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  employeeId: uuid('employee_id')
-    .notNull()
-    .references(() => employees.id, { onDelete: 'cascade' }),
-  degreeType: degreeTypeEnum('degree_type').notNull(),
-  degreeName: varchar('degree_name', {
-    length: 255,
-  }).notNull(),
-  major: varchar('major', { length: 255 }),
-  institution: varchar('institution', { length: 255 }).notNull(),
-  countryId: uuid('country_id').references(() => countries.id),
-  graduationDate: date('graduation_date'),
-  documentFileId: uuid('document_file_id').references(() => files.id, {
-    onDelete: 'restrict',
-  }),
-  ...verificationColumns,
-  ...baseColumns,
-})
+export const employeeDegrees = pgTable(
+  'employee_degrees',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    employeeId: uuid('employee_id')
+      .notNull()
+      .references(() => employees.id, { onDelete: 'cascade' }),
+    degreeType: degreeTypeEnum('degree_type').notNull(),
+    degreeName: varchar('degree_name', {
+      length: 255,
+    }).notNull(),
+    major: varchar('major', { length: 255 }),
+    institution: varchar('institution', { length: 255 }).notNull(),
+    countryId: uuid('country_id').references(() => countries.id),
+    graduationDate: date('graduation_date'),
+    documentFileId: uuid('document_file_id').references(() => files.id, {
+      onDelete: 'restrict',
+    }),
+    ...verificationColumns,
+    ...baseColumns,
+  },
+  (table) => [
+    uniqueIndex('uq_employee_degree_document_file_id').on(table.documentFileId),
+  ],
+)
 
 export const employeeBoards = pgTable('employee_boards', {
   id: uuid('id').defaultRandom().primaryKey(),

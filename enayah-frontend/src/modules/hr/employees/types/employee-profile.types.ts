@@ -1,7 +1,6 @@
 export interface EmployeeProfile {
   personal: {
     id: string
-
     employeeNumber: string
 
     firstNameEn: string
@@ -15,8 +14,10 @@ export interface EmployeeProfile {
     familyNameAr: string
 
     gender: 'male' | 'female'
-
     dateOfBirth: string | null
+
+    avatarFileId: string | null
+    avatar: string | null
 
     nationality: {
       id: string
@@ -33,7 +34,6 @@ export interface EmployeeProfile {
     } | null
 
     version: number
-    avatar?: string | null
   }
 
   employment: {
@@ -86,4 +86,12 @@ export interface EmployeeProfile {
       } | null
     }
   }
+}
+
+export type EmployeeAvatarUploadResponse = {
+  avatarFileId: string
+  avatarUrl: string
+  mimeType: 'image/webp'
+  fileSize: number
+  checksumSha256: string
 }

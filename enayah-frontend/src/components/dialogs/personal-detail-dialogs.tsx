@@ -32,7 +32,9 @@ import { HijriDatePicker } from './hijri-date-picker'
 import { DateObject } from 'react-multi-date-picker'
 import gregorian from 'react-date-object/calendars/gregorian'
 import arabic from 'react-date-object/calendars/arabic'
-import { Save } from 'lucide-react'
+import { AlertCircle, Save } from 'lucide-react'
+import axios from 'axios'
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert'
 
 type DialogProps<T> = {
   open: boolean
@@ -67,8 +69,8 @@ const emptyIdentification: Identification = {
   id: '',
   type: 'iqama',
   identificationNumber: '',
-  issueDate: '',
-  expiryDate: '',
+  issueDate: null,
+  expiryDate: null,
   issueDateHijri: null,
   expiryDateHijri: null,
   dateCalendar: 'gregorian',
@@ -77,6 +79,68 @@ const emptyIdentification: Identification = {
   occupation: null,
   isCurrent: true,
   fileId: null,
+}
+
+interface ApiErrorResponse {
+  message?: string
+
+  error?: {
+    message?: string
+
+    issues?: Array<{
+      path?: Array<string | number>
+      message?: string
+    }>
+  }
+
+  issues?: Array<{
+    path?: Array<string | number>
+    message?: string
+  }>
+}
+
+type ApiErrorFallbacks = {
+  validationFailed: string
+  requestFailed: string
+  unexpectedError: string
+}
+
+function getApiErrorMessage(
+  error: unknown,
+  fallbacks: ApiErrorFallbacks,
+): string {
+  if (axios.isAxiosError(error)) {
+    const responseData = error.response?.data
+
+    if (
+      responseData &&
+      typeof responseData === 'object' &&
+      'message' in responseData &&
+      typeof responseData.message === 'string' &&
+      responseData.message.trim()
+    ) {
+      return responseData.message
+    }
+
+    if (error.response?.status === 422) {
+      return fallbacks.validationFailed
+    }
+
+    return fallbacks.requestFailed
+  }
+
+  if (error instanceof Error && error.message.trim()) {
+    return error.message
+  }
+
+  return fallbacks.unexpectedError
+}
+
+type IdentificationFieldErrors = {
+  type?: string
+  identificationNumber?: string
+  issueDate?: string
+  expiryDate?: string
 }
 
 export function IdentificationDialog({
@@ -157,11 +221,72 @@ function IdentificationDialogContent({
   const type = form.type.trim()
   const identificationNumber = form.identificationNumber.trim()
 
+  const [fieldErrors, setFieldErrors] = useState<IdentificationFieldErrors>({})
+
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
+  function validateForm(): IdentificationFieldErrors {
+    const errors: IdentificationFieldErrors = {}
+
+    const normalizedType = form.type.trim()
+    const normalizedNumber = form.identificationNumber.trim()
+    const issueDate = form.issueDate?.trim()
+    const expiryDate = form.expiryDate?.trim()
+
+    if (!normalizedType) {
+      errors.type = it('validation.typeRequired')
+    }
+
+    if (!normalizedNumber) {
+      errors.identificationNumber = it('validation.numberRequired')
+    } else if (normalizedNumber.length > 30) {
+      errors.identificationNumber = it('validation.numberMaxLength', {
+        max: 30,
+      })
+    } else if (!/^[\p{L}\p{N}-]+$/u.test(normalizedNumber)) {
+      errors.identificationNumber = it('validation.numberInvalidCharacters')
+    }
+
+    if (requireExpiryDate && !expiryDate) {
+      errors.expiryDate = it('validation.expiryDateRequired')
+    }
+
+    if (issueDate && expiryDate && issueDate > expiryDate) {
+      errors.issueDate = it('validation.issueDateAfterExpiry')
+      errors.expiryDate = it('validation.expiryDateBeforeIssue')
+    }
+
+    return errors
+  }
+
+  function clearFieldError(field: keyof IdentificationFieldErrors) {
+    setFieldErrors((previous) => {
+      const next = { ...previous }
+
+      delete next[field]
+
+      return next
+    })
+  }
+
   function update<K extends keyof Identification>(
     field: K,
     value: Identification[K],
   ) {
-    setForm((prev) => ({ ...prev, [field]: value }))
+    setForm((previous) => ({
+      ...previous,
+      [field]: value,
+    }))
+
+    setSubmitError(null)
+
+    if (
+      field === 'type' ||
+      field === 'identificationNumber' ||
+      field === 'expiryDate'
+    ) {
+      clearFieldError(field)
+    }
   }
 
   const formInvalid =
@@ -176,24 +301,47 @@ function IdentificationDialogContent({
   }
 
   async function handleSubmit() {
-    if (isSubmitting || formInvalid) return
+    if (isSubmitting) return
 
+    const errors = validateForm()
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors)
+      setSubmitError(ct('validation.correctHighlightedFields'))
+      return
+    }
+
+    setFieldErrors({})
+    setSubmitError(null)
     setIsSubmitting(true)
 
     try {
       await onSubmit({
         ...form,
+
         id: form.id || createClientId('identification'),
-        sponsor: form.sponsor || null,
-        issuingAuthority: form.issuingAuthority || null,
-        occupation: form.occupation || null,
+
+        identificationNumber: form.identificationNumber.trim(),
+
+        issueDate: form.issueDate?.trim() || null,
+        expiryDate: form.expiryDate?.trim() || null,
+
+        sponsor: form.sponsor?.trim() || null,
+        issuingAuthority: form.issuingAuthority?.trim() || null,
+        occupation: form.occupation?.trim() || null,
+
         fileId: form.fileId || null,
       })
 
       onOpenChange(false)
-    } catch {
-      // Keep the dialog open.
-      // The parent mutation can display the error toast.
+    } catch (error: unknown) {
+      setSubmitError(
+        getApiErrorMessage(error, {
+          validationFailed: ct('errors.validationFailed'),
+          requestFailed: ct('errors.requestFailed'),
+          unexpectedError: ct('errors.unexpected'),
+        }),
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -230,12 +378,31 @@ function IdentificationDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>{it('number')}</Label>
+              <Label htmlFor='identification-number'>{it('number')}</Label>
+
               <Input
+                id='identification-number'
                 className='h-11'
                 value={form.identificationNumber}
-                onChange={(e) => update('identificationNumber', e.target.value)}
+                aria-invalid={Boolean(fieldErrors.identificationNumber)}
+                aria-describedby={
+                  fieldErrors.identificationNumber
+                    ? 'identification-number-error'
+                    : undefined
+                }
+                onChange={(event) =>
+                  update('identificationNumber', event.target.value)
+                }
               />
+
+              {fieldErrors.identificationNumber && (
+                <p
+                  id='identification-number-error'
+                  className='text-sm font-medium text-destructive'
+                >
+                  {fieldErrors.identificationNumber}
+                </p>
+              )}
             </div>
 
             {form.type === 'iqama' && (
@@ -291,87 +458,123 @@ function IdentificationDialogContent({
             )}
 
             <div className='space-y-2'>
-              <Label>{it('issueDate')}</Label>
-              {/* <Input
-                type='date'
-                className='h-11'
-                value={form.issueDate}
-                onChange={(e) => update('issueDate', e.target.value)}
-              /> */}
+              <Label htmlFor='identification-issue-date'>
+                {it('issueDate')}
+              </Label>
+
               <Input
+                id='identification-issue-date'
                 type='date'
                 className='h-11'
                 value={form.issueDate || ''}
-                onChange={(e) => {
-                  const val = e.target.value
-                  if (!val) {
-                    setForm((prev) => ({
-                      ...prev,
-                      issueDate: '',
+                aria-invalid={Boolean(fieldErrors.issueDate)}
+                aria-describedby={
+                  fieldErrors.issueDate
+                    ? 'identification-issue-date-error'
+                    : undefined
+                }
+                onChange={(event) => {
+                  const value = event.target.value
+
+                  clearFieldError('issueDate')
+                  clearFieldError('expiryDate')
+                  setSubmitError(null)
+
+                  if (!value) {
+                    setForm((previous) => ({
+                      ...previous,
+                      issueDate: null,
                       issueDateHijri: null,
                     }))
+
                     return
                   }
 
-                  // Convert standard date back to Hijri format
                   const hijriConverted = new DateObject({
-                    date: val,
+                    date: value,
                     calendar: gregorian,
                     format: 'YYYY-MM-DD',
                   })
                     .convert(arabic)
                     .format('YYYY-MM-DD')
 
-                  setForm((prev) => ({
-                    ...prev,
-                    issueDate: val,
+                  setForm((previous) => ({
+                    ...previous,
+                    issueDate: value,
                     issueDateHijri: hijriConverted,
                     dateCalendar: 'gregorian',
                   }))
                 }}
               />
+
+              {fieldErrors.issueDate && (
+                <p
+                  id='identification-issue-date-error'
+                  className='text-sm font-medium text-destructive'
+                >
+                  {fieldErrors.issueDate}
+                </p>
+              )}
             </div>
 
             <div className='space-y-2'>
-              <Label>{it('expiryDate')}</Label>
-              {/* <Input
-                type='date'
-                className='h-11'
-                value={form.expiryDate}
-                onChange={(e) => update('expiryDate', e.target.value)}
-              /> */}
+              <Label htmlFor='identification-expiry-date'>
+                {it('expiryDate')}
+              </Label>
+
               <Input
+                id='identification-expiry-date'
                 type='date'
                 className='h-11'
                 value={form.expiryDate || ''}
-                onChange={(e) => {
-                  const val = e.target.value
-                  if (!val) {
-                    setForm((prev) => ({
-                      ...prev,
-                      expiryDate: '',
+                aria-invalid={Boolean(fieldErrors.expiryDate)}
+                aria-describedby={
+                  fieldErrors.expiryDate
+                    ? 'identification-expiry-date-error'
+                    : undefined
+                }
+                onChange={(event) => {
+                  const value = event.target.value
+
+                  clearFieldError('issueDate')
+                  clearFieldError('expiryDate')
+                  setSubmitError(null)
+
+                  if (!value) {
+                    setForm((previous) => ({
+                      ...previous,
+                      expiryDate: null,
                       expiryDateHijri: null,
                     }))
+
                     return
                   }
 
-                  // Convert standard date back to Hijri format
                   const hijriConverted = new DateObject({
-                    date: val,
+                    date: value,
                     calendar: gregorian,
                     format: 'YYYY-MM-DD',
                   })
                     .convert(arabic)
                     .format('YYYY-MM-DD')
 
-                  setForm((prev) => ({
-                    ...prev,
-                    expiryDate: val,
+                  setForm((previous) => ({
+                    ...previous,
+                    expiryDate: value,
                     expiryDateHijri: hijriConverted,
                     dateCalendar: 'gregorian',
                   }))
                 }}
               />
+
+              {fieldErrors.expiryDate && (
+                <p
+                  id='identification-expiry-date-error'
+                  className='text-sm font-medium text-destructive'
+                >
+                  {fieldErrors.expiryDate}
+                </p>
+              )}
             </div>
 
             {form.type === 'iqama' && (
@@ -419,6 +622,17 @@ function IdentificationDialogContent({
             </div>
           </div>
         </section>
+        {submitError && (
+          <Alert variant='destructive'>
+            <AlertCircle className='h-4 w-4' />
+
+            <AlertTitle>{it('errors.saveFailedTitle')}</AlertTitle>
+
+            <AlertDescription className='whitespace-pre-line'>
+              {submitError}
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
 
       <Footer
@@ -427,7 +641,7 @@ function IdentificationDialogContent({
         onSave={handleSubmit}
         label={submitLabel ?? it('saveIdentification')}
         //savingLabel={crt('saving', { item: 'board' })}
-        disabled={formInvalid}
+        //disabled={formInvalid}
         isSaving={isSubmitting}
         saveVariant='default'
         saveIcon={<Save className='h-4 w-4' />}

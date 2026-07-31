@@ -2,8 +2,8 @@ export type Identification = {
   id: string
   type: 'national_id' | 'iqama' | 'gcc_id' | 'passport' | 'other'
   identificationNumber: string
-  issueDate: string
-  expiryDate: string
+  issueDate: string | null
+  expiryDate: string | null
 
   issueDateHijri?: string | null
   expiryDateHijri?: string | null

@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/iam/stores/permission.store.ts
+
 'use client'
 
 import { create } from 'zustand'
@@ -11,13 +13,6 @@ interface PermissionState {
   clearPermissions: () => void
 }
 
-/*export const usePermissionStore = create<PermissionState>((set) => ({
-  permissions: [],
-
-  setPermissions: (permissions) => set({ permissions }),
-
-  clearPermissions: () => set({ permissions: [] }),
-}))*/
 export const usePermissionStore = create<PermissionState>()(
   persist(
     (set) => ({

@@ -15,7 +15,9 @@ export interface User {
   username: string
   fullName: string
   email: string
+  employeeId: string | null
   employee?: {
+    id: string
     firstNameEn: string
     secondNameEn?: string | null
     thirdNameEn?: string | null

@@ -8,11 +8,30 @@ import { audit } from '../../../../core/middleware/audit.middleware'
 import { EmployeeController } from '../controller/employee.controller'
 import { getParam } from '../../../../core/utils/request.utils'
 import { EmploymentController } from '../../employments/controller/employment.controller'
+import { uploadEmployeeAvatarMiddleware } from '../middleware/employee-avatar-upload.middleware'
+import { employeeAvatarController } from '../controller/employee-avatar.controller'
 
 const router = Router()
 
 router.use(requireAuth)
 router.use(attachPermissions)
+
+router.get('/me/profile', EmployeeController.getMyProfile)
+
+router.post(
+  '/:id/avatar',
+  requirePermission('employee.avatar.upload'),
+  uploadEmployeeAvatarMiddleware,
+  employeeAvatarController.upload,
+)
+
+router.delete(
+  '/:id/avatar',
+  requireAuth,
+  //attachPermissions,
+  //requirePermission('employee.update'),
+  employeeAvatarController.remove,
+)
 
 router.get(
   '/:employeeId/employments',
@@ -62,29 +81,10 @@ router.post(
 )
 
 router.get(
-  '/:id/profile',
-  requirePermission('employee.view'),
-  EmployeeController.getProfile,
-)
-
-router.get(
   '/:id',
   requirePermission('employee.view'),
   EmployeeController.findById,
 )
-
-// router.patch(
-//   '/:id/personal',
-//   requirePermission('employee.update'),
-//   audit('EMPLOYEE_UPDATE', {
-//     resource: 'EMPLOYEE',
-//     getResourceId: (req) => getParam(req.params.id),
-//     // sanitize: {
-//     //   redactFields: ['email', 'phone'],
-//     // },
-//   }),
-//   EmployeeController.update,
-// )
 
 router.patch(
   '/:id',
@@ -92,9 +92,6 @@ router.patch(
   audit('EMPLOYEE_UPDATE', {
     resource: 'EMPLOYEE',
     getResourceId: (req) => getParam(req.params.id),
-    // sanitize: {
-    //   redactFields: ['email', 'phone'],
-    // },
   }),
   EmployeeController.update,
 )

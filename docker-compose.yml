@@ -62,6 +62,8 @@ services:
     volumes:
       - ./enayah-backend:/app:cached
       - backend_node_modules:/app/node_modules
+      - public_file_storage:/app/storage/public
+      - private_file_storage:/app/storage/private
     command: npm run dev
     labels:
       ofelia.enabled: 'true'
@@ -100,3 +102,5 @@ volumes:
   redis_data:
   backend_node_modules:
   frontend_node_modules:
+  public_file_storage:
+  private_file_storage:

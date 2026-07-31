@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/iam/stores/auth.store.ts
+
 'use client'
 
 import { create } from 'zustand'

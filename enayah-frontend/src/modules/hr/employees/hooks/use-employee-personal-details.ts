@@ -33,7 +33,7 @@ export function useEmployeePersonal(id?: string) {
   })
 }
 
-export function useEmployeePersonalMutations(employeeId?: string) {
+export function useEmployeePersonalMutations(employeeId: string) {
   const queryClient = useQueryClient()
 
   const invalidate = () => {
@@ -47,7 +47,7 @@ export function useEmployeePersonalMutations(employeeId?: string) {
 
     createIdentification: useMutation({
       mutationFn: (data: CreateIdentificationDto) =>
-        employeeService.createIdentification(employeeId!, data),
+        employeeService.createIdentification(employeeId, data),
 
       onSuccess: invalidate,
     }),
@@ -59,13 +59,14 @@ export function useEmployeePersonalMutations(employeeId?: string) {
       }: {
         id: string
         data: UpdateIdentificationDto
-      }) => employeeService.updateIdentification(id, data),
+      }) => employeeService.updateIdentification(employeeId, id, data),
 
       onSuccess: invalidate,
     }),
 
     deleteIdentification: useMutation({
-      mutationFn: (id: string) => employeeService.deleteIdentification(id),
+      mutationFn: (id: string) =>
+        employeeService.deleteIdentification(employeeId, id),
 
       onSuccess: invalidate,
     }),
@@ -74,20 +75,20 @@ export function useEmployeePersonalMutations(employeeId?: string) {
 
     createPhone: useMutation({
       mutationFn: (data: CreatePhoneDto) =>
-        employeeService.createPhone(employeeId!, data),
+        employeeService.createPhone(employeeId, data),
 
       onSuccess: invalidate,
     }),
 
     updatePhone: useMutation({
       mutationFn: ({ id, data }: { id: string; data: UpdatePhoneDto }) =>
-        employeeService.updatePhone(id, data),
+        employeeService.updatePhone(employeeId, id, data),
 
       onSuccess: invalidate,
     }),
 
     deletePhone: useMutation({
-      mutationFn: (id: string) => employeeService.deletePhone(id),
+      mutationFn: (id: string) => employeeService.deletePhone(employeeId, id),
 
       onSuccess: invalidate,
     }),
@@ -96,20 +97,20 @@ export function useEmployeePersonalMutations(employeeId?: string) {
 
     createEmail: useMutation({
       mutationFn: (data: CreateEmailDto) =>
-        employeeService.createEmail(employeeId!, data),
+        employeeService.createEmail(employeeId, data),
 
       onSuccess: invalidate,
     }),
 
     updateEmail: useMutation({
       mutationFn: ({ id, data }: { id: string; data: UpdateEmailDto }) =>
-        employeeService.updateEmail(id, data),
+        employeeService.updateEmail(employeeId, id, data),
 
       onSuccess: invalidate,
     }),
 
     deleteEmail: useMutation({
-      mutationFn: (id: string) => employeeService.deleteEmail(id),
+      mutationFn: (id: string) => employeeService.deleteEmail(employeeId, id),
 
       onSuccess: invalidate,
     }),
@@ -118,20 +119,20 @@ export function useEmployeePersonalMutations(employeeId?: string) {
 
     createAddress: useMutation({
       mutationFn: (data: CreateAddressDto) =>
-        employeeService.createAddress(employeeId!, data),
+        employeeService.createAddress(employeeId, data),
 
       onSuccess: invalidate,
     }),
 
     updateAddress: useMutation({
       mutationFn: ({ id, data }: { id: string; data: UpdateAddressDto }) =>
-        employeeService.updateAddress(id, data),
+        employeeService.updateAddress(employeeId, id, data),
 
       onSuccess: invalidate,
     }),
 
     deleteAddress: useMutation({
-      mutationFn: (id: string) => employeeService.deleteAddress(id),
+      mutationFn: (id: string) => employeeService.deleteAddress(employeeId, id),
 
       onSuccess: invalidate,
     }),
@@ -140,20 +141,21 @@ export function useEmployeePersonalMutations(employeeId?: string) {
 
     createDependent: useMutation({
       mutationFn: (data: CreateDependentDto) =>
-        employeeService.createDependent(employeeId!, data),
+        employeeService.createDependent(employeeId, data),
 
       onSuccess: invalidate,
     }),
 
     updateDependent: useMutation({
       mutationFn: ({ id, data }: { id: string; data: UpdateDependentDto }) =>
-        employeeService.updateDependent(id, data),
+        employeeService.updateDependent(employeeId, id, data),
 
       onSuccess: invalidate,
     }),
 
     deleteDependent: useMutation({
-      mutationFn: (id: string) => employeeService.deleteDependent(id),
+      mutationFn: (id: string) =>
+        employeeService.deleteDependent(employeeId, id),
 
       onSuccess: invalidate,
     }),
@@ -162,7 +164,7 @@ export function useEmployeePersonalMutations(employeeId?: string) {
 
     createEmergencyContact: useMutation({
       mutationFn: (data: CreateEmergencyContactDto) =>
-        employeeService.createEmergencyContact(employeeId!, data),
+        employeeService.createEmergencyContact(employeeId, data),
 
       onSuccess: invalidate,
     }),
@@ -174,13 +176,14 @@ export function useEmployeePersonalMutations(employeeId?: string) {
       }: {
         id: string
         data: UpdateEmergencyContactDto
-      }) => employeeService.updateEmergencyContact(id, data),
+      }) => employeeService.updateEmergencyContact(employeeId, id, data),
 
       onSuccess: invalidate,
     }),
 
     deleteEmergencyContact: useMutation({
-      mutationFn: (id: string) => employeeService.deleteEmergencyContact(id),
+      mutationFn: (id: string) =>
+        employeeService.deleteEmergencyContact(employeeId, id),
 
       onSuccess: invalidate,
     }),
@@ -189,20 +192,20 @@ export function useEmployeePersonalMutations(employeeId?: string) {
 
     createVisa: useMutation({
       mutationFn: (data: CreateVisaDto) =>
-        employeeService.createVisa(employeeId!, data),
+        employeeService.createVisa(employeeId, data),
 
       onSuccess: invalidate,
     }),
 
     updateVisa: useMutation({
       mutationFn: ({ id, data }: { id: string; data: UpdateVisaDto }) =>
-        employeeService.updateVisa(id, data),
+        employeeService.updateVisa(employeeId, id, data),
 
       onSuccess: invalidate,
     }),
 
     deleteVisa: useMutation({
-      mutationFn: (id: string) => employeeService.deleteVisa(id),
+      mutationFn: (id: string) => employeeService.deleteVisa(employeeId, id),
 
       onSuccess: invalidate,
     }),

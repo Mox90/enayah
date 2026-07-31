@@ -1,4 +1,5 @@
 import {
+  AnyPgColumn,
   boolean,
   check,
   date,
@@ -9,6 +10,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core'
@@ -47,16 +49,19 @@ export const employees = pgTable(
     familyNameAr: varchar('family_name_ar', { length: 100 }).notNull(),
     dateOfBirth: date('date_of_birth'),
     gender: genderEnum('gender'),
-    avatarFileId: uuid('avatar_file_id').references(() => files.id, {
-      onDelete: 'set null',
-    }),
+    avatarFileId: uuid('avatar_file_id').references(
+      (): AnyPgColumn => files.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
     countryId: uuid('country_id').references(() => countries.id, {
       onDelete: 'restrict',
     }),
     ...baseColumns,
   },
   (table) => [
-    index('idx_employees_avatar_file_id').on(table.avatarFileId),
+    uniqueIndex('uq_employees_avatar_file_id').on(table.avatarFileId),
 
     index('idx_employees_country_id').on(table.countryId),
   ],
@@ -86,9 +91,6 @@ export const employments = pgTable(
     causeOfLeaving: varchar('cause_of_leaving', { length: 255 }),
     ...baseColumns,
   },
-  // (table) => ({
-  //   employeeIdx: index('idx_employments_employee_id').on(table.employeeId),
-  // }),
   (table) => [
     index('idx_employments_employee_id').on(table.employeeId),
     index('idx_employments_hire_date_active')

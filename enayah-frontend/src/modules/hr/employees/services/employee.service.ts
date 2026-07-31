@@ -12,7 +12,10 @@ import {
   UpdateEmployeeDto,
 } from '../types/employee-request.types'
 import { Employee } from '../types/employee.types'
-import { EmployeeProfile } from '../types/employee-profile.types'
+import {
+  EmployeeAvatarUploadResponse,
+  EmployeeProfile,
+} from '../types/employee-profile.types'
 import { EmployeePersonalDetails } from '../types/employee-personal-details.types'
 import {
   CreateAddressDto,
@@ -31,6 +34,7 @@ import {
   UpdatePhoneDto,
   UpdateVisaDto,
 } from '../types/employee-personal.dto'
+import { ApiResponse } from '../../dashboard/types/hr-dashboard.types'
 
 //import { Employee } from '../types/employee.types'
 const base = `${API_ENDPOINTS.hr.employees}/personal`
@@ -38,6 +42,11 @@ const base = `${API_ENDPOINTS.hr.employees}/personal`
 type EmployeeProfileSummaryResponse = {
   data: EmployeeProfileSummary
 }
+
+const normalizeDigits = (value: string): string =>
+  value
+    .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
+    .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
 
 export const employeeService = {
   //----------------------------------
@@ -70,6 +79,23 @@ export const employeeService = {
     //console.log('data is')
     //console.log(response.data)
     return response.data
+  },
+
+  uploadAvatar: async (
+    employeeId: string,
+    file: File,
+  ): Promise<EmployeeAvatarUploadResponse> => {
+    const formData = new FormData()
+
+    // Must match upload.single('avatar') in Multer.
+    formData.append('avatar', file)
+
+    const response = await api.post<ApiResponse<EmployeeAvatarUploadResponse>>(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/avatar`,
+      formData,
+    )
+
+    return response.data.data
   },
 
   getPersonal: async (id: string): Promise<EmployeePersonalDetails> => {
@@ -106,70 +132,76 @@ export const employeeService = {
     await api.delete(`${API_ENDPOINTS.hr.employees}/${id}`)
   },
 
-  /*getEmployeesByRange: async (params: {
-    offset: number
-    limit: number
-    search?: string
-    sortBy?: string
-    sortOrder?: 'asc' | 'desc'
-  }) => {
-    const response = await api.get<EmployeeListResponse>(
-      `${API_ENDPOINTS.hr.employees}`,
-      {
-        params,
-      },
-    )
-    return response.data
-  },
-
-  getOrganizationTreeView: async (): Promise<DepartmentHierarchyNode[]> => {
-    const response = await api.get(`${API_ENDPOINTS.org.departments}/tree`)
-    return response.data
-  },
-
-  getManpowerView: async () => {
-    const response = await api.get(
-      `${API_ENDPOINTS.hr.positionItems}/manpower-view`,
-    )
-    return response.data
-  },
-
-  getEmployeeDirectory: async (params: EmployeeDirectoryParams) => {
-    const response = await api.get<EmployeeDirectoryResponse>(
-      `${API_ENDPOINTS.hr.employees}/directory`,
-      {
-        params,
-      },
-    )
-    return response.data
-  },
-
-  getEmployeeProfile: async (id: string): Promise<EmployeeProfile> => {
-    const response = await api.get(
-      `${API_ENDPOINTS.hr.employees}/${id}/profile`,
-    )
-    return response.data
-  },*/
   // ------------------------------------------------------------------
   // IDENTIFICATIONS
   // ------------------------------------------------------------------
 
+  // createIdentification: async (
+  //   employeeId: string,
+  //   data: CreateIdentificationDto,
+  // ) => {
+  //   const { ...payload } = data
+  //   const response = await api.post(`${base}/${employeeId}`, {
+  //     identifications: [payload],
+  //   })
+  //   return response.data
+  // },
   createIdentification: async (
     employeeId: string,
     data: CreateIdentificationDto,
   ) => {
-    const { ...payload } = data
+    const payload = {
+      type: data.type,
+      identificationNumber: data.identificationNumber.trim(),
+      isCurrent: data.isCurrent,
+
+      ...(data.issueDate ? { issueDate: data.issueDate } : {}),
+      ...(data.expiryDate ? { expiryDate: data.expiryDate } : {}),
+
+      ...(data.issueDateHijri
+        ? {
+            issueDateHijri: normalizeDigits(data.issueDateHijri),
+          }
+        : {}),
+
+      ...(data.expiryDateHijri
+        ? {
+            expiryDateHijri: normalizeDigits(data.expiryDateHijri),
+          }
+        : {}),
+
+      ...(data.issuingAuthority?.trim()
+        ? { issuingAuthority: data.issuingAuthority.trim() }
+        : {}),
+
+      ...(data.occupation?.trim()
+        ? { occupation: data.occupation.trim() }
+        : {}),
+
+      ...(data.sponsor?.trim() ? { sponsor: data.sponsor.trim() } : {}),
+    }
+
     const response = await api.post(`${base}/${employeeId}`, {
       identifications: [payload],
     })
+
     return response.data
   },
 
-  updateIdentification: async (id: string, data: UpdateIdentificationDto) =>
-    api.patch(`${base}/identifications/${id}`, data),
+  updateIdentification: async (
+    employeeId: string,
+    id: string,
+    data: UpdateIdentificationDto,
+  ) =>
+    api.patch(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/identifications/${id}`,
+      data,
+    ),
 
-  deleteIdentification: async (id: string) =>
-    api.delete(`${base}/identifications/${id}`),
+  deleteIdentification: async (employeeId: string, id: string) =>
+    api.delete(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/identifications/${id}`,
+    ),
 
   // ------------------------------------------------------------------
   // PHONE NUMBERS
@@ -183,10 +215,16 @@ export const employeeService = {
     return response.data
   },
 
-  updatePhone: async (id: string, data: UpdatePhoneDto) =>
-    api.patch(`${base}/phone-numbers/${id}`, data),
+  updatePhone: async (employeeId: string, id: string, data: UpdatePhoneDto) =>
+    api.patch(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/phone-numbers/${id}`,
+      data,
+    ),
 
-  deletePhone: async (id: string) => api.delete(`${base}/phone-numbers/${id}`),
+  deletePhone: async (employeeId: string, id: string) =>
+    api.delete(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/phone-numbers/${id}`,
+    ),
 
   // ------------------------------------------------------------------
   // EMAILS
@@ -200,10 +238,16 @@ export const employeeService = {
     return response.data
   },
 
-  updateEmail: async (id: string, data: UpdateEmailDto) =>
-    api.patch(`${base}/emails/${id}`, data),
+  updateEmail: async (employeeId: string, id: string, data: UpdateEmailDto) =>
+    api.patch(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/emails/${id}`,
+      data,
+    ),
 
-  deleteEmail: async (id: string) => api.delete(`${base}/emails/${id}`),
+  deleteEmail: async (employeeId: string, id: string) =>
+    api.delete(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/emails/${id}`,
+    ),
 
   // ------------------------------------------------------------------
   // ADDRESSES
@@ -217,10 +261,20 @@ export const employeeService = {
     return response.data
   },
 
-  updateAddress: async (id: string, data: UpdateAddressDto) =>
-    api.patch(`${base}/addresses/${id}`, data),
+  updateAddress: async (
+    employeeId: string,
+    id: string,
+    data: UpdateAddressDto,
+  ) =>
+    api.patch(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/addresses/${id}`,
+      data,
+    ),
 
-  deleteAddress: async (id: string) => api.delete(`${base}/addresses/${id}`),
+  deleteAddress: async (employeeId: string, id: string) =>
+    api.delete(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/addresses/${id}`,
+    ),
 
   // ------------------------------------------------------------------
   // DEPENDENTS
@@ -234,10 +288,20 @@ export const employeeService = {
     return response.data
   },
 
-  updateDependent: async (id: string, data: UpdateDependentDto) =>
-    api.patch(`${base}/dependents/${id}`, data),
+  updateDependent: async (
+    employeeId: string,
+    id: string,
+    data: UpdateDependentDto,
+  ) =>
+    api.patch(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/dependents/${id}`,
+      data,
+    ),
 
-  deleteDependent: async (id: string) => api.delete(`${base}/dependents/${id}`),
+  deleteDependent: async (employeeId: string, id: string) =>
+    api.delete(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/dependents/${id}`,
+    ),
 
   // ------------------------------------------------------------------
   // EMERGENCY CONTACTS
@@ -254,11 +318,20 @@ export const employeeService = {
     return response.data
   },
 
-  updateEmergencyContact: async (id: string, data: UpdateEmergencyContactDto) =>
-    api.patch(`${base}/emergency-contacts/${id}`, data),
+  updateEmergencyContact: async (
+    employeeId: string,
+    id: string,
+    data: UpdateEmergencyContactDto,
+  ) =>
+    api.patch(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/emergency-contacts/${id}`,
+      data,
+    ),
 
-  deleteEmergencyContact: async (id: string) =>
-    api.delete(`${base}/emergency-contacts/${id}`),
+  deleteEmergencyContact: async (employeeId: string, id: string) =>
+    api.delete(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/emergency-contacts/${id}`,
+    ),
 
   // ------------------------------------------------------------------
   // VISAS
@@ -272,16 +345,30 @@ export const employeeService = {
     return response.data
   },
 
-  updateVisa: async (id: string, data: UpdateVisaDto) =>
-    api.patch(`${base}/visas/${id}`, data),
+  updateVisa: async (employeeId: string, id: string, data: UpdateVisaDto) =>
+    api.patch(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/visas/${id}`,
+      data,
+    ),
 
-  deleteVisa: async (id: string) => api.delete(`${base}/visas/${id}`),
+  deleteVisa: async (employeeId: string, id: string) =>
+    api.delete(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/visas/${id}`,
+    ),
 
   getCredentialSummary: async (id: string): Promise<EmployeeProfileSummary> => {
     const response = await api.get<EmployeeProfileSummaryResponse>(
       `${API_ENDPOINTS.hr.employees}/${id}/profile-summary`,
     )
-
+    //console.log(response.data.data)
     return response.data.data
+  },
+
+  getMyProfile: async (): Promise<EmployeeProfile> => {
+    const response = await api.get<EmployeeProfile>(
+      `${API_ENDPOINTS.hr.employees}/me/profile`,
+    )
+
+    return response.data
   },
 }
