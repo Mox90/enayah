@@ -3,14 +3,17 @@ import { db } from '../../../../db/client'
 import { EmployeePersonalRepository } from '../repository/employee-personal.repository'
 import {
   CreateEmployeePersonalDto,
+  EmployeeIdentificationSchema,
   UpdateEmployeeAddressDto,
   UpdateEmployeeDependentDto,
   UpdateEmployeeEmailDto,
   UpdateEmployeeEmergencyContactDto,
   UpdateEmployeeIdentificationDto,
+  UpdateEmployeeIdentificationSchema,
   UpdateEmployeePhoneNumberDto,
   UpdateEmployeeVisaDto,
 } from '../dto/employee-personal.request'
+import { AppError } from '../../../../core/errors/AppError'
 
 export const EmployeePersonalService = {
   findByEmployeeId: async (employeeId: string) => {
@@ -25,12 +28,32 @@ export const EmployeePersonalService = {
 
   updateIdentification: async (
     employeeId: string,
-    id: string,
+    recordId: string,
     data: UpdateEmployeeIdentificationDto,
   ) => {
-    return db.transaction((tx) =>
-      EmployeePersonalRepository.updateIdentification(tx, employeeId, id, data),
-    )
+    return db.transaction(async (tx) => {
+      const existing = await EmployeePersonalRepository.findIdentificationById(
+        tx,
+        employeeId,
+        recordId,
+      )
+
+      if (!existing) {
+        throw new AppError('Employee identification was not found', 404)
+      }
+
+      EmployeeIdentificationSchema.parse({
+        ...existing,
+        ...data,
+      })
+
+      return EmployeePersonalRepository.updateIdentification(
+        tx,
+        employeeId,
+        recordId,
+        data,
+      )
+    })
   },
 
   updateEmail: async (

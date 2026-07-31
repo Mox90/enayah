@@ -198,8 +198,10 @@ export const employeeService = {
       data,
     ),
 
-  deleteIdentification: async (id: string) =>
-    api.delete(`${base}/identifications/${id}`),
+  deleteIdentification: async (employeeId: string, id: string) =>
+    api.delete(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/identifications/${id}`,
+    ),
 
   // ------------------------------------------------------------------
   // PHONE NUMBERS
@@ -213,10 +215,16 @@ export const employeeService = {
     return response.data
   },
 
-  updatePhone: async (id: string, data: UpdatePhoneDto) =>
-    api.patch(`${base}/phone-numbers/${id}`, data),
+  updatePhone: async (employeeId: string, id: string, data: UpdatePhoneDto) =>
+    api.patch(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/phone-numbers/${id}`,
+      data,
+    ),
 
-  deletePhone: async (id: string) => api.delete(`${base}/phone-numbers/${id}`),
+  deletePhone: async (employeeId: string, id: string) =>
+    api.delete(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/phone-numbers/${id}`,
+    ),
 
   // ------------------------------------------------------------------
   // EMAILS
@@ -230,10 +238,16 @@ export const employeeService = {
     return response.data
   },
 
-  updateEmail: async (id: string, data: UpdateEmailDto) =>
-    api.patch(`${base}/emails/${id}`, data),
+  updateEmail: async (employeeId: string, id: string, data: UpdateEmailDto) =>
+    api.patch(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/emails/${id}`,
+      data,
+    ),
 
-  deleteEmail: async (id: string) => api.delete(`${base}/emails/${id}`),
+  deleteEmail: async (employeeId: string, id: string) =>
+    api.delete(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/emails/${id}`,
+    ),
 
   // ------------------------------------------------------------------
   // ADDRESSES
@@ -247,10 +261,20 @@ export const employeeService = {
     return response.data
   },
 
-  updateAddress: async (id: string, data: UpdateAddressDto) =>
-    api.patch(`${base}/addresses/${id}`, data),
+  updateAddress: async (
+    employeeId: string,
+    id: string,
+    data: UpdateAddressDto,
+  ) =>
+    api.patch(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/addresses/${id}`,
+      data,
+    ),
 
-  deleteAddress: async (id: string) => api.delete(`${base}/addresses/${id}`),
+  deleteAddress: async (employeeId: string, id: string) =>
+    api.delete(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/addresses/${id}`,
+    ),
 
   // ------------------------------------------------------------------
   // DEPENDENTS
@@ -264,10 +288,20 @@ export const employeeService = {
     return response.data
   },
 
-  updateDependent: async (id: string, data: UpdateDependentDto) =>
-    api.patch(`${base}/dependents/${id}`, data),
+  updateDependent: async (
+    employeeId: string,
+    id: string,
+    data: UpdateDependentDto,
+  ) =>
+    api.patch(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/dependents/${id}`,
+      data,
+    ),
 
-  deleteDependent: async (id: string) => api.delete(`${base}/dependents/${id}`),
+  deleteDependent: async (employeeId: string, id: string) =>
+    api.delete(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/dependents/${id}`,
+    ),
 
   // ------------------------------------------------------------------
   // EMERGENCY CONTACTS
@@ -284,11 +318,20 @@ export const employeeService = {
     return response.data
   },
 
-  updateEmergencyContact: async (id: string, data: UpdateEmergencyContactDto) =>
-    api.patch(`${base}/emergency-contacts/${id}`, data),
+  updateEmergencyContact: async (
+    employeeId: string,
+    id: string,
+    data: UpdateEmergencyContactDto,
+  ) =>
+    api.patch(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/emergency-contacts/${id}`,
+      data,
+    ),
 
-  deleteEmergencyContact: async (id: string) =>
-    api.delete(`${base}/emergency-contacts/${id}`),
+  deleteEmergencyContact: async (employeeId: string, id: string) =>
+    api.delete(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/emergency-contacts/${id}`,
+    ),
 
   // ------------------------------------------------------------------
   // VISAS
@@ -302,10 +345,16 @@ export const employeeService = {
     return response.data
   },
 
-  updateVisa: async (id: string, data: UpdateVisaDto) =>
-    api.patch(`${base}/visas/${id}`, data),
+  updateVisa: async (employeeId: string, id: string, data: UpdateVisaDto) =>
+    api.patch(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/visas/${id}`,
+      data,
+    ),
 
-  deleteVisa: async (id: string) => api.delete(`${base}/visas/${id}`),
+  deleteVisa: async (employeeId: string, id: string) =>
+    api.delete(
+      `${API_ENDPOINTS.hr.employees}/${employeeId}/personal/visas/${id}`,
+    ),
 
   getCredentialSummary: async (id: string): Promise<EmployeeProfileSummary> => {
     const response = await api.get<EmployeeProfileSummaryResponse>(

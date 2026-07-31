@@ -27,9 +27,11 @@ export function MyEmployeeProfile() {
   } = useMyEmployeeProfile()
 
   //const uploadAvatarMutation = useUploadEmployeeAvatar(employeeId)
-  const uploadAvatarMutation = useUploadEmployeeAvatar(
-    (employeeId || profile?.personal.id) ?? '',
-  )
+  const resolvedEmployeeId = profile?.personal.id ?? ''
+  const uploadAvatarMutation = useUploadEmployeeAvatar(resolvedEmployeeId)
+  // const uploadAvatarMutation = useUploadEmployeeAvatar(
+  //   (employeeId || profile?.personal.id) ?? '',
+  // )
 
   const onAvatarUpload = async (file: File): Promise<void> => {
     await uploadAvatarMutation.mutateAsync(file)
@@ -97,7 +99,7 @@ export function MyEmployeeProfile() {
         onAvatarUpload={onAvatarUpload}
       />
 
-      <EmployeeProfileTabs employeeId={employeeId} profile={profile} />
+      <EmployeeProfileTabs employeeId={resolvedEmployeeId} profile={profile} />
     </div>
   )
 }

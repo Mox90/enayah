@@ -48,7 +48,15 @@
     "expiresInDays": "ينتهي خلال {days} يومًا",
     "expiresTomorrow": "ينتهي غدًا",
     "noExpiryDate": "لا يوجد تاريخ انتهاء",
-    "invalidExpiryDate": "تاريخ الانتهاء غير صالح"
+    "invalidExpiryDate": "تاريخ الانتهاء غير صالح",
+    "validation": {
+      "correctHighlightedFields": "يرجى تصحيح الحقول المحددة."
+    },
+    "errors": {
+      "validationFailed": "بعض البيانات المدخلة غير صحيحة.",
+      "requestFailed": "تعذر إكمال الطلب.",
+      "unexpected": "حدث خطأ غير متوقع."
+    }
   },
 
   "auth": {
@@ -535,7 +543,19 @@
     "sponsor": "الراعي",
     "authority": "سلطة الإصدار",
     "saveIdentification": "حفظ الهوية",
-    "idTitleSub": "أدخل تفاصيل الهوية."
+    "idTitleSub": "أدخل تفاصيل الهوية.",
+    "validation": {
+      "typeRequired": "نوع الهوية مطلوب.",
+      "numberRequired": "رقم الهوية مطلوب.",
+      "numberMaxLength": "يجب ألا يتجاوز رقم الهوية {max} حرفًا.",
+      "numberInvalidCharacters": "يُسمح فقط بالأحرف والأرقام والشرطات.",
+      "expiryDateRequired": "تاريخ الانتهاء مطلوب.",
+      "issueDateAfterExpiry": "يجب ألا يكون تاريخ الإصدار بعد تاريخ الانتهاء.",
+      "expiryDateBeforeIssue": "يجب ألا يكون تاريخ الانتهاء قبل تاريخ الإصدار."
+    },
+    "errors": {
+      "saveFailedTitle": "تعذر حفظ بيانات الهوية"
+    }
   },
   "phoneNumber": {
     "phoneTitle": "أرقام الهواتف",

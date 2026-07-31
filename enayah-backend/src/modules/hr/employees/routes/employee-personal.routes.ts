@@ -147,10 +147,10 @@ router.patch(
 )
 
 router.patch(
-  '/personal/dependents/:id',
+  '/:employeeId/personal/dependents/:recordId',
   //requirePermission('employee.update'),
   requireEmployeeAccess({
-    employeeIdParam: 'id',
+    employeeIdParam: 'employeeId',
     anyEmployeePermission: 'employee.update',
     selfPermission: 'employee.self.personal.update',
   }),
@@ -162,10 +162,10 @@ router.patch(
 // --------------------------------------------------
 
 router.delete(
-  '/personal/identifications/:id',
+  '/:employeeId/personal/identifications/:recordId',
   //requirePermission('employee.update'),
   requireEmployeeAccess({
-    employeeIdParam: 'id',
+    employeeIdParam: 'employeeId',
     anyEmployeePermission: 'employee.update',
     selfPermission: 'employee.self.personal.update',
   }),
@@ -173,10 +173,10 @@ router.delete(
 )
 
 router.delete(
-  '/personal/emails/:id',
+  '/:employeeId/personal/emails/:recordId',
   //requirePermission('employee.update'),
   requireEmployeeAccess({
-    employeeIdParam: 'id',
+    employeeIdParam: 'employeeId',
     anyEmployeePermission: 'employee.update',
     selfPermission: 'employee.self.personal.update',
   }),
@@ -184,10 +184,10 @@ router.delete(
 )
 
 router.delete(
-  '/personal/phone-numbers/:id',
+  '/:employeeId/personal/phone-numbers/:recordId',
   //requirePermission('employee.update'),
   requireEmployeeAccess({
-    employeeIdParam: 'id',
+    employeeIdParam: 'employeeId',
     anyEmployeePermission: 'employee.update',
     selfPermission: 'employee.self.personal.update',
   }),
@@ -195,10 +195,10 @@ router.delete(
 )
 
 router.delete(
-  '/personal/dependents/:id',
+  '/:employeeId/personal/dependents/:recordId',
   //requirePermission('employee.update'),
   requireEmployeeAccess({
-    employeeIdParam: 'id',
+    employeeIdParam: 'employeeId',
     anyEmployeePermission: 'employee.update',
     selfPermission: 'employee.self.personal.update',
   }),
@@ -206,10 +206,10 @@ router.delete(
 )
 
 router.delete(
-  '/personal/addresses/:id',
+  '/:employeeId/personal/addresses/:recordId',
   //requirePermission('employee.update'),
   requireEmployeeAccess({
-    employeeIdParam: 'id',
+    employeeIdParam: 'employeeId',
     anyEmployeePermission: 'employee.update',
     selfPermission: 'employee.self.personal.update',
   }),
@@ -217,10 +217,10 @@ router.delete(
 )
 
 router.delete(
-  '/personal/emergency-contacts/:id',
+  '/:employeeId/personal/emergency-contacts/:recordId',
   //requirePermission('employee.update'),
   requireEmployeeAccess({
-    employeeIdParam: 'id',
+    employeeIdParam: 'employeeId',
     anyEmployeePermission: 'employee.update',
     selfPermission: 'employee.self.personal.update',
   }),
@@ -228,10 +228,10 @@ router.delete(
 )
 
 router.delete(
-  '/personal/visas/:id',
+  '/:employeeId/personal/visas/:recordId',
   //requirePermission('employee.update'),
   requireEmployeeAccess({
-    employeeIdParam: 'id',
+    employeeIdParam: 'employeeId',
     anyEmployeePermission: 'employee.update',
     selfPermission: 'employee.self.personal.update',
   }),

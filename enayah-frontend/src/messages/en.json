@@ -48,7 +48,15 @@
     "expiresInDays": "Expires in {days} days",
     "expiresTomorrow": "Expires tomorrow",
     "noExpiryDate": "No expiry date",
-    "invalidExpiryDate": "Invalid expiry date"
+    "invalidExpiryDate": "Invalid expiry date",
+    "validation": {
+      "correctHighlightedFields": "Please correct the highlighted fields."
+    },
+    "errors": {
+      "validationFailed": "Some submitted information is invalid.",
+      "requestFailed": "The request could not be completed.",
+      "unexpected": "An unexpected error occurred."
+    }
   },
   "auth": {
     "loginTitle": "Login to Your Account",
@@ -533,7 +541,19 @@
     "sponsor": "Sponsor",
     "authority": "Issuing Authority",
     "saveIdentification": "Save Identification",
-    "idTitleSub": "Enter employee identification details."
+    "idTitleSub": "Enter employee identification details.",
+    "validation": {
+      "typeRequired": "Identification type is required.",
+      "numberRequired": "Identification number is required.",
+      "numberMaxLength": "Identification number must not exceed {max} characters.",
+      "numberInvalidCharacters": "Only letters, numbers, and hyphens are allowed.",
+      "expiryDateRequired": "Expiry date is required.",
+      "issueDateAfterExpiry": "Issue date must not be later than the expiry date.",
+      "expiryDateBeforeIssue": "Expiry date must not be earlier than the issue date."
+    },
+    "errors": {
+      "saveFailedTitle": "Unable to save identification"
+    }
   },
   "phoneNumber": {
     "phoneTitle": "Phone Numbers",

@@ -99,32 +99,41 @@ interface ApiErrorResponse {
   }>
 }
 
-function getApiErrorMessage(error: unknown): string {
-  if (!axios.isAxiosError<ApiErrorResponse>(error)) {
-    return error instanceof Error
-      ? error.message
-      : 'An unexpected error occurred.'
+type ApiErrorFallbacks = {
+  validationFailed: string
+  requestFailed: string
+  unexpectedError: string
+}
+
+function getApiErrorMessage(
+  error: unknown,
+  fallbacks: ApiErrorFallbacks,
+): string {
+  if (axios.isAxiosError(error)) {
+    const responseData = error.response?.data
+
+    if (
+      responseData &&
+      typeof responseData === 'object' &&
+      'message' in responseData &&
+      typeof responseData.message === 'string' &&
+      responseData.message.trim()
+    ) {
+      return responseData.message
+    }
+
+    if (error.response?.status === 422) {
+      return fallbacks.validationFailed
+    }
+
+    return fallbacks.requestFailed
   }
 
-  const response = error.response?.data
-  const issues = response?.error?.issues ?? response?.issues
-
-  if (issues?.length) {
-    return issues
-      .map((issue) => {
-        const field = issue.path?.join('.')
-        const message = issue.message ?? 'Invalid value'
-
-        return field ? `${field}: ${message}` : message
-      })
-      .join('\n')
+  if (error instanceof Error && error.message.trim()) {
+    return error.message
   }
 
-  return (
-    response?.error?.message ??
-    response?.message ??
-    'Unable to save the identification.'
-  )
+  return fallbacks.unexpectedError
 }
 
 type IdentificationFieldErrors = {
@@ -225,27 +234,26 @@ function IdentificationDialogContent({
     const expiryDate = form.expiryDate?.trim()
 
     if (!normalizedType) {
-      errors.type = 'Identification type is required.'
+      errors.type = it('validation.typeRequired')
     }
 
     if (!normalizedNumber) {
-      errors.identificationNumber = 'Identification number is required.'
+      errors.identificationNumber = it('validation.numberRequired')
     } else if (normalizedNumber.length > 30) {
-      errors.identificationNumber =
-        'Identification number must not exceed 30 characters.'
+      errors.identificationNumber = it('validation.numberMaxLength', {
+        max: 30,
+      })
     } else if (!/^[\p{L}\p{N}-]+$/u.test(normalizedNumber)) {
-      errors.identificationNumber =
-        'Only letters, numbers, and hyphens are allowed.'
+      errors.identificationNumber = it('validation.numberInvalidCharacters')
     }
 
     if (requireExpiryDate && !expiryDate) {
-      errors.expiryDate = 'Expiry date is required.'
+      errors.expiryDate = it('validation.expiryDateRequired')
     }
 
     if (issueDate && expiryDate && issueDate > expiryDate) {
-      errors.issueDate = 'Issue date must not be later than the expiry date.'
-
-      errors.expiryDate = 'Expiry date must not be earlier than the issue date.'
+      errors.issueDate = it('validation.issueDateAfterExpiry')
+      errors.expiryDate = it('validation.expiryDateBeforeIssue')
     }
 
     return errors
@@ -299,7 +307,7 @@ function IdentificationDialogContent({
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors)
-      setSubmitError('Please correct the highlighted fields.')
+      setSubmitError(ct('validation.correctHighlightedFields'))
       return
     }
 
@@ -327,7 +335,13 @@ function IdentificationDialogContent({
 
       onOpenChange(false)
     } catch (error: unknown) {
-      setSubmitError(getApiErrorMessage(error))
+      setSubmitError(
+        getApiErrorMessage(error, {
+          validationFailed: ct('errors.validationFailed'),
+          requestFailed: ct('errors.requestFailed'),
+          unexpectedError: ct('errors.unexpected'),
+        }),
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -612,7 +626,7 @@ function IdentificationDialogContent({
           <Alert variant='destructive'>
             <AlertCircle className='h-4 w-4' />
 
-            <AlertTitle>Unable to save identification</AlertTitle>
+            <AlertTitle>{it('errors.saveFailedTitle')}</AlertTitle>
 
             <AlertDescription className='whitespace-pre-line'>
               {submitError}

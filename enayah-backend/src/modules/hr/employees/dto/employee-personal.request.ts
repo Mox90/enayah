@@ -23,7 +23,13 @@ const optionalUuid = z.uuid().nullable().optional()
 const normalizeDigits = (value: string): string =>
   value
     .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
-    .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳٤٥٦٧۸٩'.indexOf(digit)))
+    .replace(/[۰-۹]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
+// const normalizeDigits = (value: string): string =>
+//   value.replace(/[\u0660-\u0669\u06F0-\u06F9]/g, (digit) => {
+//     const code = digit.codePointAt(0)!
+//     const base = code >= 0x06f0 ? 0x06f0 : 0x0660
+//     return String(code - base)
+//   })
 
 const optionalHijriDate = z.preprocess(
   (value) => {

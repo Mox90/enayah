@@ -1,4 +1,4 @@
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, isNull, sql } from 'drizzle-orm'
 //import { DB } from '../../../../db'
 import {
   employeeAddresses,
@@ -193,6 +193,30 @@ export const EmployeePersonalRepository = {
       emergencyContacts,
       visas,
     }
+  },
+
+  // =====================================================
+  // INDIVIDUAL READ
+  // =====================================================
+
+  findIdentificationById: async (
+    tx: DB,
+    employeeId: string,
+    recordId: string,
+  ) => {
+    const [identification] = await tx
+      .select()
+      .from(employeeIdentifications)
+      .where(
+        and(
+          eq(employeeIdentifications.id, recordId),
+          eq(employeeIdentifications.employeeId, employeeId),
+          isNull(employeeIdentifications.deletedAt),
+        ),
+      )
+      .limit(1)
+
+    return identification ?? null
   },
 
   // =====================================================

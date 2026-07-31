@@ -65,7 +65,8 @@ export function useEmployeePersonalMutations(employeeId: string) {
     }),
 
     deleteIdentification: useMutation({
-      mutationFn: (id: string) => employeeService.deleteIdentification(id),
+      mutationFn: (id: string) =>
+        employeeService.deleteIdentification(employeeId, id),
 
       onSuccess: invalidate,
     }),
@@ -81,13 +82,13 @@ export function useEmployeePersonalMutations(employeeId: string) {
 
     updatePhone: useMutation({
       mutationFn: ({ id, data }: { id: string; data: UpdatePhoneDto }) =>
-        employeeService.updatePhone(id, data),
+        employeeService.updatePhone(employeeId, id, data),
 
       onSuccess: invalidate,
     }),
 
     deletePhone: useMutation({
-      mutationFn: (id: string) => employeeService.deletePhone(id),
+      mutationFn: (id: string) => employeeService.deletePhone(employeeId, id),
 
       onSuccess: invalidate,
     }),
@@ -103,13 +104,13 @@ export function useEmployeePersonalMutations(employeeId: string) {
 
     updateEmail: useMutation({
       mutationFn: ({ id, data }: { id: string; data: UpdateEmailDto }) =>
-        employeeService.updateEmail(id, data),
+        employeeService.updateEmail(employeeId, id, data),
 
       onSuccess: invalidate,
     }),
 
     deleteEmail: useMutation({
-      mutationFn: (id: string) => employeeService.deleteEmail(id),
+      mutationFn: (id: string) => employeeService.deleteEmail(employeeId, id),
 
       onSuccess: invalidate,
     }),
@@ -125,13 +126,13 @@ export function useEmployeePersonalMutations(employeeId: string) {
 
     updateAddress: useMutation({
       mutationFn: ({ id, data }: { id: string; data: UpdateAddressDto }) =>
-        employeeService.updateAddress(id, data),
+        employeeService.updateAddress(employeeId, id, data),
 
       onSuccess: invalidate,
     }),
 
     deleteAddress: useMutation({
-      mutationFn: (id: string) => employeeService.deleteAddress(id),
+      mutationFn: (id: string) => employeeService.deleteAddress(employeeId, id),
 
       onSuccess: invalidate,
     }),
@@ -147,13 +148,14 @@ export function useEmployeePersonalMutations(employeeId: string) {
 
     updateDependent: useMutation({
       mutationFn: ({ id, data }: { id: string; data: UpdateDependentDto }) =>
-        employeeService.updateDependent(id, data),
+        employeeService.updateDependent(employeeId, id, data),
 
       onSuccess: invalidate,
     }),
 
     deleteDependent: useMutation({
-      mutationFn: (id: string) => employeeService.deleteDependent(id),
+      mutationFn: (id: string) =>
+        employeeService.deleteDependent(employeeId, id),
 
       onSuccess: invalidate,
     }),
@@ -174,13 +176,14 @@ export function useEmployeePersonalMutations(employeeId: string) {
       }: {
         id: string
         data: UpdateEmergencyContactDto
-      }) => employeeService.updateEmergencyContact(id, data),
+      }) => employeeService.updateEmergencyContact(employeeId, id, data),
 
       onSuccess: invalidate,
     }),
 
     deleteEmergencyContact: useMutation({
-      mutationFn: (id: string) => employeeService.deleteEmergencyContact(id),
+      mutationFn: (id: string) =>
+        employeeService.deleteEmergencyContact(employeeId, id),
 
       onSuccess: invalidate,
     }),
@@ -196,13 +199,13 @@ export function useEmployeePersonalMutations(employeeId: string) {
 
     updateVisa: useMutation({
       mutationFn: ({ id, data }: { id: string; data: UpdateVisaDto }) =>
-        employeeService.updateVisa(id, data),
+        employeeService.updateVisa(employeeId, id, data),
 
       onSuccess: invalidate,
     }),
 
     deleteVisa: useMutation({
-      mutationFn: (id: string) => employeeService.deleteVisa(id),
+      mutationFn: (id: string) => employeeService.deleteVisa(employeeId, id),
 
       onSuccess: invalidate,
     }),
