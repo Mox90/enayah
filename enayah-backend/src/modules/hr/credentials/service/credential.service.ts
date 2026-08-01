@@ -1,4 +1,4 @@
-// src/modules/hr/credentials/service/credential.service.ts
+// enayah-backend/src/modules/hr/credentials/service/credential.service.ts
 
 import { AppError } from '../../../../core/errors/AppError'
 import { db } from '../../../../db'
@@ -8,6 +8,7 @@ import {
   type CreateEmployeeCredentialsDto,
   type UpdateDegreeDto,
 } from '../dto/credential.request'
+import { degreeDocumentRepository } from '../repository/credential-document-repositories'
 
 import {
   CredentialRepository,
@@ -20,8 +21,9 @@ import {
 } from './credential-document-processing.service'
 
 import {
-  removeCredentialDocument,
   removeCredentialDocumentByAbsolutePath,
+  resolveCredentialDocument,
+  removeCredentialDocument,
   storeCredentialDocument,
   type StoredCredentialDocument,
 } from './credential-document-storage.service'
@@ -82,9 +84,106 @@ async function removeReplacedDocument(
   })
 }
 
+export type CredentialDocumentAccessResult = {
+  id: string
+  credentialId: string
+  employeeId: string
+  originalName: string
+  mimeType: string
+  fileSize: number
+
+  /*
+   * Internal server value used by the controller.
+   * It must never be included in a JSON response.
+   */
+  absolutePath: string
+}
+
+export type GetDegreeDocumentInput = {
+  employeeId: string
+  degreeId: string
+}
+
+type CredentialDocumentRepositoryPort = Pick<
+  typeof degreeDocumentRepository,
+  'findActiveDocument'
+>
+
+async function getCredentialDocumentForAccess({
+  repository,
+  employeeId,
+  credentialId,
+  notFoundMessage,
+}: {
+  repository: CredentialDocumentRepositoryPort
+  employeeId: string
+  credentialId: string
+  notFoundMessage: string
+}): Promise<CredentialDocumentAccessResult> {
+  const document = await repository.findActiveDocument(
+    db,
+    employeeId,
+    credentialId,
+  )
+
+  if (!document) {
+    throw new AppError(notFoundMessage, 404)
+  }
+
+  const resolvedDocument = await resolveCredentialDocument(document.storageKey)
+
+  /*
+   * Detect a file that was changed outside the
+   * application after its metadata was recorded.
+   */
+  if (resolvedDocument.fileSize !== document.fileSize) {
+    throw new AppError(
+      'Credential document failed its storage integrity check.',
+      500,
+    )
+  }
+
+  return {
+    id: document.id,
+    credentialId: document.credentialId,
+    employeeId: document.employeeId,
+    originalName: document.originalName,
+    mimeType: document.mimeType,
+    fileSize: document.fileSize,
+    absolutePath: resolvedDocument.absolutePath,
+  }
+}
+
 export const CredentialService = {
   findByEmployeeId: async (employeeId: string) => {
     return CredentialRepository.findByEmployeeId(db, employeeId)
+  },
+
+  getDegreeDocument: async ({
+    employeeId,
+    degreeId,
+  }: GetDegreeDocumentInput) => {
+    const document = await getCredentialDocumentForAccess({
+      repository: degreeDocumentRepository,
+      employeeId,
+      credentialId: degreeId,
+      notFoundMessage: 'Degree document not found.',
+    })
+
+    /*
+     * Expose a degree-specific property to the
+     * controller while keeping the reusable helper
+     * credential-neutral.
+     */
+    return {
+      id: document.id,
+      degreeId: document.credentialId,
+      employeeId: document.employeeId,
+      originalName: document.originalName,
+      mimeType: document.mimeType,
+      fileSize: document.fileSize,
+      absolutePath: document.absolutePath,
+    }
   },
 
   createAll: async (employeeId: string, data: CreateEmployeeCredentialsDto) => {
@@ -201,7 +300,12 @@ export const CredentialService = {
 
       return await db.transaction(async (tx) => {
         const existingDegree =
-          await CredentialRepository.findDegreeForDocumentUpdate(
+          // await CredentialRepository.findDegreeForDocumentUpdate(
+          //   tx,
+          //   employeeId,
+          //   degreeId,
+          // )
+          await degreeDocumentRepository.findForDocumentUpdate(
             tx,
             employeeId,
             degreeId,
@@ -313,7 +417,7 @@ export const CredentialService = {
   }) => {
     return await db.transaction(async (tx) => {
       const existingDegree =
-        await CredentialRepository.findDegreeForDocumentUpdate(
+        await degreeDocumentRepository.findForDocumentUpdate(
           tx,
           employeeId,
           degreeId,

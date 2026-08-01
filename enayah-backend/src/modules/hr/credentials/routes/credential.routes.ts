@@ -16,6 +16,26 @@ router.use(requireAuth)
 router.use(attachPermissions)
 
 router.get(
+  '/employee/:employeeId/degrees/:id/document/preview',
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.view',
+    selfPermission: 'employee.self.view',
+  }),
+  CredentialController.previewDegreeDocument,
+)
+
+router.get(
+  '/employee/:employeeId/degrees/:id/document/download',
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.view',
+    selfPermission: 'employee.self.view',
+  }),
+  CredentialController.downloadDegreeDocument,
+)
+
+router.get(
   '/employee/:employeeId',
   //requirePermission('employee.credentials.view'),
   requireEmployeeAccess({
