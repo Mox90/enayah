@@ -4,6 +4,10 @@
 
 import { useState } from 'react'
 
+import { Save } from 'lucide-react'
+import { useLocale, useTranslations } from 'next-intl'
+
+import { CredentialDocumentDropzone } from '@/components/forms/credential-document-dropzone'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -13,13 +17,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useLocale, useTranslations } from 'next-intl'
-import { FormDialog } from '../forms'
+
 import { Footer } from '../footer/footer'
-import { Save } from 'lucide-react'
+import { FormDialog } from '../forms'
 
 export type DegreeFormValue = {
   id?: string
+
   degreeType:
     | 'diploma'
     | 'associate'
@@ -27,19 +31,54 @@ export type DegreeFormValue = {
     | 'master'
     | 'doctorate'
     | 'other'
+
   degreeName: string
   major?: string | null
   institution: string
   graduationDate?: string | null
+
+  /*
+   * Read-only data that may be present when editing.
+   * This field is not sent back to the backend.
+   */
   isVerified?: boolean
+}
+
+export type DegreeFormSubmitValue = {
+  id?: string
+
+  degreeType:
+    | 'diploma'
+    | 'associate'
+    | 'bachelor'
+    | 'master'
+    | 'doctorate'
+    | 'other'
+
+  degreeName: string
+  major: string | null
+  institution: string
+  graduationDate: string | null
+  documentFile: File | null
 }
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialValue?: DegreeFormValue | null
-  onSubmit: (value: DegreeFormValue) => void | Promise<void>
+
+  onSubmit: (value: DegreeFormSubmitValue) => void | Promise<void>
+
   generateId?: boolean
+
+  /*
+   * Existing employee profile:
+   * true — document can be uploaded immediately.
+   *
+   * Employee onboarding:
+   * false — employeeId does not exist yet.
+   */
+  allowDocumentUpload?: boolean
 }
 
 const emptyValue: DegreeFormValue = {
@@ -56,20 +95,26 @@ function DegreeDialogContent({
   onOpenChange,
   onSubmit,
   generateId,
+  allowDocumentUpload,
 }: {
-  initialValue?: DegreeFormValue | null
+  /*
+   * Required property with an explicit undefined union.
+   * This avoids exactOptionalPropertyTypes errors when
+   * DegreeDialog passes initialValue explicitly.
+   */
+  initialValue: DegreeFormValue | null | undefined
   onOpenChange: (open: boolean) => void
-  onSubmit: (value: DegreeFormValue) => void | Promise<void>
+  onSubmit: (value: DegreeFormSubmitValue) => void | Promise<void>
   generateId: boolean
+  allowDocumentUpload: boolean
 }) {
   const t = useTranslations('credentials')
   const locale = useLocale()
   const isRtl = locale === 'ar'
 
   const [form, setForm] = useState<DegreeFormValue>(initialValue ?? emptyValue)
-
+  const [selectedDocument, setSelectedDocument] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-
   const degreeName = form.degreeName.trim()
   const institution = form.institution.trim()
 
@@ -77,13 +122,13 @@ function DegreeDialogContent({
     field: K,
     value: DegreeFormValue[K],
   ) {
-    setForm((prev) => ({
-      ...prev,
+    setForm((previous) => ({
+      ...previous,
       [field]: value,
     }))
   }
 
-  function createClientId() {
+  function createClientId(): string {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
       return crypto.randomUUID()
     }
@@ -94,28 +139,47 @@ function DegreeDialogContent({
   const formInvalid = !degreeName || !institution
 
   function closeDialog() {
-    if (isSubmitting) return
+    if (isSubmitting) {
+      return
+    }
 
     onOpenChange(false)
   }
 
   async function handleSubmit() {
-    if (isSubmitting || formInvalid) return
+    if (isSubmitting || formInvalid) {
+      return
+    }
 
     setIsSubmitting(true)
 
     try {
+      const resolvedId = form.id ?? (generateId ? createClientId() : null)
+
+      /*
+       * Use a conditional spread rather than:
+       *
+       * id: resolvedId ?? undefined
+       *
+       * This is compatible with
+       * exactOptionalPropertyTypes: true.
+       */
       await onSubmit({
-        ...form,
-        id: form.id ?? (generateId ? createClientId() : undefined),
-        major: form.major || null,
+        ...(resolvedId ? { id: resolvedId } : {}),
+        degreeType: form.degreeType,
+        degreeName,
+        major: form.major?.trim() || null,
+        institution,
         graduationDate: form.graduationDate || null,
+        documentFile: allowDocumentUpload ? selectedDocument : null,
       })
-      //console.log('DATA INPUT IS ', form)
+
       onOpenChange(false)
     } catch {
-      // Keep the dialog open.
-      // The parent mutation hook can display the error toast.
+      /*
+       * Keep the dialog open.
+       * The mutation hook displays the error toast.
+       */
     } finally {
       setIsSubmitting(false)
     }
@@ -129,6 +193,7 @@ function DegreeDialogContent({
             <h3 className='text-sm font-semibold text-foreground'>
               {t('highestEducationalLabel')}
             </h3>
+
             <p className='text-xs text-muted-foreground'>
               {t.rich('dialogDes', {
                 item: isRtl
@@ -141,21 +206,25 @@ function DegreeDialogContent({
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2 xl:col-span-2'>
               <Label>{t('degreeNameLabel')}</Label>
+
               <Input
                 className='h-11'
                 value={form.degreeName}
-                onChange={(e) => update('degreeName', e.target.value)}
+                onChange={(event) => update('degreeName', event.target.value)}
                 placeholder={t('degreePlaceHolder')}
+                disabled={isSubmitting}
               />
             </div>
 
             <div className='space-y-2'>
               <Label>{t('degreeTypeLabel')}</Label>
+
               <Select
                 dir={isRtl ? 'rtl' : 'ltr'}
                 value={form.degreeType}
-                onValueChange={(v) =>
-                  update('degreeType', v as DegreeFormValue['degreeType'])
+                disabled={isSubmitting}
+                onValueChange={(value) =>
+                  update('degreeType', value as DegreeFormValue['degreeType'])
                 }
               >
                 <SelectTrigger className='h-11'>
@@ -164,10 +233,15 @@ function DegreeDialogContent({
 
                 <SelectContent>
                   <SelectItem value='diploma'>{t('diploma')}</SelectItem>
+
                   <SelectItem value='associate'>{t('associate')}</SelectItem>
+
                   <SelectItem value='bachelor'>{t('bachelor')}</SelectItem>
+
                   <SelectItem value='master'>{t('master')}</SelectItem>
+
                   <SelectItem value='doctorate'>{t('doctorate')}</SelectItem>
+
                   <SelectItem value='other'>{t('other')}</SelectItem>
                 </SelectContent>
               </Select>
@@ -175,43 +249,72 @@ function DegreeDialogContent({
 
             <div className='space-y-2'>
               <Label>{t('major')}</Label>
+
               <Input
                 className='h-11'
                 value={form.major ?? ''}
-                onChange={(e) => update('major', e.target.value || null)}
+                onChange={(event) =>
+                  update('major', event.target.value || null)
+                }
                 placeholder={t('majorPlaceHolder')}
+                disabled={isSubmitting}
               />
             </div>
 
             <div className='space-y-2 xl:col-span-2'>
               <Label>{t('institutionNameLabel')}</Label>
+
               <Input
                 className='h-11'
                 value={form.institution}
-                onChange={(e) => update('institution', e.target.value)}
+                onChange={(event) => update('institution', event.target.value)}
                 placeholder={t('institutionPlaceHolder')}
+                disabled={isSubmitting}
               />
             </div>
           </div>
         </section>
+
+        {allowDocumentUpload && (
+          <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+            <div className='mb-4'>
+              <h3 className='text-sm font-semibold text-foreground'>
+                {t('degreeDocument.title')}
+              </h3>
+
+              <p className='text-xs text-muted-foreground'>
+                {t('degreeDocument.description')}
+              </p>
+            </div>
+
+            <CredentialDocumentDropzone
+              value={selectedDocument}
+              onChange={setSelectedDocument}
+              disabled={isSubmitting}
+            />
+          </section>
+        )}
 
         <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
               {t('graduationDateLabel')}
             </h3>
+
             <p className='text-xs text-muted-foreground'>{t('degreeSub')}</p>
           </div>
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
               <Label>{t('graduationDateLabel')}</Label>
+
               <Input
                 type='date'
                 className='h-11 bg-background'
                 value={form.graduationDate ?? ''}
-                onChange={(e) =>
-                  update('graduationDate', e.target.value || null)
+                disabled={isSubmitting}
+                onChange={(event) =>
+                  update('graduationDate', event.target.value || null)
                 }
               />
             </div>
@@ -225,8 +328,10 @@ function DegreeDialogContent({
         label={t('save', {
           item: isRtl ? 'التحصيل العلمي' : 'Educational Attainment',
         })}
-        savingLabel={t('saving', { item: 'educational attainment' })}
-        disabled={formInvalid}
+        savingLabel={t('saving', {
+          item: isRtl ? 'التحصيل العلمي' : 'educational attainment',
+        })}
+        disabled={formInvalid || isSubmitting}
         isSaving={isSubmitting}
         saveVariant='default'
         saveIcon={<Save className='h-4 w-4' />}
@@ -241,8 +346,10 @@ export function DegreeDialog({
   initialValue,
   onSubmit,
   generateId = false,
+  allowDocumentUpload = true,
 }: Props) {
   const dialogKey = initialValue?.id ?? (open ? 'add-degree' : 'closed')
+
   const t = useTranslations('credentials')
 
   return (
@@ -261,6 +368,7 @@ export function DegreeDialog({
           onOpenChange={onOpenChange}
           onSubmit={onSubmit}
           generateId={generateId}
+          allowDocumentUpload={allowDocumentUpload}
         />
       )}
     </FormDialog>

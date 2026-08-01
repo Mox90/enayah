@@ -18,7 +18,8 @@ import { CredentialLifeSupport } from '../../profile/tabs/cards/credential-lifes
 import { CredentialMalpractice } from '../../profile/tabs/cards/credential-malpractice'
 import {
   DegreeDialog,
-  DegreeFormValue,
+  type DegreeFormSubmitValue,
+  type DegreeFormValue,
 } from '@/components/dialogs/degree-dialog'
 import { useState } from 'react'
 import { BoardDialog, BoardFormValue } from '@/components/dialogs/board-dialog'
@@ -86,7 +87,26 @@ export function CredentialsStep({ value, onChange }: Props) {
   const memberships = value.credentials?.memberships ?? []
   const malpractice = value.credentials?.malpractice ?? []
 
-  function saveDegree(degree: DegreeFormValue) {
+  function saveDegree(form: DegreeFormSubmitValue): void {
+    /*
+     * The onboarding payload is JSON-based and cannot contain
+     * a browser File object.
+     *
+     * File uploading is disabled for this dialog usage, so
+     * documentFile should always be null here.
+     */
+    const degree: DegreeFormValue = {
+      ...(form.id ? { id: form.id } : {}),
+
+      degreeType: form.degreeType,
+      degreeName: form.degreeName,
+      major: form.major,
+      institution: form.institution,
+      graduationDate: form.graduationDate,
+
+      isVerified: false,
+    }
+
     const exists = degrees.some((item: DegreeInput) => item.id === degree.id)
 
     const nextDegrees = exists
@@ -316,11 +336,15 @@ export function CredentialsStep({ value, onChange }: Props) {
       <DegreeDialog
         open={activeDialog === 'degree'}
         onOpenChange={(open) => {
-          if (!open) setActiveDialog(null)
+          if (!open) {
+            setActiveDialog(null)
+            setEditingDegree(null)
+          }
         }}
         initialValue={editingDegree}
         onSubmit={saveDegree}
-        generateId={true}
+        generateId
+        allowDocumentUpload={false}
       />
 
       <CredentialBoards

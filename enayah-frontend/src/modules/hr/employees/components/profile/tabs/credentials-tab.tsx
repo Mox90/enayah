@@ -11,7 +11,8 @@ import { CredentialMalpractice } from './cards/credential-malpractice'
 import { useState } from 'react'
 import {
   DegreeDialog,
-  DegreeFormValue,
+  type DegreeFormSubmitValue,
+  type DegreeFormValue,
 } from '@/components/dialogs/degree-dialog'
 import {
   useCreateDegree,
@@ -107,6 +108,22 @@ const CredentialsTab = ({ employeeId }: Props) => {
   const createDegreeMutation = useCreateDegree(employeeId)
   const updateDegreeMutation = useUpdateDegree(employeeId)
   const deleteDegreeMutation = useDeleteDegree(employeeId)
+  async function handleDegreeSubmit(
+    value: DegreeFormSubmitValue,
+  ): Promise<void> {
+    const { id, ...payload } = value
+
+    if (id) {
+      await updateDegreeMutation.mutateAsync({
+        id,
+        ...payload,
+      })
+
+      return
+    }
+
+    await createDegreeMutation.mutateAsync(payload)
+  }
 
   const createBoardMutation = useCreateBoard(employeeId)
   const updateBoardMutation = useUpdateBoard(employeeId)
@@ -181,31 +198,14 @@ const CredentialsTab = ({ employeeId }: Props) => {
       <DegreeDialog
         open={activeDialog === 'degree'}
         onOpenChange={(open) => {
-          if (!open) setActiveDialog(null)
-        }}
-        initialValue={editingDegree}
-        onSubmit={async (form) => {
-          if (editingDegree?.id) {
-            await updateDegreeMutation.mutateAsync({
-              id: editingDegree.id,
-              degreeType: form.degreeType,
-              degreeName: form.degreeName,
-              major: form.major ?? null,
-              institution: form.institution,
-              graduationDate: form.graduationDate ?? null,
-              isVerified: form.isVerified ?? false,
-            })
-          } else {
-            await createDegreeMutation.mutateAsync({
-              degreeType: form.degreeType,
-              degreeName: form.degreeName,
-              major: form.major ?? null,
-              institution: form.institution,
-              graduationDate: form.graduationDate ?? null,
-              isVerified: form.isVerified ?? false,
-            })
+          if (!open) {
+            setActiveDialog(null)
+            setEditingDegree(null)
           }
         }}
+        initialValue={editingDegree}
+        onSubmit={handleDegreeSubmit}
+        allowDocumentUpload
       />
 
       <CredentialBoards
