@@ -1,6 +1,6 @@
-// src/modules/hr/credentials/repository/credential.repository.ts
+// enayah-backend/src/modules/hr/credentials/repository/credential.repository.ts
 
-import { and, eq, sql } from 'drizzle-orm'
+import { and, eq, isNull, sql } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
 import {
   DB,
@@ -11,7 +11,9 @@ import {
   employeeLifeSupportCertifications,
   employeeMalpracticeInsurance,
   employeeMemberships,
+  files,
 } from '../../../../db'
+
 import { CreateEmployeeCredentialsDto } from '../dto/credential.request'
 
 export type CredentialPayload = CreateEmployeeCredentialsDto
@@ -45,6 +47,26 @@ type MembershipInsert = typeof employeeMemberships.$inferInsert
 type LicenseInsert = typeof employeeLicenses.$inferInsert
 type LifeSupportInsert = typeof employeeLifeSupportCertifications.$inferInsert
 type MalpracticeInsert = typeof employeeMalpracticeInsurance.$inferInsert
+
+export type CredentialFileCategory = (typeof files.category.enumValues)[number]
+export type CreateCredentialFileInput = {
+  storedName: string
+  originalName: string
+  mimeType: string
+  fileSize: number
+  storageKey: string
+  checksumSha256: string
+  category: CredentialFileCategory
+  uploadedByUserId: string
+}
+
+export type DegreeForDocumentUpdate = {
+  id: string
+  employeeId: string
+  documentFileId: string | null
+  documentStorageKey: string | null
+  documentCategory: CredentialFileCategory | null
+}
 
 async function findOneOrThrow(tx: DB, table: any, id: string, name: string) {
   // const row = await tx.query[table._.name].findFirst({
@@ -218,6 +240,116 @@ export const CredentialRepository = {
       lifeSupport,
       malpractice,
     }
+  },
+
+  findDegreeForDocumentUpdate: async (
+    tx: DB,
+    employeeId: string,
+    degreeId: string,
+  ): Promise<DegreeForDocumentUpdate | null> => {
+    /*
+     * Serialize simultaneous document updates for the same degree.
+     */
+    await tx.execute(sql`
+    SELECT ${employeeDegrees.id}
+    FROM ${employeeDegrees}
+    WHERE
+      ${employeeDegrees.id} = ${degreeId}
+      AND ${employeeDegrees.employeeId} = ${employeeId}
+      AND ${employeeDegrees.isDeleted} = false
+      AND ${employeeDegrees.deletedAt} IS NULL
+    FOR UPDATE
+  `)
+
+    const [degree] = await tx
+      .select({
+        id: employeeDegrees.id,
+        employeeId: employeeDegrees.employeeId,
+
+        documentFileId: employeeDegrees.documentFileId,
+
+        documentStorageKey: files.storageKey,
+
+        documentCategory: files.category,
+      })
+      .from(employeeDegrees)
+      .leftJoin(files, eq(employeeDegrees.documentFileId, files.id))
+      .where(
+        and(
+          eq(employeeDegrees.id, degreeId),
+          eq(employeeDegrees.employeeId, employeeId),
+          eq(employeeDegrees.isDeleted, false),
+          isNull(employeeDegrees.deletedAt),
+        ),
+      )
+      .limit(1)
+
+    return degree ?? null
+  },
+
+  createCredentialFile: async (
+    tx: DB,
+    input: CreateCredentialFileInput,
+  ): Promise<{
+    id: string
+    storageKey: string
+  }> => {
+    const [createdFile] = await tx
+      .insert(files)
+      .values({
+        storedName: input.storedName,
+        originalName: input.originalName,
+        mimeType: input.mimeType,
+        fileSize: input.fileSize,
+        storageKey: input.storageKey,
+
+        checksumSha256: input.checksumSha256,
+
+        visibility: 'private',
+        category: input.category,
+
+        uploadedByUserId: input.uploadedByUserId,
+
+        createdBy: input.uploadedByUserId,
+
+        updatedBy: input.uploadedByUserId,
+      })
+      .returning({
+        id: files.id,
+        storageKey: files.storageKey,
+      })
+
+    if (!createdFile) {
+      throw new Error(
+        'The credential document file record could not be created.',
+      )
+    }
+
+    return createdFile
+  },
+
+  softDeleteCredentialFile: async (
+    tx: DB,
+    fileId: string,
+    category: CredentialFileCategory,
+    userId: string,
+  ): Promise<void> => {
+    await tx
+      .update(files)
+      .set({
+        isDeleted: true,
+        deletedAt: new Date(),
+        deletedBy: userId,
+        updatedAt: new Date(),
+        updatedBy: userId,
+      })
+      .where(
+        and(
+          eq(files.id, fileId),
+          eq(files.category, category),
+          eq(files.isDeleted, false),
+        ),
+      )
   },
 
   createAll: async (

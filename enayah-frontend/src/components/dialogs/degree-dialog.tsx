@@ -1,3 +1,5 @@
+// enayah-frontend/src/copoents/dialogs/degree-dialog.tsx
+
 'use client'
 
 import { useState } from 'react'

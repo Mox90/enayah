@@ -48,23 +48,6 @@ const degreeTypeColors: Record<string, string> = {
     'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300',
 }
 
-// function DetailItem({ label, value, valueDirection }: DetailItemProps) {
-//   return (
-//     <div className='min-w-0'>
-//       <div className='mb-1 text-xs font-medium text-muted-foreground'>
-//         {label}
-//       </div>
-
-//       <div
-//         className='break-words text-sm font-medium text-foreground'
-//         dir={valueDirection}
-//       >
-//         {value || '-'}
-//       </div>
-//     </div>
-//   )
-// }
-
 export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
   const ct = useTranslations('credentials')
   const locale = useLocale()
@@ -147,7 +130,14 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
             )}
           </div>
         ) : (
-          <div className='space-y-4'>
+          <div
+            className={cn(
+              'grid grid-cols-1 auto-rows-fr items-stretch gap-4',
+              degrees.length === 2 && 'lg:grid-cols-2',
+              degrees.length === 3 && 'lg:grid-cols-2 xl:grid-cols-3',
+              degrees.length >= 4 && 'lg:grid-cols-2 xl:grid-cols-4',
+            )}
+          >
             {degrees.map((degree, index) => {
               const degreeId = degree.id
 
@@ -160,7 +150,11 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
                     degreeId ??
                     `${degree.degreeName}-${degree.institution}-${index}`
                   }
-                  className='relative rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md sm:p-5'
+                  className={cn(
+                    'relative flex h-full min-w-0 flex-col rounded-xl border bg-card',
+                    'p-4 shadow-sm transition-all duration-200 sm:p-5',
+                    'hover:border-primary/20 hover:shadow-md',
+                  )}
                 >
                   <div className='mb-5 flex items-start justify-between gap-4 border-b pb-4'>
                     <div className='min-w-0'>
@@ -215,7 +209,7 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
                     </div>
                   </div>
 
-                  <div className='grid gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3'>
+                  <div className='grid flex-1 content-start gap-x-6 gap-y-5 sm:grid-cols-2'>
                     <DetailItem
                       label={ct('institution')}
                       value={degree.institution}
