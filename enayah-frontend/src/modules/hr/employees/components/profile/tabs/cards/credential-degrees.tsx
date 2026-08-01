@@ -22,12 +22,6 @@ interface Props {
   onDelete?: (id: string) => void
 }
 
-// interface DetailItemProps {
-//   label: string
-//   value?: ReactNode
-//   valueDirection?: 'ltr' | 'rtl'
-// }
-
 const degreeTypeColors: Record<string, string> = {
   doctorate:
     'border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300',

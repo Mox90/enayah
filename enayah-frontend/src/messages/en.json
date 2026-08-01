@@ -499,7 +499,21 @@
     "degreeSub": "Graduation or completion date, if available",
     "educationSub": "Enter the employee's board qualification details.",
     "institution": "School / Provider",
-    "membershipNumber": "Membership Number"
+    "membershipNumber": "Membership Number",
+    "degreeDocument": {
+      "title": "Degree document",
+      "description": "Attach a diploma, certificate, transcript, or another supporting document.",
+      "dropTitle": "Drag and drop the document here",
+      "dropNow": "Drop the document to attach it",
+      "browse": "or click to browse your files",
+      "supported": "JPG, PNG, PDF, or WEBP — maximum 2 MB",
+      "remove": "Remove selected document",
+      "errors": {
+        "empty": "The selected document is empty.",
+        "size": "The document must not exceed 2 MB.",
+        "type": "Only JPG, PNG, PDF, and WEBP documents are allowed."
+      }
+    }
   },
   "payroll": {},
   "attendance": {},
