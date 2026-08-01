@@ -43,7 +43,7 @@ const credentialDocumentUpload = multer({
      * file content before storing it.
      */
     if (
-      !ACCEPTED_CREDENTIAL_MIME_TYPES.has(mimeType) &&
+      !ACCEPTED_CREDENTIAL_MIME_TYPES.has(mimeType) ||
       !ACCEPTED_CREDENTIAL_EXTENSIONS.has(extension)
     ) {
       callback(

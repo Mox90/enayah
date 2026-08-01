@@ -193,8 +193,14 @@ router.patch(
 // -----------------------------------------------
 
 router.delete(
-  '/degrees/:id',
-  requirePermission('employee.credentials.update'),
+  '/employee/:employeeId/degrees/:id',
+
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
+
   CredentialController.deleteDegree,
 )
 

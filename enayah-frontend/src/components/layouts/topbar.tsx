@@ -156,14 +156,14 @@ const Topbar = () => {
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem>
+            <DropdownMenuItem asChild>
               <Link href='/my-profile' className='flex w-full items-center'>
-                <User className='me-2 h-4 w-4' />
+                <User className='mr-2 h-4 w-4' />
                 {t('profile')}
               </Link>
             </DropdownMenuItem>
 
-            <DropdownMenuItem>
+            <DropdownMenuItem asChild>
               <Link href='/settings' className='flex w-full items-center'>
                 <Settings className='mr-2 h-4 w-4' />
                 {t('settings')}

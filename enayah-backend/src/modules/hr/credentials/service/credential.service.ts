@@ -199,7 +199,7 @@ export const CredentialService = {
         preparedDocument = await prepareDegreeDocument(document)
       }
 
-      const result = await db.transaction(async (tx) => {
+      return await db.transaction(async (tx) => {
         const existingDegree =
           await CredentialRepository.findDegreeForDocumentUpdate(
             tx,
@@ -248,29 +248,31 @@ export const CredentialService = {
           },
         )
 
-        if (newDocumentFileId && existingDegree.documentFileId) {
+        if (
+          newDocumentFileId &&
+          existingDegree.documentFileId &&
+          existingDegree.documentCategory === DEGREE_FILE_CATEGORY
+        ) {
           await CredentialRepository.softDeleteCredentialFile(
             tx,
             existingDegree.documentFileId,
-
             DEGREE_FILE_CATEGORY,
             updatedByUserId,
           )
         }
 
-        return {
-          updatedDegree,
-          previousStorageKey:
-            newDocumentFileId &&
-            existingDegree.documentCategory === DEGREE_FILE_CATEGORY
-              ? existingDegree.documentStorageKey
-              : null,
-        }
+        // return {
+        //   updatedDegree,
+        //   previousStorageKey:
+        //     newDocumentFileId &&
+        //     existingDegree.documentCategory === DEGREE_FILE_CATEGORY
+        //       ? existingDegree.documentStorageKey
+        //       : null,
+        // }
+        return updatedDegree
       })
 
-      await removeReplacedDocument(result.previousStorageKey)
-
-      return result.updatedDegree
+      //await removeReplacedDocument(result.previousStorageKey)
     } catch (error: unknown) {
       await cleanUpNewDocument(preparedDocument)
 
@@ -309,7 +311,7 @@ export const CredentialService = {
     degreeId: string
     deletedByUserId: string
   }) => {
-    const result = await db.transaction(async (tx) => {
+    return await db.transaction(async (tx) => {
       const existingDegree =
         await CredentialRepository.findDegreeForDocumentUpdate(
           tx,
@@ -330,21 +332,20 @@ export const CredentialService = {
         await CredentialRepository.softDeleteCredentialFile(
           tx,
           existingDegree.documentFileId,
-
           DEGREE_FILE_CATEGORY,
           deletedByUserId,
         )
       }
 
-      return {
-        storageKey:
-          existingDegree.documentCategory === DEGREE_FILE_CATEGORY
-            ? existingDegree.documentStorageKey
-            : null,
-      }
+      // return {
+      //   storageKey:
+      //     existingDegree.documentCategory === DEGREE_FILE_CATEGORY
+      //       ? existingDegree.documentStorageKey
+      //       : null,
+      // }
     })
 
-    await removeReplacedDocument(result.storageKey)
+    //await removeReplacedDocument(result.storageKey)
   },
 
   softDeleteBoard: async (id: string, userId?: string) =>

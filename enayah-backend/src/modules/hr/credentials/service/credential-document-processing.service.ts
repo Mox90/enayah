@@ -27,15 +27,22 @@ export type ProcessedCredentialDocument = {
   checksumSha256: string
 }
 
+// function isPdf(buffer: Buffer): boolean {
+//   /*
+//    * The PDF header should appear within the first 1024 bytes.
+//    */
+//   const header = buffer
+//     .subarray(0, Math.min(buffer.length, 1024))
+//     .toString('latin1')
+
+//   return header.includes('%PDF-')
+// }
+
 function isPdf(buffer: Buffer): boolean {
   /*
-   * The PDF header should appear within the first 1024 bytes.
+   * Require the PDF signature at the start of the file.
    */
-  const header = buffer
-    .subarray(0, Math.min(buffer.length, 1024))
-    .toString('latin1')
-
-  return header.includes('%PDF-')
+  return buffer.subarray(0, 5).toString('latin1') === '%PDF-'
 }
 
 function resolveImageType(format: string): {
