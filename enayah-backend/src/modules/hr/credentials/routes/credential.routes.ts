@@ -8,6 +8,7 @@ import {
 } from '../../../../core/middleware/permission.middleware'
 import { CredentialController } from '../controller/credential.controller'
 import { requireEmployeeAccess } from '../../../../core/middleware/employee-access.middleware'
+import { uploadCredentialDocumentMiddleware } from '../middleware/credential-document-upload.middleware'
 
 const router = Router()
 
@@ -31,49 +32,101 @@ router.get(
 
 router.post(
   '/employee/:employeeId',
-  requirePermission('employee.credentials.update'),
+  //requirePermission('employee.credentials.update'),
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
   CredentialController.createAll,
 )
 
+// router.post(
+//   '/employee/:employeeId/degrees',
+//   //requirePermission('employee.credentials.update'),
+//   requireEmployeeAccess({
+//     employeeIdParam: 'employeeId',
+//     anyEmployeePermission: 'employee.credentials.update',
+//     selfPermission: 'employee.self.update',
+//   }),
+//   CredentialController.createDegree,
+// )
 router.post(
   '/employee/:employeeId/degrees',
-  requirePermission('employee.credentials.update'),
+
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
+
+  uploadCredentialDocumentMiddleware,
   CredentialController.createDegree,
 )
 
 router.post(
   '/employee/:employeeId/boards',
-  requirePermission('employee.credentials.update'),
+  //requirePermission('employee.credentials.update'),
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
   CredentialController.createBoard,
 )
 
 router.post(
   '/employee/:employeeId/fellowships',
-  requirePermission('employee.credentials.update'),
+  //requirePermission('employee.credentials.update'),
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
   CredentialController.createFellowship,
 )
 
 router.post(
   '/employee/:employeeId/memberships',
-  requirePermission('employee.credentials.update'),
+  //requirePermission('employee.credentials.update'),
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
   CredentialController.createMembership,
 )
 
 router.post(
   '/employee/:employeeId/licenses',
-  requirePermission('employee.credentials.update'),
+  //requirePermission('employee.credentials.update'),
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
   CredentialController.createLicense,
 )
 
 router.post(
   '/employee/:employeeId/life-support',
-  requirePermission('employee.credentials.update'),
+  //requirePermission('employee.credentials.update'),
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
   CredentialController.createLifeSupport,
 )
 
 router.post(
   '/employee/:employeeId/malpractice',
-  requirePermission('employee.credentials.update'),
+  //requirePermission('employee.credentials.update'),
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
   CredentialController.createMalpractice,
 )
 
@@ -81,9 +134,21 @@ router.post(
 // ALL EDIT/UPDATE
 // -----------------------------------------------
 
+// router.patch(
+//   '/degrees/:id',
+//   requirePermission('employee.credentials.update'),
+//   CredentialController.updateDegree,
+// )
 router.patch(
-  '/degrees/:id',
-  requirePermission('employee.credentials.update'),
+  '/employee/:employeeId/degrees/:id',
+
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
+
+  uploadCredentialDocumentMiddleware,
   CredentialController.updateDegree,
 )
 
@@ -128,8 +193,14 @@ router.patch(
 // -----------------------------------------------
 
 router.delete(
-  '/degrees/:id',
-  requirePermission('employee.credentials.update'),
+  '/employee/:employeeId/degrees/:id',
+
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
+
   CredentialController.deleteDegree,
 )
 

@@ -166,6 +166,14 @@ export function PersonalDetailsCards({
   const emergencyContacts = personalDetails?.emergencyContacts ?? []
   const visas = personalDetails?.visas ?? []
 
+  const identificationGridClass = cn(
+    'grid auto-rows-fr items-stretch gap-4',
+    'grid-cols-1',
+    identifications.length === 2 && 'lg:grid-cols-2',
+    identifications.length === 3 && 'lg:grid-cols-2 xl:grid-cols-3',
+    identifications.length >= 4 && 'lg:grid-cols-2 xl:grid-cols-4',
+  )
+
   //console.log('Personal Details: ', addresses)
 
   return (
@@ -187,7 +195,7 @@ export function PersonalDetailsCards({
         spanClass='text-green-600'
         onAdd={onAddIdentification}
       >
-        <div className='space-y-4'>
+        <div className={identificationGridClass}>
           {identifications.length === 0 ? (
             <EmptyState />
           ) : (
@@ -204,7 +212,7 @@ export function PersonalDetailsCards({
                   key={item.id}
                   //className={`relative overflow-hidden rounded-xl border border-muted-foreground/10 p-5 shadow-sm transition-all hover:shadow-md ${isRtl ? 'border-r-4' : 'border-l-4'} ${status.bgClass} ${status.borderClass} ${status.pulseClass}`}
                   className={cn(
-                    'relative overflow-hidden rounded-xl border',
+                    'relative flex h-full min-w-0 flex-col overflow-hidden rounded-xl border',
                     'border-muted-foreground/10 p-5 shadow-sm',
                     'transition-all hover:shadow-md',
                     isRtl ? 'border-r-4' : 'border-l-4',

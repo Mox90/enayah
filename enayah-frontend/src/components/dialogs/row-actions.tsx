@@ -1,3 +1,5 @@
+// enayah-frontend/src/components/dialogs/row-actions.tsx
+
 'use client'
 
 import {

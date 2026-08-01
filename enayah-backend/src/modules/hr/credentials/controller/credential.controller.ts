@@ -3,11 +3,38 @@
 import { Request, Response } from 'express'
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
 import {
+  CreateBoardSchema,
+  CreateDegreeSchema,
   CreateEmployeeCredentialsSchema,
+  CreateFellowshipSchema,
+  CreateLicenseSchema,
+  CreateLifeSupportSchema,
+  CreateMalpracticeSchema,
+  CreateMembershipSchema,
   CredentialRecordIdSchema,
   EmployeeCredentialParamSchema,
+  EmployeeCredentialRecordParamSchema,
+  UpdateBoardSchema,
+  UpdateDegreeSchema,
+  UpdateFellowshipSchema,
+  UpdateLicenseSchema,
+  UpdateLifeSupportSchema,
+  UpdateMalpracticeSchema,
+  UpdateMembershipSchema,
+  parseCredentialMultipartBody,
 } from '../dto/credential.request'
 import { CredentialService } from '../service/credential.service'
+import { AppError } from '../../../../core/errors/AppError'
+
+function getAuthenticatedUserId(request: Request): string {
+  const userId = request.user?.id
+
+  if (!userId) {
+    throw new AppError('An authenticated user is required.', 401)
+  }
+
+  return userId
+}
 
 export const CredentialController = {
   findByEmployeeId: asyncHandler(async (req: Request, res: Response) => {
@@ -30,7 +57,20 @@ export const CredentialController = {
   createDegree: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
 
-    const result = await CredentialService.createDegree(employeeId, req.body)
+    const uploadedByUserId = getAuthenticatedUserId(req)
+
+    const body = parseCredentialMultipartBody(
+      req.body,
+      'degree',
+      CreateDegreeSchema,
+    )
+
+    const result = await CredentialService.createDegree({
+      employeeId,
+      data: body,
+      uploadedByUserId,
+      ...(req.file ? { document: req.file } : {}),
+    })
 
     res.status(201).json(result)
   }),
@@ -38,7 +78,23 @@ export const CredentialController = {
   createBoard: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
 
-    const result = await CredentialService.createBoard(employeeId, req.body)
+    const uploadedByUserId = getAuthenticatedUserId(req)
+
+    // const body = parseCredentialMultipartBody(
+    //   req.body,
+    //   'board',
+    //   CreateBoardSchema,
+    // )
+
+    // const result = await CredentialService.createBoard({
+    //   employeeId,
+    //   data: body,
+    //   uploadedByUserId,
+    //   ...(req.file ? { document: req.file } : {}),
+    // })
+    const body = CreateBoardSchema.parse(req.body)
+
+    const result = await CredentialService.createBoard(employeeId, body)
 
     res.status(201).json(result)
   }),
@@ -46,10 +102,17 @@ export const CredentialController = {
   createFellowship: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
 
-    const result = await CredentialService.createFellowship(
-      employeeId,
-      req.body,
-    )
+    // const uploadedByUserId = getAuthenticatedUserId(req)
+
+    // const body = parseCredentialMultipartBody(
+    //   req.body,
+    //   'fellowship',
+    //   CreateFellowshipSchema,
+    // )
+
+    const body = CreateFellowshipSchema.parse(req.body)
+
+    const result = await CredentialService.createFellowship(employeeId, body)
 
     res.status(201).json(result)
   }),
@@ -96,9 +159,24 @@ export const CredentialController = {
   }),
 
   updateDegree: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = CredentialRecordIdSchema.parse(req.params)
+    const { employeeId, id: degreeId } =
+      EmployeeCredentialRecordParamSchema.parse(req.params)
 
-    const result = await CredentialService.updateDegree(id, req.body)
+    const updatedByUserId = getAuthenticatedUserId(req)
+
+    const body = parseCredentialMultipartBody(
+      req.body,
+      'degree',
+      UpdateDegreeSchema,
+    )
+
+    const result = await CredentialService.updateDegree({
+      employeeId,
+      degreeId,
+      data: body,
+      updatedByUserId,
+      ...(req.file ? { document: req.file } : {}),
+    })
 
     res.status(200).json(result)
   }),
@@ -152,9 +230,16 @@ export const CredentialController = {
   }),
 
   deleteDegree: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = CredentialRecordIdSchema.parse(req.params)
+    const { employeeId, id: degreeId } =
+      EmployeeCredentialRecordParamSchema.parse(req.params)
 
-    await CredentialService.softDeleteDegree(id, req.user?.id)
+    const deletedByUserId = getAuthenticatedUserId(req)
+
+    await CredentialService.softDeleteDegree({
+      employeeId,
+      degreeId,
+      deletedByUserId,
+    })
 
     res.status(204).send()
   }),

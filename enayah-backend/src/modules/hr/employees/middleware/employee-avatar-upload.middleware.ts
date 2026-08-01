@@ -1,4 +1,4 @@
-// employee-avatar-upload.middleware.ts
+// enayah-backend/src/modules/hr/employees/middleware/employee-avatar-upload.middleware.ts
 
 import type { NextFunction, Request, Response } from 'express'
 import multer from 'multer'
