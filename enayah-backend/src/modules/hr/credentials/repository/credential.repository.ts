@@ -27,12 +27,12 @@ import {
 
 export type CredentialPayload = CreateEmployeeCredentialsDto
 
-export type CredentialDocumentMetadata = {
-  id: string
-  originalName: string
-  mimeType: string
-  fileSize: number
-}
+// export type CredentialDocumentMetadata = {
+//   id: string
+//   originalName: string
+//   mimeType: string
+//   fileSize: number
+// }
 
 function hasItems<T>(items?: T[] | null): items is T[] {
   return Array.isArray(items) && items.length > 0
@@ -266,7 +266,7 @@ export const CredentialRepository = {
     employeeId: string,
     degreeId: string,
   ) => {
-    await degreeDocumentRepository.findActiveDocument(tx, employeeId, degreeId)
+    return degreeDocumentRepository.findActiveDocument(tx, employeeId, degreeId)
   },
 
   findDegreeForDocumentUpdate: async (

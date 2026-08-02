@@ -1,4 +1,9 @@
-import type { ErrorRequestHandler, Request, Response } from 'express'
+import type {
+  ErrorRequestHandler,
+  NextFunction,
+  Request,
+  Response,
+} from 'express'
 import { ZodError } from 'zod'
 
 import { AppError } from './AppError'
@@ -28,12 +33,17 @@ export const globalErrorHandler: ErrorRequestHandler = (
   error: unknown,
   request: Request,
   response: Response,
-  _next,
+  next: NextFunction,
 ): void => {
   const normalizedError: ErrorWithStatus = isErrorWithStatus(error) ? error : {}
 
   const isSqlState = (code?: string): boolean =>
     /^[0-9A-Z]{5}$/.test(code ?? '')
+
+  if (response.headersSent) {
+    next(error)
+    return
+  }
 
   /*
    * Zod validation errors

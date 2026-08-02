@@ -106,12 +106,36 @@ async function sendCredentialDocument({
         },
       },
       (error) => {
-        if (error) {
-          reject(error)
+        if (!error) {
+          resolve()
           return
         }
 
-        resolve()
+        /*
+         * sendFile may fail after part of the response has
+         * already been streamed.
+         *
+         * At that point, another HTTP response cannot be sent.
+         * Close the connection and do not reject the Promise,
+         * otherwise asyncHandler would forward the error to the
+         * JSON error middleware.
+         */
+        if (response.headersSent) {
+          console.error(
+            'Credential document stream failed after headers were sent:',
+            error,
+          )
+
+          response.destroy(error)
+          resolve()
+          return
+        }
+
+        /*
+         * No response has been committed yet, so the normal
+         * Express error pipeline can safely return JSON.
+         */
+        reject(error)
       },
     )
   })
