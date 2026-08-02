@@ -503,6 +503,15 @@
     "degreeDocument": {
       "title": "Degree document",
       "description": "Attach a diploma, certificate, transcript, or another supporting document.",
+      "currentTitle": "Current document",
+      "currentDescription": "This is the document currently attached to the degree.",
+      "replaceTitle": "Replace document",
+      "replaceDescription": "Select a new document only when you want to replace the current attachment.",
+      "preview": "Preview",
+      "download": "Download",
+      "previewFailed": "The document could not be previewed.",
+      "previewBlocked": "The preview window was blocked by the browser.",
+      "downloadFailed": "The document could not be downloaded.",
       "dropTitle": "Drag and drop the document here",
       "dropNow": "Drop the document to attach it",
       "browse": "or click to browse your files",
@@ -764,7 +773,19 @@
     "returnReasonDescription": "Explain why the Jawazat update was unsuccessful. This reason will be recorded in the case discussion.",
     "returnReasonPlaceholder": "Describe the Jawazat issue and any action HR must take...",
     "confirmReturnToHr": "Return to HR",
-    "returningCase": "Returning case..."
+    "returningCase": "Returning case...",
+    "actions2": {
+      "uploadToMhrsd": "Upload to MHRSD",
+      "cancelProcess": "Cancel Process",
+      "markUnderProcess": "Mark as Under Process",
+      "approveByMhrsd": "Approve by MHRSD",
+      "denyByMhrsd": "Deny by MHRSD",
+      "sendToGovernmentRelations": "Send to Government Relations",
+      "returnForCorrection": "Return for Correction",
+      "reuploadToMhrsd": "Re-upload to MHRSD",
+      "markEocRequired": "Mark EOC as Required",
+      "completeProcess": "Complete Process"
+    }
   },
   "tooltip": {
     "list": "List View",

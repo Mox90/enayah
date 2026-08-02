@@ -168,6 +168,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
     <div className='space-y-6'>
       {/* <CredentialDegrees degrees={data?.degrees ?? []} /> */}
       <CredentialDegrees
+        employeeId={employeeId}
         degrees={data?.degrees ?? []}
         onAdd={() => {
           setEditingDegree(null)
@@ -187,6 +188,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
             institution: degree.institution,
             graduationDate: degree.graduationDate ?? null,
             isVerified: degree.isVerified ?? false,
+            document: degree.document ?? null,
           })
 
           //setOpen(true)
@@ -197,6 +199,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
 
       <DegreeDialog
         open={activeDialog === 'degree'}
+        employeeId={employeeId}
         onOpenChange={(open) => {
           if (!open) {
             setActiveDialog(null)

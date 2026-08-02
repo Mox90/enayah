@@ -20,6 +20,7 @@ export type CredentialDocumentKind =
   | 'license'
   | 'life-support'
   | 'malpractice'
+  | 'verification-evidence'
 
 export type StoredCredentialDocument = {
   storedName: string

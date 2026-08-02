@@ -20,6 +20,9 @@ import {
 
 import { Footer } from '../footer/footer'
 import { FormDialog } from '../forms'
+import { CredentialDocumentMetadata } from '@/modules/hr/onboarding/types/onboarding.types'
+import { DegreeDocumentSummary } from '@/modules/hr/credentials/components/degree-document-summary'
+import { cn } from '@/lib/utils'
 
 export type DegreeFormValue = {
   id?: string
@@ -41,7 +44,8 @@ export type DegreeFormValue = {
    * Read-only data that may be present when editing.
    * This field is not sent back to the backend.
    */
-  isVerified?: boolean
+  isVerified?: boolean | null
+  document?: CredentialDocumentMetadata | null
 }
 
 export type DegreeFormSubmitValue = {
@@ -66,9 +70,7 @@ interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialValue?: DegreeFormValue | null
-
   onSubmit: (value: DegreeFormSubmitValue) => void | Promise<void>
-
   generateId?: boolean
 
   /*
@@ -79,6 +81,7 @@ interface Props {
    * false — employeeId does not exist yet.
    */
   allowDocumentUpload?: boolean
+  employeeId?: string
 }
 
 const emptyValue: DegreeFormValue = {
@@ -96,6 +99,7 @@ function DegreeDialogContent({
   onSubmit,
   generateId,
   allowDocumentUpload,
+  employeeId,
 }: {
   /*
    * Required property with an explicit undefined union.
@@ -107,6 +111,7 @@ function DegreeDialogContent({
   onSubmit: (value: DegreeFormSubmitValue) => void | Promise<void>
   generateId: boolean
   allowDocumentUpload: boolean
+  employeeId?: string | undefined
 }) {
   const t = useTranslations('credentials')
   const locale = useLocale()
@@ -115,6 +120,13 @@ function DegreeDialogContent({
   const [form, setForm] = useState<DegreeFormValue>(initialValue ?? emptyValue)
   const [selectedDocument, setSelectedDocument] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const currentDocument = initialValue?.document ?? null
+
+  const canAccessCurrentDocument = Boolean(
+    employeeId && initialValue?.id && currentDocument,
+  )
+
   const degreeName = form.degreeName.trim()
   const institution = form.institution.trim()
 
@@ -277,21 +289,50 @@ function DegreeDialogContent({
 
         {allowDocumentUpload && (
           <section className='rounded-2xl border bg-card p-5 shadow-sm'>
-            <div className='mb-4'>
-              <h3 className='text-sm font-semibold text-foreground'>
-                {t('degreeDocument.title')}
-              </h3>
+            {canAccessCurrentDocument &&
+              employeeId &&
+              initialValue?.id &&
+              currentDocument && (
+                <div className='mb-5'>
+                  <div className='mb-3'>
+                    <h3 className='text-sm font-semibold text-foreground'>
+                      {t('degreeDocument.currentTitle')}
+                    </h3>
 
-              <p className='text-xs text-muted-foreground'>
-                {t('degreeDocument.description')}
-              </p>
+                    <p className='text-xs text-muted-foreground'>
+                      {t('degreeDocument.currentDescription')}
+                    </p>
+                  </div>
+
+                  <DegreeDocumentSummary
+                    employeeId={employeeId}
+                    degreeId={initialValue.id}
+                    document={currentDocument}
+                  />
+                </div>
+              )}
+
+            <div className={cn(canAccessCurrentDocument && 'border-t pt-5')}>
+              <div className='mb-4'>
+                <h3 className='text-sm font-semibold text-foreground'>
+                  {canAccessCurrentDocument
+                    ? t('degreeDocument.replaceTitle')
+                    : t('degreeDocument.title')}
+                </h3>
+
+                <p className='text-xs text-muted-foreground'>
+                  {canAccessCurrentDocument
+                    ? t('degreeDocument.replaceDescription')
+                    : t('degreeDocument.description')}
+                </p>
+              </div>
+
+              <CredentialDocumentDropzone
+                value={selectedDocument}
+                onChange={setSelectedDocument}
+                disabled={isSubmitting}
+              />
             </div>
-
-            <CredentialDocumentDropzone
-              value={selectedDocument}
-              onChange={setSelectedDocument}
-              disabled={isSubmitting}
-            />
           </section>
         )}
 
@@ -347,6 +388,7 @@ export function DegreeDialog({
   onSubmit,
   generateId = false,
   allowDocumentUpload = true,
+  employeeId,
 }: Props) {
   const dialogKey = initialValue?.id ?? (open ? 'add-degree' : 'closed')
 
@@ -369,6 +411,7 @@ export function DegreeDialog({
           onSubmit={onSubmit}
           generateId={generateId}
           allowDocumentUpload={allowDocumentUpload}
+          employeeId={employeeId}
         />
       )}
     </FormDialog>

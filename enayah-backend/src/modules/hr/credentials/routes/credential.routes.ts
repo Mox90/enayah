@@ -159,6 +159,49 @@ router.post(
 //   requirePermission('employee.credentials.update'),
 //   CredentialController.updateDegree,
 // )
+
+router.patch(
+  '/employee/:employeeId/degrees/:id/verification',
+  requirePermission('credential.verify'),
+  CredentialController.updateDegreeVerification,
+)
+
+router.patch(
+  '/employee/:employeeId/boards/:id/verification',
+  requirePermission('credential.verify'),
+  CredentialController.updateBoardVerification,
+)
+
+router.patch(
+  '/employee/:employeeId/fellowships/:id/verification',
+  requirePermission('credential.verify'),
+  CredentialController.updateFellowshipVerification,
+)
+
+router.patch(
+  '/employee/:employeeId/memberships/:id/verification',
+  requirePermission('credential.verify'),
+  CredentialController.updateMembershipVerification,
+)
+
+router.patch(
+  '/employee/:employeeId/licenses/:id/verification',
+  requirePermission('credential.verify'),
+  CredentialController.updateLicenseVerification,
+)
+
+router.patch(
+  '/employee/:employeeId/life-support/:id/verification',
+  requirePermission('credential.verify'),
+  CredentialController.updateLifeSupportVerification,
+)
+
+router.patch(
+  '/employee/:employeeId/malpractice/:id/verification',
+  requirePermission('credential.verify'),
+  CredentialController.updateMalpracticeVerification,
+)
+
 router.patch(
   '/employee/:employeeId/degrees/:id',
 

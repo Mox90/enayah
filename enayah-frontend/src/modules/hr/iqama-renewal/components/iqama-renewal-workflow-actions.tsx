@@ -67,9 +67,21 @@ interface Props {
 
 type ActionTone = 'default' | 'success' | 'warning' | 'danger' | 'info'
 
+type ActionTranslationKey =
+  | 'actions2.uploadToMhrsd'
+  | 'actions2.cancelProcess'
+  | 'actions2.markUnderProcess'
+  | 'actions2.approveByMhrsd'
+  | 'actions2.denyByMhrsd'
+  | 'actions2.sendToGovernmentRelations'
+  | 'actions2.returnForCorrection'
+  | 'actions2.reuploadToMhrsd'
+  | 'actions2.markEocRequired'
+  | 'actions2.completeProcess'
+
 type ActionDefinition = {
   status: IqamaRenewalStatus
-  label: string
+  labelKey: ActionTranslationKey
   icon: LucideIcon
   tone: ActionTone
 }
@@ -102,13 +114,13 @@ function getAvailableActions(status: IqamaRenewalStatus): ActionDefinition[] {
       return [
         {
           status: 'uploaded_to_mhrsd',
-          label: 'Uploaded to MHRSD',
+          labelKey: 'actions2.uploadToMhrsd',
           icon: Upload,
           tone: 'info',
         },
         {
           status: 'cancelled',
-          label: 'Cancel Process',
+          labelKey: 'actions2.cancelProcess',
           icon: CircleX,
           tone: 'danger',
         },
@@ -118,19 +130,19 @@ function getAvailableActions(status: IqamaRenewalStatus): ActionDefinition[] {
       return [
         {
           status: 'under_process',
-          label: 'Mark Under Process',
+          labelKey: 'actions2.markUnderProcess',
           icon: Clock3,
           tone: 'warning',
         },
         {
           status: 'approved_by_mhrsd',
-          label: 'Approved by MHRSD',
+          labelKey: 'actions2.approveByMhrsd',
           icon: CheckCircle2,
           tone: 'success',
         },
         {
           status: 'denied_by_mhrsd',
-          label: 'Denied by MHRSD',
+          labelKey: 'actions2.denyByMhrsd',
           icon: CircleX,
           tone: 'danger',
         },
@@ -140,13 +152,13 @@ function getAvailableActions(status: IqamaRenewalStatus): ActionDefinition[] {
       return [
         {
           status: 'approved_by_mhrsd',
-          label: 'Approved by MHRSD',
+          labelKey: 'actions2.approveByMhrsd',
           icon: CheckCircle2,
           tone: 'success',
         },
         {
           status: 'denied_by_mhrsd',
-          label: 'Denied by MHRSD',
+          labelKey: 'actions2.denyByMhrsd',
           icon: CircleX,
           tone: 'danger',
         },
@@ -156,7 +168,7 @@ function getAvailableActions(status: IqamaRenewalStatus): ActionDefinition[] {
       return [
         {
           status: 'sent_to_government_relations',
-          label: 'Send to Government Relations',
+          labelKey: 'actions2.sendToGovernmentRelations',
           icon: Send,
           tone: 'info',
         },
@@ -166,19 +178,19 @@ function getAvailableActions(status: IqamaRenewalStatus): ActionDefinition[] {
       return [
         {
           status: 'pending_upload',
-          label: 'Return for Correction',
+          labelKey: 'actions2.returnForCorrection',
           icon: RefreshCcw,
           tone: 'warning',
         },
         {
           status: 'uploaded_to_mhrsd',
-          label: 'Re-upload to MHRSD',
+          labelKey: 'actions2.reuploadToMhrsd',
           icon: Upload,
           tone: 'info',
         },
         {
           status: 'eoc_required',
-          label: 'EOC Required',
+          labelKey: 'actions2.markEocRequired',
           icon: ShieldAlert,
           tone: 'danger',
         },
@@ -188,13 +200,13 @@ function getAvailableActions(status: IqamaRenewalStatus): ActionDefinition[] {
       return [
         // {
         //   status: 'completed',
-        //   label: 'Complete Process',
+        //   labelKey: 'actions2.completeProcess',
         //   icon: CheckCircle2,
         //   tone: 'success',
         // },
         {
           status: 'eoc_required',
-          label: 'EOC Required',
+          labelKey: 'actions2.markEocRequired',
           icon: ShieldAlert,
           tone: 'danger',
         },
@@ -204,7 +216,7 @@ function getAvailableActions(status: IqamaRenewalStatus): ActionDefinition[] {
       return [
         {
           status: 'completed',
-          label: 'Complete Process',
+          labelKey: 'actions2.completeProcess',
           icon: CheckCircle2,
           tone: 'success',
         },
@@ -682,11 +694,11 @@ export function IqamaRenewalWorkflowActions({
                       actionIconClasses[action.tone],
                     )}
                   >
-                    <ActionIcon className='h-5 w-5' />
+                    <ActionIcon aria-hidden='true' className='h-5 w-5' />
                   </div>
 
                   <div className='min-w-0 flex-1'>
-                    <div className='font-semibold'>{action.label}</div>
+                    <div className='font-semibold'>{t(action.labelKey)}</div>
 
                     <div className='mt-1 text-xs font-normal text-muted-foreground'>
                       {t('newStatus')}
@@ -695,6 +707,7 @@ export function IqamaRenewalWorkflowActions({
 
                   <div className='hidden h-9 w-9 items-center justify-center rounded-full border bg-background shadow-sm lg:flex'>
                     <ArrowRight
+                      aria-hidden='true'
                       className={cn(
                         'h-4 w-4 text-muted-foreground',
                         isRtl && 'rotate-180',
@@ -715,7 +728,11 @@ export function IqamaRenewalWorkflowActions({
             closeDialog()
           }
         }}
-        title={selectedAction?.label ?? t('confirmStatusChange')}
+        title={
+          selectedAction?.labelKey
+            ? t(selectedAction.labelKey)
+            : t('confirmStatusChange')
+        }
         description={t('confirmStatusChangeDescription')}
         //className='flex max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] flex-col overflow-hidden p-0 md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
         className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
@@ -785,7 +802,9 @@ export function IqamaRenewalWorkflowActions({
 
                   <div>
                     <div className='text-sm font-semibold'>
-                      {selectedAction.label}
+                      {selectedAction.labelKey
+                        ? t(selectedAction.labelKey)
+                        : selectedAction.labelKey}
                     </div>
 
                     <p className='mt-1 text-sm leading-6 text-rose-800/80 dark:text-rose-200/80'>

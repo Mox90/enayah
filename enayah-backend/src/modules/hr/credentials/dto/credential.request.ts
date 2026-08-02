@@ -358,3 +358,36 @@ export type UpdateMalpracticeDto = z.infer<typeof UpdateMalpracticeSchema>
 export type CreateEmployeeCredentialsDto = z.infer<
   typeof CreateEmployeeCredentialsSchema
 >
+
+export const EmployeeCredentialVerificationEventParamSchema = z.object({
+  employeeId: z.uuid(),
+  id: z.uuid(),
+  eventId: z.uuid(),
+})
+
+export const UpdateCredentialVerificationSchema = z
+  .object({
+    isVerified: z.boolean(),
+    remarks: z
+      .string()
+      .trim()
+      .max(1000, 'Verification remarks must not exceed 1000 characters.')
+      .nullable()
+      .optional(),
+  })
+  .strict()
+  .superRefine((data, context) => {
+    const remarks = data.remarks?.trim()
+
+    if (!data.isVerified && !remarks) {
+      context.addIssue({
+        code: 'custom',
+        path: ['remarks'],
+        message: 'A reason is required when revoking verification.',
+      })
+    }
+  })
+
+export type UpdateCredentialVerificationDto = z.infer<
+  typeof UpdateCredentialVerificationSchema
+>

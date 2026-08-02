@@ -4,11 +4,30 @@ import { AppError } from '../../../../core/errors/AppError'
 import { db } from '../../../../db'
 
 import {
+  UpdateCredentialVerificationDto,
   type CreateDegreeDto,
   type CreateEmployeeCredentialsDto,
   type UpdateDegreeDto,
 } from '../dto/credential.request'
-import { degreeDocumentRepository } from '../repository/credential-document-repositories'
+import {
+  boardDocumentRepository,
+  degreeDocumentRepository,
+  fellowshipDocumentRepository,
+  licenseDocumentRepository,
+  lifeSupportDocumentRepository,
+  malpracticeDocumentRepository,
+  membershipDocumentRepository,
+} from '../repository/credential-document-repositories'
+import { CredentialVerificationEventRepository } from '../repository/credential-verification-event.repository'
+import {
+  boardVerificationRepository,
+  degreeVerificationRepository,
+  fellowshipVerificationRepository,
+  licenseVerificationRepository,
+  lifeSupportVerificationRepository,
+  malpracticeVerificationRepository,
+  membershipVerificationRepository,
+} from '../repository/credential-verification-repositories'
 
 import {
   CredentialRepository,
@@ -27,6 +46,9 @@ import {
   storeCredentialDocument,
   type StoredCredentialDocument,
 } from './credential-document-storage.service'
+import { getCredentialVerificationEvidence } from './credential-verification-evidence-access.service'
+import { enrichEmployeeCredentialsWithVerification } from './credential-verification-response.service'
+import { updateCredentialVerification } from './credential-verification.service'
 
 type PreparedCredentialDocument = {
   processed: ProcessedCredentialDocument
@@ -155,8 +177,24 @@ async function getCredentialDocumentForAccess({
 }
 
 export const CredentialService = {
+  // findByEmployeeId: async (employeeId: string) => {
+  //   return CredentialRepository.findByEmployeeId(db, employeeId)
+  // },
   findByEmployeeId: async (employeeId: string) => {
-    return CredentialRepository.findByEmployeeId(db, employeeId)
+    const [credentials, verificationEvents] = await Promise.all([
+      /*
+       * Keep your current repository implementation that returns
+       * document metadata for degrees.
+       */
+      CredentialRepository.findByEmployeeId(db, employeeId),
+
+      CredentialVerificationEventRepository.findForEmployee(db, employeeId),
+    ])
+
+    return enrichEmployeeCredentialsWithVerification(
+      credentials,
+      verificationEvents,
+    )
   },
 
   getDegreeDocument: async ({
@@ -406,6 +444,32 @@ export const CredentialService = {
       CredentialRepository.updateMalpractice(tx, id, data),
     ),
 
+  updateDegreeVerification: async ({
+    employeeId,
+    degreeId,
+    verifiedByUserId,
+    data,
+    evidence,
+  }: {
+    employeeId: string
+    degreeId: string
+    verifiedByUserId: string
+    data: UpdateCredentialVerificationDto
+    evidence?: Express.Multer.File
+  }) => {
+    return updateCredentialVerification({
+      documentRepository: degreeDocumentRepository,
+      verificationRepository: degreeVerificationRepository,
+      credentialType: 'degree',
+      credentialLabel: 'Degree',
+      employeeId,
+      credentialId: degreeId,
+      actorUserId: verifiedByUserId,
+      data,
+      ...(evidence ? { evidence } : {}),
+    })
+  },
+
   softDeleteDegree: async ({
     employeeId,
     degreeId,
@@ -481,4 +545,21 @@ export const CredentialService = {
     db.transaction((tx) =>
       CredentialRepository.softDeleteMalpractice(tx, id, userId),
     ),
+
+  getDegreeVerificationEvidence: async ({
+    employeeId,
+    degreeId,
+    eventId,
+  }: {
+    employeeId: string
+    degreeId: string
+    eventId: string
+  }) => {
+    return getCredentialVerificationEvidence({
+      employeeId,
+      credentialType: 'degree',
+      credentialId: degreeId,
+      eventId,
+    })
+  },
 }

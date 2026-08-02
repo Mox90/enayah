@@ -322,5 +322,24 @@ export const fileCategoryEnum = pgEnum('file_category', [
   'employee_malpractice',
   'employee_identification',
   'employee_contract',
+  'credential_verification_evidence',
   'other',
 ])
+
+export const credentialVerificationCredentialTypeEnum = pgEnum(
+  'credential_verification_credential_type',
+  [
+    'degree',
+    'board',
+    'fellowship',
+    'membership',
+    'license',
+    'life_support',
+    'malpractice',
+  ],
+)
+
+export const credentialVerificationActionEnum = pgEnum(
+  'credential_verification_action',
+  ['verified', 'revoked'],
+)

@@ -78,9 +78,13 @@ export function formatDate(value: string | null | undefined, isRtl: boolean) {
     return '-'
   }
 
-  const formattedDate = format(parsedDate, 'dd-MMM-yyyy', {
-    locale: isRtl ? arSA : enUS,
-  })
+  const formattedDate = format(
+    parsedDate,
+    isRtl ? 'dd-MMMM-yyyy' : 'dd-MMM-yyyy',
+    {
+      locale: isRtl ? arSA : enUS,
+    },
+  )
 
   return isRtl ? toPersianDigits(formattedDate) : formattedDate
 }
