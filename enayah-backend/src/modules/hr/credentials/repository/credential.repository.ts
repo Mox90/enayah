@@ -1,6 +1,6 @@
 // enayah-backend/src/modules/hr/credentials/repository/credential.repository.ts
 
-import { and, eq, isNull, sql } from 'drizzle-orm'
+import { and, eq, getTableColumns, sql } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
 import {
   DB,
@@ -15,8 +15,24 @@ import {
 } from '../../../../db'
 
 import { CreateEmployeeCredentialsDto } from '../dto/credential.request'
+import {
+  boardDocumentRepository,
+  degreeDocumentRepository,
+  fellowshipDocumentRepository,
+  membershipDocumentRepository,
+  licenseDocumentRepository,
+  lifeSupportDocumentRepository,
+  malpracticeDocumentRepository,
+} from './credential-document-repositories'
 
 export type CredentialPayload = CreateEmployeeCredentialsDto
+
+// export type CredentialDocumentMetadata = {
+//   id: string
+//   originalName: string
+//   mimeType: string
+//   fileSize: number
+// }
 
 function hasItems<T>(items?: T[] | null): items is T[] {
   return Array.isArray(items) && items.length > 0
@@ -68,10 +84,18 @@ export type DegreeForDocumentUpdate = {
   documentCategory: CredentialFileCategory | null
 }
 
+export type ActiveDegreeDocument = {
+  id: string
+  degreeId: string
+  employeeId: string
+  originalName: string
+  storedName: string
+  mimeType: string
+  fileSize: number
+  storageKey: string
+}
+
 async function findOneOrThrow(tx: DB, table: any, id: string, name: string) {
-  // const row = await tx.query[table._.name].findFirst({
-  //   where: and(eq(table.id, id), eq(table.isDeleted, false)),
-  // })
   const [row] = await tx
     .select()
     .from(table)
@@ -82,6 +106,79 @@ async function findOneOrThrow(tx: DB, table: any, id: string, name: string) {
 
   return row
 }
+
+// async function findDegreesWithDocument(tx: DB, employeeId: string) {
+//   const degreeColumns = getTableColumns(employeeDegrees)
+
+//   const rows = await tx
+//     .select({
+//       ...degreeColumns,
+//       documentId: files.id,
+//       documentOriginalName: files.originalName,
+//       documentMimeType: files.mimeType,
+//       documentFileSize: files.fileSize,
+//     })
+//     .from(employeeDegrees)
+//     .leftJoin(
+//       files,
+//       and(
+//         eq(files.id, employeeDegrees.documentFileId),
+//         eq(files.isDeleted, false),
+//         eq(files.category, 'employee_degree'),
+//       ),
+//     )
+//     .where(
+//       and(
+//         eq(employeeDegrees.employeeId, employeeId),
+//         eq(employeeDegrees.isDeleted, false),
+//       ),
+//     )
+//     .orderBy(
+//       sql`
+//         ${employeeDegrees.graduationDate}
+//         DESC NULLS LAST
+//       `,
+//       sql`
+//         CASE ${employeeDegrees.degreeType}
+//           WHEN 'doctorate' THEN 1
+//           WHEN 'master' THEN 2
+//           WHEN 'bachelor' THEN 3
+//           WHEN 'diploma' THEN 4
+//           WHEN 'associate' THEN 5
+//           WHEN 'other' THEN 6
+//           ELSE 7
+//         END ASC
+//       `,
+//     )
+
+//   return rows.map((row) => {
+//     const {
+//       documentId,
+//       documentOriginalName,
+//       documentMimeType,
+//       documentFileSize,
+//       ...degree
+//     } = row
+
+//     const document: CredentialDocumentMetadata | null =
+//       documentId &&
+//       documentOriginalName &&
+//       documentMimeType &&
+//       documentFileSize !== null
+//         ? {
+//             id: documentId,
+//             originalName: documentOriginalName,
+//             mimeType: documentMimeType,
+//             fileSize: documentFileSize,
+//           }
+//         : null
+
+//     return {
+//       ...degree,
+//       document,
+//     }
+//   })
+// }
 
 async function updateRecord(
   tx: DB,
@@ -136,99 +233,21 @@ export const CredentialRepository = {
       lifeSupport,
       malpractice,
     ] = await Promise.all([
-      tx.query.employeeDegrees.findMany({
-        where: and(
-          eq(employeeDegrees.employeeId, employeeId),
-          eq(employeeDegrees.isDeleted, false),
-        ),
-        orderBy: (a, { desc }) => [
-          //desc(a.graduationDate),
-          sql`${a.graduationDate} DESC NULLS LAST`,
-          sql`
-            CASE ${a.degreeType} 
-              WHEN 'doctorate' THEN 1 
-              WHEN 'master' THEN 2 
-              WHEN 'bachelor' THEN 3 
-              WHEN 'diploma' THEN 4 
-              WHEN 'associate' THEN 5 
-              WHEN 'other' THEN 6 
-              ELSE 7 
-            END ASC
-          `,
-        ],
-      }),
+      //findDegreesWithDocument(tx, employeeId),
 
-      tx.query.employeeBoards.findMany({
-        where: and(
-          eq(employeeBoards.employeeId, employeeId),
-          eq(employeeBoards.isDeleted, false),
-        ),
-        orderBy: (a, { desc }) => [
-          //desc(a.issueDate)
-          sql`${a.issueDate} DESC NULLS LAST`,
-        ],
-      }),
+      degreeDocumentRepository.findManyWithDocument(tx, employeeId),
 
-      tx.query.employeeFellowships.findMany({
-        where: and(
-          eq(employeeFellowships.employeeId, employeeId),
-          eq(employeeFellowships.isDeleted, false),
-        ),
-        orderBy: (a) => [sql`${a.issueDate} DESC NULLS LAST`],
-      }),
+      boardDocumentRepository.findManyWithDocument(tx, employeeId),
 
-      tx.query.employeeMemberships.findMany({
-        where: and(
-          eq(employeeMemberships.employeeId, employeeId),
-          eq(employeeMemberships.isDeleted, false),
-        ),
-        orderBy: (a) => [sql`${a.startDate} DESC NULLS LAST`],
-      }),
+      fellowshipDocumentRepository.findManyWithDocument(tx, employeeId),
 
-      tx.query.employeeLicenses.findMany({
-        where: and(
-          eq(employeeLicenses.employeeId, employeeId),
-          eq(employeeLicenses.isDeleted, false),
-        ),
-        orderBy: (a) => [sql`${a.issueDate} DESC NULLS LAST`],
-      }),
+      membershipDocumentRepository.findManyWithDocument(tx, employeeId),
 
-      tx.query.employeeLifeSupportCertifications.findMany({
-        where: and(
-          eq(employeeLifeSupportCertifications.employeeId, employeeId),
-          eq(employeeLifeSupportCertifications.isDeleted, false),
-        ),
-        orderBy: (a) => [
-          sql`
-            CASE ${a.type}
-              WHEN 'bls' THEN 1
-              WHEN 'acls' THEN 2
-              WHEN 'pals' THEN 3
-              WHEN 'nrp' THEN 4
-              WHEN 'stls' THEN 5
-              WHEN 'atls' THEN 6
-              WHEN 'itls' THEN 7
-              WHEN 'blso' THEN 8
-              WHEN 'atcn' THEN 9
-              WHEN 'also' THEN 10
-              WHEN 'tncc' THEN 11
-              WHEN 'enpc' THEN 12
-              WHEN 'asls' THEN 13
-              WHEN 'esls' THEN 14
-              WHEN 'pfccs' THEN 15
-              WHEN 'other' THEN 16
-              ELSE 17
-            END ASC
-          `,
-        ],
-      }),
+      licenseDocumentRepository.findManyWithDocument(tx, employeeId),
 
-      tx.query.employeeMalpracticeInsurance.findMany({
-        where: and(
-          eq(employeeMalpracticeInsurance.employeeId, employeeId),
-          eq(employeeMalpracticeInsurance.isDeleted, false),
-        ),
-      }),
+      lifeSupportDocumentRepository.findManyWithDocument(tx, employeeId),
+
+      malpracticeDocumentRepository.findManyWithDocument(tx, employeeId),
     ])
 
     return {
@@ -242,49 +261,152 @@ export const CredentialRepository = {
     }
   },
 
+  findActiveDegreeDocument: async (
+    tx: DB,
+    employeeId: string,
+    degreeId: string,
+  ) => {
+    return degreeDocumentRepository.findActiveDocument(tx, employeeId, degreeId)
+  },
+
   findDegreeForDocumentUpdate: async (
     tx: DB,
     employeeId: string,
     degreeId: string,
-  ): Promise<DegreeForDocumentUpdate | null> => {
-    /*
-     * Serialize simultaneous document updates for the same degree.
-     */
-    await tx.execute(sql`
-    SELECT ${employeeDegrees.id}
-    FROM ${employeeDegrees}
-    WHERE
-      ${employeeDegrees.id} = ${degreeId}
-      AND ${employeeDegrees.employeeId} = ${employeeId}
-      AND ${employeeDegrees.isDeleted} = false
-      AND ${employeeDegrees.deletedAt} IS NULL
-    FOR UPDATE
-  `)
+  ) => {
+    return degreeDocumentRepository.findForDocumentUpdate(
+      tx,
+      employeeId,
+      degreeId,
+    )
+  },
 
-    const [degree] = await tx
-      .select({
-        id: employeeDegrees.id,
-        employeeId: employeeDegrees.employeeId,
+  findActiveBoardDocument: async (
+    tx: DB,
+    employeeId: string,
+    boardId: string,
+  ) => {
+    return boardDocumentRepository.findActiveDocument(tx, employeeId, boardId)
+  },
 
-        documentFileId: employeeDegrees.documentFileId,
+  findBoardForDocumentUpdate: async (
+    tx: DB,
+    employeeId: string,
+    boardId: string,
+  ) => {
+    return boardDocumentRepository.findForDocumentUpdate(
+      tx,
+      employeeId,
+      boardId,
+    )
+  },
 
-        documentStorageKey: files.storageKey,
+  findActiveFellowshipDocument: async (
+    tx: DB,
+    employeeId: string,
+    fellowshipId: string,
+  ) => {
+    return fellowshipDocumentRepository.findActiveDocument(
+      tx,
+      employeeId,
+      fellowshipId,
+    )
+  },
 
-        documentCategory: files.category,
-      })
-      .from(employeeDegrees)
-      .leftJoin(files, eq(employeeDegrees.documentFileId, files.id))
-      .where(
-        and(
-          eq(employeeDegrees.id, degreeId),
-          eq(employeeDegrees.employeeId, employeeId),
-          eq(employeeDegrees.isDeleted, false),
-          isNull(employeeDegrees.deletedAt),
-        ),
-      )
-      .limit(1)
+  findFellowshipForDocumentUpdate: async (
+    tx: DB,
+    employeeId: string,
+    fellowshipId: string,
+  ) => {
+    return fellowshipDocumentRepository.findForDocumentUpdate(
+      tx,
+      employeeId,
+      fellowshipId,
+    )
+  },
 
-    return degree ?? null
+  findActiveMembershipDocument: async (
+    tx: DB,
+    employeeId: string,
+    membershipId: string,
+  ) => {
+    return membershipDocumentRepository.findActiveDocument(
+      tx,
+      employeeId,
+      membershipId,
+    )
+  },
+
+  findMembershipForDocumentUpdate: async (
+    tx: DB,
+    employeeId: string,
+    membershipId: string,
+  ) => {
+    return membershipDocumentRepository.findForDocumentUpdate(
+      tx,
+      employeeId,
+      membershipId,
+    )
+  },
+
+  findActiveLicenseDocument: async (
+    tx: DB,
+    employeeId: string,
+    licenseId: string,
+  ) => {
+    return licenseDocumentRepository.findActiveDocument(
+      tx,
+      employeeId,
+      licenseId,
+    )
+  },
+
+  findLicenseForDocumentUpdate: async (
+    tx: DB,
+    employeeId: string,
+    licenseId: string,
+  ) => {
+    return licenseDocumentRepository.findForDocumentUpdate(
+      tx,
+      employeeId,
+      licenseId,
+    )
+  },
+
+  findActiveLifeSupportDocument: async (
+    tx: DB,
+    employeeId: string,
+    lifeSupportId: string,
+  ) => {
+    return lifeSupportDocumentRepository.findActiveDocument(
+      tx,
+      employeeId,
+      lifeSupportId,
+    )
+  },
+
+  findLifeSupportForDocumentUpdate: async (
+    tx: DB,
+    employeeId: string,
+    lifeSupportId: string,
+  ) => {
+    return lifeSupportDocumentRepository.findForDocumentUpdate(
+      tx,
+      employeeId,
+      lifeSupportId,
+    )
+  },
+
+  findActiveMalpracticeDocument: async (
+    tx: DB,
+    employeeId: string,
+    malpracticeId: string,
+  ) => {
+    return malpracticeDocumentRepository.findActiveDocument(
+      tx,
+      employeeId,
+      malpracticeId,
+    )
   },
 
   createCredentialFile: async (
@@ -302,16 +424,11 @@ export const CredentialRepository = {
         mimeType: input.mimeType,
         fileSize: input.fileSize,
         storageKey: input.storageKey,
-
         checksumSha256: input.checksumSha256,
-
         visibility: 'private',
         category: input.category,
-
         uploadedByUserId: input.uploadedByUserId,
-
         createdBy: input.uploadedByUserId,
-
         updatedBy: input.uploadedByUserId,
       })
       .returning({

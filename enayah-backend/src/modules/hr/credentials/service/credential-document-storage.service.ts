@@ -8,6 +8,7 @@ import { AppError } from '../../../../core/errors/AppError'
 import { getPrivateFileStorageRoot } from '../../../../core/utils/file-storage.util'
 
 import type { ProcessedCredentialDocument } from './credential-document-processing.service'
+import { lstat, realpath } from 'fs/promises'
 
 const DEFAULT_TIME_ZONE = 'Asia/Riyadh'
 
@@ -76,6 +77,158 @@ function normalizeOriginalName(
     .slice(0, 255)
 
   return normalizedName || fallbackName
+}
+
+export type ResolvedCredentialDocument = {
+  absolutePath: string
+  fileSize: number
+}
+
+/**
+ * Returns true only when childPath is located below parentPath.
+ *
+ * It rejects:
+ * - the parent directory itself
+ * - paths outside the parent
+ * - absolute relative-path results
+ */
+function isPathInside(parentPath: string, childPath: string): boolean {
+  const relativePath = path.relative(parentPath, childPath)
+
+  return (
+    relativePath.length > 0 &&
+    relativePath !== '..' &&
+    !relativePath.startsWith(`..${path.sep}`) &&
+    !path.isAbsolute(relativePath)
+  )
+}
+
+/**
+ * Storage keys are stored in PostgreSQL using POSIX-style
+ * forward slashes, for example:
+ *
+ * hr/2026/08/uuid-degree-document.pdf
+ */
+function normalizeStorageKey(storageKey: string): string {
+  return storageKey.trim().replaceAll('\\', '/').replace(/^\/+/, '')
+}
+
+function getErrorCode(error: unknown): string | null {
+  if (!error || typeof error !== 'object' || !('code' in error)) {
+    return null
+  }
+
+  const code = error.code
+
+  return typeof code === 'string' ? code : null
+}
+
+/**
+ * Resolves a credential storage key into a safe absolute
+ * filesystem path under PRIVATE_FILE_STORAGE_ROOT.
+ *
+ * This function:
+ * - rejects absolute paths
+ * - rejects "." and ".." path segments
+ * - restricts credentials to the "hr/" directory
+ * - resolves symbolic links
+ * - prevents symbolic links from escaping the private root
+ * - confirms that the target is a regular file
+ */
+export async function resolveCredentialDocument(
+  storageKey: string,
+): Promise<ResolvedCredentialDocument> {
+  const normalizedStorageKey = normalizeStorageKey(storageKey)
+
+  if (!normalizedStorageKey) {
+    throw new AppError('Credential document storage key is invalid.', 500)
+  }
+
+  if (normalizedStorageKey.includes('\0')) {
+    throw new AppError('Credential document storage key is invalid.', 500)
+  }
+
+  const storageKeySegments = normalizedStorageKey.split('/')
+
+  if (
+    storageKeySegments.some(
+      (segment) => segment === '' || segment === '.' || segment === '..',
+    )
+  ) {
+    throw new AppError('Credential document storage key is invalid.', 500)
+  }
+
+  /*
+   * Credential evidence must always live below:
+   *
+   * PRIVATE_FILE_STORAGE_ROOT/hr/
+   */
+  if (storageKeySegments[0] !== 'hr') {
+    throw new AppError('Credential document storage key is invalid.', 500)
+  }
+
+  const configuredPrivateRoot = path.resolve(getPrivateFileStorageRoot())
+
+  const candidatePath = path.resolve(
+    configuredPrivateRoot,
+    ...storageKeySegments,
+  )
+
+  /*
+   * Check the unresolved candidate first.
+   *
+   * This rejects straightforward traversal attempts before
+   * accessing the filesystem.
+   */
+  if (!isPathInside(configuredPrivateRoot, candidatePath)) {
+    throw new AppError('Credential document storage key is invalid.', 500)
+  }
+
+  try {
+    /*
+     * realpath resolves symbolic links. Checking containment
+     * again after realpath prevents a symlink inside the private
+     * directory from pointing outside it.
+     */
+    const resolvedPrivateRoot = await realpath(configuredPrivateRoot)
+
+    const resolvedFilePath = await realpath(candidatePath)
+
+    if (!isPathInside(resolvedPrivateRoot, resolvedFilePath)) {
+      throw new AppError('Credential document path is invalid.', 500)
+    }
+
+    const fileStats = await lstat(resolvedFilePath)
+
+    if (!fileStats.isFile()) {
+      throw new AppError('Credential document is not a regular file.', 500)
+    }
+
+    return {
+      absolutePath: resolvedFilePath,
+      fileSize: fileStats.size,
+    }
+  } catch (error: unknown) {
+    if (error instanceof AppError) {
+      throw error
+    }
+
+    const errorCode = getErrorCode(error)
+
+    if (errorCode === 'ENOENT' || errorCode === 'ENOTDIR') {
+      /*
+       * The database contains a storage key, but the matching
+       * physical file or directory is missing.
+       */
+      throw new AppError('Credential document is unavailable.', 500)
+    }
+
+    if (errorCode === 'EACCES' || errorCode === 'EPERM') {
+      throw new AppError('Credential document cannot be accessed.', 500)
+    }
+
+    throw error
+  }
 }
 
 function createStoredName(

@@ -1,6 +1,6 @@
-// src/modules/hr/credentials/controller/credential.controller.ts
+// enayah-backend/src/modules/hr/credentials/controller/credential.controller.ts
 
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
 import {
   CreateBoardSchema,
@@ -36,6 +36,111 @@ function getAuthenticatedUserId(request: Request): string {
   return userId
 }
 
+type CredentialDocumentDisposition = 'inline' | 'attachment'
+
+function normalizeDocumentFilename(fileName: string): string {
+  const normalized = fileName.replace(/[\u0000-\u001F\u007F]/g, ' ').trim()
+
+  return normalized || 'credential-document'
+}
+
+function createAsciiFilename(fileName: string): string {
+  const asciiFilename = fileName
+    .replace(/["\\]/g, '_')
+    .replace(/[^\x20-\x7E]/g, '_')
+    .trim()
+
+  return asciiFilename || 'credential-document'
+}
+
+function encodeRfc5987Filename(fileName: string): string {
+  return encodeURIComponent(fileName).replace(
+    /[!'()*]/g,
+    (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
+  )
+}
+
+function buildContentDisposition(
+  disposition: CredentialDocumentDisposition,
+  originalName: string,
+): string {
+  const normalizedName = normalizeDocumentFilename(originalName)
+  const asciiName = createAsciiFilename(normalizedName)
+  const encodedName = encodeRfc5987Filename(normalizedName)
+
+  return `${disposition}; filename="${asciiName}"; filename*=UTF-8''${encodedName}`
+}
+
+async function sendCredentialDocument({
+  response,
+  absolutePath,
+  originalName,
+  mimeType,
+  disposition,
+}: {
+  response: Response
+  absolutePath: string
+  originalName: string
+  mimeType: string
+  disposition: CredentialDocumentDisposition
+}): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    response.sendFile(
+      absolutePath,
+      {
+        acceptRanges: true,
+        cacheControl: false,
+        dotfiles: 'deny',
+        lastModified: false,
+        headers: {
+          'Content-Type': mimeType,
+          'Content-Disposition': buildContentDisposition(
+            disposition,
+            originalName,
+          ),
+          'Cache-Control': 'private, no-store, max-age=0',
+          Pragma: 'no-cache',
+          Expires: '0',
+          'X-Content-Type-Options': 'nosniff',
+          'Cross-Origin-Resource-Policy': 'same-origin',
+        },
+      },
+      (error) => {
+        if (!error) {
+          resolve()
+          return
+        }
+
+        /*
+         * sendFile may fail after part of the response has
+         * already been streamed.
+         *
+         * At that point, another HTTP response cannot be sent.
+         * Close the connection and do not reject the Promise,
+         * otherwise asyncHandler would forward the error to the
+         * JSON error middleware.
+         */
+        if (response.headersSent) {
+          console.error(
+            'Credential document stream failed after headers were sent:',
+            error,
+          )
+
+          response.destroy(error)
+          resolve()
+          return
+        }
+
+        /*
+         * No response has been committed yet, so the normal
+         * Express error pipeline can safely return JSON.
+         */
+        reject(error)
+      },
+    )
+  })
+}
+
 export const CredentialController = {
   findByEmployeeId: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
@@ -43,6 +148,42 @@ export const CredentialController = {
     const result = await CredentialService.findByEmployeeId(employeeId)
 
     res.status(200).json(result)
+  }),
+
+  previewDegreeDocument: asyncHandler(async (req: Request, res: Response) => {
+    const { employeeId, id: degreeId } =
+      EmployeeCredentialRecordParamSchema.parse(req.params)
+
+    const document = await CredentialService.getDegreeDocument({
+      employeeId,
+      degreeId,
+    })
+
+    await sendCredentialDocument({
+      response: res,
+      absolutePath: document.absolutePath,
+      originalName: document.originalName,
+      mimeType: document.mimeType,
+      disposition: 'inline',
+    })
+  }),
+
+  downloadDegreeDocument: asyncHandler(async (req: Request, res: Response) => {
+    const { employeeId, id: degreeId } =
+      EmployeeCredentialRecordParamSchema.parse(req.params)
+
+    const document = await CredentialService.getDegreeDocument({
+      employeeId,
+      degreeId,
+    })
+
+    await sendCredentialDocument({
+      response: res,
+      absolutePath: document.absolutePath,
+      originalName: document.originalName,
+      mimeType: document.mimeType,
+      disposition: 'attachment',
+    })
   }),
 
   createAll: asyncHandler(async (req: Request, res: Response) => {
