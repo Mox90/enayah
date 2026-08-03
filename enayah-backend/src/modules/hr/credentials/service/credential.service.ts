@@ -562,4 +562,106 @@ export const CredentialService = {
       eventId,
     })
   },
+
+  getBoardVerificationEvidence: async ({
+    employeeId,
+    boardId,
+    eventId,
+  }: {
+    employeeId: string
+    boardId: string
+    eventId: string
+  }) => {
+    return getCredentialVerificationEvidence({
+      employeeId,
+      credentialType: 'board',
+      credentialId: boardId,
+      eventId,
+    })
+  },
+
+  getFellowshipVerificationEvidence: async ({
+    employeeId,
+    fellowshipId,
+    eventId,
+  }: {
+    employeeId: string
+    fellowshipId: string
+    eventId: string
+  }) => {
+    return getCredentialVerificationEvidence({
+      employeeId,
+      credentialType: 'fellowship',
+      credentialId: fellowshipId,
+      eventId,
+    })
+  },
+
+  getMembershipVerificationEvidence: async ({
+    employeeId,
+    membershipId,
+    eventId,
+  }: {
+    employeeId: string
+    membershipId: string
+    eventId: string
+  }) => {
+    return getCredentialVerificationEvidence({
+      employeeId,
+      credentialType: 'membership',
+      credentialId: membershipId,
+      eventId,
+    })
+  },
+
+  getLicenseVerificationEvidence: async ({
+    employeeId,
+    licenseId,
+    eventId,
+  }: {
+    employeeId: string
+    licenseId: string
+    eventId: string
+  }) => {
+    return getCredentialVerificationEvidence({
+      employeeId,
+      credentialType: 'license',
+      credentialId: licenseId,
+      eventId,
+    })
+  },
+
+  getLifeSupportVerificationEvidence: async ({
+    employeeId,
+    lifeSupportId,
+    eventId,
+  }: {
+    employeeId: string
+    lifeSupportId: string
+    eventId: string
+  }) => {
+    return getCredentialVerificationEvidence({
+      employeeId,
+      credentialType: 'life_support',
+      credentialId: lifeSupportId,
+      eventId,
+    })
+  },
+
+  getMalpracticeVerificationEvidence: async ({
+    employeeId,
+    malpracticeId,
+    eventId,
+  }: {
+    employeeId: string
+    malpracticeId: string
+    eventId: string
+  }) => {
+    return getCredentialVerificationEvidence({
+      employeeId,
+      credentialType: 'malpractice',
+      credentialId: malpracticeId,
+      eventId,
+    })
+  },
 }

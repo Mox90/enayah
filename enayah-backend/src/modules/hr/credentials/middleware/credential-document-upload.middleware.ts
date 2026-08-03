@@ -24,7 +24,7 @@ const ACCEPTED_CREDENTIAL_EXTENSIONS = new Set([
   '.webp',
 ])
 
-const credentialDocumentUpload = multer({
+export const credentialDocumentUpload = multer({
   storage: multer.memoryStorage(),
 
   limits: {

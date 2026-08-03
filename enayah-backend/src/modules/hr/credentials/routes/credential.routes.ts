@@ -8,7 +8,10 @@ import {
 } from '../../../../core/middleware/permission.middleware'
 import { CredentialController } from '../controller/credential.controller'
 import { requireEmployeeAccess } from '../../../../core/middleware/employee-access.middleware'
-import { uploadCredentialDocumentMiddleware } from '../middleware/credential-document-upload.middleware'
+import {
+  credentialDocumentUpload,
+  uploadCredentialDocumentMiddleware,
+} from '../middleware/credential-document-upload.middleware'
 
 const router = Router()
 
@@ -33,6 +36,18 @@ router.get(
     selfPermission: 'employee.self.view',
   }),
   CredentialController.downloadDegreeDocument,
+)
+
+router.get(
+  '/employee/:employeeId/degrees/:id/verification/events/:eventId/evidence/preview',
+  requirePermission('credential.verify'),
+  CredentialController.previewDegreeVerificationEvidence,
+)
+
+router.get(
+  '/employee/:employeeId/degrees/:id/verification/events/:eventId/evidence/download',
+  requirePermission('credential.verify'),
+  CredentialController.downloadDegreeVerificationEvidence,
 )
 
 router.get(
@@ -73,7 +88,6 @@ router.post(
 // )
 router.post(
   '/employee/:employeeId/degrees',
-
   requireEmployeeAccess({
     employeeIdParam: 'employeeId',
     anyEmployeePermission: 'employee.credentials.update',
@@ -163,44 +177,45 @@ router.post(
 router.patch(
   '/employee/:employeeId/degrees/:id/verification',
   requirePermission('credential.verify'),
+  credentialDocumentUpload.single('evidence'),
   CredentialController.updateDegreeVerification,
 )
 
-router.patch(
-  '/employee/:employeeId/boards/:id/verification',
-  requirePermission('credential.verify'),
-  CredentialController.updateBoardVerification,
-)
+// router.patch(
+//   '/employee/:employeeId/boards/:id/verification',
+//   requirePermission('credential.verify'),
+//   CredentialController.updateBoardVerification,
+// )
 
-router.patch(
-  '/employee/:employeeId/fellowships/:id/verification',
-  requirePermission('credential.verify'),
-  CredentialController.updateFellowshipVerification,
-)
+// router.patch(
+//   '/employee/:employeeId/fellowships/:id/verification',
+//   requirePermission('credential.verify'),
+//   CredentialController.updateFellowshipVerification,
+// )
 
-router.patch(
-  '/employee/:employeeId/memberships/:id/verification',
-  requirePermission('credential.verify'),
-  CredentialController.updateMembershipVerification,
-)
+// router.patch(
+//   '/employee/:employeeId/memberships/:id/verification',
+//   requirePermission('credential.verify'),
+//   CredentialController.updateMembershipVerification,
+// )
 
-router.patch(
-  '/employee/:employeeId/licenses/:id/verification',
-  requirePermission('credential.verify'),
-  CredentialController.updateLicenseVerification,
-)
+// router.patch(
+//   '/employee/:employeeId/licenses/:id/verification',
+//   requirePermission('credential.verify'),
+//   CredentialController.updateLicenseVerification,
+// )
 
-router.patch(
-  '/employee/:employeeId/life-support/:id/verification',
-  requirePermission('credential.verify'),
-  CredentialController.updateLifeSupportVerification,
-)
+// router.patch(
+//   '/employee/:employeeId/life-support/:id/verification',
+//   requirePermission('credential.verify'),
+//   CredentialController.updateLifeSupportVerification,
+// )
 
-router.patch(
-  '/employee/:employeeId/malpractice/:id/verification',
-  requirePermission('credential.verify'),
-  CredentialController.updateMalpracticeVerification,
-)
+// router.patch(
+//   '/employee/:employeeId/malpractice/:id/verification',
+//   requirePermission('credential.verify'),
+//   CredentialController.updateMalpracticeVerification,
+// )
 
 router.patch(
   '/employee/:employeeId/degrees/:id',

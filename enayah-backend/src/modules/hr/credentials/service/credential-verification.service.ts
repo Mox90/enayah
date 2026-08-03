@@ -123,7 +123,11 @@ export async function updateCredentialVerification<
           credentialId,
         )
 
-        if (!activeDocument) {
+        const hasOriginalDocument = Boolean(activeDocument)
+
+        const hasVerificationEvidence = Boolean(preparedEvidence)
+
+        if (!hasOriginalDocument && !hasVerificationEvidence) {
           throw new AppError(
             `An active ${credentialLabel.toLowerCase()} document is required before verification.`,
             422,
