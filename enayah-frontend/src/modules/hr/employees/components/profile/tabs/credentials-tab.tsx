@@ -78,6 +78,9 @@ import {
   type DegreeVerificationDialogDegree,
   type DegreeVerificationSubmitValue,
 } from '@/components/dialogs/degree-verification-dialog'
+import { useAuthStore } from '@/modules/iam/stores/auth.store'
+import { hasPermission } from '@/lib/permissions/hasPermission'
+import { usePermission } from '@/hooks/usePermission'
 
 // type DegreeVerificationSubmitValue = {
 //   isVerified: boolean
@@ -151,6 +154,15 @@ const CredentialsTab = ({ employeeId }: Props) => {
   const createMalpracticeMutation = useCreateMalpractice(employeeId)
   const updateMalpracticeMutation = useUpdateMalpractice(employeeId)
   const deleteMalpracticeMutation = useDeleteMalpractice(employeeId)
+
+  //const permissions = useAuthStore((state) => state.permissions)
+  const user = useAuthStore((state) => state.user)
+  const permissions =
+    user?.roles?.flatMap((role) =>
+      role.permissions.map((permission) => permission.code),
+    ) ?? []
+
+  const canVerifyCredentials = permissions.includes('credential.verify')
 
   const selectedVerificationDegree = verificationDegreeId
     ? (data?.degrees.find((degree) => degree.id === verificationDegreeId) ??
@@ -274,9 +286,13 @@ const CredentialsTab = ({ employeeId }: Props) => {
           setActiveDialog('degree')
         }}
         onDelete={(id) => deleteDegreeMutation.mutate(id)}
-        onVerify={(id) => {
-          setVerificationDegreeId(id)
-        }}
+        {...(canVerifyCredentials
+          ? {
+              onVerify: (id) => {
+                setVerificationDegreeId(id)
+              },
+            }
+          : {})}
       />
 
       <DegreeVerificationDialog

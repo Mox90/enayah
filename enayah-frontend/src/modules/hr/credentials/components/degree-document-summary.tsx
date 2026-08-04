@@ -73,11 +73,11 @@ export function DegreeDocumentSummary({
           </div>
         </div>
 
-        <div className='flex shrink-0 gap-2'>
+        <div className='flex shrink-0 gap-0'>
           <Button
             type='button'
             size='sm'
-            variant='outline'
+            variant='ghost'
             disabled={isPreviewing || isDownloading}
             onClick={() => {
               void previewDocument()
@@ -89,16 +89,16 @@ export function DegreeDocumentSummary({
                 className='me-2 h-4 w-4 animate-spin'
               />
             ) : (
-              <Eye aria-hidden='true' className='me-2 h-4 w-4' />
+              <Eye aria-hidden='true' className=' h-4 w-4' />
             )}
 
-            {t('preview')}
+            {/* {t('preview')} */}
           </Button>
 
           <Button
             type='button'
             size='sm'
-            variant='outline'
+            variant='ghost'
             disabled={isPreviewing || isDownloading}
             onClick={() => {
               void downloadDocument()
@@ -110,10 +110,10 @@ export function DegreeDocumentSummary({
                 className='me-2 h-4 w-4 animate-spin'
               />
             ) : (
-              <Download aria-hidden='true' className='me-2 h-4 w-4' />
+              <Download aria-hidden='true' className=' h-4 w-4' />
             )}
 
-            {t('download')}
+            {/* {t('download')} */}
           </Button>
         </div>
       </div>

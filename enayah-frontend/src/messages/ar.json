@@ -577,6 +577,20 @@
       "verifyCredential": "تحقق من المؤهل",
       "updateVerification": "تحديث التحقق",
       "revokeVerification": "إلغاء التحقق"
+    },
+    "verificationSummary": {
+      "title": "تفاصيل التحقق",
+      "description": "سجل التحقق الحالي للموارد البشرية",
+      "verified": "تم التحقق",
+      "verifiedBy": "تم التحقق بواسطة",
+      "verifiedAt": "تاريخ التحقق",
+      "remarks": "ملاحظات التحقق",
+      "preview": "معاينة",
+      "download": "تنزيل",
+      "manage": "إدارة التحقق",
+      "previewBlocked": "منع المتصفح فتح نافذة معاينة المستند.",
+      "previewFailed": "تعذرت معاينة مستند التحقق.",
+      "downloadFailed": "تعذر تنزيل مستند التحقق."
     }
   },
   "payroll": {},
