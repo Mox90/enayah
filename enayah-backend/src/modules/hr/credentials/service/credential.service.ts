@@ -4,11 +4,31 @@ import { AppError } from '../../../../core/errors/AppError'
 import { db } from '../../../../db'
 
 import {
+  UpdateCredentialVerificationDto,
   type CreateDegreeDto,
   type CreateEmployeeCredentialsDto,
   type UpdateDegreeDto,
 } from '../dto/credential.request'
-import { degreeDocumentRepository } from '../repository/credential-document-repositories'
+import {
+  boardDocumentRepository,
+  degreeDocumentRepository,
+  fellowshipDocumentRepository,
+  licenseDocumentRepository,
+  lifeSupportDocumentRepository,
+  malpracticeDocumentRepository,
+  membershipDocumentRepository,
+} from '../repository/credential-document-repositories'
+import { CredentialVerificationEventRepository } from '../repository/credential-verification-event.repository'
+import {
+  boardVerificationRepository,
+  degreeVerificationRepository,
+  fellowshipVerificationRepository,
+  licenseVerificationRepository,
+  lifeSupportVerificationRepository,
+  malpracticeVerificationRepository,
+  membershipVerificationRepository,
+} from '../repository/credential-verification-repositories'
+import { CredentialVerifierRepository } from '../repository/credential-verifier.repository'
 
 import {
   CredentialRepository,
@@ -27,6 +47,12 @@ import {
   storeCredentialDocument,
   type StoredCredentialDocument,
 } from './credential-document-storage.service'
+import { getCredentialVerificationEvidence } from './credential-verification-evidence-access.service'
+import {
+  collectCurrentCredentialVerifierIds,
+  enrichEmployeeCredentialsWithVerification,
+} from './credential-verification-response.service'
+import { updateCredentialVerification } from './credential-verification.service'
 
 type PreparedCredentialDocument = {
   processed: ProcessedCredentialDocument
@@ -155,8 +181,28 @@ async function getCredentialDocumentForAccess({
 }
 
 export const CredentialService = {
+  // findByEmployeeId: async (employeeId: string) => {
+  //   return CredentialRepository.findByEmployeeId(db, employeeId)
+  // },
   findByEmployeeId: async (employeeId: string) => {
-    return CredentialRepository.findByEmployeeId(db, employeeId)
+    const [credentials, verificationEvents] = await Promise.all([
+      CredentialRepository.findByEmployeeId(db, employeeId),
+
+      CredentialVerificationEventRepository.findForEmployee(db, employeeId),
+    ])
+
+    const verifierIds = collectCurrentCredentialVerifierIds(credentials)
+
+    const verificationActors = await CredentialVerifierRepository.findByUserIds(
+      db,
+      verifierIds,
+    )
+
+    return enrichEmployeeCredentialsWithVerification(
+      credentials,
+      verificationActors,
+      verificationEvents,
+    )
   },
 
   getDegreeDocument: async ({
@@ -406,6 +452,32 @@ export const CredentialService = {
       CredentialRepository.updateMalpractice(tx, id, data),
     ),
 
+  updateDegreeVerification: async ({
+    employeeId,
+    degreeId,
+    verifiedByUserId,
+    data,
+    evidence,
+  }: {
+    employeeId: string
+    degreeId: string
+    verifiedByUserId: string
+    data: UpdateCredentialVerificationDto
+    evidence?: Express.Multer.File
+  }) => {
+    return updateCredentialVerification({
+      documentRepository: degreeDocumentRepository,
+      verificationRepository: degreeVerificationRepository,
+      credentialType: 'degree',
+      credentialLabel: 'Degree',
+      employeeId,
+      credentialId: degreeId,
+      actorUserId: verifiedByUserId,
+      data,
+      ...(evidence ? { evidence } : {}),
+    })
+  },
+
   softDeleteDegree: async ({
     employeeId,
     degreeId,
@@ -481,4 +553,123 @@ export const CredentialService = {
     db.transaction((tx) =>
       CredentialRepository.softDeleteMalpractice(tx, id, userId),
     ),
+
+  getDegreeVerificationEvidence: async ({
+    employeeId,
+    degreeId,
+    eventId,
+  }: {
+    employeeId: string
+    degreeId: string
+    eventId: string
+  }) => {
+    return getCredentialVerificationEvidence({
+      employeeId,
+      credentialType: 'degree',
+      credentialId: degreeId,
+      eventId,
+    })
+  },
+
+  getBoardVerificationEvidence: async ({
+    employeeId,
+    boardId,
+    eventId,
+  }: {
+    employeeId: string
+    boardId: string
+    eventId: string
+  }) => {
+    return getCredentialVerificationEvidence({
+      employeeId,
+      credentialType: 'board',
+      credentialId: boardId,
+      eventId,
+    })
+  },
+
+  getFellowshipVerificationEvidence: async ({
+    employeeId,
+    fellowshipId,
+    eventId,
+  }: {
+    employeeId: string
+    fellowshipId: string
+    eventId: string
+  }) => {
+    return getCredentialVerificationEvidence({
+      employeeId,
+      credentialType: 'fellowship',
+      credentialId: fellowshipId,
+      eventId,
+    })
+  },
+
+  getMembershipVerificationEvidence: async ({
+    employeeId,
+    membershipId,
+    eventId,
+  }: {
+    employeeId: string
+    membershipId: string
+    eventId: string
+  }) => {
+    return getCredentialVerificationEvidence({
+      employeeId,
+      credentialType: 'membership',
+      credentialId: membershipId,
+      eventId,
+    })
+  },
+
+  getLicenseVerificationEvidence: async ({
+    employeeId,
+    licenseId,
+    eventId,
+  }: {
+    employeeId: string
+    licenseId: string
+    eventId: string
+  }) => {
+    return getCredentialVerificationEvidence({
+      employeeId,
+      credentialType: 'license',
+      credentialId: licenseId,
+      eventId,
+    })
+  },
+
+  getLifeSupportVerificationEvidence: async ({
+    employeeId,
+    lifeSupportId,
+    eventId,
+  }: {
+    employeeId: string
+    lifeSupportId: string
+    eventId: string
+  }) => {
+    return getCredentialVerificationEvidence({
+      employeeId,
+      credentialType: 'life_support',
+      credentialId: lifeSupportId,
+      eventId,
+    })
+  },
+
+  getMalpracticeVerificationEvidence: async ({
+    employeeId,
+    malpracticeId,
+    eventId,
+  }: {
+    employeeId: string
+    malpracticeId: string
+    eventId: string
+  }) => {
+    return getCredentialVerificationEvidence({
+      employeeId,
+      credentialType: 'malpractice',
+      credentialId: malpracticeId,
+      eventId,
+    })
+  },
 }

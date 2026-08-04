@@ -14,7 +14,9 @@ import {
   CredentialRecordIdSchema,
   EmployeeCredentialParamSchema,
   EmployeeCredentialRecordParamSchema,
+  EmployeeCredentialVerificationEventParamSchema,
   UpdateBoardSchema,
+  UpdateCredentialVerificationSchema,
   UpdateDegreeSchema,
   UpdateFellowshipSchema,
   UpdateLicenseSchema,
@@ -185,6 +187,54 @@ export const CredentialController = {
       disposition: 'attachment',
     })
   }),
+
+  previewDegreeVerificationEvidence: asyncHandler(
+    async (req: Request, res: Response) => {
+      const {
+        employeeId,
+        id: degreeId,
+        eventId,
+      } = EmployeeCredentialVerificationEventParamSchema.parse(req.params)
+
+      const document = await CredentialService.getDegreeVerificationEvidence({
+        employeeId,
+        degreeId,
+        eventId,
+      })
+
+      await sendCredentialDocument({
+        response: res,
+        absolutePath: document.absolutePath,
+        originalName: document.originalName,
+        mimeType: document.mimeType,
+        disposition: 'inline',
+      })
+    },
+  ),
+
+  downloadDegreeVerificationEvidence: asyncHandler(
+    async (req: Request, res: Response) => {
+      const {
+        employeeId,
+        id: degreeId,
+        eventId,
+      } = EmployeeCredentialVerificationEventParamSchema.parse(req.params)
+
+      const document = await CredentialService.getDegreeVerificationEvidence({
+        employeeId,
+        degreeId,
+        eventId,
+      })
+
+      await sendCredentialDocument({
+        response: res,
+        absolutePath: document.absolutePath,
+        originalName: document.originalName,
+        mimeType: document.mimeType,
+        disposition: 'attachment',
+      })
+    },
+  ),
 
   createAll: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
@@ -369,6 +419,48 @@ export const CredentialController = {
 
     res.status(200).json(result)
   }),
+
+  updateDegreeVerification: asyncHandler(
+    async (req: Request, res: Response) => {
+      const { employeeId, id: degreeId } =
+        EmployeeCredentialRecordParamSchema.parse(req.params)
+
+      const verifiedByUserId = getAuthenticatedUserId(req)
+
+      /*
+       * Preserve JSON compatibility:
+       *
+       * JSON:
+       * {
+       *   "isVerified": true,
+       *   "remarks": "Reviewed"
+       * }
+       *
+       * Multipart:
+       * verification: JSON string
+       * evidence: File
+       */
+      const isMultipart = Boolean(req.is('multipart/form-data'))
+
+      const body = isMultipart
+        ? parseCredentialMultipartBody(
+            req.body,
+            'verification',
+            UpdateCredentialVerificationSchema,
+          )
+        : UpdateCredentialVerificationSchema.parse(req.body)
+
+      const result = await CredentialService.updateDegreeVerification({
+        employeeId,
+        degreeId,
+        data: body,
+        verifiedByUserId,
+        ...(req.file ? { evidence: req.file } : {}),
+      })
+
+      res.status(200).json(result)
+    },
+  ),
 
   deleteDegree: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId, id: degreeId } =

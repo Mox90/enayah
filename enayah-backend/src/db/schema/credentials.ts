@@ -8,6 +8,8 @@ import {
   integer,
   numeric,
   pgTable,
+  text,
+  timestamp,
   uniqueIndex,
   uuid,
   varchar,
@@ -526,3 +528,37 @@ export const employeeDisciplinaryActions = pgTable(
     ...baseColumns,
   },
 )
+
+// export const credentialVerificationEvents = pgTable(
+//   'credential_verification_events',
+//   {
+//     id: uuid('id').defaultRandom().primaryKey(),
+//     employeeId: uuid('employee_id')
+//       .notNull()
+//       .references(() => employees.id, {
+//         onDelete: 'cascade',
+//       }),
+//     credentialType: credentialTypeEnum('credential_type').notNull(),
+//     credentialId: uuid('credential_id').notNull(),
+//     action: credentialVerificationActionEnum('action').notNull(),
+//     remarks: text('remarks'),
+//     evidenceFileId: uuid('evidence_file_id').references(() => files.id, {
+//       onDelete: 'restrict',
+//     }),
+//     performedByUserId: uuid('performed_by_user_id')
+//       .notNull()
+//       .references(() => users.id, {
+//         onDelete: 'restrict',
+//       }),
+//     performedAt: timestamp('performed_at', {
+//       withTimezone: true,
+//     })
+//       .notNull()
+//       .defaultNow(),
+//     createdAt: timestamp('created_at', {
+//       withTimezone: true,
+//     })
+//       .notNull()
+//       .defaultNow(),
+//   },
+// )

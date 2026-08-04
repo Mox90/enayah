@@ -10,16 +10,24 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { VerificationBadge } from '@/components/badges/verification-badge'
 import { RowActions } from '@/components/dialogs/row-actions'
-import { DegreeInput } from '@/modules/hr/onboarding/types/onboarding.types'
+import {
+  CredentialDocumentMetadata,
+  DegreeInput,
+} from '@/modules/hr/onboarding/types/onboarding.types'
 import { cn } from '@/lib/utils'
 import { formatDate, toPersianDigits } from '@/utils/utilities'
 import { DetailItem } from '@/components/forms/form-detail-item'
+import { DegreeDocumentSummary } from '@/modules/hr/credentials/components/degree-document-summary'
 
 interface Props {
   degrees: DegreeInput[]
+  employeeId?: string
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
+  onVerify?: (id: string) => void
+  // documentFileId?: string | null
+  // document?: CredentialDocumentMetadata | null
 }
 
 const degreeTypeColors: Record<string, string> = {
@@ -42,7 +50,14 @@ const degreeTypeColors: Record<string, string> = {
     'border-slate-200 bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300',
 }
 
-export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
+export function CredentialDegrees({
+  degrees,
+  employeeId,
+  onAdd,
+  onEdit,
+  onDelete,
+  onVerify,
+}: Props) {
   const ct = useTranslations('credentials')
   const locale = useLocale()
   const isRtl = locale === 'ar'
@@ -199,6 +214,11 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
                             ? () => onDelete(degreeId)
                             : undefined
                         }
+                        onVerify={
+                          degreeId && onVerify
+                            ? () => onVerify(degreeId)
+                            : undefined
+                        }
                       />
                     </div>
                   </div>
@@ -216,6 +236,20 @@ export function CredentialDegrees({ degrees, onAdd, onEdit, onDelete }: Props) {
                       value={formatDate(degree.graduationDate, isRtl)}
                     />
                   </div>
+
+                  {employeeId && degreeId && degree.document && (
+                    <div className='mt-5 border-t pt-4'>
+                      <p className='mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+                        {ct('degreeDocument.currentTitle')}
+                      </p>
+
+                      <DegreeDocumentSummary
+                        employeeId={employeeId}
+                        degreeId={degreeId}
+                        document={degree.document}
+                      />
+                    </div>
+                  )}
                 </article>
               )
             })}

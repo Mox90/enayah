@@ -1,4 +1,5 @@
 import { AllowanceType } from '../../compensations/types/allowance.types'
+import { CredentialVerificationMetadata } from '../../credentials/types/credential-verification.types'
 //import { DegreeInput } from '../../employees/components/onboarding/types/onboarding.types'
 
 export type EmployeeEmailInput = {
@@ -6,6 +7,13 @@ export type EmployeeEmailInput = {
   email: string
   isPrimary: boolean
   isVerified: boolean
+}
+
+export type CredentialDocumentMetadata = {
+  id: string
+  originalName: string
+  mimeType: string
+  fileSize: number
 }
 
 export type EmployeePhoneInput = {
@@ -85,10 +93,12 @@ export type DegreeInput = {
   endDate?: string | null
   graduationDate?: string | null
   documentFileId?: string | null
-  isVerified?: boolean
+  document?: CredentialDocumentMetadata | null
+  isVerified?: boolean | null
   verifiedAt?: string | null
   verifiedBy?: string | null
   verificationRemarks?: string | null
+  verification?: CredentialVerificationMetadata | null
 }
 
 export type BoardInput = {
@@ -99,7 +109,12 @@ export type BoardInput = {
   issueDate?: string | null
   expiryDate?: string | null
   isLifetime?: boolean | null
+  documentFileId?: string | null
+  document?: CredentialDocumentMetadata | null
   isVerified?: boolean | null
+  verifiedAt?: string | null
+  verifiedBy?: string | null
+  verificationRemarks?: string | null
 }
 
 export type FellowshipInput = {
@@ -111,6 +126,10 @@ export type FellowshipInput = {
   issueDate?: string | null
   expiryDate?: string | null
   documentFileId?: string | null
+  document?: CredentialDocumentMetadata | null
+  verifiedAt?: string | null
+  verifiedBy?: string | null
+  verificationRemarks?: string | null
   isVerified: boolean
 }
 
@@ -122,6 +141,10 @@ export type MembershipInput = {
   startDate?: string | null
   expiryDate?: string | null
   documentFileId?: string | null
+  document?: CredentialDocumentMetadata | null
+  verifiedAt?: string | null
+  verifiedBy?: string | null
+  verificationRemarks?: string | null
   isVerified: boolean
 }
 
@@ -136,6 +159,11 @@ export type LicenseInput = {
   status: 'active' | 'expired' | 'suspended' | 'revoked'
   isPrimary: boolean
   isVerified?: boolean
+  documentFileId?: string | null
+  document?: CredentialDocumentMetadata | null
+  verifiedAt?: string | null
+  verifiedBy?: string | null
+  verificationRemarks?: string | null
 }
 
 export type LifeSupportInput = {
@@ -163,6 +191,10 @@ export type LifeSupportInput = {
   expiryDate: string
   isVerified?: boolean
   documentFileId?: string | null
+  document?: CredentialDocumentMetadata | null
+  verifiedAt?: string | null
+  verifiedBy?: string | null
+  verificationRemarks?: string | null
 }
 
 export type MalpracticeInput = {
@@ -174,6 +206,10 @@ export type MalpracticeInput = {
   expiryDate?: string | null
   documentFileId?: string | null
   isVerified?: boolean
+  document?: CredentialDocumentMetadata | null
+  verifiedAt?: string | null
+  verifiedBy?: string | null
+  verificationRemarks?: string | null
 }
 
 export type EmployeeCredentialsResponse = {

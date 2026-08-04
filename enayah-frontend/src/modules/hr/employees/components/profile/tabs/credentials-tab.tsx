@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/hr/employees/components/profile/tabs/credentials-tab.tsx
+
 'use client'
 
 import { useEmployeeCredentials } from '@/modules/hr/credentials/hooks/use-employee-credentials'
@@ -70,6 +72,18 @@ import {
   MalpracticeDialog,
   MalpracticeFormValue,
 } from '@/components/dialogs/malpractice-dialog'
+import { useUpdateDegreeVerification } from '@/modules/hr/credentials/hooks/use-update-degree-verification'
+import {
+  DegreeVerificationDialog,
+  type DegreeVerificationDialogDegree,
+  type DegreeVerificationSubmitValue,
+} from '@/components/dialogs/degree-verification-dialog'
+
+// type DegreeVerificationSubmitValue = {
+//   isVerified: boolean
+//   remarks: string | null
+//   evidenceFile?: File
+// }
 
 interface Props {
   employeeId: string
@@ -86,9 +100,11 @@ const CredentialsTab = ({ employeeId }: Props) => {
     | 'malpractice'
     | null
   >(null)
-  const { data, isLoading, error } = useEmployeeCredentials(employeeId)
   //const [open, setOpen] = useState(false)
 
+  const [verificationDegreeId, setVerificationDegreeId] = useState<
+    string | null
+  >(null)
   const [editingDegree, setEditingDegree] = useState<DegreeFormValue | null>(
     null,
   )
@@ -105,25 +121,12 @@ const CredentialsTab = ({ employeeId }: Props) => {
   const [editingMalpractice, setEditingMalpractice] =
     useState<MalpracticeFormValue | null>(null)
 
+  const { data, isLoading, error } = useEmployeeCredentials(employeeId)
+
   const createDegreeMutation = useCreateDegree(employeeId)
   const updateDegreeMutation = useUpdateDegree(employeeId)
   const deleteDegreeMutation = useDeleteDegree(employeeId)
-  async function handleDegreeSubmit(
-    value: DegreeFormSubmitValue,
-  ): Promise<void> {
-    const { id, ...payload } = value
-
-    if (id) {
-      await updateDegreeMutation.mutateAsync({
-        id,
-        ...payload,
-      })
-
-      return
-    }
-
-    await createDegreeMutation.mutateAsync(payload)
-  }
+  const updateDegreeVerification = useUpdateDegreeVerification(employeeId)
 
   const createBoardMutation = useCreateBoard(employeeId)
   const updateBoardMutation = useUpdateBoard(employeeId)
@@ -149,6 +152,62 @@ const CredentialsTab = ({ employeeId }: Props) => {
   const updateMalpracticeMutation = useUpdateMalpractice(employeeId)
   const deleteMalpracticeMutation = useDeleteMalpractice(employeeId)
 
+  const selectedVerificationDegree = verificationDegreeId
+    ? (data?.degrees.find((degree) => degree.id === verificationDegreeId) ??
+      null)
+    : null
+
+  const verificationDegree: DegreeVerificationDialogDegree | null =
+    selectedVerificationDegree?.id
+      ? {
+          id: selectedVerificationDegree.id,
+          degreeName: selectedVerificationDegree.degreeName,
+          institution: selectedVerificationDegree.institution,
+          degreeType: selectedVerificationDegree.degreeType,
+          isVerified: selectedVerificationDegree.isVerified ?? false,
+          document: selectedVerificationDegree.document ?? null,
+          verification: selectedVerificationDegree.verification ?? null,
+        }
+      : null
+
+  async function handleDegreeSubmit(
+    value: DegreeFormSubmitValue,
+  ): Promise<void> {
+    const { id, ...payload } = value
+
+    if (id) {
+      await updateDegreeMutation.mutateAsync({
+        id,
+        ...payload,
+      })
+
+      return
+    }
+
+    await createDegreeMutation.mutateAsync(payload)
+  }
+
+  async function handleDegreeVerificationSubmit(
+    value: DegreeVerificationSubmitValue,
+  ): Promise<void> {
+    if (!verificationDegree?.id) {
+      return
+    }
+
+    await updateDegreeVerification.mutateAsync({
+      degreeId: verificationDegree.id,
+      isVerified: value.isVerified,
+      remarks: value.remarks,
+      ...(value.evidenceFile
+        ? {
+            evidenceFile: value.evidenceFile,
+          }
+        : {}),
+    })
+
+    setVerificationDegreeId(null)
+  }
+
   //console.log(data.credentials, isLoading, error, isError)
 
   if (isLoading) {
@@ -167,7 +226,28 @@ const CredentialsTab = ({ employeeId }: Props) => {
   return (
     <div className='space-y-6'>
       {/* <CredentialDegrees degrees={data?.degrees ?? []} /> */}
+      {/* {data?.degrees[0]?.id && (
+        <Button
+          type='button'
+          disabled={updateDegreeVerification.isPending}
+          onClick={() => {
+            const degreeId = data.degrees[0]?.id
+
+            if (!degreeId) {
+              return
+            }
+
+            void testVerifyDegree(degreeId)
+          }}
+        >
+          {updateDegreeVerification.isPending
+            ? 'Verifying...'
+            : 'Test degree verification'}
+        </Button>
+      )} */}
+
       <CredentialDegrees
+        employeeId={employeeId}
         degrees={data?.degrees ?? []}
         onAdd={() => {
           setEditingDegree(null)
@@ -187,16 +267,34 @@ const CredentialsTab = ({ employeeId }: Props) => {
             institution: degree.institution,
             graduationDate: degree.graduationDate ?? null,
             isVerified: degree.isVerified ?? false,
+            document: degree.document ?? null,
           })
 
           //setOpen(true)
           setActiveDialog('degree')
         }}
         onDelete={(id) => deleteDegreeMutation.mutate(id)}
+        onVerify={(id) => {
+          setVerificationDegreeId(id)
+        }}
+      />
+
+      <DegreeVerificationDialog
+        key={verificationDegreeId ?? 'degree-verification-closed'}
+        open={verificationDegreeId !== null && verificationDegree !== null}
+        degree={verificationDegree}
+        isSubmitting={updateDegreeVerification.isPending}
+        onOpenChange={(open) => {
+          if (!open) {
+            setVerificationDegreeId(null)
+          }
+        }}
+        onSubmit={handleDegreeVerificationSubmit}
       />
 
       <DegreeDialog
         open={activeDialog === 'degree'}
+        employeeId={employeeId}
         onOpenChange={(open) => {
           if (!open) {
             setActiveDialog(null)
