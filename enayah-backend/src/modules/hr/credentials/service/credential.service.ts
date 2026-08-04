@@ -28,6 +28,7 @@ import {
   malpracticeVerificationRepository,
   membershipVerificationRepository,
 } from '../repository/credential-verification-repositories'
+import { CredentialVerifierRepository } from '../repository/credential-verifier.repository'
 
 import {
   CredentialRepository,
@@ -47,7 +48,10 @@ import {
   type StoredCredentialDocument,
 } from './credential-document-storage.service'
 import { getCredentialVerificationEvidence } from './credential-verification-evidence-access.service'
-import { enrichEmployeeCredentialsWithVerification } from './credential-verification-response.service'
+import {
+  collectCurrentCredentialVerifierIds,
+  enrichEmployeeCredentialsWithVerification,
+} from './credential-verification-response.service'
 import { updateCredentialVerification } from './credential-verification.service'
 
 type PreparedCredentialDocument = {
@@ -182,17 +186,21 @@ export const CredentialService = {
   // },
   findByEmployeeId: async (employeeId: string) => {
     const [credentials, verificationEvents] = await Promise.all([
-      /*
-       * Keep your current repository implementation that returns
-       * document metadata for degrees.
-       */
       CredentialRepository.findByEmployeeId(db, employeeId),
 
       CredentialVerificationEventRepository.findForEmployee(db, employeeId),
     ])
 
+    const verifierIds = collectCurrentCredentialVerifierIds(credentials)
+
+    const verificationActors = await CredentialVerifierRepository.findByUserIds(
+      db,
+      verifierIds,
+    )
+
     return enrichEmployeeCredentialsWithVerification(
       credentials,
+      verificationActors,
       verificationEvents,
     )
   },

@@ -9,21 +9,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreVertical, Pencil, Trash2 } from 'lucide-react'
+import { Check, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { Button } from '../ui/button'
 
 export function RowActions({
   onEdit,
   onDelete,
+  onVerify,
 }: {
   onEdit?: () => void
   onDelete?: () => void
+  onVerify?: () => void
 }) {
   const ct = useTranslations('common')
   const locale = useLocale()
   const isRtl = locale === 'ar'
-  if (!onEdit && !onDelete) return null
+  if (!onEdit && !onDelete && !onVerify) return null
   return (
     <DropdownMenu dir={isRtl ? 'rtl' : 'ltr'}>
       <DropdownMenuTrigger asChild>
@@ -40,7 +42,14 @@ export function RowActions({
           </DropdownMenuItem>
         )}
 
-        {onEdit && onDelete && <DropdownMenuSeparator />}
+        {onVerify && (
+          <DropdownMenuItem onClick={onVerify}>
+            <Check className='mr-2 h-4 w-4' />
+            {ct('verify')}
+          </DropdownMenuItem>
+        )}
+
+        {onDelete && (onEdit || onVerify) && <DropdownMenuSeparator />}
 
         {onDelete && (
           <DropdownMenuItem

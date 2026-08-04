@@ -1,7 +1,13 @@
 //response enrichment service
 // enayah-backend/src/modules/hr/credentials/service/credential-verification-response.service.ts
+
 import type { CredentialVerificationCredentialType } from '../../../../db'
-import { CredentialVerificationMetadata } from '../dto/credential-verification.types'
+
+import type {
+  CredentialVerificationEventSummary,
+  CredentialVerificationMetadata,
+  CredentialVerificationActorSummary,
+} from '../dto/credential-verification.types'
 
 import type { LatestCredentialVerificationEventRecord } from '../repository/credential-verification-event.repository'
 
@@ -13,98 +19,9 @@ type CredentialVerificationSnapshot = {
   verificationRemarks?: string | null
 }
 
-function createEventKey(
-  credentialType: CredentialVerificationCredentialType,
-  credentialId: string,
-): string {
-  return `${credentialType}:${credentialId}`
-}
+type CredentialActorMap = Map<string, CredentialVerificationActorSummary>
 
-function createLatestEventMap(
-  events: LatestCredentialVerificationEventRecord[],
-): Map<string, LatestCredentialVerificationEventRecord> {
-  const map = new Map<string, LatestCredentialVerificationEventRecord>()
-
-  /*
-   * Repository results are newest-first.
-   * Keep only the first event for each credential.
-   */
-  for (const event of events) {
-    const key = createEventKey(event.credentialType, event.credentialId)
-
-    if (!map.has(key)) {
-      map.set(key, event)
-    }
-  }
-
-  return map
-}
-
-function enrichCredentialCollection<
-  TCredential extends CredentialVerificationSnapshot,
->(
-  credentialType: CredentialVerificationCredentialType,
-
-  credentials: TCredential[],
-
-  eventMap: Map<string, LatestCredentialVerificationEventRecord>,
-): Array<
-  TCredential & {
-    verification: CredentialVerificationMetadata
-  }
-> {
-  return credentials.map((credential) => {
-    const latestEvent =
-      eventMap.get(createEventKey(credentialType, credential.id)) ?? null
-
-    const isVerified = credential.isVerified ?? false
-
-    const latestEventMatchesCurrentVerification =
-      isVerified &&
-      latestEvent?.action === 'verified' &&
-      latestEvent.performedBy.id === credential.verifiedBy
-
-    return {
-      ...credential,
-
-      verification: {
-        isVerified,
-
-        verifiedAt: credential.verifiedAt ?? null,
-
-        remarks: credential.verificationRemarks ?? null,
-
-        verifiedBy: latestEventMatchesCurrentVerification
-          ? latestEvent.performedBy
-          : null,
-
-        evidenceDocument: latestEventMatchesCurrentVerification
-          ? latestEvent.evidenceDocument
-          : null,
-
-        latestEvent: latestEvent
-          ? {
-              id: latestEvent.id,
-
-              credentialType: latestEvent.credentialType,
-
-              credentialId: latestEvent.credentialId,
-
-              action: latestEvent.action,
-
-              remarks: latestEvent.remarks,
-
-              performedAt: latestEvent.performedAt,
-
-              performedBy: latestEvent.performedBy,
-
-              evidenceDocument: latestEvent.evidenceDocument,
-            }
-          : null,
-      },
-    }
-  })
-}
+type CredentialEventMap = Map<string, LatestCredentialVerificationEventRecord>
 
 type EmployeeCredentialCollections = {
   degrees: CredentialVerificationSnapshot[]
@@ -116,13 +33,178 @@ type EmployeeCredentialCollections = {
   malpractice: CredentialVerificationSnapshot[]
 }
 
+function createCredentialEventKey(
+  credentialType: CredentialVerificationCredentialType,
+  credentialId: string,
+): string {
+  return `${credentialType}:${credentialId}`
+}
+
+function datesMatch(
+  first: Date | null | undefined,
+  second: Date | null | undefined,
+): boolean {
+  if (!first || !second) {
+    return false
+  }
+
+  return first.getTime() === second.getTime()
+}
+
+/*
+ * Repository events must be ordered newest-first.
+ * Keep only the newest event for each credential.
+ */
+function createLatestCredentialEventMap(
+  events: LatestCredentialVerificationEventRecord[],
+): CredentialEventMap {
+  const eventMap: CredentialEventMap = new Map()
+
+  for (const event of events) {
+    const key = createCredentialEventKey(
+      event.credentialType,
+      event.credentialId,
+    )
+
+    if (!eventMap.has(key)) {
+      eventMap.set(key, event)
+    }
+  }
+
+  return eventMap
+}
+
+function createCredentialActorMap(
+  actors: CredentialVerificationActorSummary[],
+): CredentialActorMap {
+  return new Map(actors.map((actor) => [actor.id, actor]))
+}
+
+/*
+ * Collect only users referenced by the current verified snapshot.
+ *
+ * This also supports verified records created before the
+ * verification-event history table was introduced.
+ */
+export function collectCurrentCredentialVerifierIds(
+  credentials: EmployeeCredentialCollections,
+): string[] {
+  const verifierIds = new Set<string>()
+
+  const collections = [
+    credentials.degrees,
+    credentials.boards,
+    credentials.fellowships,
+    credentials.memberships,
+    credentials.licenses,
+    credentials.lifeSupport,
+    credentials.malpractice,
+  ]
+
+  for (const collection of collections) {
+    for (const credential of collection) {
+      if (credential.isVerified && credential.verifiedBy) {
+        verifierIds.add(credential.verifiedBy)
+      }
+    }
+  }
+
+  return [...verifierIds]
+}
+
+function toEventSummary(
+  event: LatestCredentialVerificationEventRecord,
+): CredentialVerificationEventSummary {
+  return {
+    id: event.id,
+    credentialType: event.credentialType,
+    credentialId: event.credentialId,
+    action: event.action,
+    remarks: event.remarks,
+    performedAt: event.performedAt,
+    performedBy: event.performedBy,
+    evidenceDocument: event.evidenceDocument,
+  }
+}
+
+function enrichCredentialCollection<
+  TCredential extends CredentialVerificationSnapshot,
+>(
+  credentialType: CredentialVerificationCredentialType,
+  credentials: TCredential[],
+  actorMap: CredentialActorMap,
+  eventMap: CredentialEventMap,
+): Array<
+  TCredential & {
+    verification: CredentialVerificationMetadata
+  }
+> {
+  return credentials.map((credential) => {
+    const isVerified = credential.isVerified ?? false
+
+    const latestEvent =
+      eventMap.get(createCredentialEventKey(credentialType, credential.id)) ??
+      null
+
+    /*
+     * Resolve the current verifier from the credential snapshot,
+     * rather than relying only on the latest event.
+     */
+    const currentVerifier =
+      isVerified && credential.verifiedBy
+        ? (actorMap.get(credential.verifiedBy) ?? null)
+        : null
+
+    /*
+     * Evidence is considered part of the current verification
+     * only when the latest event matches the current snapshot.
+     *
+     * This prevents historical evidence from being presented as
+     * current after revocation, document replacement, or another
+     * verification-state reset.
+     */
+    const latestEventMatchesCurrentVerification = Boolean(
+      isVerified &&
+      credential.verifiedAt &&
+      credential.verifiedBy &&
+      latestEvent &&
+      latestEvent.action === 'verified' &&
+      latestEvent.performedBy.id === credential.verifiedBy &&
+      datesMatch(latestEvent.performedAt, credential.verifiedAt),
+    )
+
+    return {
+      ...credential,
+
+      verification: {
+        isVerified,
+
+        verifiedAt: isVerified ? (credential.verifiedAt ?? null) : null,
+
+        remarks: credential.verificationRemarks ?? null,
+
+        verifiedBy: currentVerifier,
+
+        evidenceDocument: latestEventMatchesCurrentVerification
+          ? (latestEvent?.evidenceDocument ?? null)
+          : null,
+
+        latestEvent: latestEvent ? toEventSummary(latestEvent) : null,
+      },
+    }
+  })
+}
+
 export function enrichEmployeeCredentialsWithVerification<
   TCredentials extends EmployeeCredentialCollections,
 >(
   credentials: TCredentials,
+  actors: CredentialVerificationActorSummary[],
   events: LatestCredentialVerificationEventRecord[],
 ) {
-  const eventMap = createLatestEventMap(events)
+  const actorMap = createCredentialActorMap(actors)
+
+  const eventMap = createLatestCredentialEventMap(events)
 
   return {
     ...credentials,
@@ -130,38 +212,49 @@ export function enrichEmployeeCredentialsWithVerification<
     degrees: enrichCredentialCollection(
       'degree',
       credentials.degrees,
+      actorMap,
       eventMap,
     ),
 
-    boards: enrichCredentialCollection('board', credentials.boards, eventMap),
+    boards: enrichCredentialCollection(
+      'board',
+      credentials.boards,
+      actorMap,
+      eventMap,
+    ),
 
     fellowships: enrichCredentialCollection(
       'fellowship',
       credentials.fellowships,
+      actorMap,
       eventMap,
     ),
 
     memberships: enrichCredentialCollection(
       'membership',
       credentials.memberships,
+      actorMap,
       eventMap,
     ),
 
     licenses: enrichCredentialCollection(
       'license',
       credentials.licenses,
+      actorMap,
       eventMap,
     ),
 
     lifeSupport: enrichCredentialCollection(
       'life_support',
       credentials.lifeSupport,
+      actorMap,
       eventMap,
     ),
 
     malpractice: enrichCredentialCollection(
       'malpractice',
       credentials.malpractice,
+      actorMap,
       eventMap,
     ),
   }

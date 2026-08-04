@@ -1,16 +1,21 @@
 //event repository
 // enayah-backend/src/modules/hr/credentials/repository/credential-verification-event.repository.ts
 
-import { and, desc, eq, isNull } from 'drizzle-orm'
+import { and, desc, eq, isNull, sql } from 'drizzle-orm'
 
 import {
   credentialVerificationEvents,
+  employees,
   files,
   users,
   type CredentialVerificationAction,
   type CredentialVerificationCredentialType,
   type DB,
 } from '../../../../db'
+import {
+  CredentialVerificationActorSummary,
+  CredentialVerificationEvidenceMetadata,
+} from '../dto/credential-verification.types'
 
 const VERIFICATION_EVIDENCE_FILE_CATEGORY =
   'credential_verification_evidence' as const
@@ -59,6 +64,19 @@ export type LatestCredentialVerificationEventRecord = {
     mimeType: string
     fileSize: number
   } | null
+}
+
+export type CredentialVerificationEventResponseRecord = {
+  id: string
+  employeeId: string
+  credentialType: CredentialVerificationCredentialType
+  credentialId: string
+  action: CredentialVerificationAction
+  remarks: string | null
+  performedAt: Date
+
+  performedBy: CredentialVerificationActorSummary
+  evidenceDocument: CredentialVerificationEvidenceMetadata | null
 }
 
 export const CredentialVerificationEventRepository = {
@@ -153,7 +171,24 @@ export const CredentialVerificationEventRepository = {
            * Use your existing display-name projection here when available.
            * Username is a safe fallback and requires no employee-profile join.
            */
-          displayName: users.username,
+          displayName: sql<string>`
+            COALESCE(
+              NULLIF(
+                BTRIM(
+                  CONCAT_WS(
+                    ' ',
+                    NULLIF(BTRIM(${employees.firstNameEn}), ''),
+                    NULLIF(BTRIM(${employees.secondNameEn}), ''),
+                    NULLIF(BTRIM(${employees.thirdNameEn}), ''),
+                    NULLIF(BTRIM(${employees.familyNameEn}), '')
+                  )
+                ),
+                ''
+              ),
+              NULLIF(BTRIM(${users.username}), ''),
+              'Unknown user'
+            )
+          `,
         },
 
         evidenceDocument: {
@@ -168,6 +203,7 @@ export const CredentialVerificationEventRepository = {
         users,
         eq(users.id, credentialVerificationEvents.performedByUserId),
       )
+      .leftJoin(employees, eq(employees.id, users.employeeId))
       .leftJoin(
         files,
         and(
@@ -181,6 +217,7 @@ export const CredentialVerificationEventRepository = {
       .where(eq(credentialVerificationEvents.employeeId, employeeId))
       .orderBy(
         desc(credentialVerificationEvents.performedAt),
+        desc(credentialVerificationEvents.createdAt),
         desc(credentialVerificationEvents.id),
       )
 

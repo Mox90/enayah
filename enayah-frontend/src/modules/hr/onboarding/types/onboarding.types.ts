@@ -1,4 +1,5 @@
 import { AllowanceType } from '../../compensations/types/allowance.types'
+import { CredentialVerificationMetadata } from '../../credentials/types/credential-verification.types'
 //import { DegreeInput } from '../../employees/components/onboarding/types/onboarding.types'
 
 export type EmployeeEmailInput = {
@@ -97,6 +98,7 @@ export type DegreeInput = {
   verifiedAt?: string | null
   verifiedBy?: string | null
   verificationRemarks?: string | null
+  verification?: CredentialVerificationMetadata | null
 }
 
 export type BoardInput = {

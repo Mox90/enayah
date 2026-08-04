@@ -25,6 +25,7 @@ interface Props {
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
+  onVerify?: (id: string) => void
   // documentFileId?: string | null
   // document?: CredentialDocumentMetadata | null
 }
@@ -55,6 +56,7 @@ export function CredentialDegrees({
   onAdd,
   onEdit,
   onDelete,
+  onVerify,
 }: Props) {
   const ct = useTranslations('credentials')
   const locale = useLocale()
@@ -210,6 +212,11 @@ export function CredentialDegrees({
                         onDelete={
                           degreeId && onDelete
                             ? () => onDelete(degreeId)
+                            : undefined
+                        }
+                        onVerify={
+                          degreeId && onVerify
+                            ? () => onVerify(degreeId)
                             : undefined
                         }
                       />

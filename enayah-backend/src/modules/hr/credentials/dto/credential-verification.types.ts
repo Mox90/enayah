@@ -38,3 +38,11 @@ export type CredentialVerificationMetadata = {
   evidenceDocument: CredentialVerificationEvidenceMetadata | null
   latestEvent: CredentialVerificationEventSummary | null
 }
+
+export type CredentialVerificationSnapshot = {
+  id: string
+  isVerified: boolean | null
+  verifiedAt: Date | null
+  verifiedBy: string | null
+  verificationRemarks: string | null
+}
