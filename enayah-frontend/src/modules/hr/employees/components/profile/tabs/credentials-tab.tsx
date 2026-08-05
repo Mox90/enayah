@@ -156,13 +156,13 @@ const CredentialsTab = ({ employeeId }: Props) => {
   const deleteMalpracticeMutation = useDeleteMalpractice(employeeId)
 
   //const permissions = useAuthStore((state) => state.permissions)
-  const user = useAuthStore((state) => state.user)
-  const permissions =
-    user?.roles?.flatMap((role) =>
-      role.permissions.map((permission) => permission.code),
-    ) ?? []
+  //const user = useAuthStore((state) => state.user)
+  // const permissions =
+  //   user?.roles?.flatMap((role) =>
+  //     role.permissions.map((permission) => permission.code),
+  //   ) ?? []
 
-  const canVerifyCredentials = permissions.includes('credential.verify')
+  const canVerifyCredentials = usePermission('credential.verify') //permissions.includes('credential.verify')
 
   const selectedVerificationDegree = verificationDegreeId
     ? (data?.degrees.find((degree) => degree.id === verificationDegreeId) ??
