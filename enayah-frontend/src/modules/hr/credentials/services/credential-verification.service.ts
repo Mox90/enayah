@@ -21,6 +21,14 @@ type CreateCredentialVerificationServiceOptions = {
   resourceSegment: string
 }
 
+type CredentialVerificationEvidenceRequest = {
+  employeeId: string
+  credentialId: string
+  eventId: string
+}
+
+type EvidenceAccessMode = 'preview' | 'download'
+
 type VerificationBody = {
   isVerified: boolean
   remarks?: string | null
@@ -41,17 +49,35 @@ function createVerificationBody({
     /*
      * Preserve exactOptionalPropertyTypes compatibility.
      */
-    ...(remarks !== undefined
-      ? {
-          remarks: normalizedRemarks,
-        }
-      : {}),
+    ...(remarks !== undefined ? { remarks: normalizedRemarks } : {}),
   }
 }
 
 export function createCredentialVerificationService({
   resourceSegment,
 }: CreateCredentialVerificationServiceOptions) {
+  const getEvidenceBlob = async ({
+    employeeId,
+    credentialId,
+    eventId,
+    mode,
+  }: CredentialVerificationEvidenceRequest & {
+    mode: EvidenceAccessMode
+  }): Promise<Blob> => {
+    const endpoint =
+      `${API_ENDPOINTS.hr.credentials}` +
+      `/employee/${employeeId}` +
+      `/${resourceSegment}/${credentialId}` +
+      `/verification/events/${eventId}` +
+      `/evidence/${mode}`
+
+    const response = await api.get<Blob>(endpoint, {
+      responseType: 'blob',
+    })
+
+    return response.data
+  }
+
   return {
     updateVerification: async ({
       employeeId,
@@ -68,16 +94,11 @@ export function createCredentialVerificationService({
 
       const verification = createVerificationBody({
         isVerified,
-
-        ...(remarks !== undefined
-          ? {
-              remarks,
-            }
-          : {}),
+        ...(remarks !== undefined ? { remarks } : {}),
       })
 
       /*
-       * Continue using JSON when no evidence is attached.
+       * Use JSON when no verification evidence is attached.
        */
       if (!evidenceFile) {
         const response = await api.patch<CredentialVerificationUpdateResponse>(
@@ -92,17 +113,32 @@ export function createCredentialVerificationService({
        * Evidence requires multipart/form-data.
        */
       const formData = new FormData()
-
       formData.append('verification', JSON.stringify(verification))
-
       formData.append('evidence', evidenceFile)
-
       const response = await api.patch<CredentialVerificationUpdateResponse>(
         endpoint,
         formData,
       )
 
       return response.data
+    },
+
+    previewEvidence: async (
+      request: CredentialVerificationEvidenceRequest,
+    ): Promise<Blob> => {
+      return getEvidenceBlob({
+        ...request,
+        mode: 'preview',
+      })
+    },
+
+    downloadEvidence: async (
+      request: CredentialVerificationEvidenceRequest,
+    ): Promise<Blob> => {
+      return getEvidenceBlob({
+        ...request,
+        mode: 'download',
+      })
     },
   }
 }

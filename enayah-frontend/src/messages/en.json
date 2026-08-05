@@ -575,6 +575,20 @@
       "verifyCredential": "Verify credential",
       "updateVerification": "Update verification",
       "revokeVerification": "Revoke verification"
+    },
+    "verificationSummary": {
+      "title": "Verification details",
+      "description": "Current HR verification record",
+      "verified": "Verified",
+      "verifiedBy": "Verified by",
+      "verifiedAt": "Verified at",
+      "remarks": "Verification remarks",
+      "preview": "Preview",
+      "download": "Download",
+      "manage": "Manage verification",
+      "previewBlocked": "The browser blocked the evidence preview window.",
+      "previewFailed": "Unable to preview verification evidence.",
+      "downloadFailed": "Unable to download verification evidence."
     }
   },
   "payroll": {},

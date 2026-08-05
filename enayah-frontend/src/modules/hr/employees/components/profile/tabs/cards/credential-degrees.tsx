@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils'
 import { formatDate, toPersianDigits } from '@/utils/utilities'
 import { DetailItem } from '@/components/forms/form-detail-item'
 import { DegreeDocumentSummary } from '@/modules/hr/credentials/components/degree-document-summary'
+import { DegreeVerificationSummary } from '@/modules/hr/credentials/components/degree-verification-summary'
 
 interface Props {
   degrees: DegreeInput[]
@@ -141,14 +142,19 @@ export function CredentialDegrees({
         ) : (
           <div
             className={cn(
-              'grid grid-cols-1 auto-rows-fr items-stretch gap-4',
+              //'grid grid-cols-1 auto-rows-fr items-stretch gap-4',
+              'grid grid-cols-1 items-start gap-4',
               degrees.length === 2 && 'lg:grid-cols-2',
               degrees.length === 3 && 'lg:grid-cols-2 xl:grid-cols-3',
-              degrees.length >= 4 && 'lg:grid-cols-2 xl:grid-cols-4',
+              degrees.length >= 4 &&
+                'lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4',
             )}
           >
             {degrees.map((degree, index) => {
               const degreeId = degree.id
+
+              const isVerified =
+                degree.verification?.isVerified ?? degree.isVerified ?? false
 
               const degreeTypeClass =
                 degreeTypeColors[degree.degreeType] ?? degreeTypeColors.other
@@ -160,9 +166,14 @@ export function CredentialDegrees({
                     `${degree.degreeName}-${degree.institution}-${index}`
                   }
                   className={cn(
-                    'relative flex h-full min-w-0 flex-col rounded-xl border bg-card',
+                    //'relative flex h-full min-w-0 flex-col rounded-xl border bg-card',
+                    //'p-4 shadow-sm transition-all duration-200 sm:p-5',
+                    //'hover:border-primary/20 hover:shadow-md',
+                    'relative flex min-w-0 flex-col rounded-xl border bg-card',
                     'p-4 shadow-sm transition-all duration-200 sm:p-5',
                     'hover:border-primary/20 hover:shadow-md',
+                    isVerified &&
+                      'border-emerald-500/20 shadow-[0_8px_30px_rgba(16,185,129,0.04)]',
                   )}
                 >
                   <div className='mb-5 flex items-start justify-between gap-4 border-b pb-4'>
@@ -178,9 +189,7 @@ export function CredentialDegrees({
                       )}
 
                       <div className='mt-3 flex flex-wrap items-center gap-2'>
-                        <VerificationBadge
-                          verified={degree.isVerified ?? false}
-                        />
+                        <VerificationBadge verified={isVerified} />
 
                         <Badge
                           variant='outline'
@@ -223,7 +232,8 @@ export function CredentialDegrees({
                     </div>
                   </div>
 
-                  <div className='grid flex-1 content-start gap-x-6 gap-y-5 sm:grid-cols-2'>
+                  {/* <div className='grid flex-1 content-start gap-x-6 gap-y-5 sm:grid-cols-2'> */}
+                  <div className='grid content-start gap-x-6 gap-y-5 sm:grid-cols-2'>
                     <DetailItem
                       label={ct('institution')}
                       value={degree.institution}
@@ -250,6 +260,20 @@ export function CredentialDegrees({
                       />
                     </div>
                   )}
+                  {employeeId &&
+                    degreeId &&
+                    degree.verification?.isVerified && (
+                      <DegreeVerificationSummary
+                        employeeId={employeeId}
+                        degreeId={degreeId}
+                        verification={degree.verification}
+                        {...(onVerify
+                          ? {
+                              onManage: () => onVerify(degreeId),
+                            }
+                          : {})}
+                      />
+                    )}
                 </article>
               )
             })}
