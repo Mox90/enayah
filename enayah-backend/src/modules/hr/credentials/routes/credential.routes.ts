@@ -40,13 +40,23 @@ router.get(
 
 router.get(
   '/employee/:employeeId/degrees/:id/verification/events/:eventId/evidence/preview',
-  requirePermission('credential.verify'),
+  //requirePermission('credential.verify'),
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'credential.verify',
+    selfPermission: 'employee.self.view',
+  }),
   CredentialController.previewDegreeVerificationEvidence,
 )
 
 router.get(
   '/employee/:employeeId/degrees/:id/verification/events/:eventId/evidence/download',
-  requirePermission('credential.verify'),
+  //requirePermission('credential.verify'),
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'credential.verify',
+    selfPermission: 'employee.self.view',
+  }),
   CredentialController.downloadDegreeVerificationEvidence,
 )
 
