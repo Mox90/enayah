@@ -20,7 +20,8 @@ router.use(attachPermissions)
 
 const requireCredentialEmployeeAccess = requireEmployeeAccess({
   employeeIdParam: 'employeeId',
-  anyEmployeePermission: 'employee.view',
+  //anyEmployeePermission: 'employee.view',
+  anyEmployeePermission: 'employee.credentials.view',
   selfPermission: 'employee.self.view',
 })
 
@@ -202,7 +203,7 @@ router.get(
 )
 
 router.get(
-  '/employee/:employeeId/life-supports/:id/verification/events/:eventId/evidence/download',
+  '/employee/:employeeId/life-support/:id/verification/events/:eventId/evidence/download',
   //requirePermission('credential.verify'),
   requireCredentialEmployeeAccess,
   CredentialController.downloadCredentialVerificationEvidence('life-support'),
