@@ -162,6 +162,8 @@ export function CredentialFellowships({
                             ? () => onDelete(fellowshipId)
                             : undefined
                         }
+                        confirmDelete
+                        deleteItemName={ct('fellowship')}
                       />
                     </div>
                   </div>

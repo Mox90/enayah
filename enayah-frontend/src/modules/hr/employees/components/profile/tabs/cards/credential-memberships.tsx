@@ -184,6 +184,8 @@ export function CredentialMemberships({
                             ? () => onDelete(membershipId)
                             : undefined
                         }
+                        confirmDelete
+                        deleteItemName={ct('membership')}
                       />
                     </div>
                   </div>

@@ -147,6 +147,8 @@ export function CredentialLicenses({
                             ? () => onDelete(licenseId)
                             : undefined
                         }
+                        confirmDelete
+                        deleteItemName={ct('license')}
                       />
                     </div>
                   </div>

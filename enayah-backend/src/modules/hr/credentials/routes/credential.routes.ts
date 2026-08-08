@@ -18,46 +18,201 @@ const router = Router()
 router.use(requireAuth)
 router.use(attachPermissions)
 
+const requireCredentialEmployeeAccess = requireEmployeeAccess({
+  employeeIdParam: 'employeeId',
+  anyEmployeePermission: 'employee.view',
+  selfPermission: 'employee.self.view',
+})
+
+// -----------------------------------------------
+// ALL ORGIGNAL DOC PREVIEW
+// -----------------------------------------------
+
 router.get(
   '/employee/:employeeId/degrees/:id/document/preview',
-  requireEmployeeAccess({
-    employeeIdParam: 'employeeId',
-    anyEmployeePermission: 'employee.view',
-    selfPermission: 'employee.self.view',
-  }),
-  CredentialController.previewDegreeDocument,
+  requireCredentialEmployeeAccess,
+  CredentialController.previewCredentialDocument('degree'),
 )
+
+router.get(
+  '/employee/:employeeId/boards/:id/document/preview',
+  requireCredentialEmployeeAccess,
+  CredentialController.previewCredentialDocument('board'),
+)
+
+router.get(
+  '/employee/:employeeId/fellowships/:id/document/preview',
+  requireCredentialEmployeeAccess,
+  CredentialController.previewCredentialDocument('fellowship'),
+)
+
+router.get(
+  '/employee/:employeeId/memberships/:id/document/preview',
+  requireCredentialEmployeeAccess,
+  CredentialController.previewCredentialDocument('membership'),
+)
+
+router.get(
+  '/employee/:employeeId/licenses/:id/document/preview',
+  requireCredentialEmployeeAccess,
+  CredentialController.previewCredentialDocument('license'),
+)
+
+router.get(
+  '/employee/:employeeId/life-support/:id/document/preview',
+  requireCredentialEmployeeAccess,
+  CredentialController.previewCredentialDocument('life-support'),
+)
+
+router.get(
+  '/employee/:employeeId/malpractice/:id/document/preview',
+  requireCredentialEmployeeAccess,
+  CredentialController.previewCredentialDocument('malpractice'),
+)
+
+// -----------------------------------------------
+// ALL ORIGINAL DOC DOWNLOAD
+// -----------------------------------------------
 
 router.get(
   '/employee/:employeeId/degrees/:id/document/download',
-  requireEmployeeAccess({
-    employeeIdParam: 'employeeId',
-    anyEmployeePermission: 'employee.view',
-    selfPermission: 'employee.self.view',
-  }),
-  CredentialController.downloadDegreeDocument,
+  requireCredentialEmployeeAccess,
+  CredentialController.downloadCredentialDocument('degree'),
 )
 
 router.get(
-  '/employee/:employeeId/degrees/:id/verification/events/:eventId/evidence/preview',
-  //requirePermission('credential.verify'),
-  requireEmployeeAccess({
-    employeeIdParam: 'employeeId',
-    anyEmployeePermission: 'employee.view',
-    selfPermission: 'employee.self.view',
-  }),
-  CredentialController.previewDegreeVerificationEvidence,
+  '/employee/:employeeId/boards/:id/document/download',
+  requireCredentialEmployeeAccess,
+  CredentialController.downloadCredentialDocument('board'),
 )
+
+router.get(
+  '/employee/:employeeId/fellowships/:id/document/download',
+  requireCredentialEmployeeAccess,
+  CredentialController.downloadCredentialDocument('fellowship'),
+)
+
+router.get(
+  '/employee/:employeeId/memberships/:id/document/download',
+  requireCredentialEmployeeAccess,
+  CredentialController.downloadCredentialDocument('membership'),
+)
+
+router.get(
+  '/employee/:employeeId/licenses/:id/document/download',
+  requireCredentialEmployeeAccess,
+  CredentialController.downloadCredentialDocument('license'),
+)
+
+router.get(
+  '/employee/:employeeId/life-support/:id/document/download',
+  requireCredentialEmployeeAccess,
+  CredentialController.downloadCredentialDocument('life-support'),
+)
+
+router.get(
+  '/employee/:employeeId/malpractice/:id/document/download',
+  requireCredentialEmployeeAccess,
+  CredentialController.downloadCredentialDocument('malpractice'),
+)
+
+// -----------------------------------------------
+// ALL VERIFICATION DOC PREVIEW
+// -----------------------------------------------
+
+router.get(
+  '/employee/:employeeId/degrees/:id/verification/events/:eventId/evidence/preview',
+  requireCredentialEmployeeAccess,
+  CredentialController.previewCredentialVerificationEvidence('degree'),
+)
+
+router.get(
+  '/employee/:employeeId/boards/:id/verification/events/:eventId/evidence/preview',
+  requireCredentialEmployeeAccess,
+  CredentialController.previewCredentialVerificationEvidence('board'),
+)
+
+router.get(
+  '/employee/:employeeId/fellowships/:id/verification/events/:eventId/evidence/preview',
+  requireCredentialEmployeeAccess,
+  CredentialController.previewCredentialVerificationEvidence('fellowship'),
+)
+
+router.get(
+  '/employee/:employeeId/memberships/:id/verification/events/:eventId/evidence/preview',
+  requireCredentialEmployeeAccess,
+  CredentialController.previewCredentialVerificationEvidence('membership'),
+)
+
+router.get(
+  '/employee/:employeeId/licenses/:id/verification/events/:eventId/evidence/preview',
+  requireCredentialEmployeeAccess,
+  CredentialController.previewCredentialVerificationEvidence('license'),
+)
+
+router.get(
+  '/employee/:employeeId/life-support/:id/verification/events/:eventId/evidence/preview',
+  requireCredentialEmployeeAccess,
+  CredentialController.previewCredentialVerificationEvidence('life-support'),
+)
+
+router.get(
+  '/employee/:employeeId/malpractice/:id/verification/events/:eventId/evidence/preview',
+  requireCredentialEmployeeAccess,
+  CredentialController.previewCredentialVerificationEvidence('malpractice'),
+)
+
+// -----------------------------------------------
+// ALL VERIFICATION DOC DOWNLOAD
+// -----------------------------------------------
 
 router.get(
   '/employee/:employeeId/degrees/:id/verification/events/:eventId/evidence/download',
   //requirePermission('credential.verify'),
-  requireEmployeeAccess({
-    employeeIdParam: 'employeeId',
-    anyEmployeePermission: 'employee.view',
-    selfPermission: 'employee.self.view',
-  }),
-  CredentialController.downloadDegreeVerificationEvidence,
+  requireCredentialEmployeeAccess,
+  CredentialController.downloadCredentialVerificationEvidence('degree'),
+)
+
+router.get(
+  '/employee/:employeeId/boards/:id/verification/events/:eventId/evidence/download',
+  //requirePermission('credential.verify'),
+  requireCredentialEmployeeAccess,
+  CredentialController.downloadCredentialVerificationEvidence('board'),
+)
+
+router.get(
+  '/employee/:employeeId/fellowships/:id/verification/events/:eventId/evidence/download',
+  //requirePermission('credential.verify'),
+  requireCredentialEmployeeAccess,
+  CredentialController.downloadCredentialVerificationEvidence('fellowship'),
+)
+
+router.get(
+  '/employee/:employeeId/memberships/:id/verification/events/:eventId/evidence/download',
+  //requirePermission('credential.verify'),
+  requireCredentialEmployeeAccess,
+  CredentialController.downloadCredentialVerificationEvidence('membership'),
+)
+
+router.get(
+  '/employee/:employeeId/licenses/:id/verification/events/:eventId/evidence/download',
+  //requirePermission('credential.verify'),
+  requireCredentialEmployeeAccess,
+  CredentialController.downloadCredentialVerificationEvidence('license'),
+)
+
+router.get(
+  '/employee/:employeeId/life-supports/:id/verification/events/:eventId/evidence/download',
+  //requirePermission('credential.verify'),
+  requireCredentialEmployeeAccess,
+  CredentialController.downloadCredentialVerificationEvidence('life-support'),
+)
+
+router.get(
+  '/employee/:employeeId/malpractice/:id/verification/events/:eventId/evidence/download',
+  //requirePermission('credential.verify'),
+  requireCredentialEmployeeAccess,
+  CredentialController.downloadCredentialVerificationEvidence('malpractice'),
 )
 
 router.get(
@@ -103,7 +258,6 @@ router.post(
     anyEmployeePermission: 'employee.credentials.update',
     selfPermission: 'employee.self.update',
   }),
-
   uploadCredentialDocumentMiddleware,
   CredentialController.createDegree,
 )
@@ -116,6 +270,7 @@ router.post(
     anyEmployeePermission: 'employee.credentials.update',
     selfPermission: 'employee.self.update',
   }),
+  uploadCredentialDocumentMiddleware,
   CredentialController.createBoard,
 )
 

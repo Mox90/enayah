@@ -8,6 +8,7 @@ import {
   LifeSupportInput,
   MembershipInput,
   MalpracticeInput,
+  FellowshipInput,
 } from '@/modules/hr/onboarding/types/onboarding.types'
 import { CredentialDegrees } from '../../profile/tabs/cards/credential-degrees'
 import { CredentialBoards } from '../../profile/tabs/cards/credential-boards'
@@ -22,7 +23,11 @@ import {
   type DegreeFormValue,
 } from '@/components/dialogs/degree-dialog'
 import { useState } from 'react'
-import { BoardDialog, BoardFormValue } from '@/components/dialogs/board-dialog'
+import {
+  BoardDialog,
+  BoardFormSubmitValue,
+  BoardFormValue,
+} from '@/components/dialogs/board-dialog'
 import {
   LicenseDialog,
   LicenseFormValue,
@@ -134,11 +139,40 @@ export function CredentialsStep({ value, onChange }: Props) {
     })
   }
 
-  function saveBoard(board: BoardFormValue) {
-    const exists = boards.some((item: BoardInput) => item.id === board.id)
+  // function saveBoard(board: BoardFormValue) {
+  //   const exists = boards.some((item: BoardInput) => item.id === board.id)
+
+  //   const nextBoards = exists
+  //     ? boards.map((item: BoardInput) => (item.id === board.id ? board : item))
+  //     : [...boards, board]
+
+  //   onChange({
+  //     ...value,
+  //     credentials: {
+  //       ...(value.credentials ?? {}),
+  //       boards: nextBoards,
+  //     },
+  //   })
+  // }
+
+  function saveBoard(boardValue: BoardFormSubmitValue) {
+    const { clientId, id, documentFile: _documentFile, ...form } = boardValue
+
+    const localId = clientId ?? id
+
+    if (!localId) {
+      return
+    }
+
+    const board: BoardInput = {
+      id: localId,
+      ...form,
+    }
+
+    const exists = boards.some((item) => item.id === localId)
 
     const nextBoards = exists
-      ? boards.map((item: BoardInput) => (item.id === board.id ? board : item))
+      ? boards.map((item) => (item.id === localId ? board : item))
       : [...boards, board]
 
     onChange({
@@ -188,8 +222,14 @@ export function CredentialsStep({ value, onChange }: Props) {
     })
   }
 
-  function saveFellowship(fellowship: FellowshipFormValue) {
+  function saveFellowship(fellowshipValue: FellowshipFormValue) {
+    const fellowship: FellowshipInput = {
+      ...fellowshipValue,
+      isVerified: false,
+    }
+
     const exists = fellowships.some((item) => item.id === fellowship.id)
+
     const nextFellowships = exists
       ? fellowships.map((item) =>
           item.id === fellowship.id ? fellowship : item,
@@ -379,6 +419,7 @@ export function CredentialsStep({ value, onChange }: Props) {
         initialValue={editingBoard}
         onSubmit={saveBoard}
         generateId={true}
+        allowDocumentUpload={false}
       />
 
       <CredentialLicenses

@@ -15,9 +15,6 @@ export const credentialService = {
       `${API_ENDPOINTS.hr.credentials}/employee/${employeeId}`,
     )
 
-    //console.log(`${API_ENDPOINTS.hr.credentials}/employee/${employeeId}`)
-    //console.log(response)
-
     return response.data
   },
 

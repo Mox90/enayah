@@ -385,7 +385,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
   }
 
   async function handleBoardSubmit(value: BoardFormSubmitValue): Promise<void> {
-    const { id, ...payload } = value
+    const { id, clientId: _clientId, ...payload } = value
 
     if (id) {
       await updateBoardMutation.mutateAsync({
@@ -498,19 +498,6 @@ const CredentialsTab = ({ employeeId }: Props) => {
             }
           : {})}
       />
-
-      {/* <DegreeVerificationDialog
-        key={verificationCredentialId ?? 'degree-verification-closed'}
-        open={verificationCredentialId !== null && verificationDegree !== null}
-        degree={verificationDegree}
-        isSubmitting={updateDegreeVerification.isPending}
-        onOpenChange={(open) => {
-          if (!open) {
-            setVerificationCredentialId(null)
-          }
-        }}
-        onSubmit={handleDegreeVerificationSubmit}
-      /> */}
 
       <DegreeDialog
         open={activeDialog === 'degree'}

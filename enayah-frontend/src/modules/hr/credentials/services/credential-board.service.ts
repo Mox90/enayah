@@ -3,17 +3,6 @@
 import { api } from '@/lib/api/client'
 import { API_ENDPOINTS } from '@/lib/api/endpoints'
 
-// export type CreateBoardPayload = {
-//   employeeId: string
-//   boardName: string
-//   specialty?: string | null
-//   issuingBody: string
-//   issueDate?: string | null
-//   expiryDate?: string | null
-//   isLifetime?: boolean
-//   isVerified?: boolean
-// }
-
 export type BoardWritePayload = {
   boardName: string
   specialty?: string | null
@@ -38,17 +27,6 @@ export type DeleteBoardPayload = {
   employeeId: string
   id: string
 }
-
-// export type UpdateBoardPayload = Partial<CreateBoardPayload> & {
-//   id: string
-// }
-
-// export type UpdateBoardPayload = Omit<
-//   Partial<CreateBoardPayload>,
-//   'employeeId'
-// > & {
-//   id: string
-// }
 
 function buildBoardFormData(payload: BoardWritePayload): FormData {
   const { documentFile, ...boardData } = payload

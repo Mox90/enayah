@@ -38,6 +38,7 @@ export type BoardFormValue = {
 
 export type BoardFormSubmitValue = {
   id?: string
+  clientId?: string
   boardName: string
   specialty: string | null
   issuingBody: string
@@ -145,10 +146,13 @@ function BoardDialogContent({
     setIsSubmitting(true)
 
     try {
-      const resolvedId = form.id ?? (generateId ? createClientId() : null)
+      //const resolvedId = form.id ?? (generateId ? createClientId() : null)
+      const clientId = generateId ? (form.id ?? createClientId()) : null
 
       await onSubmit({
-        ...(resolvedId ? { id: resolvedId } : {}),
+        //...(resolvedId ? { id: resolvedId } : {}),
+        ...(!generateId && form.id ? { id: form.id } : {}),
+        ...(generateId && clientId ? { clientId } : {}),
         boardName,
         specialty: form.specialty?.trim() || null,
         issuingBody,

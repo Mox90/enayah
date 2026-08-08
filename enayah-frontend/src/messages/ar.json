@@ -57,7 +57,12 @@
       "requestFailed": "تعذر إكمال الطلب.",
       "unexpected": "حدث خطأ غير متوقع."
     },
-    "verify": "التحقق من المؤهل"
+    "verify": "تحقق",
+    "record": "السجل",
+    "deleteConfirmation": {
+      "title": "تأكيد الحذف",
+      "description": "هل أنت متأكد من رغبتك في حذف {item}؟ لا يمكن التراجع عن هذا الإجراء."
+    }
   },
 
   "auth": {
@@ -505,7 +510,7 @@
     "membershipNumber": "رقم العضوية",
     "lifetimeCertification": "شهادة مدى الحياة",
     "lifetimeCertificationDescription": "هذه الشهادة لا تنتهي صلاحيتها.",
-    "degreeDocument": {
+    "credentialDocument": {
       "title": "مستند المؤهل العلمي",
       "description": "أرفق الشهادة أو وثيقة التخرج أو السجل الأكاديمي أو أي مستند داعم.",
       "currentTitle": "المستند الحالي",
@@ -601,7 +606,14 @@
       "currentDescription": "المستند المرفق حالياً بشهادة البورد.",
       "replaceTitle": "استبدال شهادة البورد",
       "replaceDescription": "قم برفع مستند جديد لاستبدال الشهادة الحالية."
-    }
+    },
+    "degree": "degree",
+    "board": "board",
+    "fellowship": "fellowship",
+    "membership": "membership",
+    "license": "license",
+    "lifeSupport": "life support",
+    "malpractice": "malpractice insurance"
   },
   "payroll": {},
   "attendance": {},

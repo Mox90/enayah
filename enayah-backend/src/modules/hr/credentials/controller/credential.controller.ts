@@ -25,7 +25,10 @@ import {
   UpdateMembershipSchema,
   parseCredentialMultipartBody,
 } from '../dto/credential.request'
-import { CredentialService } from '../service/credential.service'
+import {
+  CredentialService,
+  type CredentialKind,
+} from '../service/credential.service'
 import { AppError } from '../../../../core/errors/AppError'
 
 function getAuthenticatedUserId(request: Request): string {
@@ -143,6 +146,58 @@ async function sendCredentialDocument({
   })
 }
 
+function createCredentialDocumentAccessHandler(
+  kind: CredentialKind,
+  disposition: CredentialDocumentDisposition,
+) {
+  return asyncHandler(async (req: Request, res: Response) => {
+    const { employeeId, id: credentialId } =
+      EmployeeCredentialRecordParamSchema.parse(req.params)
+
+    const document = await CredentialService.getCredentialDocument({
+      kind,
+      employeeId,
+      credentialId,
+    })
+
+    await sendCredentialDocument({
+      response: res,
+      absolutePath: document.absolutePath,
+      originalName: document.originalName,
+      mimeType: document.mimeType,
+      disposition,
+    })
+  })
+}
+
+function createCredentialVerificationEvidenceAccessHandler(
+  kind: CredentialKind,
+  disposition: CredentialDocumentDisposition,
+) {
+  return asyncHandler(async (req: Request, res: Response) => {
+    const {
+      employeeId,
+      id: credentialId,
+      eventId,
+    } = EmployeeCredentialVerificationEventParamSchema.parse(req.params)
+
+    const document = await CredentialService.getCredentialVerificationEvidence({
+      kind,
+      employeeId,
+      credentialId,
+      eventId,
+    })
+
+    await sendCredentialDocument({
+      response: res,
+      absolutePath: document.absolutePath,
+      originalName: document.originalName,
+      mimeType: document.mimeType,
+      disposition,
+    })
+  })
+}
+
 export const CredentialController = {
   findByEmployeeId: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
@@ -152,89 +207,101 @@ export const CredentialController = {
     res.status(200).json(result)
   }),
 
-  previewDegreeDocument: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId, id: degreeId } =
-      EmployeeCredentialRecordParamSchema.parse(req.params)
+  previewCredentialDocument: (kind: CredentialKind) =>
+    createCredentialDocumentAccessHandler(kind, 'inline'),
 
-    const document = await CredentialService.getDegreeDocument({
-      employeeId,
-      degreeId,
-    })
+  downloadCredentialDocument: (kind: CredentialKind) =>
+    createCredentialDocumentAccessHandler(kind, 'attachment'),
 
-    await sendCredentialDocument({
-      response: res,
-      absolutePath: document.absolutePath,
-      originalName: document.originalName,
-      mimeType: document.mimeType,
-      disposition: 'inline',
-    })
-  }),
+  previewCredentialVerificationEvidence: (kind: CredentialKind) =>
+    createCredentialVerificationEvidenceAccessHandler(kind, 'inline'),
 
-  downloadDegreeDocument: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId, id: degreeId } =
-      EmployeeCredentialRecordParamSchema.parse(req.params)
+  downloadCredentialVerificationEvidence: (kind: CredentialKind) =>
+    createCredentialVerificationEvidenceAccessHandler(kind, 'attachment'),
 
-    const document = await CredentialService.getDegreeDocument({
-      employeeId,
-      degreeId,
-    })
+  // previewDegreeDocument: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId, id: degreeId } =
+  //     EmployeeCredentialRecordParamSchema.parse(req.params)
 
-    await sendCredentialDocument({
-      response: res,
-      absolutePath: document.absolutePath,
-      originalName: document.originalName,
-      mimeType: document.mimeType,
-      disposition: 'attachment',
-    })
-  }),
+  //   const document = await CredentialService.getDegreeDocument({
+  //     employeeId,
+  //     degreeId,
+  //   })
 
-  previewDegreeVerificationEvidence: asyncHandler(
-    async (req: Request, res: Response) => {
-      const {
-        employeeId,
-        id: degreeId,
-        eventId,
-      } = EmployeeCredentialVerificationEventParamSchema.parse(req.params)
+  //   await sendCredentialDocument({
+  //     response: res,
+  //     absolutePath: document.absolutePath,
+  //     originalName: document.originalName,
+  //     mimeType: document.mimeType,
+  //     disposition: 'inline',
+  //   })
+  // }),
 
-      const document = await CredentialService.getDegreeVerificationEvidence({
-        employeeId,
-        degreeId,
-        eventId,
-      })
+  // downloadDegreeDocument: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId, id: degreeId } =
+  //     EmployeeCredentialRecordParamSchema.parse(req.params)
 
-      await sendCredentialDocument({
-        response: res,
-        absolutePath: document.absolutePath,
-        originalName: document.originalName,
-        mimeType: document.mimeType,
-        disposition: 'inline',
-      })
-    },
-  ),
+  //   const document = await CredentialService.getDegreeDocument({
+  //     employeeId,
+  //     degreeId,
+  //   })
 
-  downloadDegreeVerificationEvidence: asyncHandler(
-    async (req: Request, res: Response) => {
-      const {
-        employeeId,
-        id: degreeId,
-        eventId,
-      } = EmployeeCredentialVerificationEventParamSchema.parse(req.params)
+  //   await sendCredentialDocument({
+  //     response: res,
+  //     absolutePath: document.absolutePath,
+  //     originalName: document.originalName,
+  //     mimeType: document.mimeType,
+  //     disposition: 'attachment',
+  //   })
+  // }),
 
-      const document = await CredentialService.getDegreeVerificationEvidence({
-        employeeId,
-        degreeId,
-        eventId,
-      })
+  // previewDegreeVerificationEvidence: asyncHandler(
+  //   async (req: Request, res: Response) => {
+  //     const {
+  //       employeeId,
+  //       id: degreeId,
+  //       eventId,
+  //     } = EmployeeCredentialVerificationEventParamSchema.parse(req.params)
 
-      await sendCredentialDocument({
-        response: res,
-        absolutePath: document.absolutePath,
-        originalName: document.originalName,
-        mimeType: document.mimeType,
-        disposition: 'attachment',
-      })
-    },
-  ),
+  //     const document = await CredentialService.getDegreeVerificationEvidence({
+  //       employeeId,
+  //       degreeId,
+  //       eventId,
+  //     })
+
+  //     await sendCredentialDocument({
+  //       response: res,
+  //       absolutePath: document.absolutePath,
+  //       originalName: document.originalName,
+  //       mimeType: document.mimeType,
+  //       disposition: 'inline',
+  //     })
+  //   },
+  // ),
+
+  // downloadDegreeVerificationEvidence: asyncHandler(
+  //   async (req: Request, res: Response) => {
+  //     const {
+  //       employeeId,
+  //       id: degreeId,
+  //       eventId,
+  //     } = EmployeeCredentialVerificationEventParamSchema.parse(req.params)
+
+  //     const document = await CredentialService.getDegreeVerificationEvidence({
+  //       employeeId,
+  //       degreeId,
+  //       eventId,
+  //     })
+
+  //     await sendCredentialDocument({
+  //       response: res,
+  //       absolutePath: document.absolutePath,
+  //       originalName: document.originalName,
+  //       mimeType: document.mimeType,
+  //       disposition: 'attachment',
+  //     })
+  //   },
+  // ),
 
   createAll: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
@@ -247,9 +314,7 @@ export const CredentialController = {
 
   createDegree: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
-
     const uploadedByUserId = getAuthenticatedUserId(req)
-
     const body = parseCredentialMultipartBody(
       req.body,
       'degree',
@@ -261,12 +326,7 @@ export const CredentialController = {
       data: body,
       uploadedByUserId,
       kind: 'degree',
-
-      ...(req.file
-        ? {
-            document: req.file,
-          }
-        : {}),
+      ...(req.file ? { document: req.file } : {}),
     })
 
     res.status(201).json(result)

@@ -190,6 +190,8 @@ export function CredentialLifeSupport({
                             ? () => onDelete(lifeSupportId)
                             : undefined
                         }
+                        confirmDelete
+                        deleteItemName={t('lifeSupport')}
                       />
                     </div>
                   </div>

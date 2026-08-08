@@ -171,6 +171,8 @@ export function CredentialBoards({
                             ? () => onVerify(boardId)
                             : undefined
                         }
+                        confirmDelete
+                        deleteItemName={ct('board')}
                       />
                     </div>
                   </div>
@@ -194,7 +196,7 @@ export function CredentialBoards({
                   {employeeId && boardId && board.document && (
                     <div className='mt-5 border-t pt-4'>
                       <p className='mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
-                        {ct('degreeDocument.currentTitle')}
+                        {ct('credentialDocument.currentTitle')}
                       </p>
 
                       <CredentialDocumentSummary

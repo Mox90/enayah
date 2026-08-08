@@ -59,7 +59,7 @@ import {
   storeCredentialDocument,
   type StoredCredentialDocument,
 } from './credential-document-storage.service'
-import { getCredentialVerificationEvidence } from './credential-verification-evidence-access.service'
+import { getCredentialVerificationEvidence as getCredentialVerificationEvidenceForAccess } from './credential-verification-evidence-access.service'
 import {
   collectCurrentCredentialVerifierIds,
   enrichEmployeeCredentialsWithVerification,
@@ -383,15 +383,79 @@ export type CredentialDocumentAccessResult = {
   absolutePath: string
 }
 
-export type GetDegreeDocumentInput = {
-  employeeId: string
-  degreeId: string
+// type CredentialDocumentRepositoryPort = Pick<
+//   typeof degreeDocumentRepository,
+//   'findActiveDocument'
+// >
+type CredentialDocumentRepositoryPort = {
+  findActiveDocument: (
+    tx: DB,
+    employeeId: string,
+    credentialId: string,
+  ) => ReturnType<typeof degreeDocumentRepository.findActiveDocument>
 }
 
-type CredentialDocumentRepositoryPort = Pick<
-  typeof degreeDocumentRepository,
-  'findActiveDocument'
->
+type GetCredentialDocumentInput = {
+  kind: CredentialKind
+  employeeId: string
+  credentialId: string
+}
+
+const credentialDocumentRepositories = {
+  degree: degreeDocumentRepository,
+  board: boardDocumentRepository,
+  fellowship: fellowshipDocumentRepository,
+  membership: membershipDocumentRepository,
+  license: licenseDocumentRepository,
+  'life-support': lifeSupportDocumentRepository,
+  malpractice: malpracticeDocumentRepository,
+} as const satisfies Record<CredentialKind, CredentialDocumentRepositoryPort>
+
+const credentialDocumentNotFoundMessages = {
+  degree: 'Degree document not found.',
+  board: 'Board document not found.',
+  fellowship: 'Fellowship document not found.',
+  membership: 'Membership document not found.',
+  license: 'License document not found.',
+  'life-support': 'Life support document not found.',
+  malpractice: 'Malpractice document not found.',
+} as const satisfies Record<CredentialKind, string>
+
+type CredentialVerificationType =
+  | 'degree'
+  | 'board'
+  | 'fellowship'
+  | 'membership'
+  | 'license'
+  | 'life_support'
+  | 'malpractice'
+
+const credentialVerificationTypeByKind = {
+  degree: 'degree',
+  board: 'board',
+  fellowship: 'fellowship',
+  membership: 'membership',
+  license: 'license',
+  'life-support': 'life_support',
+  malpractice: 'malpractice',
+} as const satisfies Record<CredentialKind, CredentialVerificationType>
+
+type GetCredentialVerificationEvidenceInput = {
+  kind: CredentialKind
+  employeeId: string
+  credentialId: string
+  eventId: string
+}
+
+const credentialVerificationRepositories = {
+  degree: degreeVerificationRepository,
+  board: boardVerificationRepository,
+  fellowship: fellowshipVerificationRepository,
+  membership: membershipVerificationRepository,
+  license: licenseVerificationRepository,
+  'life-support': lifeSupportVerificationRepository,
+  malpractice: malpracticeVerificationRepository,
+}
 
 async function getCredentialDocumentForAccess({
   repository,
@@ -460,31 +524,31 @@ export const CredentialService = {
     )
   },
 
-  getDegreeDocument: async ({
+  getCredentialDocument: async ({
+    kind,
     employeeId,
-    degreeId,
-  }: GetDegreeDocumentInput) => {
-    const document = await getCredentialDocumentForAccess({
-      repository: degreeDocumentRepository,
+    credentialId,
+  }: GetCredentialDocumentInput) => {
+    return getCredentialDocumentForAccess({
+      repository: credentialDocumentRepositories[kind],
       employeeId,
-      credentialId: degreeId,
-      notFoundMessage: 'Degree document not found.',
+      credentialId,
+      notFoundMessage: credentialDocumentNotFoundMessages[kind],
     })
+  },
 
-    /*
-     * Expose a degree-specific property to the
-     * controller while keeping the reusable helper
-     * credential-neutral.
-     */
-    return {
-      id: document.id,
-      degreeId: document.credentialId,
-      employeeId: document.employeeId,
-      originalName: document.originalName,
-      mimeType: document.mimeType,
-      fileSize: document.fileSize,
-      absolutePath: document.absolutePath,
-    }
+  getCredentialVerificationEvidence: async ({
+    kind,
+    employeeId,
+    credentialId,
+    eventId,
+  }: GetCredentialVerificationEvidenceInput) => {
+    return getCredentialVerificationEvidenceForAccess({
+      employeeId,
+      credentialType: credentialVerificationTypeByKind[kind],
+      credentialId,
+      eventId,
+    })
   },
 
   createAll: async (employeeId: string, data: CreateEmployeeCredentialsDto) => {
@@ -498,11 +562,7 @@ export const CredentialService = {
       employeeId: args.employeeId,
       uploadedByUserId: args.uploadedByUserId,
       kind: args.kind,
-      ...(args.document
-        ? {
-            document: args.document,
-          }
-        : {}),
+      ...(args.document ? { document: args.document } : {}),
     }
 
     return createCredentialWithDocument({
@@ -1073,122 +1133,122 @@ export const CredentialService = {
       CredentialRepository.softDeleteMalpractice(tx, id, userId),
     ),
 
-  getDegreeVerificationEvidence: async ({
-    employeeId,
-    degreeId,
-    eventId,
-  }: {
-    employeeId: string
-    degreeId: string
-    eventId: string
-  }) => {
-    return getCredentialVerificationEvidence({
-      employeeId,
-      credentialType: 'degree',
-      credentialId: degreeId,
-      eventId,
-    })
-  },
+  // getDegreeVerificationEvidence: async ({
+  //   employeeId,
+  //   degreeId,
+  //   eventId,
+  // }: {
+  //   employeeId: string
+  //   degreeId: string
+  //   eventId: string
+  // }) => {
+  //   return getCredentialVerificationEvidence({
+  //     employeeId,
+  //     credentialType: 'degree',
+  //     credentialId: degreeId,
+  //     eventId,
+  //   })
+  // },
 
-  getBoardVerificationEvidence: async ({
-    employeeId,
-    boardId,
-    eventId,
-  }: {
-    employeeId: string
-    boardId: string
-    eventId: string
-  }) => {
-    return getCredentialVerificationEvidence({
-      employeeId,
-      credentialType: 'board',
-      credentialId: boardId,
-      eventId,
-    })
-  },
+  // getBoardVerificationEvidence: async ({
+  //   employeeId,
+  //   boardId,
+  //   eventId,
+  // }: {
+  //   employeeId: string
+  //   boardId: string
+  //   eventId: string
+  // }) => {
+  //   return getCredentialVerificationEvidence({
+  //     employeeId,
+  //     credentialType: 'board',
+  //     credentialId: boardId,
+  //     eventId,
+  //   })
+  // },
 
-  getFellowshipVerificationEvidence: async ({
-    employeeId,
-    fellowshipId,
-    eventId,
-  }: {
-    employeeId: string
-    fellowshipId: string
-    eventId: string
-  }) => {
-    return getCredentialVerificationEvidence({
-      employeeId,
-      credentialType: 'fellowship',
-      credentialId: fellowshipId,
-      eventId,
-    })
-  },
+  // getFellowshipVerificationEvidence: async ({
+  //   employeeId,
+  //   fellowshipId,
+  //   eventId,
+  // }: {
+  //   employeeId: string
+  //   fellowshipId: string
+  //   eventId: string
+  // }) => {
+  //   return getCredentialVerificationEvidence({
+  //     employeeId,
+  //     credentialType: 'fellowship',
+  //     credentialId: fellowshipId,
+  //     eventId,
+  //   })
+  // },
 
-  getMembershipVerificationEvidence: async ({
-    employeeId,
-    membershipId,
-    eventId,
-  }: {
-    employeeId: string
-    membershipId: string
-    eventId: string
-  }) => {
-    return getCredentialVerificationEvidence({
-      employeeId,
-      credentialType: 'membership',
-      credentialId: membershipId,
-      eventId,
-    })
-  },
+  // getMembershipVerificationEvidence: async ({
+  //   employeeId,
+  //   membershipId,
+  //   eventId,
+  // }: {
+  //   employeeId: string
+  //   membershipId: string
+  //   eventId: string
+  // }) => {
+  //   return getCredentialVerificationEvidence({
+  //     employeeId,
+  //     credentialType: 'membership',
+  //     credentialId: membershipId,
+  //     eventId,
+  //   })
+  // },
 
-  getLicenseVerificationEvidence: async ({
-    employeeId,
-    licenseId,
-    eventId,
-  }: {
-    employeeId: string
-    licenseId: string
-    eventId: string
-  }) => {
-    return getCredentialVerificationEvidence({
-      employeeId,
-      credentialType: 'license',
-      credentialId: licenseId,
-      eventId,
-    })
-  },
+  // getLicenseVerificationEvidence: async ({
+  //   employeeId,
+  //   licenseId,
+  //   eventId,
+  // }: {
+  //   employeeId: string
+  //   licenseId: string
+  //   eventId: string
+  // }) => {
+  //   return getCredentialVerificationEvidence({
+  //     employeeId,
+  //     credentialType: 'license',
+  //     credentialId: licenseId,
+  //     eventId,
+  //   })
+  // },
 
-  getLifeSupportVerificationEvidence: async ({
-    employeeId,
-    lifeSupportId,
-    eventId,
-  }: {
-    employeeId: string
-    lifeSupportId: string
-    eventId: string
-  }) => {
-    return getCredentialVerificationEvidence({
-      employeeId,
-      credentialType: 'life_support',
-      credentialId: lifeSupportId,
-      eventId,
-    })
-  },
+  // getLifeSupportVerificationEvidence: async ({
+  //   employeeId,
+  //   lifeSupportId,
+  //   eventId,
+  // }: {
+  //   employeeId: string
+  //   lifeSupportId: string
+  //   eventId: string
+  // }) => {
+  //   return getCredentialVerificationEvidence({
+  //     employeeId,
+  //     credentialType: 'life_support',
+  //     credentialId: lifeSupportId,
+  //     eventId,
+  //   })
+  // },
 
-  getMalpracticeVerificationEvidence: async ({
-    employeeId,
-    malpracticeId,
-    eventId,
-  }: {
-    employeeId: string
-    malpracticeId: string
-    eventId: string
-  }) => {
-    return getCredentialVerificationEvidence({
-      employeeId,
-      credentialType: 'malpractice',
-      credentialId: malpracticeId,
-      eventId,
-    })
-  },
+  // getMalpracticeVerificationEvidence: async ({
+  //   employeeId,
+  //   malpracticeId,
+  //   eventId,
+  // }: {
+  //   employeeId: string
+  //   malpracticeId: string
+  //   eventId: string
+  // }) => {
+  //   return getCredentialVerificationEvidence({
+  //     employeeId,
+  //     credentialType: 'malpractice',
+  //     credentialId: malpracticeId,
+  //     eventId,
+  //   })
+  // },
 }

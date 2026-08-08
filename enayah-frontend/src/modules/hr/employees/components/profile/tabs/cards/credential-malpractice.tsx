@@ -183,6 +183,8 @@ export function CredentialMalpractice({
                             ? () => onDelete(insuranceId)
                             : undefined
                         }
+                        confirmDelete
+                        deleteItemName={ct('malpractice')}
                       />
                     </div>
                   </div>

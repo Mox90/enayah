@@ -24,6 +24,7 @@ import { CredentialDocumentMetadata } from '@/modules/hr/onboarding/types/onboar
 import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
 import { cn } from '@/lib/utils'
 import { degreeDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
+//import { degreeDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
 
 export type DegreeFormValue = {
   id?: string
@@ -300,11 +301,11 @@ function DegreeDialogContent({
                 <div className='mb-5'>
                   <div className='mb-3'>
                     <h3 className='text-sm font-semibold text-foreground'>
-                      {t('degreeDocument.currentTitle')}
+                      {t('credentialDocument.currentTitle')}
                     </h3>
 
                     <p className='text-xs text-muted-foreground'>
-                      {t('degreeDocument.currentDescription')}
+                      {t('credentialDocument.currentDescription')}
                     </p>
                   </div>
 
@@ -321,14 +322,14 @@ function DegreeDialogContent({
               <div className='mb-4'>
                 <h3 className='text-sm font-semibold text-foreground'>
                   {canAccessCurrentDocument
-                    ? t('degreeDocument.replaceTitle')
-                    : t('degreeDocument.title')}
+                    ? t('credentialDocument.replaceTitle')
+                    : t('credentialDocument.title')}
                 </h3>
 
                 <p className='text-xs text-muted-foreground'>
                   {canAccessCurrentDocument
-                    ? t('degreeDocument.replaceDescription')
-                    : t('degreeDocument.description')}
+                    ? t('credentialDocument.replaceDescription')
+                    : t('credentialDocument.description')}
                 </p>
               </div>
 
