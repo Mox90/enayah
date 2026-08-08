@@ -26,7 +26,11 @@ import {
   useDeleteBoard,
   useUpdateBoard,
 } from '@/modules/hr/credentials/hooks/use-board-mutations'
-import { BoardDialog, BoardFormValue } from '@/components/dialogs/board-dialog'
+import {
+  BoardDialog,
+  type BoardFormSubmitValue,
+  type BoardFormValue,
+} from '@/components/dialogs/board-dialog'
 import {
   LicenseDialog,
   LicenseFormValue,
@@ -72,12 +76,14 @@ import {
   MalpracticeDialog,
   MalpracticeFormValue,
 } from '@/components/dialogs/malpractice-dialog'
-import { useUpdateDegreeVerification } from '@/modules/hr/credentials/hooks/use-update-degree-verification'
 import {
-  DegreeVerificationDialog,
-  type DegreeVerificationDialogDegree,
-  type DegreeVerificationSubmitValue,
-} from '@/components/dialogs/degree-verification-dialog'
+  CredentialVerificationDialog,
+  CredentialVerificationDialogItem,
+  type CredentialVerificationSubmitValue,
+} from '@/components/dialogs/credential-verification-dialog'
+import { useUpdateCredentialVerification } from '@/modules/hr/credentials/hooks/use-update-credential-verification'
+import type { CredentialKind } from '@/modules/hr/credentials/config/credential-resource.config'
+
 import { useAuthStore } from '@/modules/iam/stores/auth.store'
 import { hasPermission } from '@/lib/permissions/hasPermission'
 import { usePermission } from '@/hooks/usePermission'
@@ -87,6 +93,20 @@ import { usePermission } from '@/hooks/usePermission'
 //   remarks: string | null
 //   evidenceFile?: File
 // }
+
+// type VerificationCredentialKind =
+//   | 'degree'
+//   | 'board'
+//   | 'fellowship'
+//   | 'membership'
+//   | 'license'
+//   | 'life-support'
+//   | 'malpractice'
+
+type VerificationTarget = {
+  kind: CredentialKind
+  id: string
+}
 
 interface Props {
   employeeId: string
@@ -105,9 +125,12 @@ const CredentialsTab = ({ employeeId }: Props) => {
   >(null)
   //const [open, setOpen] = useState(false)
 
-  const [verificationDegreeId, setVerificationDegreeId] = useState<
-    string | null
-  >(null)
+  // const [verificationCredentialId, setVerificationCredentialId] = useState<
+  //   string | null
+  // >(null)
+  const [verificationTarget, setVerificationTarget] =
+    useState<VerificationTarget | null>(null)
+
   const [editingDegree, setEditingDegree] = useState<DegreeFormValue | null>(
     null,
   )
@@ -129,7 +152,8 @@ const CredentialsTab = ({ employeeId }: Props) => {
   const createDegreeMutation = useCreateDegree(employeeId)
   const updateDegreeMutation = useUpdateDegree(employeeId)
   const deleteDegreeMutation = useDeleteDegree(employeeId)
-  const updateDegreeVerification = useUpdateDegreeVerification(employeeId)
+  const updateCredentialVerification =
+    useUpdateCredentialVerification(employeeId)
 
   const createBoardMutation = useCreateBoard(employeeId)
   const updateBoardMutation = useUpdateBoard(employeeId)
@@ -155,32 +179,193 @@ const CredentialsTab = ({ employeeId }: Props) => {
   const updateMalpracticeMutation = useUpdateMalpractice(employeeId)
   const deleteMalpracticeMutation = useDeleteMalpractice(employeeId)
 
-  //const permissions = useAuthStore((state) => state.permissions)
-  //const user = useAuthStore((state) => state.user)
-  // const permissions =
-  //   user?.roles?.flatMap((role) =>
-  //     role.permissions.map((permission) => permission.code),
-  //   ) ?? []
-
   const canVerifyCredentials = usePermission('credential.verify') //permissions.includes('credential.verify')
 
-  const selectedVerificationDegree = verificationDegreeId
-    ? (data?.degrees.find((degree) => degree.id === verificationDegreeId) ??
-      null)
-    : null
+  // const selectedVerificationDegree = verificationCredentialId
+  //   ? (data?.degrees.find((degree) => degree.id === verificationCredentialId) ??
+  //     null)
+  //   : null
 
-  const verificationDegree: DegreeVerificationDialogDegree | null =
-    selectedVerificationDegree?.id
-      ? {
-          id: selectedVerificationDegree.id,
-          degreeName: selectedVerificationDegree.degreeName,
-          institution: selectedVerificationDegree.institution,
-          degreeType: selectedVerificationDegree.degreeType,
-          isVerified: selectedVerificationDegree.isVerified ?? false,
-          document: selectedVerificationDegree.document ?? null,
-          verification: selectedVerificationDegree.verification ?? null,
+  // const verificationCredential: CredentialVerificationDialogItem | null =
+  //   selectedVerificationDegree?.id
+  //     ? {
+  //         id: selectedVerificationDegree.id,
+  //         title: selectedVerificationDegree.degreeName,
+  //         subtitle: selectedVerificationDegree.institution,
+  //         descriptor: selectedVerificationDegree.degreeType,
+  //         isVerified:
+  //           selectedVerificationDegree.verification?.isVerified ??
+  //           selectedVerificationDegree.isVerified ??
+  //           false,
+  //         document: selectedVerificationDegree.document ?? null,
+  //         verification: selectedVerificationDegree.verification ?? null,
+  //       }
+  //     : null
+
+  // const verificationDegree: DegreeVerificationDialogDegree | null =
+  //   selectedVerificationDegree?.id
+  //     ? {
+  //         id: selectedVerificationDegree.id,
+  //         degreeName: selectedVerificationDegree.degreeName,
+  //         institution: selectedVerificationDegree.institution,
+  //         degreeType: selectedVerificationDegree.degreeType,
+  //         isVerified: selectedVerificationDegree.isVerified ?? false,
+  //         document: selectedVerificationDegree.document ?? null,
+  //         verification: selectedVerificationDegree.verification ?? null,
+  //       }
+  //     : null
+
+  const verificationCredential: CredentialVerificationDialogItem | null =
+    (() => {
+      if (!verificationTarget || !data) {
+        return null
+      }
+
+      const { kind, id } = verificationTarget
+
+      switch (kind) {
+        case 'degree': {
+          const item = data.degrees.find((degree) => degree.id === id)
+
+          if (!item?.id) {
+            return null
+          }
+
+          return {
+            id: item.id,
+            title: item.degreeName,
+            subtitle: item.institution,
+            descriptor: item.degreeType,
+            isVerified:
+              item.verification?.isVerified ?? item.isVerified ?? false,
+            document: item.document ?? null,
+            verification: item.verification ?? null,
+          }
         }
-      : null
+
+        case 'board': {
+          const item = data.boards.find((board) => board.id === id)
+
+          if (!item?.id) {
+            return null
+          }
+
+          return {
+            id: item.id,
+            title: item.boardName,
+            subtitle: item.issuingBody,
+            descriptor: item.specialty ?? null,
+            isVerified:
+              item.verification?.isVerified ?? item.isVerified ?? false,
+            document: item.document ?? null,
+            verification: item.verification ?? null,
+          }
+        }
+
+        case 'fellowship': {
+          const item = data.fellowships.find(
+            (fellowship) => fellowship.id === id,
+          )
+
+          if (!item?.id) {
+            return null
+          }
+
+          return {
+            id: item.id,
+            title: item.fellowshipName,
+            subtitle: item.issuingBody,
+            descriptor: item.specialty ?? item.abbreviation ?? null,
+            isVerified:
+              item.verification?.isVerified ?? item.isVerified ?? false,
+            document: item.document ?? null,
+            verification: item.verification ?? null,
+          }
+        }
+
+        case 'membership': {
+          const item = data.memberships.find(
+            (membership) => membership.id === id,
+          )
+
+          if (!item?.id) {
+            return null
+          }
+
+          return {
+            id: item.id,
+            title: item.organization,
+            subtitle: item.membershipNumber ?? null,
+            descriptor: item.membershipLevel ?? null,
+            isVerified:
+              item.verification?.isVerified ?? item.isVerified ?? false,
+            document: item.document ?? null,
+            verification: item.verification ?? null,
+          }
+        }
+
+        case 'license': {
+          const item = data.licenses.find((license) => license.id === id)
+
+          if (!item?.id) {
+            return null
+          }
+
+          return {
+            id: item.id,
+            title: item.profession || item.licenseNumber,
+            subtitle: item.authority,
+            descriptor: item.specialty ?? null,
+            isVerified:
+              item.verification?.isVerified ?? item.isVerified ?? false,
+            document: item.document ?? null,
+            verification: item.verification ?? null,
+          }
+        }
+
+        case 'life-support': {
+          const item = data.lifeSupport.find(
+            (lifeSupport) => lifeSupport.id === id,
+          )
+
+          if (!item?.id) {
+            return null
+          }
+
+          return {
+            id: item.id,
+            title: item.type,
+            subtitle: item.provider,
+            descriptor: item.certificateNumber ?? null,
+            isVerified:
+              item.verification?.isVerified ?? item.isVerified ?? false,
+            document: item.document ?? null,
+            verification: item.verification ?? null,
+          }
+        }
+
+        case 'malpractice': {
+          const item = data.malpractice.find(
+            (malpractice) => malpractice.id === id,
+          )
+
+          if (!item?.id) {
+            return null
+          }
+
+          return {
+            id: item.id,
+            title: item.insuranceCompany,
+            subtitle: item.policyNumber,
+            descriptor: null,
+            isVerified:
+              item.verification?.isVerified ?? item.isVerified ?? false,
+            document: item.document ?? null,
+            verification: item.verification ?? null,
+          }
+        }
+      }
+    })()
 
   async function handleDegreeSubmit(
     value: DegreeFormSubmitValue,
@@ -199,17 +384,34 @@ const CredentialsTab = ({ employeeId }: Props) => {
     await createDegreeMutation.mutateAsync(payload)
   }
 
-  async function handleDegreeVerificationSubmit(
-    value: DegreeVerificationSubmitValue,
-  ): Promise<void> {
-    if (!verificationDegree?.id) {
+  async function handleBoardSubmit(value: BoardFormSubmitValue): Promise<void> {
+    const { id, ...payload } = value
+
+    if (id) {
+      await updateBoardMutation.mutateAsync({
+        id,
+        ...payload,
+      })
+
       return
     }
 
-    await updateDegreeVerification.mutateAsync({
-      degreeId: verificationDegree.id,
+    await createBoardMutation.mutateAsync(payload)
+  }
+
+  async function handleCredentialVerificationSubmit(
+    value: CredentialVerificationSubmitValue,
+  ): Promise<void> {
+    if (!verificationTarget) {
+      return
+    }
+
+    await updateCredentialVerification.mutateAsync({
+      kind: verificationTarget.kind,
+      credentialId: verificationTarget.id,
       isVerified: value.isVerified,
       remarks: value.remarks,
+
       ...(value.evidenceFile
         ? {
             evidenceFile: value.evidenceFile,
@@ -217,7 +419,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
         : {}),
     })
 
-    setVerificationDegreeId(null)
+    setVerificationTarget(null)
   }
 
   //console.log(data.credentials, isLoading, error, isError)
@@ -237,7 +439,6 @@ const CredentialsTab = ({ employeeId }: Props) => {
 
   return (
     <div className='space-y-6'>
-      {/* <CredentialDegrees degrees={data?.degrees ?? []} /> */}
       {/* {data?.degrees[0]?.id && (
         <Button
           type='button'
@@ -289,24 +490,27 @@ const CredentialsTab = ({ employeeId }: Props) => {
         {...(canVerifyCredentials
           ? {
               onVerify: (id) => {
-                setVerificationDegreeId(id)
+                setVerificationTarget({
+                  kind: 'degree',
+                  id,
+                })
               },
             }
           : {})}
       />
 
-      <DegreeVerificationDialog
-        key={verificationDegreeId ?? 'degree-verification-closed'}
-        open={verificationDegreeId !== null && verificationDegree !== null}
+      {/* <DegreeVerificationDialog
+        key={verificationCredentialId ?? 'degree-verification-closed'}
+        open={verificationCredentialId !== null && verificationDegree !== null}
         degree={verificationDegree}
         isSubmitting={updateDegreeVerification.isPending}
         onOpenChange={(open) => {
           if (!open) {
-            setVerificationDegreeId(null)
+            setVerificationCredentialId(null)
           }
         }}
         onSubmit={handleDegreeVerificationSubmit}
-      />
+      /> */}
 
       <DegreeDialog
         open={activeDialog === 'degree'}
@@ -323,6 +527,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
       />
 
       <CredentialBoards
+        employeeId={employeeId}
         boards={data?.boards ?? []}
         onAdd={() => {
           setEditingBoard(null)
@@ -330,58 +535,54 @@ const CredentialsTab = ({ employeeId }: Props) => {
           setActiveDialog('board')
         }}
         onEdit={(id) => {
-          const board = data?.boards.find((b) => b.id === id)
+          const board = data?.boards.find((item) => item.id === id)
+
           if (!board) return
+
           setEditingBoard({
             id: board.id,
             boardName: board.boardName,
-            specialty: board.specialty,
+            specialty: board.specialty ?? null,
             issuingBody: board.issuingBody,
-            issueDate: board.issueDate,
-            expiryDate: board.expiryDate,
-            isLifetime: board.isLifetime,
-            isVerified: board.isVerified,
+            issueDate: board.issueDate ?? null,
+            expiryDate: board.expiryDate ?? null,
+            isLifetime: board.isLifetime ?? false,
+            isVerified: board.isVerified ?? false,
+            document: board.document ?? null,
           })
 
-          //setOpen(true)
           setActiveDialog('board')
         }}
+        //onDelete={(id) => deleteBoardMutation.mutate(id)}
         onDelete={(id) => deleteBoardMutation.mutate(id)}
+        {...(canVerifyCredentials
+          ? {
+              onVerify: (id) => {
+                setVerificationTarget({
+                  kind: 'board',
+                  id,
+                })
+              },
+            }
+          : {})}
       />
 
       <BoardDialog
         open={activeDialog === 'board'}
-        onOpenChange={(open) => {
-          if (!open) setActiveDialog(null)
-        }}
+        employeeId={employeeId}
         initialValue={editingBoard}
-        onSubmit={async (form) => {
-          if (editingBoard?.id) {
-            await updateBoardMutation.mutateAsync({
-              id: editingBoard.id,
-              boardName: form.boardName,
-              specialty: form.specialty,
-              issuingBody: form.issuingBody,
-              issueDate: form.issueDate,
-              expiryDate: form.expiryDate,
-              isLifetime: form.isLifetime ?? false,
-              isVerified: form.isVerified ?? false,
-            })
-          } else {
-            await createBoardMutation.mutateAsync({
-              boardName: form.boardName,
-              specialty: form.specialty,
-              issuingBody: form.issuingBody,
-              issueDate: form.issueDate,
-              expiryDate: form.expiryDate,
-              isLifetime: form.isLifetime ?? false,
-              isVerified: form.isVerified ?? false,
-            })
+        allowDocumentUpload
+        onOpenChange={(open) => {
+          if (!open) {
+            setActiveDialog(null)
+            setEditingBoard(null)
           }
         }}
+        onSubmit={handleBoardSubmit}
       />
 
       <CredentialLicenses
+        employeeId={employeeId}
         licenses={data?.licenses ?? []}
         onAdd={() => {
           setEditingLicense(null)
@@ -407,6 +608,16 @@ const CredentialsTab = ({ employeeId }: Props) => {
           setActiveDialog('license')
         }}
         onDelete={(id) => deleteLicenseMutation.mutate(id)}
+        {...(canVerifyCredentials
+          ? {
+              onVerify: (id) => {
+                setVerificationTarget({
+                  kind: 'license',
+                  id,
+                })
+              },
+            }
+          : {})}
       />
 
       <LicenseDialog
@@ -444,6 +655,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
       />
 
       <CredentialFellowships
+        employeeId={employeeId}
         fellowships={data?.fellowships ?? []}
         onAdd={() => {
           setEditingFellowship(null)
@@ -469,6 +681,16 @@ const CredentialsTab = ({ employeeId }: Props) => {
           setActiveDialog('fellowship')
         }}
         onDelete={(id) => deleteFellowshipMutation.mutate(id)}
+        {...(canVerifyCredentials
+          ? {
+              onVerify: (id) => {
+                setVerificationTarget({
+                  kind: 'fellowship',
+                  id,
+                })
+              },
+            }
+          : {})}
       />
 
       <FellowshipDialog
@@ -506,6 +728,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
       />
 
       <CredentialMemberships
+        employeeId={employeeId}
         memberships={data?.memberships ?? []}
         onAdd={() => {
           setEditingMembership(null)
@@ -529,6 +752,16 @@ const CredentialsTab = ({ employeeId }: Props) => {
           setActiveDialog('membership')
         }}
         onDelete={(id) => deleteMembershipMutation.mutate(id)}
+        {...(canVerifyCredentials
+          ? {
+              onVerify: (id) => {
+                setVerificationTarget({
+                  kind: 'membership',
+                  id,
+                })
+              },
+            }
+          : {})}
       />
 
       <MembershipDialog
@@ -564,6 +797,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
       />
 
       <CredentialLifeSupport
+        employeeId={employeeId}
         lifeSupports={data?.lifeSupport ?? []}
         onAdd={() => {
           setEditingLifeSupport(null)
@@ -587,6 +821,16 @@ const CredentialsTab = ({ employeeId }: Props) => {
           setActiveDialog('life_support')
         }}
         onDelete={(id) => deleteLifeSupportMutation.mutate(id)}
+        {...(canVerifyCredentials
+          ? {
+              onVerify: (id) => {
+                setVerificationTarget({
+                  kind: 'life-support',
+                  id,
+                })
+              },
+            }
+          : {})}
       />
 
       <LifeSupportDialog
@@ -622,6 +866,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
       />
 
       <CredentialMalpractice
+        employeeId={employeeId}
         malpractice={data?.malpractice ?? []}
         onAdd={() => {
           setEditingMalpractice(null)
@@ -645,6 +890,16 @@ const CredentialsTab = ({ employeeId }: Props) => {
           setActiveDialog('malpractice')
         }}
         onDelete={(id) => deleteMalpracticeMutation.mutate(id)}
+        {...(canVerifyCredentials
+          ? {
+              onVerify: (id) => {
+                setVerificationTarget({
+                  kind: 'malpractice',
+                  id,
+                })
+              },
+            }
+          : {})}
       />
 
       <MalpracticeDialog
@@ -675,6 +930,23 @@ const CredentialsTab = ({ employeeId }: Props) => {
             })
           }
         }}
+      />
+
+      <CredentialVerificationDialog
+        key={
+          verificationTarget
+            ? `${verificationTarget.kind}:${verificationTarget.id}`
+            : 'credential-verification-closed'
+        }
+        open={verificationTarget !== null && verificationCredential !== null}
+        credential={verificationCredential}
+        isSubmitting={updateCredentialVerification.isPending}
+        onOpenChange={(open) => {
+          if (!open) {
+            setVerificationTarget(null)
+          }
+        }}
+        onSubmit={handleCredentialVerificationSubmit}
       />
     </div>
   )

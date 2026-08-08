@@ -21,8 +21,9 @@ import {
 import { Footer } from '../footer/footer'
 import { FormDialog } from '../forms'
 import { CredentialDocumentMetadata } from '@/modules/hr/onboarding/types/onboarding.types'
-import { DegreeDocumentSummary } from '@/modules/hr/credentials/components/degree-document-summary'
+import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
 import { cn } from '@/lib/utils'
+import { degreeDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
 
 export type DegreeFormValue = {
   id?: string
@@ -45,6 +46,11 @@ export type DegreeFormValue = {
    * This field is not sent back to the backend.
    */
   isVerified?: boolean | null
+
+  /*
+   * Existing document metadata when editing.
+   * This is not submitted to the backend.
+   */
   document?: CredentialDocumentMetadata | null
 }
 
@@ -120,9 +126,7 @@ function DegreeDialogContent({
   const [form, setForm] = useState<DegreeFormValue>(initialValue ?? emptyValue)
   const [selectedDocument, setSelectedDocument] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
-
   const currentDocument = initialValue?.document ?? null
-
   const canAccessCurrentDocument = Boolean(
     employeeId && initialValue?.id && currentDocument,
   )
@@ -304,10 +308,11 @@ function DegreeDialogContent({
                     </p>
                   </div>
 
-                  <DegreeDocumentSummary
+                  <CredentialDocumentSummary
                     employeeId={employeeId}
-                    degreeId={initialValue.id}
+                    credentialId={initialValue.id}
                     document={currentDocument}
+                    service={degreeDocumentService}
                   />
                 </div>
               )}

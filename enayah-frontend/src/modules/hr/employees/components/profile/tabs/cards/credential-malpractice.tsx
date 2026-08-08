@@ -16,9 +16,11 @@ import { DetailItem } from '@/components/forms/form-detail-item'
 
 interface Props {
   malpractice: MalpracticeInput[]
+  employeeId?: string
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
+  onVerify?: (id: string) => void
 }
 
 function formatCoverageAmount(
@@ -41,9 +43,11 @@ function formatCoverageAmount(
 
 export function CredentialMalpractice({
   malpractice,
+  employeeId,
   onAdd,
   onEdit,
   onDelete,
+  onVerify,
 }: Props) {
   const locale = useLocale()
   const ct = useTranslations('credentials')

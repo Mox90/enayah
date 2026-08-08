@@ -13,15 +13,29 @@ import { RowActions } from '@/components/dialogs/row-actions'
 import { BoardInput } from '@/modules/hr/onboarding/types/onboarding.types'
 import { formatDate, toPersianDigits } from '@/utils/utilities'
 import { DetailItem } from '@/components/forms/form-detail-item'
+import { cn } from '@/lib/utils'
+import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
+import { boardDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
+import { CredentialVerificationSummary } from '@/modules/hr/credentials/components/credential-verification-summary'
+import { boardVerificationService } from '@/modules/hr/credentials/services/credential-verification.service'
 
 interface Props {
   boards: BoardInput[]
+  employeeId?: string
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
+  onVerify?: (id: string) => void
 }
 
-export function CredentialBoards({ boards, onAdd, onEdit, onDelete }: Props) {
+export function CredentialBoards({
+  boards,
+  employeeId,
+  onAdd,
+  onEdit,
+  onDelete,
+  onVerify,
+}: Props) {
   const locale = useLocale()
   const ct = useTranslations('credentials')
   const isRtl = locale === 'ar'
@@ -99,10 +113,23 @@ export function CredentialBoards({ boards, onAdd, onEdit, onDelete }: Props) {
             {boards.map((board, index) => {
               const boardId = board.id
 
+              const isVerified =
+                board.verification?.isVerified ?? board.isVerified ?? false
+
               return (
                 <article
                   key={boardId ?? `${board.boardName}-${index}`}
-                  className='relative rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md sm:p-5'
+                  // className='relative rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md sm:p-5'
+                  className={cn(
+                    //'relative flex h-full min-w-0 flex-col rounded-xl border bg-card',
+                    //'p-4 shadow-sm transition-all duration-200 sm:p-5',
+                    //'hover:border-primary/20 hover:shadow-md',
+                    'relative flex min-w-0 flex-col rounded-xl border bg-card',
+                    'p-4 shadow-sm transition-all duration-200 sm:p-5',
+                    'hover:border-primary/20 hover:shadow-md',
+                    isVerified &&
+                      'border-emerald-500/20 shadow-[0_8px_30px_rgba(16,185,129,0.04)]',
+                  )}
                 >
                   <div className='mb-5 flex items-start justify-between gap-4 border-b pb-4'>
                     <div className='min-w-0'>
@@ -117,9 +144,10 @@ export function CredentialBoards({ boards, onAdd, onEdit, onDelete }: Props) {
                       )}
 
                       <div className='mt-3 flex flex-wrap items-center gap-2'>
-                        <VerificationBadge
+                        {/* <VerificationBadge
                           verified={board.isVerified ?? false}
-                        />
+                        /> */}
+                        <VerificationBadge verified={isVerified} />
 
                         <ExpiryStatusBadge
                           expiryDate={board.expiryDate}
@@ -136,6 +164,11 @@ export function CredentialBoards({ boards, onAdd, onEdit, onDelete }: Props) {
                         onDelete={
                           boardId && onDelete
                             ? () => onDelete(boardId)
+                            : undefined
+                        }
+                        onVerify={
+                          boardId && onVerify
+                            ? () => onVerify(boardId)
                             : undefined
                         }
                       />
@@ -158,6 +191,36 @@ export function CredentialBoards({ boards, onAdd, onEdit, onDelete }: Props) {
                       value={formatDate(board.expiryDate, isRtl)}
                     />
                   </div>
+                  {employeeId && boardId && board.document && (
+                    <div className='mt-5 border-t pt-4'>
+                      <p className='mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+                        {ct('degreeDocument.currentTitle')}
+                      </p>
+
+                      <CredentialDocumentSummary
+                        employeeId={employeeId}
+                        credentialId={boardId}
+                        document={board.document}
+                        service={boardDocumentService}
+                      />
+                    </div>
+                  )}
+                  {employeeId &&
+                    boardId &&
+                    isVerified &&
+                    board.verification && (
+                      <CredentialVerificationSummary
+                        employeeId={employeeId}
+                        credentialId={boardId}
+                        verification={board.verification}
+                        service={boardVerificationService}
+                        {...(onVerify
+                          ? {
+                              onManage: () => onVerify(boardId),
+                            }
+                          : {})}
+                      />
+                    )}
                 </article>
               )
             })}

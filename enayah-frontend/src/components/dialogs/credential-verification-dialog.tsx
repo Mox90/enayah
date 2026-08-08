@@ -19,7 +19,7 @@ import {
   UserRoundCheck,
   X,
 } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { Badge } from '@/components/ui/badge'
@@ -57,17 +57,44 @@ const ALLOWED_EVIDENCE_EXTENSION = /\.(pdf|jpe?g|png|webp)$/i
 
 type VerificationAction = 'verify' | 'revoke'
 
-export type DegreeVerificationDialogDegree = {
+export type CredentialVerificationDialogItem = {
   id: string
-  degreeName: string
-  institution: string
-  degreeType: string
+
+  /*
+   * Primary credential identity shown in the dialog header.
+   *
+   * Degree    → degreeName
+   * Board     → boardName
+   * Fellowship→ fellowshipName
+   * Membership→ organization
+   * License   → profession / license number
+   * etc.
+   */
+  title: string
+
+  /*
+   * Secondary contextual information.
+   *
+   * Degree → institution
+   * Board  → issuingBody
+   * License→ authority
+   */
+  subtitle?: string | null
+
+  /*
+   * Optional badge/context.
+   *
+   * Degree → Bachelor
+   * Board  → specialty
+   * License→ specialty/status
+   */
+  descriptor?: string | null
   isVerified?: boolean | null
   document: CredentialDocumentMetadata | null
   verification?: CredentialVerificationMetadata | null
 }
 
-export type DegreeVerificationSubmitValue = {
+export type CredentialVerificationSubmitValue = {
   isVerified: boolean
   remarks: string | null
   evidenceFile?: File
@@ -75,19 +102,12 @@ export type DegreeVerificationSubmitValue = {
 
 interface Props {
   open: boolean
-  degree: DegreeVerificationDialogDegree | null
+  credential: CredentialVerificationDialogItem | null
   isSubmitting?: boolean
-
-  /*
-   * Optional full history.
-   *
-   * Until the history endpoint is connected, the dialog
-   * falls back to verification.latestEvent.
-   */
   history?: CredentialVerificationEventSummary[]
   isHistoryLoading?: boolean
   onOpenChange: (open: boolean) => void
-  onSubmit: (value: DegreeVerificationSubmitValue) => Promise<void>
+  onSubmit: (value: CredentialVerificationSubmitValue) => Promise<void>
 }
 
 function formatFileSize(size: number): string {
@@ -127,9 +147,9 @@ function getRequestErrorMessage(error: unknown, fallback: string): string {
   return fallback
 }
 
-export function DegreeVerificationDialog({
+export function CredentialVerificationDialog({
   open,
-  degree,
+  credential,
   isSubmitting = false,
   history,
   isHistoryLoading = false,
@@ -147,10 +167,10 @@ export function DegreeVerificationDialog({
   const [isDragging, setIsDragging] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const currentVerification = degree?.verification ?? null
+  const currentVerification = credential?.verification ?? null
   const isCurrentlyVerified =
-    currentVerification?.isVerified ?? degree?.isVerified ?? false
-  const hasOriginalDocument = Boolean(degree?.document)
+    currentVerification?.isVerified ?? credential?.isVerified ?? false
+  const hasOriginalDocument = Boolean(credential?.document)
   const latestEvent = currentVerification?.latestEvent ?? null
   const historyEvents = useMemo(() => {
     if (history) {
@@ -226,7 +246,7 @@ export function DegreeVerificationDialog({
   ): Promise<void> {
     event.preventDefault()
 
-    if (!degree || isSubmitting) {
+    if (!credential || isSubmitting) {
       return
     }
 
@@ -285,9 +305,11 @@ export function DegreeVerificationDialog({
 
   const submitDisabled =
     isSubmitting ||
-    !degree ||
+    !credential ||
     (action === 'verify' && !hasOriginalDocument) ||
     (action === 'revoke' && !isCurrentlyVerified)
+
+  const remarksId = useId()
 
   return (
     <Dialog
@@ -348,7 +370,7 @@ export function DegreeVerificationDialog({
                 </Badge>
               </div>
 
-              {degree && (
+              {credential && (
                 <div className='rounded-2xl border bg-background/80 p-4 shadow-sm backdrop-blur'>
                   <div className='flex items-start gap-3'>
                     <div className='flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10'>
@@ -357,16 +379,23 @@ export function DegreeVerificationDialog({
 
                     <div className='min-w-0'>
                       <p className='break-words font-semibold text-foreground'>
-                        {degree.degreeName}
+                        {credential.title}
                       </p>
 
-                      <p className='mt-0.5 break-words text-sm text-muted-foreground'>
-                        {degree.institution}
-                      </p>
+                      {credential.subtitle && (
+                        <p className='mt-0.5 break-words text-sm text-muted-foreground'>
+                          {credential.subtitle}
+                        </p>
+                      )}
 
-                      <Badge variant='secondary' className='mt-2 rounded-full'>
-                        {degree.degreeType}
-                      </Badge>
+                      {credential.descriptor && (
+                        <Badge
+                          variant='secondary'
+                          className='mt-2 rounded-full'
+                        >
+                          {credential.descriptor}
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -438,8 +467,8 @@ export function DegreeVerificationDialog({
                 )}
               </div>
 
-              {degree?.document ? (
-                <DocumentMetadataCard document={degree.document} />
+              {credential?.document ? (
+                <DocumentMetadataCard document={credential.document} />
               ) : (
                 <div className='flex items-start gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4'>
                   <AlertTriangle className='mt-0.5 size-5 shrink-0 text-amber-600' />
@@ -694,7 +723,8 @@ export function DegreeVerificationDialog({
             <section className='space-y-3'>
               <div className='flex items-center justify-between gap-3'>
                 <Label
-                  htmlFor='degree-verification-remarks'
+                  //htmlFor='credential-verification-remarks'
+                  htmlFor={remarksId}
                   className='font-semibold'
                 >
                   {isRevocation
@@ -708,7 +738,8 @@ export function DegreeVerificationDialog({
               </div>
 
               <Textarea
-                id='degree-verification-remarks'
+                //id='credential-verification-remarks'
+                id={remarksId}
                 value={remarks}
                 disabled={isSubmitting}
                 maxLength={1000}

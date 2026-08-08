@@ -4,39 +4,37 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import { degreeVerificationService } from '../services/credential-verification.service'
-
-import type { CredentialVerificationUpdateResponse } from '../types/credential-verification.types'
+import { credentialVerificationServices } from '../services/credential-verification.service'
 
 import { employeeCredentialsQueryKeys } from './use-employee-credentials'
+import { CredentialKind } from '../config/credential-resource.config'
 
-export type UpdateDegreeVerificationMutationInput = {
-  degreeId: string
+type UpdateCredentialVerificationMutationPayload = {
+  kind: CredentialKind
+  credentialId: string
   isVerified: boolean
-  remarks?: string | null
+  remarks: string | null
   evidenceFile?: File
 }
 
-export function useUpdateDegreeVerification(employeeId: string) {
+export function useUpdateCredentialVerification(employeeId: string) {
   const queryClient = useQueryClient()
 
-  return useMutation<
-    CredentialVerificationUpdateResponse,
-    Error,
-    UpdateDegreeVerificationMutationInput
-  >({
-    mutationFn: async ({ degreeId, isVerified, remarks, evidenceFile }) => {
-      return degreeVerificationService.updateVerification({
+  return useMutation({
+    mutationFn: async ({
+      kind,
+      credentialId,
+      isVerified,
+      remarks,
+      evidenceFile,
+    }: UpdateCredentialVerificationMutationPayload) => {
+      const service = credentialVerificationServices[kind]
+
+      return service.updateVerification({
         employeeId,
-        credentialId: degreeId,
+        credentialId,
         isVerified,
-
-        ...(remarks !== undefined
-          ? {
-              remarks,
-            }
-          : {}),
-
+        remarks,
         ...(evidenceFile
           ? {
               evidenceFile,

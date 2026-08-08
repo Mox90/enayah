@@ -8,6 +8,7 @@ import { FormDialog } from '../forms'
 import { useLocale, useTranslations } from 'next-intl'
 import { Footer } from '../footer/footer'
 import { Save } from 'lucide-react'
+import { CredentialDocumentMetadata } from '@/modules/hr/credentials/types/credential-document.types'
 
 export type FellowshipFormValue = {
   id?: string
@@ -18,7 +19,17 @@ export type FellowshipFormValue = {
   issueDate?: string | null
   expiryDate?: string | null
   documentFileId?: string | null
-  isVerified: boolean
+  /*
+   * Read-only verification state.
+   * It is not submitted through the normal board form.
+   */
+  isVerified?: boolean | null
+
+  /*
+   * Existing document metadata when editing.
+   * This is not submitted to the backend.
+   */
+  document?: CredentialDocumentMetadata | null
 }
 
 interface Props {
@@ -38,6 +49,7 @@ const emptyValue: FellowshipFormValue = {
   expiryDate: null,
   documentFileId: null,
   isVerified: false,
+  document: null,
 }
 
 function FellowshipDialogContent({

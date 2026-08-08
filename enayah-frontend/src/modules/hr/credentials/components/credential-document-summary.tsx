@@ -1,18 +1,24 @@
+// enayah-frontend/src/modules/hr/credentials/components/credential-document-summary.tsx
+
 'use client'
 
 import { Download, Eye, FileImage, FileText, Loader2 } from 'lucide-react'
-import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-import { useDegreeDocumentActions } from '../hooks/use-degree-document-actions'
-import type { CredentialDocumentMetadata } from '../types/credential-document.types'
+import { useCredentialDocumentActions } from '../hooks/use-credential-document-actions'
 
-interface DegreeDocumentSummaryProps {
+import type {
+  CredentialDocumentAccessService,
+  CredentialDocumentMetadata,
+} from '../types/credential-document.types'
+
+export interface CredentialDocumentSummaryProps {
   employeeId: string
-  degreeId: string
+  credentialId: string
   document: CredentialDocumentMetadata
+  service: CredentialDocumentAccessService
   className?: string
 }
 
@@ -32,20 +38,22 @@ function isPdf(mimeType: string): boolean {
   return mimeType === 'application/pdf'
 }
 
-export function DegreeDocumentSummary({
+export function CredentialDocumentSummary({
   employeeId,
-  degreeId,
+  credentialId,
   document,
+  service,
   className,
-}: DegreeDocumentSummaryProps) {
-  const t = useTranslations('credentials.degreeDocument')
-
+}: CredentialDocumentSummaryProps) {
   const { previewDocument, downloadDocument, isPreviewing, isDownloading } =
-    useDegreeDocumentActions({
+    useCredentialDocumentActions({
       employeeId,
-      degreeId,
+      credentialId,
       originalName: document.originalName,
+      service,
     })
+
+  const isBusy = isPreviewing || isDownloading
 
   return (
     <div className={cn('rounded-xl border bg-muted/20 p-3', className)}>
@@ -76,44 +84,36 @@ export function DegreeDocumentSummary({
         <div className='flex shrink-0 gap-0'>
           <Button
             type='button'
-            size='sm'
+            size='icon'
             variant='ghost'
-            disabled={isPreviewing || isDownloading}
+            disabled={isBusy}
+            aria-label='Preview document'
             onClick={() => {
               void previewDocument()
             }}
           >
             {isPreviewing ? (
-              <Loader2
-                aria-hidden='true'
-                className='me-2 h-4 w-4 animate-spin'
-              />
+              <Loader2 aria-hidden='true' className='h-4 w-4 animate-spin' />
             ) : (
-              <Eye aria-hidden='true' className=' h-4 w-4' />
+              <Eye aria-hidden='true' className='h-4 w-4' />
             )}
-
-            {/* {t('preview')} */}
           </Button>
 
           <Button
             type='button'
-            size='sm'
+            size='icon'
             variant='ghost'
-            disabled={isPreviewing || isDownloading}
+            disabled={isBusy}
+            aria-label='Download document'
             onClick={() => {
               void downloadDocument()
             }}
           >
             {isDownloading ? (
-              <Loader2
-                aria-hidden='true'
-                className='me-2 h-4 w-4 animate-spin'
-              />
+              <Loader2 aria-hidden='true' className='h-4 w-4 animate-spin' />
             ) : (
-              <Download aria-hidden='true' className=' h-4 w-4' />
+              <Download aria-hidden='true' className='h-4 w-4' />
             )}
-
-            {/* {t('download')} */}
           </Button>
         </div>
       </div>

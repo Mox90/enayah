@@ -501,6 +501,8 @@
     "educationSub": "Enter the employee's board qualification details.",
     "institution": "School / Provider",
     "membershipNumber": "Membership Number",
+    "lifetimeCertification": "Lifetime certification",
+    "lifetimeCertificationDescription": "This certification does not expire.",
     "degreeDocument": {
       "title": "Degree document",
       "description": "Attach a diploma, certificate, transcript, or another supporting document.",
@@ -589,6 +591,14 @@
       "previewBlocked": "The browser blocked the evidence preview window.",
       "previewFailed": "Unable to preview verification evidence.",
       "downloadFailed": "Unable to download verification evidence."
+    },
+    "boardDocument": {
+      "title": "Board certificate",
+      "description": "Upload the board certification document.",
+      "currentTitle": "Current board certificate",
+      "currentDescription": "The document currently attached to this board certification.",
+      "replaceTitle": "Replace board certificate",
+      "replaceDescription": "Upload a new document to replace the current certificate."
     }
   },
   "payroll": {},

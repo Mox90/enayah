@@ -21,31 +21,31 @@ export const credentialService = {
     return response.data
   },
 
-  previewDocument: async ({
-    employeeId,
-    degreeId,
-  }: DegreeDocumentRequest): Promise<Blob> => {
-    const response = await api.get<Blob>(
-      `${API_ENDPOINTS.hr.credentials}/employee/${employeeId}/degrees/${degreeId}/document/preview`,
-      {
-        responseType: 'blob',
-      },
-    )
+  // previewDocument: async ({
+  //   employeeId,
+  //   degreeId,
+  // }: DegreeDocumentRequest): Promise<Blob> => {
+  //   const response = await api.get<Blob>(
+  //     `${API_ENDPOINTS.hr.credentials}/employee/${employeeId}/degrees/${degreeId}/document/preview`,
+  //     {
+  //       responseType: 'blob',
+  //     },
+  //   )
 
-    return response.data
-  },
+  //   return response.data
+  // },
 
-  downloadDocument: async ({
-    employeeId,
-    degreeId,
-  }: DegreeDocumentRequest): Promise<Blob> => {
-    const response = await api.get<Blob>(
-      `${API_ENDPOINTS.hr.credentials}/employee/${employeeId}/degrees/${degreeId}/document/download`,
-      {
-        responseType: 'blob',
-      },
-    )
+  // downloadDocument: async ({
+  //   employeeId,
+  //   degreeId,
+  // }: DegreeDocumentRequest): Promise<Blob> => {
+  //   const response = await api.get<Blob>(
+  //     `${API_ENDPOINTS.hr.credentials}/employee/${employeeId}/degrees/${degreeId}/document/download`,
+  //     {
+  //       responseType: 'blob',
+  //     },
+  //   )
 
-    return response.data
-  },
+  //   return response.data
+  // },
 }

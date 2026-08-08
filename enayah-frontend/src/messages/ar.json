@@ -503,6 +503,8 @@
     "educationSub": "أدخل تفاصيل مؤهلات الموظف.",
     "institution": "المدرسة / الجهة المانحة",
     "membershipNumber": "رقم العضوية",
+    "lifetimeCertification": "شهادة مدى الحياة",
+    "lifetimeCertificationDescription": "هذه الشهادة لا تنتهي صلاحيتها.",
     "degreeDocument": {
       "title": "مستند المؤهل العلمي",
       "description": "أرفق الشهادة أو وثيقة التخرج أو السجل الأكاديمي أو أي مستند داعم.",
@@ -591,6 +593,14 @@
       "previewBlocked": "منع المتصفح فتح نافذة معاينة المستند.",
       "previewFailed": "تعذرت معاينة مستند التحقق.",
       "downloadFailed": "تعذر تنزيل مستند التحقق."
+    },
+    "boardDocument": {
+      "title": "شهادة البورد",
+      "description": "قم برفع مستند شهادة البورد.",
+      "currentTitle": "شهادة البورد الحالية",
+      "currentDescription": "المستند المرفق حالياً بشهادة البورد.",
+      "replaceTitle": "استبدال شهادة البورد",
+      "replaceDescription": "قم برفع مستند جديد لاستبدال الشهادة الحالية."
     }
   },
   "payroll": {},

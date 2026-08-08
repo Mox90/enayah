@@ -43,7 +43,7 @@ router.get(
   //requirePermission('credential.verify'),
   requireEmployeeAccess({
     employeeIdParam: 'employeeId',
-    anyEmployeePermission: 'credential.verify',
+    anyEmployeePermission: 'employee.view',
     selfPermission: 'employee.self.view',
   }),
   CredentialController.previewDegreeVerificationEvidence,
@@ -54,7 +54,7 @@ router.get(
   //requirePermission('credential.verify'),
   requireEmployeeAccess({
     employeeIdParam: 'employeeId',
-    anyEmployeePermission: 'credential.verify',
+    anyEmployeePermission: 'employee.view',
     selfPermission: 'employee.self.view',
   }),
   CredentialController.downloadDegreeVerificationEvidence,
@@ -191,11 +191,12 @@ router.patch(
   CredentialController.updateDegreeVerification,
 )
 
-// router.patch(
-//   '/employee/:employeeId/boards/:id/verification',
-//   requirePermission('credential.verify'),
-//   CredentialController.updateBoardVerification,
-// )
+router.patch(
+  '/employee/:employeeId/boards/:id/verification',
+  requirePermission('credential.verify'),
+  credentialDocumentUpload.single('evidence'),
+  CredentialController.updateBoardVerification,
+)
 
 // router.patch(
 //   '/employee/:employeeId/fellowships/:id/verification',
@@ -229,7 +230,6 @@ router.patch(
 
 router.patch(
   '/employee/:employeeId/degrees/:id',
-
   requireEmployeeAccess({
     employeeIdParam: 'employeeId',
     anyEmployeePermission: 'employee.credentials.update',
@@ -241,38 +241,68 @@ router.patch(
 )
 
 router.patch(
-  '/boards/:id',
-  requirePermission('employee.credentials.update'),
+  '/employee/:employeeId/boards/:id',
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
+  uploadCredentialDocumentMiddleware,
   CredentialController.updateBoard,
 )
 
 router.patch(
-  '/fellowships/:id',
-  requirePermission('employee.credentials.update'),
+  '/employee/:employeeId/fellowships/:id',
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
+  uploadCredentialDocumentMiddleware,
   CredentialController.updateFellowship,
 )
 
 router.patch(
-  '/memberships/:id',
-  requirePermission('employee.credentials.update'),
+  '/employee/:employeeId/memberships/:id',
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
+  uploadCredentialDocumentMiddleware,
   CredentialController.updateMembership,
 )
 
 router.patch(
-  '/licenses/:id',
-  requirePermission('employee.credentials.update'),
+  '/employee/:employeeId/licenses/:id',
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
+  uploadCredentialDocumentMiddleware,
   CredentialController.updateLicense,
 )
 
 router.patch(
-  '/life-support/:id',
-  requirePermission('employee.credentials.update'),
+  '/employee/:employeeId/life-support/:id',
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
+  uploadCredentialDocumentMiddleware,
   CredentialController.updateLifeSupport,
 )
 
 router.patch(
-  '/malpractice/:id',
-  requirePermission('employee.credentials.update'),
+  '/employee/:employeeId/malpractice/:id',
+  requireEmployeeAccess({
+    employeeIdParam: 'employeeId',
+    anyEmployeePermission: 'employee.credentials.update',
+    selfPermission: 'employee.self.update',
+  }),
+  uploadCredentialDocumentMiddleware,
   CredentialController.updateMalpractice,
 )
 
@@ -282,7 +312,6 @@ router.patch(
 
 router.delete(
   '/employee/:employeeId/degrees/:id',
-
   requireEmployeeAccess({
     employeeIdParam: 'employeeId',
     anyEmployeePermission: 'employee.credentials.update',

@@ -17,9 +17,11 @@ import { DetailItem } from '@/components/forms/form-detail-item'
 
 interface Props {
   memberships: MembershipInput[]
+  employeeId?: string
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
+  onVerify?: (id: string) => void
 }
 
 function formatMembershipLevel(value: string) {
@@ -30,9 +32,11 @@ function formatMembershipLevel(value: string) {
 
 export function CredentialMemberships({
   memberships,
+  employeeId,
   onAdd,
   onEdit,
   onDelete,
+  onVerify,
 }: Props) {
   const locale = useLocale()
   const ct = useTranslations('credentials')

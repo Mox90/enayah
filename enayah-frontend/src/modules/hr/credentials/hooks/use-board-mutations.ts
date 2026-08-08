@@ -1,11 +1,18 @@
+// enayah-frontend/src/modules/hr/credentials/hooks/use-board-mutations.ts
+
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLocale, useTranslations } from 'next-intl'
-import {
-  CreateBoardPayload,
-  credentialBoardService,
-  UpdateBoardPayload,
-} from '../services/credential-board.service'
 import { toast } from 'sonner'
+
+import {
+  credentialBoardService,
+  type CreateBoardPayload,
+  type UpdateBoardPayload,
+} from '../services/credential-board.service'
+
+type CreateBoardMutationPayload = Omit<CreateBoardPayload, 'employeeId'>
+
+type UpdateBoardMutationPayload = Omit<UpdateBoardPayload, 'employeeId'>
 
 export function useCreateBoard(employeeId: string) {
   const queryClient = useQueryClient()
@@ -13,17 +20,18 @@ export function useCreateBoard(employeeId: string) {
   const locale = useLocale()
   const isRtl = locale === 'ar'
   return useMutation({
-    mutationFn: (payload: Omit<CreateBoardPayload, 'employeeId'>) =>
+    mutationFn: (payload: CreateBoardMutationPayload) =>
       credentialBoardService.create({
         employeeId,
         ...payload,
       }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
         queryKey: ['employee-credentials', employeeId],
       })
       toast.success(t.rich('createSuccess', { name: isRtl ? 'مجلس' : 'Board' }))
     },
+
     onError: () => {
       toast.error(t.rich('createError', { name: isRtl ? 'مجلس' : 'board' }))
     },
@@ -37,13 +45,14 @@ export function useUpdateBoard(employeeId: string) {
   const isRtl = locale === 'ar'
 
   return useMutation({
-    mutationFn: (payload: UpdateBoardPayload) =>
-      credentialBoardService.update(payload),
+    mutationFn: (payload: UpdateBoardMutationPayload) =>
+      credentialBoardService.update({ employeeId, ...payload }),
 
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({
+    onSuccess: async (_data, variables) => {
+      await queryClient.invalidateQueries({
         queryKey: ['employee-credentials', employeeId],
       })
+
       toast.success(
         t.rich('updateSuccess', {
           name: isRtl
@@ -53,7 +62,7 @@ export function useUpdateBoard(employeeId: string) {
       )
     },
 
-    onError: (error, variables) => {
+    onError: (_error, variables) => {
       toast.error(
         t.rich('updateError', {
           name: isRtl
@@ -70,10 +79,12 @@ export function useDeleteBoard(employeeId: string) {
   const t = useTranslations('credentials')
   const locale = useLocale()
   const isRtl = locale === 'ar'
+
   return useMutation({
-    mutationFn: (id: string) => credentialBoardService.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
+    mutationFn: (id: string) =>
+      credentialBoardService.delete({ employeeId, id }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
         queryKey: ['employee-credentials', employeeId],
       })
       toast.success(t.rich('deleteSuccess', { name: isRtl ? 'مجلس' : 'Board' }))

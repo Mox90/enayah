@@ -256,11 +256,17 @@ export const CredentialController = {
       CreateDegreeSchema,
     )
 
-    const result = await CredentialService.createDegree({
+    const result = await CredentialService.createCredential({
       employeeId,
       data: body,
       uploadedByUserId,
-      ...(req.file ? { document: req.file } : {}),
+      kind: 'degree',
+
+      ...(req.file
+        ? {
+            document: req.file,
+          }
+        : {}),
     })
 
     res.status(201).json(result)
@@ -268,83 +274,120 @@ export const CredentialController = {
 
   createBoard: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
-
     const uploadedByUserId = getAuthenticatedUserId(req)
+    const body = parseCredentialMultipartBody(
+      req.body,
+      'board',
+      CreateBoardSchema,
+    )
 
-    // const body = parseCredentialMultipartBody(
-    //   req.body,
-    //   'board',
-    //   CreateBoardSchema,
-    // )
-
-    // const result = await CredentialService.createBoard({
-    //   employeeId,
-    //   data: body,
-    //   uploadedByUserId,
-    //   ...(req.file ? { document: req.file } : {}),
-    // })
-    const body = CreateBoardSchema.parse(req.body)
-
-    const result = await CredentialService.createBoard(employeeId, body)
+    const result = await CredentialService.createCredential({
+      employeeId,
+      data: body,
+      uploadedByUserId,
+      kind: 'board',
+      ...(req.file ? { document: req.file } : {}),
+    })
 
     res.status(201).json(result)
   }),
 
   createFellowship: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+    const uploadedByUserId = getAuthenticatedUserId(req)
+    const body = parseCredentialMultipartBody(
+      req.body,
+      'fellowship',
+      CreateFellowshipSchema,
+    )
 
-    // const uploadedByUserId = getAuthenticatedUserId(req)
-
-    // const body = parseCredentialMultipartBody(
-    //   req.body,
-    //   'fellowship',
-    //   CreateFellowshipSchema,
-    // )
-
-    const body = CreateFellowshipSchema.parse(req.body)
-
-    const result = await CredentialService.createFellowship(employeeId, body)
+    const result = await CredentialService.createCredential({
+      employeeId,
+      data: body,
+      uploadedByUserId,
+      kind: 'fellowship',
+      ...(req.file ? { document: req.file } : {}),
+    })
 
     res.status(201).json(result)
   }),
 
   createMembership: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
-
-    const result = await CredentialService.createMembership(
-      employeeId,
+    const uploadedByUserId = getAuthenticatedUserId(req)
+    const body = parseCredentialMultipartBody(
       req.body,
+      'membership',
+      CreateMembershipSchema,
     )
+
+    const result = await CredentialService.createCredential({
+      employeeId,
+      data: body,
+      uploadedByUserId,
+      kind: 'membership',
+      ...(req.file ? { document: req.file } : {}),
+    })
 
     res.status(201).json(result)
   }),
 
   createLicense: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+    const uploadedByUserId = getAuthenticatedUserId(req)
+    const body = parseCredentialMultipartBody(
+      req.body,
+      'license',
+      CreateLicenseSchema,
+    )
 
-    const result = await CredentialService.createLicense(employeeId, req.body)
+    const result = await CredentialService.createCredential({
+      employeeId,
+      data: body,
+      uploadedByUserId,
+      kind: 'license',
+      ...(req.file ? { document: req.file } : {}),
+    })
 
     res.status(201).json(result)
   }),
 
   createLifeSupport: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
-
-    const result = await CredentialService.createLifeSupport(
-      employeeId,
+    const uploadedByUserId = getAuthenticatedUserId(req)
+    const body = parseCredentialMultipartBody(
       req.body,
+      'life_support',
+      CreateLifeSupportSchema,
     )
+
+    const result = await CredentialService.createCredential({
+      employeeId,
+      data: body,
+      uploadedByUserId,
+      kind: 'life-support',
+      ...(req.file ? { document: req.file } : {}),
+    })
 
     res.status(201).json(result)
   }),
 
   createMalpractice: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
-
-    const result = await CredentialService.createMalpractice(
-      employeeId,
+    const uploadedByUserId = getAuthenticatedUserId(req)
+    const body = parseCredentialMultipartBody(
       req.body,
+      'malpractice',
+      CreateMalpracticeSchema,
     )
+
+    const result = await CredentialService.createCredential({
+      employeeId,
+      data: body,
+      uploadedByUserId,
+      kind: 'malpractice',
+      ...(req.file ? { document: req.file } : {}),
+    })
 
     res.status(201).json(result)
   }),
@@ -352,20 +395,19 @@ export const CredentialController = {
   updateDegree: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId, id: degreeId } =
       EmployeeCredentialRecordParamSchema.parse(req.params)
-
     const updatedByUserId = getAuthenticatedUserId(req)
-
     const body = parseCredentialMultipartBody(
       req.body,
       'degree',
       UpdateDegreeSchema,
     )
 
-    const result = await CredentialService.updateDegree({
+    const result = await CredentialService.updateCredential({
       employeeId,
-      degreeId,
+      credentialId: degreeId,
       data: body,
       updatedByUserId,
+      kind: 'degree',
       ...(req.file ? { document: req.file } : {}),
     })
 
@@ -373,52 +415,184 @@ export const CredentialController = {
   }),
 
   updateBoard: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = CredentialRecordIdSchema.parse(req.params)
+    const { employeeId, id: boardId } =
+      EmployeeCredentialRecordParamSchema.parse(req.params)
+    const updatedByUserId = getAuthenticatedUserId(req)
+    const body = parseCredentialMultipartBody(
+      req.body,
+      'board',
+      UpdateBoardSchema,
+    )
 
-    const result = await CredentialService.updateBoard(id, req.body)
+    const result = await CredentialService.updateCredential({
+      employeeId,
+      credentialId: boardId,
+      data: body,
+      updatedByUserId,
+      kind: 'board',
+      ...(req.file ? { document: req.file } : {}),
+    })
 
     res.status(200).json(result)
   }),
 
   updateFellowship: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = CredentialRecordIdSchema.parse(req.params)
+    const { employeeId, id: fellowshipId } =
+      EmployeeCredentialRecordParamSchema.parse(req.params)
+    const updatedByUserId = getAuthenticatedUserId(req)
+    const body = parseCredentialMultipartBody(
+      req.body,
+      'fellowship',
+      UpdateFellowshipSchema,
+    )
 
-    const result = await CredentialService.updateFellowship(id, req.body)
+    const result = await CredentialService.updateCredential({
+      employeeId,
+      credentialId: fellowshipId,
+      data: body,
+      updatedByUserId,
+      kind: 'fellowship',
+      ...(req.file ? { document: req.file } : {}),
+    })
 
     res.status(200).json(result)
   }),
 
   updateMembership: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = CredentialRecordIdSchema.parse(req.params)
+    const { employeeId, id: membershipId } =
+      EmployeeCredentialRecordParamSchema.parse(req.params)
+    const updatedByUserId = getAuthenticatedUserId(req)
+    const body = parseCredentialMultipartBody(
+      req.body,
+      'membership',
+      UpdateMembershipSchema,
+    )
 
-    const result = await CredentialService.updateMembership(id, req.body)
+    const result = await CredentialService.updateCredential({
+      employeeId,
+      credentialId: membershipId,
+      data: body,
+      updatedByUserId,
+      kind: 'membership',
+      ...(req.file ? { document: req.file } : {}),
+    })
 
     res.status(200).json(result)
   }),
 
   updateLicense: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = CredentialRecordIdSchema.parse(req.params)
+    const { employeeId, id: licenseId } =
+      EmployeeCredentialRecordParamSchema.parse(req.params)
+    const updatedByUserId = getAuthenticatedUserId(req)
+    const body = parseCredentialMultipartBody(
+      req.body,
+      'license',
+      UpdateLicenseSchema,
+    )
 
-    const result = await CredentialService.updateLicense(id, req.body)
+    const result = await CredentialService.updateCredential({
+      employeeId,
+      credentialId: licenseId,
+      data: body,
+      updatedByUserId,
+      kind: 'license',
+      ...(req.file ? { document: req.file } : {}),
+    })
 
     res.status(200).json(result)
   }),
 
   updateLifeSupport: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = CredentialRecordIdSchema.parse(req.params)
+    const { employeeId, id: lifeSupportId } =
+      EmployeeCredentialRecordParamSchema.parse(req.params)
+    const updatedByUserId = getAuthenticatedUserId(req)
+    const body = parseCredentialMultipartBody(
+      req.body,
+      'life_support',
+      UpdateLifeSupportSchema,
+    )
 
-    const result = await CredentialService.updateLifeSupport(id, req.body)
+    const result = await CredentialService.updateCredential({
+      employeeId,
+      credentialId: lifeSupportId,
+      data: body,
+      updatedByUserId,
+      kind: 'life-support',
+      ...(req.file ? { document: req.file } : {}),
+    })
 
     res.status(200).json(result)
   }),
 
   updateMalpractice: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = CredentialRecordIdSchema.parse(req.params)
+    const { employeeId, id: malpracticeId } =
+      EmployeeCredentialRecordParamSchema.parse(req.params)
+    const updatedByUserId = getAuthenticatedUserId(req)
+    const body = parseCredentialMultipartBody(
+      req.body,
+      'malpractice',
+      UpdateMalpracticeSchema,
+    )
 
-    const result = await CredentialService.updateMalpractice(id, req.body)
+    const result = await CredentialService.updateCredential({
+      employeeId,
+      credentialId: malpracticeId,
+      data: body,
+      updatedByUserId,
+      kind: 'malpractice',
+      ...(req.file ? { document: req.file } : {}),
+    })
 
     res.status(200).json(result)
   }),
+
+  // updateBoard: asyncHandler(async (req: Request, res: Response) => {
+  //   const { id } = CredentialRecordIdSchema.parse(req.params)
+
+  //   const result = await CredentialService.updateBoard(id, req.body)
+
+  //   res.status(200).json(result)
+  // }),
+
+  // updateFellowship: asyncHandler(async (req: Request, res: Response) => {
+  //   const { id } = CredentialRecordIdSchema.parse(req.params)
+
+  //   const result = await CredentialService.updateFellowship(id, req.body)
+
+  //   res.status(200).json(result)
+  // }),
+
+  // updateMembership: asyncHandler(async (req: Request, res: Response) => {
+  //   const { id } = CredentialRecordIdSchema.parse(req.params)
+
+  //   const result = await CredentialService.updateMembership(id, req.body)
+
+  //   res.status(200).json(result)
+  // }),
+
+  // updateLicense: asyncHandler(async (req: Request, res: Response) => {
+  //   const { id } = CredentialRecordIdSchema.parse(req.params)
+
+  //   const result = await CredentialService.updateLicense(id, req.body)
+
+  //   res.status(200).json(result)
+  // }),
+
+  // updateLifeSupport: asyncHandler(async (req: Request, res: Response) => {
+  //   const { id } = CredentialRecordIdSchema.parse(req.params)
+
+  //   const result = await CredentialService.updateLifeSupport(id, req.body)
+
+  //   res.status(200).json(result)
+  // }),
+
+  // updateMalpractice: asyncHandler(async (req: Request, res: Response) => {
+  //   const { id } = CredentialRecordIdSchema.parse(req.params)
+
+  //   const result = await CredentialService.updateMalpractice(id, req.body)
+
+  //   res.status(200).json(result)
+  // }),
 
   updateDegreeVerification: asyncHandler(
     async (req: Request, res: Response) => {
@@ -461,6 +635,46 @@ export const CredentialController = {
       res.status(200).json(result)
     },
   ),
+
+  updateBoardVerification: asyncHandler(async (req: Request, res: Response) => {
+    const { employeeId, id: boardId } =
+      EmployeeCredentialRecordParamSchema.parse(req.params)
+
+    const verifiedByUserId = getAuthenticatedUserId(req)
+
+    /*
+     * Preserve JSON compatibility:
+     *
+     * JSON:
+     * {
+     *   "isVerified": true,
+     *   "remarks": "Reviewed"
+     * }
+     *
+     * Multipart:
+     * verification: JSON string
+     * evidence: File
+     */
+    const isMultipart = Boolean(req.is('multipart/form-data'))
+
+    const body = isMultipart
+      ? parseCredentialMultipartBody(
+          req.body,
+          'verification',
+          UpdateCredentialVerificationSchema,
+        )
+      : UpdateCredentialVerificationSchema.parse(req.body)
+
+    const result = await CredentialService.updateBoardVerification({
+      employeeId,
+      boardId,
+      data: body,
+      verifiedByUserId,
+      ...(req.file ? { evidence: req.file } : {}),
+    })
+
+    res.status(200).json(result)
+  }),
 
   deleteDegree: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId, id: degreeId } =
@@ -524,4 +738,106 @@ export const CredentialController = {
 
     res.status(204).send()
   }),
+
+  // createDegree: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+
+  //   const uploadedByUserId = getAuthenticatedUserId(req)
+
+  //   const body = parseCredentialMultipartBody(
+  //     req.body,
+  //     'degree',
+  //     CreateDegreeSchema,
+  //   )
+
+  //   const result = await CredentialService.createDegree({
+  //     employeeId,
+  //     data: body,
+  //     uploadedByUserId,
+  //     ...(req.file ? { document: req.file } : {}),
+  //   })
+
+  //   res.status(201).json(result)
+  // }),
+
+  // createBoard: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+
+  //   const uploadedByUserId = getAuthenticatedUserId(req)
+
+  //   const body = parseCredentialMultipartBody(
+  //     req.body,
+  //     'board',
+  //     CreateBoardSchema,
+  //   )
+
+  //   const result = await CredentialService.createCredential({
+  //     employeeId,
+  //     data: body,
+  //     uploadedByUserId,
+  //     ...(req.file ? { document: req.file } : {}),
+  //     kind: 'board',
+  //   })
+
+  //   res.status(201).json(result)
+  // }),
+
+  // createFellowship: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+
+  //   // const uploadedByUserId = getAuthenticatedUserId(req)
+
+  //   // const body = parseCredentialMultipartBody(
+  //   //   req.body,
+  //   //   'fellowship',
+  //   //   CreateFellowshipSchema,
+  //   // )
+
+  //   const body = CreateFellowshipSchema.parse(req.body)
+
+  //   const result = await CredentialService.createFellowship(employeeId, body)
+
+  //   res.status(201).json(result)
+  // }),
+
+  // createMembership: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+
+  //   const result = await CredentialService.createMembership(
+  //     employeeId,
+  //     req.body,
+  //   )
+
+  //   res.status(201).json(result)
+  // }),
+
+  // createLicense: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+
+  //   const result = await CredentialService.createLicense(employeeId, req.body)
+
+  //   res.status(201).json(result)
+  // }),
+
+  // createLifeSupport: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+
+  //   const result = await CredentialService.createLifeSupport(
+  //     employeeId,
+  //     req.body,
+  //   )
+
+  //   res.status(201).json(result)
+  // }),
+
+  // createMalpractice: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+
+  //   const result = await CredentialService.createMalpractice(
+  //     employeeId,
+  //     req.body,
+  //   )
+
+  //   res.status(201).json(result)
+  // }),
 }

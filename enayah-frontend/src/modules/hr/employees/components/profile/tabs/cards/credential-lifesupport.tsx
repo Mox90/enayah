@@ -16,9 +16,11 @@ import { DetailItem } from '@/components/forms/form-detail-item'
 
 interface Props {
   lifeSupports: LifeSupportInput[]
+  employeeId?: string
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
+  onVerify?: (id: string) => void
 }
 
 const translatableCredentialValues = new Set([
@@ -44,9 +46,11 @@ const translatableCredentialValues = new Set([
 
 export function CredentialLifeSupport({
   lifeSupports,
+  employeeId,
   onAdd,
   onEdit,
   onDelete,
+  onVerify,
 }: Props) {
   const t = useTranslations('credentials')
   const locale = useLocale()
