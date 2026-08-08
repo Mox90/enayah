@@ -1,5 +1,6 @@
+// enayah-frontend/src/app/[locale]/(auth)/login/page.tsx
+
 import React from 'react'
-//import LoginForm from '@/components/auth/login-form'
 import LoginForm from '@/modules/iam/components/auth/login-form'
 
 const page = () => {

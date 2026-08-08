@@ -1,10 +1,22 @@
 // enayah-backend/src/modules/hr/credentials/service/credential.service.ts
 
 import { AppError } from '../../../../core/errors/AppError'
-import { db } from '../../../../db'
+import { DB, db } from '../../../../db'
 
 import {
+  CreateBoardDto,
+  CreateFellowshipDto,
+  CreateLicenseDto,
+  CreateLifeSupportDto,
+  CreateMalpracticeDto,
+  CreateMembershipDto,
+  UpdateBoardDto,
   UpdateCredentialVerificationDto,
+  UpdateFellowshipDto,
+  UpdateLicenseDto,
+  UpdateLifeSupportDto,
+  UpdateMalpracticeDto,
+  UpdateMembershipDto,
   type CreateDegreeDto,
   type CreateEmployeeCredentialsDto,
   type UpdateDegreeDto,
@@ -47,7 +59,7 @@ import {
   storeCredentialDocument,
   type StoredCredentialDocument,
 } from './credential-document-storage.service'
-import { getCredentialVerificationEvidence } from './credential-verification-evidence-access.service'
+import { getCredentialVerificationEvidence as getCredentialVerificationEvidenceForAccess } from './credential-verification-evidence-access.service'
 import {
   collectCurrentCredentialVerifierIds,
   enrichEmployeeCredentialsWithVerification,
@@ -60,16 +72,262 @@ type PreparedCredentialDocument = {
 }
 
 const DEGREE_FILE_CATEGORY: CredentialFileCategory = 'employee_degree'
+const BOARD_FILE_CATEGORY: CredentialFileCategory = 'employee_board'
+const FELLOWSHIP_FILE_CATEGORY: CredentialFileCategory = 'employee_fellowship'
+const MEMBERSHIP_FILE_CATEGORY: CredentialFileCategory = 'employee_membership'
+const LICENSE_FILE_CATEGORY: CredentialFileCategory = 'employee_license'
+const LIFE_SUPPORT_FILE_CATEGORY: CredentialFileCategory =
+  'employee_life_support'
+const MALPRACTICE_FILE_CATEGORY: CredentialFileCategory = 'employee_malpractice'
 
-async function prepareDegreeDocument(
+export type CredentialKind =
+  | 'degree'
+  | 'board'
+  | 'fellowship'
+  | 'membership'
+  | 'license'
+  | 'life-support'
+  | 'malpractice'
+
+const CREDENTIAL_FILE_CATEGORY_BY_KIND = {
+  degree: DEGREE_FILE_CATEGORY,
+  board: BOARD_FILE_CATEGORY,
+  fellowship: FELLOWSHIP_FILE_CATEGORY,
+  membership: MEMBERSHIP_FILE_CATEGORY,
+  license: LICENSE_FILE_CATEGORY,
+  'life-support': LIFE_SUPPORT_FILE_CATEGORY,
+  malpractice: MALPRACTICE_FILE_CATEGORY,
+} as const satisfies Record<CredentialKind, CredentialFileCategory>
+
+type CreateCredentialWithDocumentOptions<TResult> = {
+  employeeId: string
+  uploadedByUserId: string
+  kind: CredentialKind
+  document?: Express.Multer.File
+
+  createRecord: (tx: DB, documentFileId: string | null) => Promise<TResult>
+}
+
+async function createCredentialWithDocument<TResult>({
+  employeeId,
+  uploadedByUserId,
+  kind,
+  document,
+  createRecord,
+}: CreateCredentialWithDocumentOptions<TResult>): Promise<TResult> {
+  let preparedDocument: PreparedCredentialDocument | null = null
+
+  try {
+    if (document) {
+      preparedDocument = await prepareDocument(document, kind)
+    }
+
+    const category = CREDENTIAL_FILE_CATEGORY_BY_KIND[kind]
+
+    return await db.transaction(async (tx: DB) => {
+      let documentFileId: string | null = null
+
+      if (preparedDocument) {
+        const fileRecord = await CredentialRepository.createCredentialFile(tx, {
+          storedName: preparedDocument.stored.storedName,
+          originalName: preparedDocument.stored.originalName,
+          mimeType: preparedDocument.processed.mimeType,
+          fileSize: preparedDocument.processed.fileSize,
+          storageKey: preparedDocument.stored.storageKey,
+          checksumSha256: preparedDocument.processed.checksumSha256,
+          category,
+          uploadedByUserId,
+        })
+
+        documentFileId = fileRecord.id
+      }
+
+      return createRecord(tx, documentFileId)
+    })
+  } catch (error: unknown) {
+    await cleanUpNewDocument(preparedDocument)
+
+    throw error
+  }
+}
+
+type CreateCredentialCommand = {
+  employeeId: string
+  uploadedByUserId: string
+  document?: Express.Multer.File
+} & (
+  | {
+      kind: 'degree'
+      data: CreateDegreeDto
+    }
+  | {
+      kind: 'board'
+      data: CreateBoardDto
+    }
+  | {
+      kind: 'fellowship'
+      data: CreateFellowshipDto
+    }
+  | {
+      kind: 'membership'
+      data: CreateMembershipDto
+    }
+  | {
+      kind: 'license'
+      data: CreateLicenseDto
+    }
+  | {
+      kind: 'life-support'
+      data: CreateLifeSupportDto
+    }
+  | {
+      kind: 'malpractice'
+      data: CreateMalpracticeDto
+    }
+)
+
+type ExistingCredentialDocument = {
+  documentFileId: string | null
+  documentCategory: CredentialFileCategory | null
+}
+
+type UpdateCredentialWithDocumentOptions<TResult> = {
+  employeeId: string
+  credentialId: string
+  updatedByUserId: string
+  kind: CredentialKind
+  credentialLabel: string
+  document?: Express.Multer.File
+
+  findExisting: (
+    tx: DB,
+    employeeId: string,
+    credentialId: string,
+  ) => Promise<ExistingCredentialDocument | null>
+
+  updateRecord: (
+    tx: DB,
+    newDocumentFileId: string | undefined,
+  ) => Promise<TResult>
+}
+
+async function updateCredentialWithDocument<TResult>({
+  employeeId,
+  credentialId,
+  updatedByUserId,
+  kind,
+  credentialLabel,
+  document,
+  findExisting,
+  updateRecord,
+}: UpdateCredentialWithDocumentOptions<TResult>): Promise<TResult> {
+  let preparedDocument: PreparedCredentialDocument | null = null
+
+  try {
+    if (document) {
+      preparedDocument = await prepareDocument(document, kind)
+    }
+
+    const category = CREDENTIAL_FILE_CATEGORY_BY_KIND[kind]
+
+    return await db.transaction(async (tx) => {
+      const existing = await findExisting(tx, employeeId, credentialId)
+
+      if (!existing) {
+        throw new AppError(`${credentialLabel} not found.`, 404)
+      }
+
+      let newDocumentFileId: string | undefined
+
+      if (preparedDocument) {
+        const newFile = await CredentialRepository.createCredentialFile(tx, {
+          storedName: preparedDocument.stored.storedName,
+          originalName: preparedDocument.stored.originalName,
+          mimeType: preparedDocument.processed.mimeType,
+          fileSize: preparedDocument.processed.fileSize,
+          storageKey: preparedDocument.stored.storageKey,
+          checksumSha256: preparedDocument.processed.checksumSha256,
+          category,
+          uploadedByUserId: updatedByUserId,
+        })
+
+        newDocumentFileId = newFile.id
+      }
+
+      const updatedRecord = await updateRecord(tx, newDocumentFileId)
+
+      if (
+        newDocumentFileId &&
+        existing.documentFileId &&
+        existing.documentCategory === category
+      ) {
+        await CredentialRepository.softDeleteCredentialFile(
+          tx,
+          existing.documentFileId,
+          category,
+          updatedByUserId,
+        )
+      }
+
+      /*
+       * The previous physical bytes remain retained.
+       * Only the file metadata is soft-deleted.
+       */
+      return updatedRecord
+    })
+  } catch (error: unknown) {
+    await cleanUpNewDocument(preparedDocument)
+
+    throw error
+  }
+}
+
+type UpdateCredentialCommand = {
+  employeeId: string
+  credentialId: string
+  updatedByUserId: string
+  document?: Express.Multer.File
+} & (
+  | {
+      kind: 'degree'
+      data: UpdateDegreeDto
+    }
+  | {
+      kind: 'board'
+      data: UpdateBoardDto
+    }
+  | {
+      kind: 'fellowship'
+      data: UpdateFellowshipDto
+    }
+  | {
+      kind: 'membership'
+      data: UpdateMembershipDto
+    }
+  | {
+      kind: 'license'
+      data: UpdateLicenseDto
+    }
+  | {
+      kind: 'life-support'
+      data: UpdateLifeSupportDto
+    }
+  | {
+      kind: 'malpractice'
+      data: UpdateMalpracticeDto
+    }
+)
+
+async function prepareDocument(
   file: Express.Multer.File,
+  kind: CredentialKind,
 ): Promise<PreparedCredentialDocument> {
   const processed = await processCredentialDocument(file)
 
   const stored = await storeCredentialDocument({
     document: processed,
     originalName: file.originalname,
-    credentialKind: 'degree',
+    credentialKind: kind,
   })
 
   return {
@@ -125,15 +383,79 @@ export type CredentialDocumentAccessResult = {
   absolutePath: string
 }
 
-export type GetDegreeDocumentInput = {
-  employeeId: string
-  degreeId: string
+// type CredentialDocumentRepositoryPort = Pick<
+//   typeof degreeDocumentRepository,
+//   'findActiveDocument'
+// >
+type CredentialDocumentRepositoryPort = {
+  findActiveDocument: (
+    tx: DB,
+    employeeId: string,
+    credentialId: string,
+  ) => ReturnType<typeof degreeDocumentRepository.findActiveDocument>
 }
 
-type CredentialDocumentRepositoryPort = Pick<
-  typeof degreeDocumentRepository,
-  'findActiveDocument'
->
+type GetCredentialDocumentInput = {
+  kind: CredentialKind
+  employeeId: string
+  credentialId: string
+}
+
+const credentialDocumentRepositories = {
+  degree: degreeDocumentRepository,
+  board: boardDocumentRepository,
+  fellowship: fellowshipDocumentRepository,
+  membership: membershipDocumentRepository,
+  license: licenseDocumentRepository,
+  'life-support': lifeSupportDocumentRepository,
+  malpractice: malpracticeDocumentRepository,
+} as const satisfies Record<CredentialKind, CredentialDocumentRepositoryPort>
+
+const credentialDocumentNotFoundMessages = {
+  degree: 'Degree document not found.',
+  board: 'Board document not found.',
+  fellowship: 'Fellowship document not found.',
+  membership: 'Membership document not found.',
+  license: 'License document not found.',
+  'life-support': 'Life support document not found.',
+  malpractice: 'Malpractice document not found.',
+} as const satisfies Record<CredentialKind, string>
+
+type CredentialVerificationType =
+  | 'degree'
+  | 'board'
+  | 'fellowship'
+  | 'membership'
+  | 'license'
+  | 'life_support'
+  | 'malpractice'
+
+const credentialVerificationTypeByKind = {
+  degree: 'degree',
+  board: 'board',
+  fellowship: 'fellowship',
+  membership: 'membership',
+  license: 'license',
+  'life-support': 'life_support',
+  malpractice: 'malpractice',
+} as const satisfies Record<CredentialKind, CredentialVerificationType>
+
+type GetCredentialVerificationEvidenceInput = {
+  kind: CredentialKind
+  employeeId: string
+  credentialId: string
+  eventId: string
+}
+
+const credentialVerificationRepositories = {
+  degree: degreeVerificationRepository,
+  board: boardVerificationRepository,
+  fellowship: fellowshipVerificationRepository,
+  membership: membershipVerificationRepository,
+  license: licenseVerificationRepository,
+  'life-support': lifeSupportVerificationRepository,
+  malpractice: malpracticeVerificationRepository,
+}
 
 async function getCredentialDocumentForAccess({
   repository,
@@ -181,9 +503,6 @@ async function getCredentialDocumentForAccess({
 }
 
 export const CredentialService = {
-  // findByEmployeeId: async (employeeId: string) => {
-  //   return CredentialRepository.findByEmployeeId(db, employeeId)
-  // },
   findByEmployeeId: async (employeeId: string) => {
     const [credentials, verificationEvents] = await Promise.all([
       CredentialRepository.findByEmployeeId(db, employeeId),
@@ -205,31 +524,31 @@ export const CredentialService = {
     )
   },
 
-  getDegreeDocument: async ({
+  getCredentialDocument: async ({
+    kind,
     employeeId,
-    degreeId,
-  }: GetDegreeDocumentInput) => {
-    const document = await getCredentialDocumentForAccess({
-      repository: degreeDocumentRepository,
+    credentialId,
+  }: GetCredentialDocumentInput) => {
+    return getCredentialDocumentForAccess({
+      repository: credentialDocumentRepositories[kind],
       employeeId,
-      credentialId: degreeId,
-      notFoundMessage: 'Degree document not found.',
+      credentialId,
+      notFoundMessage: credentialDocumentNotFoundMessages[kind],
     })
+  },
 
-    /*
-     * Expose a degree-specific property to the
-     * controller while keeping the reusable helper
-     * credential-neutral.
-     */
-    return {
-      id: document.id,
-      degreeId: document.credentialId,
-      employeeId: document.employeeId,
-      originalName: document.originalName,
-      mimeType: document.mimeType,
-      fileSize: document.fileSize,
-      absolutePath: document.absolutePath,
-    }
+  getCredentialVerificationEvidence: async ({
+    kind,
+    employeeId,
+    credentialId,
+    eventId,
+  }: GetCredentialVerificationEvidenceInput) => {
+    return getCredentialVerificationEvidenceForAccess({
+      employeeId,
+      credentialType: credentialVerificationTypeByKind[kind],
+      credentialId,
+      eventId,
+    })
   },
 
   createAll: async (employeeId: string, data: CreateEmployeeCredentialsDto) => {
@@ -238,197 +557,431 @@ export const CredentialService = {
     )
   },
 
-  createDegree: async ({
-    employeeId,
-    data,
-    uploadedByUserId,
-    document,
-  }: {
-    employeeId: string
-    data: CreateDegreeDto
-    uploadedByUserId: string
-    document?: Express.Multer.File
-  }) => {
-    let preparedDocument: PreparedCredentialDocument | null = null
+  createCredential: async (args: CreateCredentialCommand) => {
+    const common = {
+      employeeId: args.employeeId,
+      uploadedByUserId: args.uploadedByUserId,
+      kind: args.kind,
+      ...(args.document ? { document: args.document } : {}),
+    }
 
-    try {
-      if (document) {
-        preparedDocument = await prepareDegreeDocument(document)
-      }
-
-      return await db.transaction(async (tx) => {
-        let documentFileId: string | null = null
-
-        if (preparedDocument) {
-          const fileRecord = await CredentialRepository.createCredentialFile(
-            tx,
-            {
-              storedName: preparedDocument.stored.storedName,
-              originalName: preparedDocument.stored.originalName,
-              mimeType: preparedDocument.processed.mimeType,
-              fileSize: preparedDocument.processed.fileSize,
-              storageKey: preparedDocument.stored.storageKey,
-              checksumSha256: preparedDocument.processed.checksumSha256,
-              category: DEGREE_FILE_CATEGORY,
-              uploadedByUserId,
-            },
-          )
-
-          documentFileId = fileRecord.id
-        }
-
-        return CredentialRepository.createDegree(tx, employeeId, {
-          ...data,
+    return createCredentialWithDocument({
+      ...common,
+      createRecord: async (tx, documentFileId) => {
+        const commonValues = {
           documentFileId,
-          createdBy: uploadedByUserId,
-          updatedBy: uploadedByUserId,
+          createdBy: args.uploadedByUserId,
+          updatedBy: args.uploadedByUserId,
           isVerified: false,
           verifiedAt: null,
           verifiedBy: null,
           verificationRemarks: null,
-        })
-      })
-    } catch (error: unknown) {
-      await cleanUpNewDocument(preparedDocument)
-      throw error
-    }
+        }
+
+        switch (args.kind) {
+          case 'degree':
+            return CredentialRepository.createDegree(tx, args.employeeId, {
+              ...args.data,
+              ...commonValues,
+            })
+
+          case 'board':
+            return CredentialRepository.createBoard(tx, args.employeeId, {
+              ...args.data,
+              ...commonValues,
+            })
+
+          case 'fellowship':
+            return CredentialRepository.createFellowship(tx, args.employeeId, {
+              ...args.data,
+              ...commonValues,
+            })
+
+          case 'membership':
+            return CredentialRepository.createMembership(tx, args.employeeId, {
+              ...args.data,
+              ...commonValues,
+            })
+
+          case 'license':
+            return CredentialRepository.createLicense(tx, args.employeeId, {
+              ...args.data,
+              ...commonValues,
+            })
+
+          case 'life-support':
+            return CredentialRepository.createLifeSupport(tx, args.employeeId, {
+              ...args.data,
+              ...commonValues,
+            })
+
+          case 'malpractice':
+            return CredentialRepository.createMalpractice(tx, args.employeeId, {
+              ...args.data,
+              ...commonValues,
+            })
+        }
+      },
+    })
   },
 
-  createBoard: async (employeeId: string, data: unknown) =>
-    db.transaction((tx) =>
-      CredentialRepository.createBoard(tx, employeeId, data),
-    ),
+  updateCredential: async (args: UpdateCredentialCommand) => {
+    const verificationReset = {
+      isVerified: false,
+      verifiedAt: null,
+      verifiedBy: null,
+      verificationRemarks: null,
+    }
 
-  createFellowship: async (employeeId: string, data: unknown) =>
-    db.transaction((tx) =>
-      CredentialRepository.createFellowship(tx, employeeId, data),
-    ),
+    const commonOptions = {
+      employeeId: args.employeeId,
+      credentialId: args.credentialId,
+      updatedByUserId: args.updatedByUserId,
+      kind: args.kind,
+      ...(args.document ? { document: args.document } : {}),
+    }
 
-  createMembership: async (employeeId: string, data: unknown) =>
-    db.transaction((tx) =>
-      CredentialRepository.createMembership(tx, employeeId, data),
-    ),
+    switch (args.kind) {
+      case 'degree':
+        return updateCredentialWithDocument({
+          ...commonOptions,
+          credentialLabel: 'Degree',
+          findExisting: (tx, employeeId, credentialId) =>
+            degreeDocumentRepository.findForDocumentUpdate(
+              tx,
+              employeeId,
+              credentialId,
+            ),
 
-  createLicense: async (employeeId: string, data: unknown) =>
-    db.transaction((tx) =>
-      CredentialRepository.createLicense(tx, employeeId, data),
-    ),
-
-  createLifeSupport: async (employeeId: string, data: unknown) =>
-    db.transaction((tx) =>
-      CredentialRepository.createLifeSupport(tx, employeeId, data),
-    ),
-
-  createMalpractice: async (employeeId: string, data: unknown) =>
-    db.transaction((tx) =>
-      CredentialRepository.createMalpractice(tx, employeeId, data),
-    ),
-
-  updateDegree: async ({
-    employeeId,
-    degreeId,
-    data,
-    updatedByUserId,
-    document,
-  }: {
-    employeeId: string
-    degreeId: string
-    data: UpdateDegreeDto
-    updatedByUserId: string
-    document?: Express.Multer.File
-  }) => {
-    let preparedDocument: PreparedCredentialDocument | null = null
-
-    try {
-      if (document) {
-        preparedDocument = await prepareDegreeDocument(document)
-      }
-
-      return await db.transaction(async (tx) => {
-        const existingDegree =
-          // await CredentialRepository.findDegreeForDocumentUpdate(
-          //   tx,
-          //   employeeId,
-          //   degreeId,
-          // )
-          await degreeDocumentRepository.findForDocumentUpdate(
-            tx,
-            employeeId,
-            degreeId,
-          )
-
-        if (!existingDegree) {
-          throw new AppError('Degree not found.', 404)
-        }
-
-        let newDocumentFileId: string | undefined
-
-        if (preparedDocument) {
-          const newFile = await CredentialRepository.createCredentialFile(tx, {
-            storedName: preparedDocument.stored.storedName,
-            originalName: preparedDocument.stored.originalName,
-            mimeType: preparedDocument.processed.mimeType,
-            fileSize: preparedDocument.processed.fileSize,
-            storageKey: preparedDocument.stored.storageKey,
-            checksumSha256: preparedDocument.processed.checksumSha256,
-            category: DEGREE_FILE_CATEGORY,
-            uploadedByUserId: updatedByUserId,
-          })
-
-          newDocumentFileId = newFile.id
-        }
-
-        const updatedDegree = await CredentialRepository.updateDegree(
-          tx,
-          degreeId,
-          {
-            ...data,
-            updatedBy: updatedByUserId,
-            ...(newDocumentFileId && {
-              documentFileId: newDocumentFileId,
-              /*
-               * Replacing evidence invalidates
-               * previous verification.
-               */
-              isVerified: false,
-              verifiedAt: null,
-              verifiedBy: null,
-              verificationRemarks: null,
+          updateRecord: (tx, newDocumentFileId) =>
+            CredentialRepository.updateDegree(tx, args.credentialId, {
+              ...args.data,
+              updatedBy: args.updatedByUserId,
+              ...(newDocumentFileId
+                ? { documentFileId: newDocumentFileId, ...verificationReset }
+                : {}),
             }),
-          },
-        )
+        })
 
-        if (
-          newDocumentFileId &&
-          existingDegree.documentFileId &&
-          existingDegree.documentCategory === DEGREE_FILE_CATEGORY
-        ) {
-          await CredentialRepository.softDeleteCredentialFile(
-            tx,
-            existingDegree.documentFileId,
-            DEGREE_FILE_CATEGORY,
-            updatedByUserId,
-          )
-        }
+      case 'board':
+        return updateCredentialWithDocument({
+          ...commonOptions,
+          credentialLabel: 'Board certification',
+          findExisting: (tx, employeeId, credentialId) =>
+            boardDocumentRepository.findForDocumentUpdate(
+              tx,
+              employeeId,
+              credentialId,
+            ),
 
-        // return {
-        //   updatedDegree,
-        //   previousStorageKey:
-        //     newDocumentFileId &&
-        //     existingDegree.documentCategory === DEGREE_FILE_CATEGORY
-        //       ? existingDegree.documentStorageKey
-        //       : null,
-        // }
-        return updatedDegree
-      })
+          updateRecord: (tx, newDocumentFileId) =>
+            CredentialRepository.updateBoard(tx, args.credentialId, {
+              ...args.data,
+              updatedBy: args.updatedByUserId,
+              ...(newDocumentFileId
+                ? { documentFileId: newDocumentFileId, ...verificationReset }
+                : {}),
+            }),
+        })
 
-      //await removeReplacedDocument(result.previousStorageKey)
-    } catch (error: unknown) {
-      await cleanUpNewDocument(preparedDocument)
+      case 'fellowship':
+        return updateCredentialWithDocument({
+          ...commonOptions,
+          credentialLabel: 'Fellowship',
+          findExisting: (tx, employeeId, credentialId) =>
+            fellowshipDocumentRepository.findForDocumentUpdate(
+              tx,
+              employeeId,
+              credentialId,
+            ),
 
-      throw error
+          updateRecord: (tx, newDocumentFileId) =>
+            CredentialRepository.updateFellowship(tx, args.credentialId, {
+              ...args.data,
+              updatedBy: args.updatedByUserId,
+              ...(newDocumentFileId
+                ? { documentFileId: newDocumentFileId, ...verificationReset }
+                : {}),
+            }),
+        })
+
+      case 'membership':
+        return updateCredentialWithDocument({
+          ...commonOptions,
+          credentialLabel: 'Membership',
+          findExisting: (tx, employeeId, credentialId) =>
+            membershipDocumentRepository.findForDocumentUpdate(
+              tx,
+              employeeId,
+              credentialId,
+            ),
+
+          updateRecord: (tx, newDocumentFileId) =>
+            CredentialRepository.updateMembership(tx, args.credentialId, {
+              ...args.data,
+              updatedBy: args.updatedByUserId,
+              ...(newDocumentFileId
+                ? { documentFileId: newDocumentFileId, ...verificationReset }
+                : {}),
+            }),
+        })
+
+      case 'license':
+        return updateCredentialWithDocument({
+          ...commonOptions,
+          credentialLabel: 'License',
+          findExisting: (tx, employeeId, credentialId) =>
+            licenseDocumentRepository.findForDocumentUpdate(
+              tx,
+              employeeId,
+              credentialId,
+            ),
+
+          updateRecord: (tx, newDocumentFileId) =>
+            CredentialRepository.updateLicense(tx, args.credentialId, {
+              ...args.data,
+              updatedBy: args.updatedByUserId,
+              ...(newDocumentFileId
+                ? { documentFileId: newDocumentFileId, ...verificationReset }
+                : {}),
+            }),
+        })
+
+      case 'life-support':
+        return updateCredentialWithDocument({
+          ...commonOptions,
+          credentialLabel: 'Life-support certification',
+          findExisting: (tx, employeeId, credentialId) =>
+            lifeSupportDocumentRepository.findForDocumentUpdate(
+              tx,
+              employeeId,
+              credentialId,
+            ),
+
+          updateRecord: (tx, newDocumentFileId) =>
+            CredentialRepository.updateLifeSupport(tx, args.credentialId, {
+              ...args.data,
+              updatedBy: args.updatedByUserId,
+              ...(newDocumentFileId
+                ? { documentFileId: newDocumentFileId, ...verificationReset }
+                : {}),
+            }),
+        })
+
+      case 'malpractice':
+        return updateCredentialWithDocument({
+          ...commonOptions,
+          credentialLabel: 'Malpractice insurance',
+          findExisting: (tx, employeeId, credentialId) =>
+            malpracticeDocumentRepository.findForDocumentUpdate(
+              tx,
+              employeeId,
+              credentialId,
+            ),
+
+          updateRecord: (tx, newDocumentFileId) =>
+            CredentialRepository.updateMalpractice(tx, args.credentialId, {
+              ...args.data,
+              updatedBy: args.updatedByUserId,
+              ...(newDocumentFileId
+                ? { documentFileId: newDocumentFileId, ...verificationReset }
+                : {}),
+            }),
+        })
     }
   },
+
+  // createDegree: async ({
+  //   employeeId,
+  //   data,
+  //   uploadedByUserId,
+  //   document,
+  // }: {
+  //   employeeId: string
+  //   data: CreateDegreeDto
+  //   uploadedByUserId: string
+  //   document?: Express.Multer.File
+  // }) => {
+  //   let preparedDocument: PreparedCredentialDocument | null = null
+
+  //   try {
+  //     if (document) {
+  //       preparedDocument = await prepareDegreeDocument(document)
+  //     }
+
+  //     return await db.transaction(async (tx) => {
+  //       let documentFileId: string | null = null
+
+  //       if (preparedDocument) {
+  //         const fileRecord = await CredentialRepository.createCredentialFile(
+  //           tx,
+  //           {
+  //             storedName: preparedDocument.stored.storedName,
+  //             originalName: preparedDocument.stored.originalName,
+  //             mimeType: preparedDocument.processed.mimeType,
+  //             fileSize: preparedDocument.processed.fileSize,
+  //             storageKey: preparedDocument.stored.storageKey,
+  //             checksumSha256: preparedDocument.processed.checksumSha256,
+  //             category: DEGREE_FILE_CATEGORY,
+  //             uploadedByUserId,
+  //           },
+  //         )
+
+  //         documentFileId = fileRecord.id
+  //       }
+
+  //       return CredentialRepository.createDegree(tx, employeeId, {
+  //         ...data,
+  //         documentFileId,
+  //         createdBy: uploadedByUserId,
+  //         updatedBy: uploadedByUserId,
+  //         isVerified: false,
+  //         verifiedAt: null,
+  //         verifiedBy: null,
+  //         verificationRemarks: null,
+  //       })
+  //     })
+  //   } catch (error: unknown) {
+  //     await cleanUpNewDocument(preparedDocument)
+  //     throw error
+  //   }
+  // },
+
+  // createBoard: async (employeeId: string, data: unknown) =>
+  //   db.transaction((tx) =>
+  //     CredentialRepository.createBoard(tx, employeeId, data),
+  //   ),
+
+  // createFellowship: async (employeeId: string, data: unknown) =>
+  //   db.transaction((tx) =>
+  //     CredentialRepository.createFellowship(tx, employeeId, data),
+  //   ),
+
+  // createMembership: async (employeeId: string, data: unknown) =>
+  //   db.transaction((tx) =>
+  //     CredentialRepository.createMembership(tx, employeeId, data),
+  //   ),
+
+  // createLicense: async (employeeId: string, data: unknown) =>
+  //   db.transaction((tx) =>
+  //     CredentialRepository.createLicense(tx, employeeId, data),
+  //   ),
+
+  // createLifeSupport: async (employeeId: string, data: unknown) =>
+  //   db.transaction((tx) =>
+  //     CredentialRepository.createLifeSupport(tx, employeeId, data),
+  //   ),
+
+  // createMalpractice: async (employeeId: string, data: unknown) =>
+  //   db.transaction((tx) =>
+  //     CredentialRepository.createMalpractice(tx, employeeId, data),
+  //   ),
+
+  // updateDegree: async ({
+  //   employeeId,
+  //   degreeId,
+  //   data,
+  //   updatedByUserId,
+  //   document,
+  // }: {
+  //   employeeId: string
+  //   degreeId: string
+  //   data: UpdateDegreeDto
+  //   updatedByUserId: string
+  //   document?: Express.Multer.File
+  // }) => {
+  //   let preparedDocument: PreparedCredentialDocument | null = null
+
+  //   try {
+  //     if (document) {
+  //       preparedDocument = await prepareDegreeDocument(document)
+  //     }
+
+  //     return await db.transaction(async (tx) => {
+  //       const existingDegree =
+  //         // await CredentialRepository.findDegreeForDocumentUpdate(
+  //         //   tx,
+  //         //   employeeId,
+  //         //   degreeId,
+  //         // )
+  //         await degreeDocumentRepository.findForDocumentUpdate(
+  //           tx,
+  //           employeeId,
+  //           degreeId,
+  //         )
+
+  //       if (!existingDegree) {
+  //         throw new AppError('Degree not found.', 404)
+  //       }
+
+  //       let newDocumentFileId: string | undefined
+
+  //       if (preparedDocument) {
+  //         const newFile = await CredentialRepository.createCredentialFile(tx, {
+  //           storedName: preparedDocument.stored.storedName,
+  //           originalName: preparedDocument.stored.originalName,
+  //           mimeType: preparedDocument.processed.mimeType,
+  //           fileSize: preparedDocument.processed.fileSize,
+  //           storageKey: preparedDocument.stored.storageKey,
+  //           checksumSha256: preparedDocument.processed.checksumSha256,
+  //           category: DEGREE_FILE_CATEGORY,
+  //           uploadedByUserId: updatedByUserId,
+  //         })
+
+  //         newDocumentFileId = newFile.id
+  //       }
+
+  //       const updatedDegree = await CredentialRepository.updateDegree(
+  //         tx,
+  //         degreeId,
+  //         {
+  //           ...data,
+  //           updatedBy: updatedByUserId,
+  //           ...(newDocumentFileId && {
+  //             documentFileId: newDocumentFileId,
+  //             /*
+  //              * Replacing evidence invalidates
+  //              * previous verification.
+  //              */
+  //             isVerified: false,
+  //             verifiedAt: null,
+  //             verifiedBy: null,
+  //             verificationRemarks: null,
+  //           }),
+  //         },
+  //       )
+
+  //       if (
+  //         newDocumentFileId &&
+  //         existingDegree.documentFileId &&
+  //         existingDegree.documentCategory === DEGREE_FILE_CATEGORY
+  //       ) {
+  //         await CredentialRepository.softDeleteCredentialFile(
+  //           tx,
+  //           existingDegree.documentFileId,
+  //           DEGREE_FILE_CATEGORY,
+  //           updatedByUserId,
+  //         )
+  //       }
+
+  //       // return {
+  //       //   updatedDegree,
+  //       //   previousStorageKey:
+  //       //     newDocumentFileId &&
+  //       //     existingDegree.documentCategory === DEGREE_FILE_CATEGORY
+  //       //       ? existingDegree.documentStorageKey
+  //       //       : null,
+  //       // }
+  //       return updatedDegree
+  //     })
+
+  //     //await removeReplacedDocument(result.previousStorageKey)
+  //   } catch (error: unknown) {
+  //     await cleanUpNewDocument(preparedDocument)
+
+  //     throw error
+  //   }
+  // },
 
   updateBoard: async (id: string, data: unknown) =>
     db.transaction((tx) => CredentialRepository.updateBoard(tx, id, data)),
@@ -472,6 +1025,32 @@ export const CredentialService = {
       credentialLabel: 'Degree',
       employeeId,
       credentialId: degreeId,
+      actorUserId: verifiedByUserId,
+      data,
+      ...(evidence ? { evidence } : {}),
+    })
+  },
+
+  updateBoardVerification: async ({
+    employeeId,
+    boardId,
+    verifiedByUserId,
+    data,
+    evidence,
+  }: {
+    employeeId: string
+    boardId: string
+    verifiedByUserId: string
+    data: UpdateCredentialVerificationDto
+    evidence?: Express.Multer.File
+  }) => {
+    return updateCredentialVerification({
+      documentRepository: boardDocumentRepository,
+      verificationRepository: boardVerificationRepository,
+      credentialType: 'board',
+      credentialLabel: 'Board',
+      employeeId,
+      credentialId: boardId,
       actorUserId: verifiedByUserId,
       data,
       ...(evidence ? { evidence } : {}),
@@ -554,122 +1133,122 @@ export const CredentialService = {
       CredentialRepository.softDeleteMalpractice(tx, id, userId),
     ),
 
-  getDegreeVerificationEvidence: async ({
-    employeeId,
-    degreeId,
-    eventId,
-  }: {
-    employeeId: string
-    degreeId: string
-    eventId: string
-  }) => {
-    return getCredentialVerificationEvidence({
-      employeeId,
-      credentialType: 'degree',
-      credentialId: degreeId,
-      eventId,
-    })
-  },
+  // getDegreeVerificationEvidence: async ({
+  //   employeeId,
+  //   degreeId,
+  //   eventId,
+  // }: {
+  //   employeeId: string
+  //   degreeId: string
+  //   eventId: string
+  // }) => {
+  //   return getCredentialVerificationEvidence({
+  //     employeeId,
+  //     credentialType: 'degree',
+  //     credentialId: degreeId,
+  //     eventId,
+  //   })
+  // },
 
-  getBoardVerificationEvidence: async ({
-    employeeId,
-    boardId,
-    eventId,
-  }: {
-    employeeId: string
-    boardId: string
-    eventId: string
-  }) => {
-    return getCredentialVerificationEvidence({
-      employeeId,
-      credentialType: 'board',
-      credentialId: boardId,
-      eventId,
-    })
-  },
+  // getBoardVerificationEvidence: async ({
+  //   employeeId,
+  //   boardId,
+  //   eventId,
+  // }: {
+  //   employeeId: string
+  //   boardId: string
+  //   eventId: string
+  // }) => {
+  //   return getCredentialVerificationEvidence({
+  //     employeeId,
+  //     credentialType: 'board',
+  //     credentialId: boardId,
+  //     eventId,
+  //   })
+  // },
 
-  getFellowshipVerificationEvidence: async ({
-    employeeId,
-    fellowshipId,
-    eventId,
-  }: {
-    employeeId: string
-    fellowshipId: string
-    eventId: string
-  }) => {
-    return getCredentialVerificationEvidence({
-      employeeId,
-      credentialType: 'fellowship',
-      credentialId: fellowshipId,
-      eventId,
-    })
-  },
+  // getFellowshipVerificationEvidence: async ({
+  //   employeeId,
+  //   fellowshipId,
+  //   eventId,
+  // }: {
+  //   employeeId: string
+  //   fellowshipId: string
+  //   eventId: string
+  // }) => {
+  //   return getCredentialVerificationEvidence({
+  //     employeeId,
+  //     credentialType: 'fellowship',
+  //     credentialId: fellowshipId,
+  //     eventId,
+  //   })
+  // },
 
-  getMembershipVerificationEvidence: async ({
-    employeeId,
-    membershipId,
-    eventId,
-  }: {
-    employeeId: string
-    membershipId: string
-    eventId: string
-  }) => {
-    return getCredentialVerificationEvidence({
-      employeeId,
-      credentialType: 'membership',
-      credentialId: membershipId,
-      eventId,
-    })
-  },
+  // getMembershipVerificationEvidence: async ({
+  //   employeeId,
+  //   membershipId,
+  //   eventId,
+  // }: {
+  //   employeeId: string
+  //   membershipId: string
+  //   eventId: string
+  // }) => {
+  //   return getCredentialVerificationEvidence({
+  //     employeeId,
+  //     credentialType: 'membership',
+  //     credentialId: membershipId,
+  //     eventId,
+  //   })
+  // },
 
-  getLicenseVerificationEvidence: async ({
-    employeeId,
-    licenseId,
-    eventId,
-  }: {
-    employeeId: string
-    licenseId: string
-    eventId: string
-  }) => {
-    return getCredentialVerificationEvidence({
-      employeeId,
-      credentialType: 'license',
-      credentialId: licenseId,
-      eventId,
-    })
-  },
+  // getLicenseVerificationEvidence: async ({
+  //   employeeId,
+  //   licenseId,
+  //   eventId,
+  // }: {
+  //   employeeId: string
+  //   licenseId: string
+  //   eventId: string
+  // }) => {
+  //   return getCredentialVerificationEvidence({
+  //     employeeId,
+  //     credentialType: 'license',
+  //     credentialId: licenseId,
+  //     eventId,
+  //   })
+  // },
 
-  getLifeSupportVerificationEvidence: async ({
-    employeeId,
-    lifeSupportId,
-    eventId,
-  }: {
-    employeeId: string
-    lifeSupportId: string
-    eventId: string
-  }) => {
-    return getCredentialVerificationEvidence({
-      employeeId,
-      credentialType: 'life_support',
-      credentialId: lifeSupportId,
-      eventId,
-    })
-  },
+  // getLifeSupportVerificationEvidence: async ({
+  //   employeeId,
+  //   lifeSupportId,
+  //   eventId,
+  // }: {
+  //   employeeId: string
+  //   lifeSupportId: string
+  //   eventId: string
+  // }) => {
+  //   return getCredentialVerificationEvidence({
+  //     employeeId,
+  //     credentialType: 'life_support',
+  //     credentialId: lifeSupportId,
+  //     eventId,
+  //   })
+  // },
 
-  getMalpracticeVerificationEvidence: async ({
-    employeeId,
-    malpracticeId,
-    eventId,
-  }: {
-    employeeId: string
-    malpracticeId: string
-    eventId: string
-  }) => {
-    return getCredentialVerificationEvidence({
-      employeeId,
-      credentialType: 'malpractice',
-      credentialId: malpracticeId,
-      eventId,
-    })
-  },
+  // getMalpracticeVerificationEvidence: async ({
+  //   employeeId,
+  //   malpracticeId,
+  //   eventId,
+  // }: {
+  //   employeeId: string
+  //   malpracticeId: string
+  //   eventId: string
+  // }) => {
+  //   return getCredentialVerificationEvidence({
+  //     employeeId,
+  //     credentialType: 'malpractice',
+  //     credentialId: malpracticeId,
+  //     eventId,
+  //   })
+  // },
 }

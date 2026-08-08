@@ -16,16 +16,20 @@ import { DetailItem } from '@/components/forms/form-detail-item'
 
 interface Props {
   fellowships: FellowshipInput[]
+  employeeId?: string
   onAdd?: () => void
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
+  onVerify?: (id: string) => void
 }
 
 export function CredentialFellowships({
   fellowships,
+  employeeId,
   onAdd,
   onEdit,
   onDelete,
+  onVerify,
 }: Props) {
   const locale = useLocale()
   const ct = useTranslations('credentials')
@@ -158,6 +162,8 @@ export function CredentialFellowships({
                             ? () => onDelete(fellowshipId)
                             : undefined
                         }
+                        confirmDelete
+                        deleteItemName={ct('fellowship')}
                       />
                     </div>
                   </div>

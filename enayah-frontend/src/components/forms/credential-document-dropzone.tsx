@@ -77,7 +77,7 @@ export function CredentialDocumentDropzone({
   disabled = false,
   className,
 }: CredentialDocumentDropzoneProps) {
-  const t = useTranslations('credentials.degreeDocument')
+  const t = useTranslations('credentials.credentialDocument')
 
   const inputId = useId()
   const inputRef = useRef<HTMLInputElement>(null)

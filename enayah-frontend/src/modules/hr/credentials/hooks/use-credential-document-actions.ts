@@ -7,13 +7,20 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
-import { credentialDegreeService } from '../services/credential-degree.service'
 import { credentialService } from '../services/credential.service'
+import { CredentialDocumentAccessService } from '../types/credential-document.types'
 
 interface UseDegreeDocumentActionsOptions {
   employeeId: string
   degreeId: string
   originalName: string
+}
+
+interface UseCredentialDocumentActionsOptions {
+  employeeId: string
+  credentialId: string
+  originalName: string
+  service: CredentialDocumentAccessService
 }
 
 function schedulePreviewUrlCleanup(
@@ -47,12 +54,13 @@ function schedulePreviewUrlCleanup(
   const timeoutId = window.setTimeout(cleanUp, 5 * 60 * 1_000)
 }
 
-export function useDegreeDocumentActions({
+export function useCredentialDocumentActions({
   employeeId,
-  degreeId,
+  credentialId,
   originalName,
-}: UseDegreeDocumentActionsOptions) {
-  const t = useTranslations('credentials.degreeDocument')
+  service,
+}: UseCredentialDocumentActionsOptions) {
+  const t = useTranslations('credentials.credentialDocument')
 
   const [isPreviewing, setIsPreviewing] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
@@ -77,9 +85,9 @@ export function useDegreeDocumentActions({
     setIsPreviewing(true)
 
     try {
-      const blob = await credentialService.previewDocument({
+      const blob = await service.previewDocument({
         employeeId,
-        degreeId,
+        credentialId,
       })
 
       const objectUrl = URL.createObjectURL(blob)
@@ -105,9 +113,9 @@ export function useDegreeDocumentActions({
     let objectUrl: string | null = null
 
     try {
-      const blob = await credentialService.downloadDocument({
+      const blob = await service.downloadDocument({
         employeeId,
-        degreeId,
+        credentialId,
       })
 
       objectUrl = URL.createObjectURL(blob)
@@ -122,13 +130,15 @@ export function useDegreeDocumentActions({
       anchor.click()
       anchor.remove()
 
+      const urlToRevoke = objectUrl
+
       /*
        * Give the browser time to start consuming the object
        * URL before releasing it.
        */
       window.setTimeout(() => {
-        if (objectUrl) {
-          URL.revokeObjectURL(objectUrl)
+        if (urlToRevoke) {
+          URL.revokeObjectURL(urlToRevoke)
         }
       }, 1_000)
     } catch {

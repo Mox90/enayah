@@ -8,6 +8,11 @@ import { FormDialog } from '@/components/forms'
 import { Footer } from '@/components/footer/footer'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { CredentialDocumentMetadata } from '@/modules/hr/onboarding/types/onboarding.types'
+import { CredentialDocumentDropzone } from '../forms/credential-document-dropzone'
+import { cn } from '@/lib/utils'
+import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
+import { boardDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
 
 export type BoardFormValue = {
   id?: string
@@ -17,15 +22,47 @@ export type BoardFormValue = {
   issueDate?: string | null
   expiryDate?: string | null
   isLifetime?: boolean | null
+
+  /*
+   * Read-only verification state.
+   * It is not submitted through the normal board form.
+   */
   isVerified?: boolean | null
+
+  /*
+   * Existing document metadata when editing.
+   * This is not submitted to the backend.
+   */
+  document?: CredentialDocumentMetadata | null
+}
+
+export type BoardFormSubmitValue = {
+  id?: string
+  clientId?: string
+  boardName: string
+  specialty: string | null
+  issuingBody: string
+  issueDate: string | null
+  expiryDate: string | null
+  isLifetime: boolean
+  documentFile: File | null
 }
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialValue?: BoardFormValue | null
-  onSubmit: (value: BoardFormValue) => void | Promise<void>
+  onSubmit: (value: BoardFormSubmitValue) => void | Promise<void>
   generateId?: boolean
+  /*
+   * Existing employee profile:
+   * true — allow immediate upload.
+   *
+   * Onboarding:
+   * false — employee record may not exist yet.
+   */
+  allowDocumentUpload?: boolean
+  employeeId?: string
 }
 
 const emptyValue: BoardFormValue = {
@@ -36,6 +73,7 @@ const emptyValue: BoardFormValue = {
   expiryDate: null,
   isLifetime: false,
   isVerified: false,
+  document: null,
 }
 
 function BoardDialogContent({
@@ -43,25 +81,33 @@ function BoardDialogContent({
   onOpenChange,
   onSubmit,
   generateId,
+  allowDocumentUpload,
+  employeeId,
 }: {
-  initialValue?: BoardFormValue | null
+  initialValue: BoardFormValue | null | undefined
   onOpenChange: (open: boolean) => void
-  onSubmit: (value: BoardFormValue) => void | Promise<void>
+  onSubmit: (value: BoardFormSubmitValue) => void | Promise<void>
   generateId: boolean
+  allowDocumentUpload: boolean
+  employeeId?: string | undefined
 }) {
-  const [form, setForm] = useState<BoardFormValue>(
-    initialValue ?? { ...emptyValue },
-  )
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
   const crt = useTranslations('credentials')
   const locale = useLocale()
   const isRtl = locale.toLowerCase().startsWith('ar')
 
+  const [form, setForm] = useState<BoardFormValue>(initialValue ?? emptyValue)
+  const [selectedDocument, setSelectedDocument] = useState<File | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const currentDocument = initialValue?.document ?? null
+  const canAccessCurrentDocument = Boolean(
+    employeeId && initialValue?.id && currentDocument,
+  )
+
   const boardName = form.boardName.trim()
   const issuingBody = form.issuingBody.trim()
-  const issueDate = form.issueDate?.trim()
-  const expiryDate = form.expiryDate?.trim()
+  const issueDate = form.issueDate?.trim() || null
+  const expiryDate = form.expiryDate?.trim() || null
+  const isLifetime = form.isLifetime ?? false
 
   function update<K extends keyof BoardFormValue>(
     field: K,
@@ -84,7 +130,7 @@ function BoardDialogContent({
   const formInvalid =
     !boardName ||
     !issuingBody ||
-    Boolean(issueDate && expiryDate && expiryDate < issueDate)
+    Boolean(!isLifetime && issueDate && expiryDate && expiryDate < issueDate)
 
   function closeDialog() {
     if (isSubmitting) return
@@ -92,28 +138,36 @@ function BoardDialogContent({
     onOpenChange(false)
   }
 
-  async function handleSubmit() {
-    if (isSubmitting || formInvalid) return
-
-    //if (!boardName || !issuingBody) return
+  async function handleSubmit(): Promise<void> {
+    if (isSubmitting || formInvalid) {
+      return
+    }
 
     setIsSubmitting(true)
 
     try {
+      //const resolvedId = form.id ?? (generateId ? createClientId() : null)
+      const clientId = generateId ? (form.id ?? createClientId()) : null
+
       await onSubmit({
-        ...form,
-        id: form.id ?? (generateId ? createClientId() : undefined),
+        //...(resolvedId ? { id: resolvedId } : {}),
+        ...(!generateId && form.id ? { id: form.id } : {}),
+        ...(generateId && clientId ? { clientId } : {}),
         boardName,
-        issuingBody,
         specialty: form.specialty?.trim() || null,
-        issueDate: form.issueDate || null,
-        expiryDate: form.expiryDate || null,
+        issuingBody,
+        issueDate,
+        expiryDate: isLifetime ? null : expiryDate,
+        isLifetime,
+        documentFile: allowDocumentUpload ? selectedDocument : null,
       })
 
       onOpenChange(false)
     } catch {
-      // Keep the dialog open.
-      // The parent mutation can display the error toast.
+      /*
+       * Keep the dialog open.
+       * The mutation hook should display the error.
+       */
     } finally {
       setIsSubmitting(false)
     }
@@ -189,6 +243,56 @@ function BoardDialogContent({
           </div>
         </section>
 
+        {allowDocumentUpload && (
+          <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+            {canAccessCurrentDocument &&
+              employeeId &&
+              initialValue?.id &&
+              currentDocument && (
+                <div className='mb-5'>
+                  <div className='mb-3'>
+                    <h3 className='text-sm font-semibold text-foreground'>
+                      {crt('boardDocument.currentTitle')}
+                    </h3>
+
+                    <p className='text-xs text-muted-foreground'>
+                      {crt('boardDocument.currentDescription')}
+                    </p>
+                  </div>
+
+                  <CredentialDocumentSummary
+                    employeeId={employeeId}
+                    credentialId={initialValue.id}
+                    document={currentDocument}
+                    service={boardDocumentService}
+                  />
+                </div>
+              )}
+
+            <div className={cn(canAccessCurrentDocument && 'border-t pt-5')}>
+              <div className='mb-4'>
+                <h3 className='text-sm font-semibold text-foreground'>
+                  {canAccessCurrentDocument
+                    ? crt('boardDocument.replaceTitle')
+                    : crt('boardDocument.title')}
+                </h3>
+
+                <p className='text-xs text-muted-foreground'>
+                  {canAccessCurrentDocument
+                    ? crt('boardDocument.replaceDescription')
+                    : crt('boardDocument.description')}
+                </p>
+              </div>
+
+              <CredentialDocumentDropzone
+                value={selectedDocument}
+                onChange={setSelectedDocument}
+                disabled={isSubmitting}
+              />
+            </div>
+          </section>
+        )}
+
         <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
@@ -219,7 +323,7 @@ function BoardDialogContent({
             <div className='space-y-2'>
               <Label htmlFor='boardExpiryDate'>{crt('expires')}</Label>
 
-              <Input
+              {/* <Input
                 id='boardExpiryDate'
                 type='date'
                 className='h-11 bg-background'
@@ -229,7 +333,45 @@ function BoardDialogContent({
                 onChange={(event) =>
                   update('expiryDate', event.target.value || null)
                 }
+              /> */}
+              <Input
+                id='boardExpiryDate'
+                type='date'
+                className='h-11 bg-background'
+                min={issueDate ?? undefined}
+                value={isLifetime ? '' : (form.expiryDate ?? '')}
+                disabled={isSubmitting || isLifetime}
+                onChange={(event) =>
+                  update('expiryDate', event.target.value || null)
+                }
               />
+
+              <div className='xl:col-span-2'>
+                <label className='flex cursor-pointer items-center gap-3 rounded-xl border bg-background px-4 py-3'>
+                  <input
+                    type='checkbox'
+                    checked={isLifetime}
+                    disabled={isSubmitting}
+                    onChange={(event) => {
+                      update('isLifetime', event.target.checked)
+
+                      if (event.target.checked) {
+                        update('expiryDate', null)
+                      }
+                    }}
+                  />
+
+                  <div>
+                    <p className='text-sm font-medium'>
+                      {crt('lifetimeCertification')}
+                    </p>
+
+                    <p className='text-xs text-muted-foreground'>
+                      {crt('lifetimeCertificationDescription')}
+                    </p>
+                  </div>
+                </label>
+              </div>
             </div>
           </div>
         </section>
@@ -257,6 +399,8 @@ export function BoardDialog({
   initialValue,
   onSubmit,
   generateId = false,
+  allowDocumentUpload = true,
+  employeeId,
 }: Props) {
   const crt = useTranslations('credentials')
 
@@ -278,6 +422,8 @@ export function BoardDialog({
           onOpenChange={onOpenChange}
           onSubmit={onSubmit}
           generateId={generateId}
+          allowDocumentUpload={allowDocumentUpload}
+          employeeId={employeeId}
         />
       )}
     </FormDialog>

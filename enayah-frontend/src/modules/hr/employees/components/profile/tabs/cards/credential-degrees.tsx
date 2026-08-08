@@ -10,15 +10,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { VerificationBadge } from '@/components/badges/verification-badge'
 import { RowActions } from '@/components/dialogs/row-actions'
-import {
-  CredentialDocumentMetadata,
-  DegreeInput,
-} from '@/modules/hr/onboarding/types/onboarding.types'
+import { DegreeInput } from '@/modules/hr/onboarding/types/onboarding.types'
 import { cn } from '@/lib/utils'
 import { formatDate, toPersianDigits } from '@/utils/utilities'
 import { DetailItem } from '@/components/forms/form-detail-item'
-import { DegreeDocumentSummary } from '@/modules/hr/credentials/components/degree-document-summary'
-import { DegreeVerificationSummary } from '@/modules/hr/credentials/components/degree-verification-summary'
+import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
+import { CredentialVerificationSummary } from '@/modules/hr/credentials/components/credential-verification-summary'
+import { degreeVerificationService } from '@/modules/hr/credentials/services/credential-verification.service'
+import { degreeDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
 
 interface Props {
   degrees: DegreeInput[]
@@ -228,6 +227,8 @@ export function CredentialDegrees({
                             ? () => onVerify(degreeId)
                             : undefined
                         }
+                        confirmDelete
+                        deleteItemName={ct('degree')}
                       />
                     </div>
                   </div>
@@ -250,23 +251,26 @@ export function CredentialDegrees({
                   {employeeId && degreeId && degree.document && (
                     <div className='mt-5 border-t pt-4'>
                       <p className='mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
-                        {ct('degreeDocument.currentTitle')}
+                        {ct('credentialDocument.currentTitle')}
                       </p>
 
-                      <DegreeDocumentSummary
+                      <CredentialDocumentSummary
                         employeeId={employeeId}
-                        degreeId={degreeId}
+                        credentialId={degreeId}
                         document={degree.document}
+                        service={degreeDocumentService}
                       />
                     </div>
                   )}
                   {employeeId &&
                     degreeId &&
-                    degree.verification?.isVerified && (
-                      <DegreeVerificationSummary
+                    isVerified &&
+                    degree.verification && (
+                      <CredentialVerificationSummary
                         employeeId={employeeId}
-                        degreeId={degreeId}
+                        credentialId={degreeId}
                         verification={degree.verification}
+                        service={degreeVerificationService}
                         {...(onVerify
                           ? {
                               onManage: () => onVerify(degreeId),

@@ -1,3 +1,5 @@
+// enayah-front/src/app/[locale]/(auth)/layout.tsx
+
 import React from 'react'
 
 type AuthLayoutPage = {

@@ -1,4 +1,4 @@
-//import type { Metadata } from 'next'
+// enayah-frontend/src/app/[locale]/layout.tsx
 
 import '@/app/globals.css'
 

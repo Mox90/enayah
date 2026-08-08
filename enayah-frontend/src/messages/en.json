@@ -57,7 +57,12 @@
       "requestFailed": "The request could not be completed.",
       "unexpected": "An unexpected error occurred."
     },
-    "verify": "Verify credential"
+    "verify": "Verify",
+    "record": "record",
+    "deleteConfirmation": {
+      "title": "Confirm deletion",
+      "description": "Are you sure you want to delete this {item}? This action cannot be undone."
+    }
   },
   "auth": {
     "loginTitle": "Login to Your Account",
@@ -501,11 +506,13 @@
     "educationSub": "Enter the employee's board qualification details.",
     "institution": "School / Provider",
     "membershipNumber": "Membership Number",
-    "degreeDocument": {
-      "title": "Degree document",
-      "description": "Attach a diploma, certificate, transcript, or another supporting document.",
+    "lifetimeCertification": "Lifetime certification",
+    "lifetimeCertificationDescription": "This certification does not expire.",
+    "credentialDocument": {
+      "title": "Supporting document",
+      "description": "Attach a certificate, license, diploma, or another supporting document.",
       "currentTitle": "Current document",
-      "currentDescription": "This is the document currently attached to the degree.",
+      "currentDescription": "This is the document currently attached to this credential.",
       "replaceTitle": "Replace document",
       "replaceDescription": "Select a new document only when you want to replace the current attachment.",
       "preview": "Preview",
@@ -589,7 +596,22 @@
       "previewBlocked": "The browser blocked the evidence preview window.",
       "previewFailed": "Unable to preview verification evidence.",
       "downloadFailed": "Unable to download verification evidence."
-    }
+    },
+    "boardDocument": {
+      "title": "Board certificate",
+      "description": "Upload the board certification document.",
+      "currentTitle": "Current board certificate",
+      "currentDescription": "The document currently attached to this board certification.",
+      "replaceTitle": "Replace board certificate",
+      "replaceDescription": "Upload a new document to replace the current certificate."
+    },
+    "degree": "degree",
+    "board": "board",
+    "fellowship": "fellowship",
+    "membership": "membership",
+    "license": "license",
+    "lifeSupport": "life support",
+    "malpractice": "malpractice insurance"
   },
   "payroll": {},
   "attendance": {},

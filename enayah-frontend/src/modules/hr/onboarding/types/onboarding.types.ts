@@ -115,6 +115,7 @@ export type BoardInput = {
   verifiedAt?: string | null
   verifiedBy?: string | null
   verificationRemarks?: string | null
+  verification?: CredentialVerificationMetadata | null
 }
 
 export type FellowshipInput = {
@@ -131,6 +132,7 @@ export type FellowshipInput = {
   verifiedBy?: string | null
   verificationRemarks?: string | null
   isVerified: boolean
+  verification?: CredentialVerificationMetadata | null
 }
 
 export type MembershipInput = {
@@ -146,6 +148,7 @@ export type MembershipInput = {
   verifiedBy?: string | null
   verificationRemarks?: string | null
   isVerified: boolean
+  verification?: CredentialVerificationMetadata | null
 }
 
 export type LicenseInput = {
@@ -164,6 +167,7 @@ export type LicenseInput = {
   verifiedAt?: string | null
   verifiedBy?: string | null
   verificationRemarks?: string | null
+  verification?: CredentialVerificationMetadata | null
 }
 
 export type LifeSupportInput = {
@@ -195,6 +199,7 @@ export type LifeSupportInput = {
   verifiedAt?: string | null
   verifiedBy?: string | null
   verificationRemarks?: string | null
+  verification?: CredentialVerificationMetadata | null
 }
 
 export type MalpracticeInput = {
@@ -210,6 +215,7 @@ export type MalpracticeInput = {
   verifiedAt?: string | null
   verifiedBy?: string | null
   verificationRemarks?: string | null
+  verification?: CredentialVerificationMetadata | null
 }
 
 export type EmployeeCredentialsResponse = {
