@@ -1,3 +1,5 @@
+// enayah-frontend/src/components/dialogs/license-dialog.tsx
+
 'use client'
 
 import { useState } from 'react'
@@ -8,6 +10,13 @@ import { FormDialog } from '../forms'
 import { Footer } from '../footer/footer'
 import { useLocale, useTranslations } from 'next-intl'
 import { Save } from 'lucide-react'
+import { CredentialDocumentMetadata } from '@/modules/hr/credentials/types/credential-document.types'
+import { cn } from '@/lib/utils'
+import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
+import { licenseDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
+import { CredentialDocumentDropzone } from '../forms/credential-document-dropzone'
+
+export type LicenseStatus = 'active' | 'expired' | 'suspended' | 'revoked'
 
 export type LicenseFormValue = {
   id?: string
@@ -16,18 +25,52 @@ export type LicenseFormValue = {
   profession: string
   specialty?: string | null
   issueDate?: string | null
-  expiryDate: string
-  status: 'active' | 'expired' | 'suspended' | 'revoked'
+  expiryDate: string | null
+  //status?: LicenseStatus //'active' | 'expired' | 'suspended' | 'revoked'
   isPrimary: boolean
-  isVerified?: boolean
+
+  /*
+   * Read-only verification state.
+   * It is not submitted through the normal board form.
+   */
+  isVerified?: boolean | null
+
+  /*
+   * Existing document metadata when editing.
+   * This is not submitted to the backend.
+   */
+  document?: CredentialDocumentMetadata | null
+}
+
+export type LicenseFormSubmitValue = {
+  id?: string
+  clientId?: string
+  authority: string
+  licenseNumber: string
+  profession: string
+  specialty?: string | null
+  issueDate?: string | null
+  expiryDate: string | null
+  //status?: LicenseStatus //'active' | 'expired' | 'suspended' | 'revoked'
+  documentFile: File | null
+  isPrimary: boolean
 }
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialValue?: LicenseFormValue | null
-  onSubmit: (value: LicenseFormValue) => void | Promise<void>
+  onSubmit: (value: LicenseFormSubmitValue) => void | Promise<void>
   generateId?: boolean
+  /*
+   * Existing employee profile:
+   * true — allow immediate upload.
+   *
+   * Onboarding:
+   * false — employee record may not exist yet.
+   */
+  allowDocumentUpload?: boolean
+  employeeId?: string
 }
 
 const emptyValue: LicenseFormValue = {
@@ -37,8 +80,10 @@ const emptyValue: LicenseFormValue = {
   specialty: '',
   issueDate: '',
   expiryDate: '',
-  status: 'active',
+  //status: 'active',
   isPrimary: false,
+  isVerified: false,
+  document: null,
 }
 
 function LicenseDialogContent({
@@ -46,26 +91,34 @@ function LicenseDialogContent({
   onOpenChange,
   onSubmit,
   generateId,
+  allowDocumentUpload,
+  employeeId,
 }: {
   initialValue?: LicenseFormValue | null
   onOpenChange: (open: boolean) => void
-  onSubmit: (value: LicenseFormValue) => void | Promise<void>
+  onSubmit: (value: LicenseFormSubmitValue) => void | Promise<void>
   generateId: boolean
+  allowDocumentUpload: boolean
+  employeeId?: string | undefined
 }) {
   const t = useTranslations('credentials')
   const locale = useLocale()
   const isRtl = locale === 'ar'
 
   const [form, setForm] = useState<LicenseFormValue>(initialValue ?? emptyValue)
-
+  const [selectedDocument, setSelectedDocument] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const currentDocument = initialValue?.document ?? null
+  const canAccessCurrentDocument = Boolean(
+    employeeId && initialValue?.id && currentDocument,
+  )
 
   const authority = form.authority.trim()
   const licenseNumber = form.licenseNumber.trim()
   //const specialty = form.specialty?.trim()
   const profession = form.profession.trim()
-  //const issueDate = form.issueDate?.trim()
-  const expiryDate = form.expiryDate.trim()
+  const issueDate = form.issueDate?.trim() || null
+  const expiryDate = form.expiryDate?.trim() || null
 
   function update<K extends keyof LicenseFormValue>(
     field: K,
@@ -85,7 +138,11 @@ function LicenseDialogContent({
     return `license-${Date.now()}-${Math.random().toString(36).slice(2)}`
   }
 
-  const formInvalid = !authority || !licenseNumber || !profession || !expiryDate
+  const formInvalid =
+    !authority ||
+    !licenseNumber ||
+    !profession ||
+    Boolean(issueDate && expiryDate && expiryDate < issueDate)
 
   function closeDialog() {
     if (isSubmitting) return
@@ -94,28 +151,32 @@ function LicenseDialogContent({
   }
 
   async function handleSubmit() {
-    // if (!form.authority.trim()) return
-    // if (!form.licenseNumber.trim()) return
-    // if (!form.profession.trim()) return
-    // if (!form.issueDate?.trim()) return
-    // if (!form.expiryDate.trim()) return
     if (isSubmitting || formInvalid) return
 
     setIsSubmitting(true)
 
     try {
+      const clientId = generateId ? (form.id ?? createClientId()) : null
+
       await onSubmit({
-        ...form,
-        id: form.id ?? (generateId ? createClientId() : undefined),
+        //...form,
+        ...(!generateId && form.id ? { id: form.id } : {}),
+        ...(generateId && clientId ? { clientId } : {}),
+        authority,
+        licenseNumber,
+        profession,
+        issueDate,
+        expiryDate,
         specialty: form.specialty || null,
-        issueDate: form.issueDate || null,
+        //status: form.status,
+        documentFile: allowDocumentUpload ? selectedDocument : null,
+        isPrimary: form.isPrimary ?? false,
       })
 
       onOpenChange(false)
-    } catch (error) {
+    } catch {
       // Keep the dialog open.
       // The parent mutation hook can display the error toast.
-      console.log(error)
     } finally {
       setIsSubmitting(false)
     }
@@ -210,6 +271,56 @@ function LicenseDialogContent({
             </div>
           </div>
         </section>
+
+        {allowDocumentUpload && (
+          <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+            {canAccessCurrentDocument &&
+              employeeId &&
+              initialValue?.id &&
+              currentDocument && (
+                <div className='mb-5'>
+                  <div className='mb-3'>
+                    <h3 className='text-sm font-semibold text-foreground'>
+                      {t('boardDocument.currentTitle')}
+                    </h3>
+
+                    <p className='text-xs text-muted-foreground'>
+                      {t('boardDocument.currentDescription')}
+                    </p>
+                  </div>
+
+                  <CredentialDocumentSummary
+                    employeeId={employeeId}
+                    credentialId={initialValue.id}
+                    document={currentDocument}
+                    service={licenseDocumentService}
+                  />
+                </div>
+              )}
+
+            <div className={cn(canAccessCurrentDocument && 'border-t pt-5')}>
+              <div className='mb-4'>
+                <h3 className='text-sm font-semibold text-foreground'>
+                  {canAccessCurrentDocument
+                    ? t('boardDocument.replaceTitle')
+                    : t('boardDocument.title')}
+                </h3>
+
+                <p className='text-xs text-muted-foreground'>
+                  {canAccessCurrentDocument
+                    ? t('boardDocument.replaceDescription')
+                    : t('boardDocument.description')}
+                </p>
+              </div>
+
+              <CredentialDocumentDropzone
+                value={selectedDocument}
+                onChange={setSelectedDocument}
+                disabled={isSubmitting}
+              />
+            </div>
+          </section>
+        )}
       </div>
 
       <Footer
@@ -234,6 +345,8 @@ export function LicenseDialog({
   initialValue,
   onSubmit,
   generateId = false,
+  allowDocumentUpload = true,
+  employeeId,
 }: Props) {
   const dialogKey = initialValue?.id ?? (open ? 'add-license' : 'closed')
 
@@ -253,6 +366,8 @@ export function LicenseDialog({
           onOpenChange={onOpenChange}
           onSubmit={onSubmit}
           generateId={generateId}
+          allowDocumentUpload={allowDocumentUpload}
+          employeeId={employeeId}
         />
       )}
     </FormDialog>

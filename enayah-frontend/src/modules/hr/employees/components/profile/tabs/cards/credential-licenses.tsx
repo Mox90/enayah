@@ -10,6 +10,11 @@ import { formatDate, toPersianDigits } from '@/utils/utilities'
 import { RowActions } from '@/components/dialogs/row-actions'
 import { ExpiryStatusBadge } from '@/components/badges/expiry-status-badge'
 import { DetailItem } from '@/components/forms/form-detail-item'
+import { cn } from '@/lib/utils'
+import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
+import { licenseDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
+import { CredentialVerificationSummary } from '@/modules/hr/credentials/components/credential-verification-summary'
+import { licenseVerificationService } from '@/modules/hr/credentials/services/credential-verification.service'
 
 interface Props {
   licenses: LicenseInput[]
@@ -26,6 +31,7 @@ export function CredentialLicenses({
   onAdd,
   onEdit,
   onDelete,
+  onVerify,
 }: Props) {
   const ct = useTranslations('credentials')
   const locale = useLocale()
@@ -106,10 +112,23 @@ export function CredentialLicenses({
                 ? toPersianDigits(license.licenseNumber)
                 : license.licenseNumber
 
+              const isVerified =
+                license.verification?.isVerified ?? license.isVerified ?? false
+
               return (
                 <article
                   key={licenseId ?? `${license.licenseNumber}-${index}`}
-                  className='relative rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md sm:p-5'
+                  //className='relative rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md sm:p-5'
+                  className={cn(
+                    //'relative flex h-full min-w-0 flex-col rounded-xl border bg-card',
+                    //'p-4 shadow-sm transition-all duration-200 sm:p-5',
+                    //'hover:border-primary/20 hover:shadow-md',
+                    'relative flex min-w-0 flex-col rounded-xl border bg-card',
+                    'p-4 shadow-sm transition-all duration-200 sm:p-5',
+                    'hover:border-primary/20 hover:shadow-md',
+                    isVerified &&
+                      'border-emerald-500/20 shadow-[0_8px_30px_rgba(16,185,129,0.04)]',
+                  )}
                 >
                   <div className='mb-5 flex items-start justify-between gap-4 border-b pb-4'>
                     <div className='min-w-0'>
@@ -124,9 +143,7 @@ export function CredentialLicenses({
                       )}
 
                       <div className='mt-3 flex flex-wrap items-center gap-2'>
-                        <VerificationBadge
-                          verified={license.isVerified ?? false}
-                        />
+                        <VerificationBadge verified={isVerified} />
 
                         <ExpiryStatusBadge
                           expiryDate={license.expiryDate}
@@ -145,6 +162,11 @@ export function CredentialLicenses({
                         onDelete={
                           licenseId && onDelete
                             ? () => onDelete(licenseId)
+                            : undefined
+                        }
+                        onVerify={
+                          licenseId && onVerify
+                            ? () => onVerify(licenseId)
                             : undefined
                         }
                         confirmDelete
@@ -182,6 +204,34 @@ export function CredentialLicenses({
                       value={formatDate(license.expiryDate, isRtl)}
                     />
                   </div>
+                  {employeeId && licenseId && license.document && (
+                    <div className='mt-5 border-t pt-4'>
+                      <p className='mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+                        {ct('credentialDocument.currentTitle')}
+                      </p>
+
+                      <CredentialDocumentSummary
+                        employeeId={employeeId}
+                        credentialId={licenseId}
+                        document={license.document}
+                        service={licenseDocumentService}
+                      />
+                    </div>
+                  )}
+                  {employeeId &&
+                    licenseId &&
+                    isVerified &&
+                    license.verification && (
+                      <CredentialVerificationSummary
+                        employeeId={employeeId}
+                        credentialId={licenseId}
+                        verification={license.verification}
+                        service={licenseVerificationService}
+                        {...(onVerify
+                          ? { onManage: () => onVerify(licenseId) }
+                          : {})}
+                      />
+                    )}
                 </article>
               )
             })}

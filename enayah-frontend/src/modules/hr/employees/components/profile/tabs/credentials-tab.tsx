@@ -33,7 +33,8 @@ import {
 } from '@/components/dialogs/board-dialog'
 import {
   LicenseDialog,
-  LicenseFormValue,
+  type LicenseFormSubmitValue,
+  type LicenseFormValue,
 } from '@/components/dialogs/license-dialog'
 import {
   useCreateLicense,
@@ -88,21 +89,6 @@ import { useAuthStore } from '@/modules/iam/stores/auth.store'
 import { hasPermission } from '@/lib/permissions/hasPermission'
 import { usePermission } from '@/hooks/usePermission'
 
-// type DegreeVerificationSubmitValue = {
-//   isVerified: boolean
-//   remarks: string | null
-//   evidenceFile?: File
-// }
-
-// type VerificationCredentialKind =
-//   | 'degree'
-//   | 'board'
-//   | 'fellowship'
-//   | 'membership'
-//   | 'license'
-//   | 'life-support'
-//   | 'malpractice'
-
 type VerificationTarget = {
   kind: CredentialKind
   id: string
@@ -152,8 +138,6 @@ const CredentialsTab = ({ employeeId }: Props) => {
   const createDegreeMutation = useCreateDegree(employeeId)
   const updateDegreeMutation = useUpdateDegree(employeeId)
   const deleteDegreeMutation = useDeleteDegree(employeeId)
-  const updateCredentialVerification =
-    useUpdateCredentialVerification(employeeId)
 
   const createBoardMutation = useCreateBoard(employeeId)
   const updateBoardMutation = useUpdateBoard(employeeId)
@@ -179,41 +163,10 @@ const CredentialsTab = ({ employeeId }: Props) => {
   const updateMalpracticeMutation = useUpdateMalpractice(employeeId)
   const deleteMalpracticeMutation = useDeleteMalpractice(employeeId)
 
+  const updateCredentialVerification =
+    useUpdateCredentialVerification(employeeId)
+
   const canVerifyCredentials = usePermission('credential.verify') //permissions.includes('credential.verify')
-
-  // const selectedVerificationDegree = verificationCredentialId
-  //   ? (data?.degrees.find((degree) => degree.id === verificationCredentialId) ??
-  //     null)
-  //   : null
-
-  // const verificationCredential: CredentialVerificationDialogItem | null =
-  //   selectedVerificationDegree?.id
-  //     ? {
-  //         id: selectedVerificationDegree.id,
-  //         title: selectedVerificationDegree.degreeName,
-  //         subtitle: selectedVerificationDegree.institution,
-  //         descriptor: selectedVerificationDegree.degreeType,
-  //         isVerified:
-  //           selectedVerificationDegree.verification?.isVerified ??
-  //           selectedVerificationDegree.isVerified ??
-  //           false,
-  //         document: selectedVerificationDegree.document ?? null,
-  //         verification: selectedVerificationDegree.verification ?? null,
-  //       }
-  //     : null
-
-  // const verificationDegree: DegreeVerificationDialogDegree | null =
-  //   selectedVerificationDegree?.id
-  //     ? {
-  //         id: selectedVerificationDegree.id,
-  //         degreeName: selectedVerificationDegree.degreeName,
-  //         institution: selectedVerificationDegree.institution,
-  //         degreeType: selectedVerificationDegree.degreeType,
-  //         isVerified: selectedVerificationDegree.isVerified ?? false,
-  //         document: selectedVerificationDegree.document ?? null,
-  //         verification: selectedVerificationDegree.verification ?? null,
-  //       }
-  //     : null
 
   const verificationCredential: CredentialVerificationDialogItem | null =
     (() => {
@@ -399,6 +352,23 @@ const CredentialsTab = ({ employeeId }: Props) => {
     await createBoardMutation.mutateAsync(payload)
   }
 
+  async function handleLicenseSubmit(
+    value: LicenseFormSubmitValue,
+  ): Promise<void> {
+    const { id, clientId: _clientId, ...payload } = value
+
+    if (id) {
+      await updateLicenseMutation.mutateAsync({
+        id,
+        ...payload,
+      })
+
+      return
+    }
+
+    await createLicenseMutation.mutateAsync(payload)
+  }
+
   async function handleCredentialVerificationSubmit(
     value: CredentialVerificationSubmitValue,
   ): Promise<void> {
@@ -577,7 +547,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
           setActiveDialog('license')
         }}
         onEdit={(id) => {
-          const license = data?.licenses.find((b) => b.id === id)
+          const license = data?.licenses.find((item) => item.id === id)
           if (!license) return
           setEditingLicense({
             id: license.id,
@@ -587,8 +557,9 @@ const CredentialsTab = ({ employeeId }: Props) => {
             profession: license.profession,
             issueDate: license.issueDate,
             expiryDate: license.expiryDate,
-            status: license.status,
+            //status: license.status,
             isPrimary: license.isPrimary,
+            document: license.document ?? null,
           })
 
           //setOpen(true)
@@ -609,36 +580,15 @@ const CredentialsTab = ({ employeeId }: Props) => {
 
       <LicenseDialog
         open={activeDialog === 'license'}
-        onOpenChange={(open) => {
-          if (!open) setActiveDialog(null)
-        }}
+        employeeId={employeeId}
         initialValue={editingLicense}
-        onSubmit={async (form) => {
-          if (editingLicense?.id) {
-            await updateLicenseMutation.mutateAsync({
-              id: editingLicense.id,
-              licenseNumber: form.licenseNumber,
-              specialty: form.specialty,
-              authority: form.authority,
-              issueDate: form.issueDate,
-              expiryDate: form.expiryDate,
-              profession: form.profession,
-              status: form.status,
-              isPrimary: form.isPrimary ?? false,
-            })
-          } else {
-            await createLicenseMutation.mutateAsync({
-              licenseNumber: form.licenseNumber,
-              specialty: form.specialty,
-              authority: form.authority,
-              issueDate: form.issueDate,
-              expiryDate: form.expiryDate,
-              profession: form.profession,
-              status: form.status,
-              isPrimary: form.isPrimary ?? false,
-            })
+        onOpenChange={(open) => {
+          if (!open) {
+            setActiveDialog(null)
+            setEditingLicense(null)
           }
         }}
+        onSubmit={handleLicenseSubmit}
       />
 
       <CredentialFellowships

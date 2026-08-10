@@ -159,9 +159,9 @@ export function CredentialMalpractice({
                       )}
 
                       <div className='mt-3 flex flex-wrap items-center gap-2'>
-                        <VerificationBadge
+                        {/* <VerificationBadge
                           verified={insurance.isVerified ?? false}
-                        />
+                        /> */}
 
                         <ExpiryStatusBadge
                           expiryDate={insurance.expiryDate}
