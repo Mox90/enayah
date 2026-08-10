@@ -1,6 +1,6 @@
 // enayah-backend/src/modules/hr/credentials/controller/credential.controller.ts
 
-import type { Request, Response } from 'express'
+import type { Request, RequestHandler, Response } from 'express'
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
 import {
   CreateBoardSchema,
@@ -30,6 +30,7 @@ import {
   type CredentialKind,
 } from '../service/credential.service'
 import { AppError } from '../../../../core/errors/AppError'
+import { ZodType } from 'zod'
 
 function getAuthenticatedUserId(request: Request): string {
   const userId = request.user?.id
@@ -198,6 +199,124 @@ function createCredentialVerificationEvidenceAccessHandler(
   })
 }
 
+type CreateCredentialHandlerArgs<TData> = {
+  fieldName: string
+  schema: ZodType<TData>
+
+  create: (args: {
+    employeeId: string
+    uploadedByUserId: string
+    data: TData
+    document?: Express.Multer.File
+  }) => Promise<unknown>
+}
+
+function createCredentialHandler<TData>({
+  fieldName,
+  schema,
+  create,
+}: CreateCredentialHandlerArgs<TData>): RequestHandler {
+  return asyncHandler(async (req: Request, res: Response) => {
+    const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+
+    const uploadedByUserId = getAuthenticatedUserId(req)
+
+    const body = parseCredentialMultipartBody(req.body, fieldName, schema)
+
+    const result = await create({
+      employeeId,
+      uploadedByUserId,
+      data: body,
+      ...(req.file
+        ? {
+            document: req.file,
+          }
+        : {}),
+    })
+
+    res.status(201).json(result)
+  })
+}
+
+const createCredentialHandlers = {
+  degree: createCredentialHandler({
+    fieldName: 'degree',
+    schema: CreateDegreeSchema,
+
+    create: (args) =>
+      CredentialService.createCredential({
+        ...args,
+        kind: 'degree',
+      }),
+  }),
+
+  board: createCredentialHandler({
+    fieldName: 'board',
+    schema: CreateBoardSchema,
+
+    create: (args) =>
+      CredentialService.createCredential({
+        ...args,
+        kind: 'board',
+      }),
+  }),
+
+  fellowship: createCredentialHandler({
+    fieldName: 'fellowship',
+    schema: CreateFellowshipSchema,
+
+    create: (args) =>
+      CredentialService.createCredential({
+        ...args,
+        kind: 'fellowship',
+      }),
+  }),
+
+  membership: createCredentialHandler({
+    fieldName: 'membership',
+    schema: CreateMembershipSchema,
+
+    create: (args) =>
+      CredentialService.createCredential({
+        ...args,
+        kind: 'membership',
+      }),
+  }),
+
+  license: createCredentialHandler({
+    fieldName: 'license',
+    schema: CreateLicenseSchema,
+
+    create: (args) =>
+      CredentialService.createCredential({
+        ...args,
+        kind: 'license',
+      }),
+  }),
+
+  'life-support': createCredentialHandler({
+    fieldName: 'life_support',
+    schema: CreateLifeSupportSchema,
+
+    create: (args) =>
+      CredentialService.createCredential({
+        ...args,
+        kind: 'life-support',
+      }),
+  }),
+
+  malpractice: createCredentialHandler({
+    fieldName: 'malpractice',
+    schema: CreateMalpracticeSchema,
+
+    create: (args) =>
+      CredentialService.createCredential({
+        ...args,
+        kind: 'malpractice',
+      }),
+  }),
+} as const satisfies Record<CredentialKind, RequestHandler>
+
 export const CredentialController = {
   findByEmployeeId: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
@@ -219,90 +338,6 @@ export const CredentialController = {
   downloadCredentialVerificationEvidence: (kind: CredentialKind) =>
     createCredentialVerificationEvidenceAccessHandler(kind, 'attachment'),
 
-  // previewDegreeDocument: asyncHandler(async (req: Request, res: Response) => {
-  //   const { employeeId, id: degreeId } =
-  //     EmployeeCredentialRecordParamSchema.parse(req.params)
-
-  //   const document = await CredentialService.getDegreeDocument({
-  //     employeeId,
-  //     degreeId,
-  //   })
-
-  //   await sendCredentialDocument({
-  //     response: res,
-  //     absolutePath: document.absolutePath,
-  //     originalName: document.originalName,
-  //     mimeType: document.mimeType,
-  //     disposition: 'inline',
-  //   })
-  // }),
-
-  // downloadDegreeDocument: asyncHandler(async (req: Request, res: Response) => {
-  //   const { employeeId, id: degreeId } =
-  //     EmployeeCredentialRecordParamSchema.parse(req.params)
-
-  //   const document = await CredentialService.getDegreeDocument({
-  //     employeeId,
-  //     degreeId,
-  //   })
-
-  //   await sendCredentialDocument({
-  //     response: res,
-  //     absolutePath: document.absolutePath,
-  //     originalName: document.originalName,
-  //     mimeType: document.mimeType,
-  //     disposition: 'attachment',
-  //   })
-  // }),
-
-  // previewDegreeVerificationEvidence: asyncHandler(
-  //   async (req: Request, res: Response) => {
-  //     const {
-  //       employeeId,
-  //       id: degreeId,
-  //       eventId,
-  //     } = EmployeeCredentialVerificationEventParamSchema.parse(req.params)
-
-  //     const document = await CredentialService.getDegreeVerificationEvidence({
-  //       employeeId,
-  //       degreeId,
-  //       eventId,
-  //     })
-
-  //     await sendCredentialDocument({
-  //       response: res,
-  //       absolutePath: document.absolutePath,
-  //       originalName: document.originalName,
-  //       mimeType: document.mimeType,
-  //       disposition: 'inline',
-  //     })
-  //   },
-  // ),
-
-  // downloadDegreeVerificationEvidence: asyncHandler(
-  //   async (req: Request, res: Response) => {
-  //     const {
-  //       employeeId,
-  //       id: degreeId,
-  //       eventId,
-  //     } = EmployeeCredentialVerificationEventParamSchema.parse(req.params)
-
-  //     const document = await CredentialService.getDegreeVerificationEvidence({
-  //       employeeId,
-  //       degreeId,
-  //       eventId,
-  //     })
-
-  //     await sendCredentialDocument({
-  //       response: res,
-  //       absolutePath: document.absolutePath,
-  //       originalName: document.originalName,
-  //       mimeType: document.mimeType,
-  //       disposition: 'attachment',
-  //     })
-  //   },
-  // ),
-
   createAll: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
     const body = CreateEmployeeCredentialsSchema.parse(req.body)
@@ -312,145 +347,149 @@ export const CredentialController = {
     res.status(201).json(result)
   }),
 
-  createDegree: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
-    const uploadedByUserId = getAuthenticatedUserId(req)
-    const body = parseCredentialMultipartBody(
-      req.body,
-      'degree',
-      CreateDegreeSchema,
-    )
+  createCredential: (kind: CredentialKind): RequestHandler => {
+    return createCredentialHandlers[kind]
+  },
 
-    const result = await CredentialService.createCredential({
-      employeeId,
-      data: body,
-      uploadedByUserId,
-      kind: 'degree',
-      ...(req.file ? { document: req.file } : {}),
-    })
+  // createDegree: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+  //   const uploadedByUserId = getAuthenticatedUserId(req)
+  //   const body = parseCredentialMultipartBody(
+  //     req.body,
+  //     'degree',
+  //     CreateDegreeSchema,
+  //   )
 
-    res.status(201).json(result)
-  }),
+  //   const result = await CredentialService.createCredential({
+  //     employeeId,
+  //     data: body,
+  //     uploadedByUserId,
+  //     kind: 'degree',
+  //     ...(req.file ? { document: req.file } : {}),
+  //   })
 
-  createBoard: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
-    const uploadedByUserId = getAuthenticatedUserId(req)
-    const body = parseCredentialMultipartBody(
-      req.body,
-      'board',
-      CreateBoardSchema,
-    )
+  //   res.status(201).json(result)
+  // }),
 
-    const result = await CredentialService.createCredential({
-      employeeId,
-      data: body,
-      uploadedByUserId,
-      kind: 'board',
-      ...(req.file ? { document: req.file } : {}),
-    })
+  // createBoard: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+  //   const uploadedByUserId = getAuthenticatedUserId(req)
+  //   const body = parseCredentialMultipartBody(
+  //     req.body,
+  //     'board',
+  //     CreateBoardSchema,
+  //   )
 
-    res.status(201).json(result)
-  }),
+  //   const result = await CredentialService.createCredential({
+  //     employeeId,
+  //     data: body,
+  //     uploadedByUserId,
+  //     kind: 'board',
+  //     ...(req.file ? { document: req.file } : {}),
+  //   })
 
-  createFellowship: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
-    const uploadedByUserId = getAuthenticatedUserId(req)
-    const body = parseCredentialMultipartBody(
-      req.body,
-      'fellowship',
-      CreateFellowshipSchema,
-    )
+  //   res.status(201).json(result)
+  // }),
 
-    const result = await CredentialService.createCredential({
-      employeeId,
-      data: body,
-      uploadedByUserId,
-      kind: 'fellowship',
-      ...(req.file ? { document: req.file } : {}),
-    })
+  // createFellowship: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+  //   const uploadedByUserId = getAuthenticatedUserId(req)
+  //   const body = parseCredentialMultipartBody(
+  //     req.body,
+  //     'fellowship',
+  //     CreateFellowshipSchema,
+  //   )
 
-    res.status(201).json(result)
-  }),
+  //   const result = await CredentialService.createCredential({
+  //     employeeId,
+  //     data: body,
+  //     uploadedByUserId,
+  //     kind: 'fellowship',
+  //     ...(req.file ? { document: req.file } : {}),
+  //   })
 
-  createMembership: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
-    const uploadedByUserId = getAuthenticatedUserId(req)
-    const body = parseCredentialMultipartBody(
-      req.body,
-      'membership',
-      CreateMembershipSchema,
-    )
+  //   res.status(201).json(result)
+  // }),
 
-    const result = await CredentialService.createCredential({
-      employeeId,
-      data: body,
-      uploadedByUserId,
-      kind: 'membership',
-      ...(req.file ? { document: req.file } : {}),
-    })
+  // createMembership: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+  //   const uploadedByUserId = getAuthenticatedUserId(req)
+  //   const body = parseCredentialMultipartBody(
+  //     req.body,
+  //     'membership',
+  //     CreateMembershipSchema,
+  //   )
 
-    res.status(201).json(result)
-  }),
+  //   const result = await CredentialService.createCredential({
+  //     employeeId,
+  //     data: body,
+  //     uploadedByUserId,
+  //     kind: 'membership',
+  //     ...(req.file ? { document: req.file } : {}),
+  //   })
 
-  createLicense: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
-    const uploadedByUserId = getAuthenticatedUserId(req)
-    const body = parseCredentialMultipartBody(
-      req.body,
-      'license',
-      CreateLicenseSchema,
-    )
+  //   res.status(201).json(result)
+  // }),
 
-    const result = await CredentialService.createCredential({
-      employeeId,
-      data: body,
-      uploadedByUserId,
-      kind: 'license',
-      ...(req.file ? { document: req.file } : {}),
-    })
+  // createLicense: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+  //   const uploadedByUserId = getAuthenticatedUserId(req)
+  //   const body = parseCredentialMultipartBody(
+  //     req.body,
+  //     'license',
+  //     CreateLicenseSchema,
+  //   )
 
-    res.status(201).json(result)
-  }),
+  //   const result = await CredentialService.createCredential({
+  //     employeeId,
+  //     data: body,
+  //     uploadedByUserId,
+  //     kind: 'license',
+  //     ...(req.file ? { document: req.file } : {}),
+  //   })
 
-  createLifeSupport: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
-    const uploadedByUserId = getAuthenticatedUserId(req)
-    const body = parseCredentialMultipartBody(
-      req.body,
-      'life_support',
-      CreateLifeSupportSchema,
-    )
+  //   res.status(201).json(result)
+  // }),
 
-    const result = await CredentialService.createCredential({
-      employeeId,
-      data: body,
-      uploadedByUserId,
-      kind: 'life-support',
-      ...(req.file ? { document: req.file } : {}),
-    })
+  // createLifeSupport: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+  //   const uploadedByUserId = getAuthenticatedUserId(req)
+  //   const body = parseCredentialMultipartBody(
+  //     req.body,
+  //     'life_support',
+  //     CreateLifeSupportSchema,
+  //   )
 
-    res.status(201).json(result)
-  }),
+  //   const result = await CredentialService.createCredential({
+  //     employeeId,
+  //     data: body,
+  //     uploadedByUserId,
+  //     kind: 'life-support',
+  //     ...(req.file ? { document: req.file } : {}),
+  //   })
 
-  createMalpractice: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
-    const uploadedByUserId = getAuthenticatedUserId(req)
-    const body = parseCredentialMultipartBody(
-      req.body,
-      'malpractice',
-      CreateMalpracticeSchema,
-    )
+  //   res.status(201).json(result)
+  // }),
 
-    const result = await CredentialService.createCredential({
-      employeeId,
-      data: body,
-      uploadedByUserId,
-      kind: 'malpractice',
-      ...(req.file ? { document: req.file } : {}),
-    })
+  // createMalpractice: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
+  //   const uploadedByUserId = getAuthenticatedUserId(req)
+  //   const body = parseCredentialMultipartBody(
+  //     req.body,
+  //     'malpractice',
+  //     CreateMalpracticeSchema,
+  //   )
 
-    res.status(201).json(result)
-  }),
+  //   const result = await CredentialService.createCredential({
+  //     employeeId,
+  //     data: body,
+  //     uploadedByUserId,
+  //     kind: 'malpractice',
+  //     ...(req.file ? { document: req.file } : {}),
+  //   })
+
+  //   res.status(201).json(result)
+  // }),
 
   updateDegree: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId, id: degreeId } =
