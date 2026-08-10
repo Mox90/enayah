@@ -143,9 +143,7 @@ export function CredentialLicenses({
                       )}
 
                       <div className='mt-3 flex flex-wrap items-center gap-2'>
-                        <VerificationBadge
-                          verified={license.isVerified ?? false}
-                        />
+                        <VerificationBadge verified={isVerified} />
 
                         <ExpiryStatusBadge
                           expiryDate={license.expiryDate}
