@@ -64,7 +64,7 @@ import {
   collectCurrentCredentialVerifierIds,
   enrichEmployeeCredentialsWithVerification,
 } from './credential-verification-response.service'
-import { updateCredentialVerification } from './credential-verification.service'
+import { updateCredentialVerification as performCredentialVerificationUpdate } from './credential-verification.service'
 
 type PreparedCredentialDocument = {
   processed: ProcessedCredentialDocument
@@ -282,6 +282,42 @@ async function updateCredentialWithDocument<TResult>({
   }
 }
 
+async function softDeleteCredentialWithDocument({
+  employeeId,
+  credentialId,
+  deletedByUserId,
+  kind,
+  credentialLabel,
+  findExisting,
+  deleteRecord,
+}: SoftDeleteCredentialWithDocumentOptions): Promise<void> {
+  const category = CREDENTIAL_FILE_CATEGORY_BY_KIND[kind]
+
+  await db.transaction(async (tx: DB) => {
+    const existing = await findExisting(tx, employeeId, credentialId)
+
+    if (!existing) {
+      throw new AppError(`${credentialLabel} not found.`, 404)
+    }
+
+    await deleteRecord(tx)
+
+    if (existing.documentFileId && existing.documentCategory === category) {
+      await CredentialRepository.softDeleteCredentialFile(
+        tx,
+        existing.documentFileId,
+        category,
+        deletedByUserId,
+      )
+    }
+
+    /*
+     * Retain the physical document bytes.
+     * Only credential/file metadata is soft-deleted.
+     */
+  })
+}
+
 type UpdateCredentialCommand = {
   employeeId: string
   credentialId: string
@@ -409,7 +445,11 @@ const credentialDocumentRepositories = {
   license: licenseDocumentRepository,
   'life-support': lifeSupportDocumentRepository,
   malpractice: malpracticeDocumentRepository,
-} as const satisfies Record<CredentialKind, CredentialDocumentRepositoryPort>
+} as const satisfies Record<
+  CredentialKind,
+  CredentialDocumentRepositoryPort &
+    CredentialVerificationDocumentRepositoryPort
+>
 
 const credentialDocumentNotFoundMessages = {
   degree: 'Degree document not found.',
@@ -440,12 +480,15 @@ const credentialVerificationTypeByKind = {
   malpractice: 'malpractice',
 } as const satisfies Record<CredentialKind, CredentialVerificationType>
 
-type GetCredentialVerificationEvidenceInput = {
-  kind: CredentialKind
-  employeeId: string
-  credentialId: string
-  eventId: string
-}
+type CredentialVerificationOperationInput = Parameters<
+  typeof performCredentialVerificationUpdate
+>[0]
+
+type CredentialVerificationRepositoryPort =
+  CredentialVerificationOperationInput['verificationRepository']
+
+type CredentialVerificationDocumentRepositoryPort =
+  CredentialVerificationOperationInput['documentRepository']
 
 const credentialVerificationRepositories = {
   degree: degreeVerificationRepository,
@@ -455,6 +498,58 @@ const credentialVerificationRepositories = {
   license: licenseVerificationRepository,
   'life-support': lifeSupportVerificationRepository,
   malpractice: malpracticeVerificationRepository,
+} as const satisfies Record<
+  CredentialKind,
+  CredentialVerificationRepositoryPort
+>
+
+const credentialVerificationLabels = {
+  degree: 'Degree',
+  board: 'Board',
+  fellowship: 'Fellowship',
+  membership: 'Membership',
+  license: 'License',
+  'life-support': 'Life-support certification',
+  malpractice: 'Malpractice insurance',
+} as const satisfies Record<CredentialKind, string>
+
+type GetCredentialVerificationEvidenceInput = {
+  kind: CredentialKind
+  employeeId: string
+  credentialId: string
+  eventId: string
+}
+
+type UpdateCredentialVerificationCommand = {
+  kind: CredentialKind
+  employeeId: string
+  credentialId: string
+  verifiedByUserId: string
+  data: UpdateCredentialVerificationDto
+  evidence?: Express.Multer.File
+}
+
+type SoftDeleteCredentialCommand = {
+  kind: CredentialKind
+  employeeId: string
+  credentialId: string
+  deletedByUserId: string
+}
+
+type SoftDeleteCredentialWithDocumentOptions = {
+  employeeId: string
+  credentialId: string
+  deletedByUserId: string
+  kind: CredentialKind
+  credentialLabel: string
+
+  findExisting: (
+    tx: DB,
+    employeeId: string,
+    credentialId: string,
+  ) => Promise<ExistingCredentialDocument | null>
+
+  deleteRecord: (tx: DB) => Promise<unknown>
 }
 
 async function getCredentialDocumentForAccess({
@@ -502,6 +597,23 @@ async function getCredentialDocumentForAccess({
   }
 }
 
+function getVerificationUpdateCommon(
+  args: UpdateCredentialVerificationCommand,
+) {
+  return {
+    employeeId: args.employeeId,
+    credentialId: args.credentialId,
+    actorUserId: args.verifiedByUserId,
+    data: args.data,
+
+    ...(args.evidence
+      ? {
+          evidence: args.evidence,
+        }
+      : {}),
+  }
+}
+
 export const CredentialService = {
   findByEmployeeId: async (employeeId: string) => {
     const [credentials, verificationEvents] = await Promise.all([
@@ -535,6 +647,77 @@ export const CredentialService = {
       credentialId,
       notFoundMessage: credentialDocumentNotFoundMessages[kind],
     })
+  },
+
+  updateCredentialVerification: async (
+    args: UpdateCredentialVerificationCommand,
+  ) => {
+    const common = getVerificationUpdateCommon(args)
+
+    switch (args.kind) {
+      case 'degree':
+        return performCredentialVerificationUpdate({
+          ...common,
+          documentRepository: degreeDocumentRepository,
+          verificationRepository: degreeVerificationRepository,
+          credentialType: 'degree',
+          credentialLabel: 'Degree',
+        })
+
+      case 'board':
+        return performCredentialVerificationUpdate({
+          ...common,
+          documentRepository: boardDocumentRepository,
+          verificationRepository: boardVerificationRepository,
+          credentialType: 'board',
+          credentialLabel: 'Board',
+        })
+
+      case 'fellowship':
+        return performCredentialVerificationUpdate({
+          ...common,
+          documentRepository: fellowshipDocumentRepository,
+          verificationRepository: fellowshipVerificationRepository,
+          credentialType: 'fellowship',
+          credentialLabel: 'Fellowship',
+        })
+
+      case 'membership':
+        return performCredentialVerificationUpdate({
+          ...common,
+          documentRepository: membershipDocumentRepository,
+          verificationRepository: membershipVerificationRepository,
+          credentialType: 'membership',
+          credentialLabel: 'Membership',
+        })
+
+      case 'license':
+        return performCredentialVerificationUpdate({
+          ...common,
+          documentRepository: licenseDocumentRepository,
+          verificationRepository: licenseVerificationRepository,
+          credentialType: 'license',
+          credentialLabel: 'License',
+        })
+
+      case 'life-support':
+        return performCredentialVerificationUpdate({
+          ...common,
+          documentRepository: lifeSupportDocumentRepository,
+          verificationRepository: lifeSupportVerificationRepository,
+          credentialType: 'life_support',
+          credentialLabel: 'Life-support certification',
+        })
+
+      case 'malpractice':
+        return performCredentialVerificationUpdate({
+          ...common,
+          documentRepository: malpracticeDocumentRepository,
+          verificationRepository: malpracticeVerificationRepository,
+          credentialType: 'malpractice',
+          credentialLabel: 'Malpractice insurance',
+        })
+    }
   },
 
   getCredentialVerificationEvidence: async ({
@@ -791,6 +974,159 @@ export const CredentialService = {
     }
   },
 
+  softDeleteCredential: async (
+    args: SoftDeleteCredentialCommand,
+  ): Promise<void> => {
+    const commonOptions = {
+      employeeId: args.employeeId,
+      credentialId: args.credentialId,
+      deletedByUserId: args.deletedByUserId,
+      kind: args.kind,
+    }
+
+    switch (args.kind) {
+      case 'degree':
+        return softDeleteCredentialWithDocument({
+          ...commonOptions,
+          credentialLabel: 'Degree',
+
+          findExisting: (tx, employeeId, credentialId) =>
+            degreeDocumentRepository.findForDocumentUpdate(
+              tx,
+              employeeId,
+              credentialId,
+            ),
+
+          deleteRecord: (tx) =>
+            CredentialRepository.softDeleteDegree(
+              tx,
+              args.credentialId,
+              args.deletedByUserId,
+            ),
+        })
+
+      case 'board':
+        return softDeleteCredentialWithDocument({
+          ...commonOptions,
+          credentialLabel: 'Board certification',
+
+          findExisting: (tx, employeeId, credentialId) =>
+            boardDocumentRepository.findForDocumentUpdate(
+              tx,
+              employeeId,
+              credentialId,
+            ),
+
+          deleteRecord: (tx) =>
+            CredentialRepository.softDeleteBoard(
+              tx,
+              args.credentialId,
+              args.deletedByUserId,
+            ),
+        })
+
+      case 'fellowship':
+        return softDeleteCredentialWithDocument({
+          ...commonOptions,
+          credentialLabel: 'Fellowship',
+
+          findExisting: (tx, employeeId, credentialId) =>
+            fellowshipDocumentRepository.findForDocumentUpdate(
+              tx,
+              employeeId,
+              credentialId,
+            ),
+
+          deleteRecord: (tx) =>
+            CredentialRepository.softDeleteFellowship(
+              tx,
+              args.credentialId,
+              args.deletedByUserId,
+            ),
+        })
+
+      case 'membership':
+        return softDeleteCredentialWithDocument({
+          ...commonOptions,
+          credentialLabel: 'Membership',
+
+          findExisting: (tx, employeeId, credentialId) =>
+            membershipDocumentRepository.findForDocumentUpdate(
+              tx,
+              employeeId,
+              credentialId,
+            ),
+
+          deleteRecord: (tx) =>
+            CredentialRepository.softDeleteMembership(
+              tx,
+              args.credentialId,
+              args.deletedByUserId,
+            ),
+        })
+
+      case 'license':
+        return softDeleteCredentialWithDocument({
+          ...commonOptions,
+          credentialLabel: 'License',
+
+          findExisting: (tx, employeeId, credentialId) =>
+            licenseDocumentRepository.findForDocumentUpdate(
+              tx,
+              employeeId,
+              credentialId,
+            ),
+
+          deleteRecord: (tx) =>
+            CredentialRepository.softDeleteLicense(
+              tx,
+              args.credentialId,
+              args.deletedByUserId,
+            ),
+        })
+
+      case 'life-support':
+        return softDeleteCredentialWithDocument({
+          ...commonOptions,
+          credentialLabel: 'Life-support certification',
+
+          findExisting: (tx, employeeId, credentialId) =>
+            lifeSupportDocumentRepository.findForDocumentUpdate(
+              tx,
+              employeeId,
+              credentialId,
+            ),
+
+          deleteRecord: (tx) =>
+            CredentialRepository.softDeleteLifeSupport(
+              tx,
+              args.credentialId,
+              args.deletedByUserId,
+            ),
+        })
+
+      case 'malpractice':
+        return softDeleteCredentialWithDocument({
+          ...commonOptions,
+          credentialLabel: 'Malpractice insurance',
+
+          findExisting: (tx, employeeId, credentialId) =>
+            malpracticeDocumentRepository.findForDocumentUpdate(
+              tx,
+              employeeId,
+              credentialId,
+            ),
+
+          deleteRecord: (tx) =>
+            CredentialRepository.softDeleteMalpractice(
+              tx,
+              args.credentialId,
+              args.deletedByUserId,
+            ),
+        })
+    }
+  },
+
   // createDegree: async ({
   //   employeeId,
   //   data,
@@ -983,155 +1319,155 @@ export const CredentialService = {
   //   }
   // },
 
-  updateBoard: async (id: string, data: unknown) =>
-    db.transaction((tx) => CredentialRepository.updateBoard(tx, id, data)),
+  // updateBoard: async (id: string, data: unknown) =>
+  //   db.transaction((tx) => CredentialRepository.updateBoard(tx, id, data)),
 
-  updateFellowship: async (id: string, data: unknown) =>
-    db.transaction((tx) => CredentialRepository.updateFellowship(tx, id, data)),
+  // updateFellowship: async (id: string, data: unknown) =>
+  //   db.transaction((tx) => CredentialRepository.updateFellowship(tx, id, data)),
 
-  updateMembership: async (id: string, data: unknown) =>
-    db.transaction((tx) => CredentialRepository.updateMembership(tx, id, data)),
+  // updateMembership: async (id: string, data: unknown) =>
+  //   db.transaction((tx) => CredentialRepository.updateMembership(tx, id, data)),
 
-  updateLicense: async (id: string, data: unknown) =>
-    db.transaction((tx) => CredentialRepository.updateLicense(tx, id, data)),
+  // updateLicense: async (id: string, data: unknown) =>
+  //   db.transaction((tx) => CredentialRepository.updateLicense(tx, id, data)),
 
-  updateLifeSupport: async (id: string, data: unknown) =>
-    db.transaction((tx) =>
-      CredentialRepository.updateLifeSupport(tx, id, data),
-    ),
+  // updateLifeSupport: async (id: string, data: unknown) =>
+  //   db.transaction((tx) =>
+  //     CredentialRepository.updateLifeSupport(tx, id, data),
+  //   ),
 
-  updateMalpractice: async (id: string, data: unknown) =>
-    db.transaction((tx) =>
-      CredentialRepository.updateMalpractice(tx, id, data),
-    ),
+  // updateMalpractice: async (id: string, data: unknown) =>
+  //   db.transaction((tx) =>
+  //     CredentialRepository.updateMalpractice(tx, id, data),
+  //   ),
 
-  updateDegreeVerification: async ({
-    employeeId,
-    degreeId,
-    verifiedByUserId,
-    data,
-    evidence,
-  }: {
-    employeeId: string
-    degreeId: string
-    verifiedByUserId: string
-    data: UpdateCredentialVerificationDto
-    evidence?: Express.Multer.File
-  }) => {
-    return updateCredentialVerification({
-      documentRepository: degreeDocumentRepository,
-      verificationRepository: degreeVerificationRepository,
-      credentialType: 'degree',
-      credentialLabel: 'Degree',
-      employeeId,
-      credentialId: degreeId,
-      actorUserId: verifiedByUserId,
-      data,
-      ...(evidence ? { evidence } : {}),
-    })
-  },
+  // updateDegreeVerification: async ({
+  //   employeeId,
+  //   degreeId,
+  //   verifiedByUserId,
+  //   data,
+  //   evidence,
+  // }: {
+  //   employeeId: string
+  //   degreeId: string
+  //   verifiedByUserId: string
+  //   data: UpdateCredentialVerificationDto
+  //   evidence?: Express.Multer.File
+  // }) => {
+  //   return performCredentialVerificationUpdate({
+  //     documentRepository: degreeDocumentRepository,
+  //     verificationRepository: degreeVerificationRepository,
+  //     credentialType: 'degree',
+  //     credentialLabel: 'Degree',
+  //     employeeId,
+  //     credentialId: degreeId,
+  //     actorUserId: verifiedByUserId,
+  //     data,
+  //     ...(evidence ? { evidence } : {}),
+  //   })
+  // },
 
-  updateBoardVerification: async ({
-    employeeId,
-    boardId,
-    verifiedByUserId,
-    data,
-    evidence,
-  }: {
-    employeeId: string
-    boardId: string
-    verifiedByUserId: string
-    data: UpdateCredentialVerificationDto
-    evidence?: Express.Multer.File
-  }) => {
-    return updateCredentialVerification({
-      documentRepository: boardDocumentRepository,
-      verificationRepository: boardVerificationRepository,
-      credentialType: 'board',
-      credentialLabel: 'Board',
-      employeeId,
-      credentialId: boardId,
-      actorUserId: verifiedByUserId,
-      data,
-      ...(evidence ? { evidence } : {}),
-    })
-  },
+  // updateBoardVerification: async ({
+  //   employeeId,
+  //   boardId,
+  //   verifiedByUserId,
+  //   data,
+  //   evidence,
+  // }: {
+  //   employeeId: string
+  //   boardId: string
+  //   verifiedByUserId: string
+  //   data: UpdateCredentialVerificationDto
+  //   evidence?: Express.Multer.File
+  // }) => {
+  //   return performCredentialVerificationUpdate({
+  //     documentRepository: boardDocumentRepository,
+  //     verificationRepository: boardVerificationRepository,
+  //     credentialType: 'board',
+  //     credentialLabel: 'Board',
+  //     employeeId,
+  //     credentialId: boardId,
+  //     actorUserId: verifiedByUserId,
+  //     data,
+  //     ...(evidence ? { evidence } : {}),
+  //   })
+  // },
 
-  softDeleteDegree: async ({
-    employeeId,
-    degreeId,
-    deletedByUserId,
-  }: {
-    employeeId: string
-    degreeId: string
-    deletedByUserId: string
-  }) => {
-    return await db.transaction(async (tx) => {
-      const existingDegree =
-        await degreeDocumentRepository.findForDocumentUpdate(
-          tx,
-          employeeId,
-          degreeId,
-        )
+  // softDeleteDegree: async ({
+  //   employeeId,
+  //   degreeId,
+  //   deletedByUserId,
+  // }: {
+  //   employeeId: string
+  //   degreeId: string
+  //   deletedByUserId: string
+  // }) => {
+  //   return await db.transaction(async (tx) => {
+  //     const existingDegree =
+  //       await degreeDocumentRepository.findForDocumentUpdate(
+  //         tx,
+  //         employeeId,
+  //         degreeId,
+  //       )
 
-      if (!existingDegree) {
-        throw new AppError('Degree not found.', 404)
-      }
+  //     if (!existingDegree) {
+  //       throw new AppError('Degree not found.', 404)
+  //     }
 
-      await CredentialRepository.softDeleteDegree(tx, degreeId, deletedByUserId)
+  //     await CredentialRepository.softDeleteDegree(tx, degreeId, deletedByUserId)
 
-      if (
-        existingDegree.documentFileId &&
-        existingDegree.documentCategory === DEGREE_FILE_CATEGORY
-      ) {
-        await CredentialRepository.softDeleteCredentialFile(
-          tx,
-          existingDegree.documentFileId,
-          DEGREE_FILE_CATEGORY,
-          deletedByUserId,
-        )
-      }
+  //     if (
+  //       existingDegree.documentFileId &&
+  //       existingDegree.documentCategory === DEGREE_FILE_CATEGORY
+  //     ) {
+  //       await CredentialRepository.softDeleteCredentialFile(
+  //         tx,
+  //         existingDegree.documentFileId,
+  //         DEGREE_FILE_CATEGORY,
+  //         deletedByUserId,
+  //       )
+  //     }
 
-      // return {
-      //   storageKey:
-      //     existingDegree.documentCategory === DEGREE_FILE_CATEGORY
-      //       ? existingDegree.documentStorageKey
-      //       : null,
-      // }
-    })
+  //     // return {
+  //     //   storageKey:
+  //     //     existingDegree.documentCategory === DEGREE_FILE_CATEGORY
+  //     //       ? existingDegree.documentStorageKey
+  //     //       : null,
+  //     // }
+  //   })
 
-    //await removeReplacedDocument(result.storageKey)
-  },
+  //   //await removeReplacedDocument(result.storageKey)
+  // },
 
-  softDeleteBoard: async (id: string, userId?: string) =>
-    db.transaction((tx) =>
-      CredentialRepository.softDeleteBoard(tx, id, userId),
-    ),
+  // softDeleteBoard: async (id: string, userId?: string) =>
+  //   db.transaction((tx) =>
+  //     CredentialRepository.softDeleteBoard(tx, id, userId),
+  //   ),
 
-  softDeleteFellowship: async (id: string, userId?: string) =>
-    db.transaction((tx) =>
-      CredentialRepository.softDeleteFellowship(tx, id, userId),
-    ),
+  // softDeleteFellowship: async (id: string, userId?: string) =>
+  //   db.transaction((tx) =>
+  //     CredentialRepository.softDeleteFellowship(tx, id, userId),
+  //   ),
 
-  softDeleteMembership: async (id: string, userId?: string) =>
-    db.transaction((tx) =>
-      CredentialRepository.softDeleteMembership(tx, id, userId),
-    ),
+  // softDeleteMembership: async (id: string, userId?: string) =>
+  //   db.transaction((tx) =>
+  //     CredentialRepository.softDeleteMembership(tx, id, userId),
+  //   ),
 
-  softDeleteLicense: async (id: string, userId?: string) =>
-    db.transaction((tx) =>
-      CredentialRepository.softDeleteLicense(tx, id, userId),
-    ),
+  // softDeleteLicense: async (id: string, userId?: string) =>
+  //   db.transaction((tx) =>
+  //     CredentialRepository.softDeleteLicense(tx, id, userId),
+  //   ),
 
-  softDeleteLifeSupport: async (id: string, userId?: string) =>
-    db.transaction((tx) =>
-      CredentialRepository.softDeleteLifeSupport(tx, id, userId),
-    ),
+  // softDeleteLifeSupport: async (id: string, userId?: string) =>
+  //   db.transaction((tx) =>
+  //     CredentialRepository.softDeleteLifeSupport(tx, id, userId),
+  //   ),
 
-  softDeleteMalpractice: async (id: string, userId?: string) =>
-    db.transaction((tx) =>
-      CredentialRepository.softDeleteMalpractice(tx, id, userId),
-    ),
+  // softDeleteMalpractice: async (id: string, userId?: string) =>
+  //   db.transaction((tx) =>
+  //     CredentialRepository.softDeleteMalpractice(tx, id, userId),
+  //   ),
 
   // getDegreeVerificationEvidence: async ({
   //   employeeId,

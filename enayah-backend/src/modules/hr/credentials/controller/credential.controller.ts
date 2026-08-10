@@ -170,7 +170,6 @@ function createCredentialDocumentAccessHandler(
     })
   })
 }
-
 function createCredentialVerificationEvidenceAccessHandler(
   kind: CredentialKind,
   disposition: CredentialDocumentDisposition,
@@ -199,6 +198,55 @@ function createCredentialVerificationEvidenceAccessHandler(
   })
 }
 
+function createUpdateCredentialVerificationHandler(
+  kind: CredentialKind,
+): RequestHandler {
+  return asyncHandler(async (req: Request, res: Response) => {
+    const { employeeId, id: credentialId } =
+      EmployeeCredentialRecordParamSchema.parse(req.params)
+
+    const verifiedByUserId = getAuthenticatedUserId(req)
+
+    /*
+     * Supports both:
+     *
+     * JSON:
+     * {
+     *   "isVerified": true,
+     *   "remarks": "Reviewed"
+     * }
+     *
+     * Multipart:
+     * verification: JSON string
+     * evidence: File
+     */
+    const isMultipart = Boolean(req.is('multipart/form-data'))
+
+    const body = isMultipart
+      ? parseCredentialMultipartBody(
+          req.body,
+          'verification',
+          UpdateCredentialVerificationSchema,
+        )
+      : UpdateCredentialVerificationSchema.parse(req.body)
+
+    const result = await CredentialService.updateCredentialVerification({
+      kind,
+      employeeId,
+      credentialId,
+      verifiedByUserId,
+      data: body,
+      ...(req.file
+        ? {
+            evidence: req.file,
+          }
+        : {}),
+    })
+
+    res.status(200).json(result)
+  })
+}
+
 type CreateCredentialHandlerArgs<TData> = {
   fieldName: string
   schema: ZodType<TData>
@@ -209,6 +257,49 @@ type CreateCredentialHandlerArgs<TData> = {
     data: TData
     document?: Express.Multer.File
   }) => Promise<unknown>
+}
+
+type UpdateCredentialHandlerArgs<TData> = {
+  fieldName: string
+  schema: ZodType<TData>
+
+  update: (args: {
+    employeeId: string
+    credentialId: string
+    updatedByUserId: string
+    data: TData
+    document?: Express.Multer.File
+  }) => Promise<unknown>
+}
+
+function createUpdateCredentialHandler<TData>({
+  fieldName,
+  schema,
+  update,
+}: UpdateCredentialHandlerArgs<TData>): RequestHandler {
+  return asyncHandler(async (req: Request, res: Response) => {
+    const { employeeId, id: credentialId } =
+      EmployeeCredentialRecordParamSchema.parse(req.params)
+
+    const updatedByUserId = getAuthenticatedUserId(req)
+
+    const body = parseCredentialMultipartBody(req.body, fieldName, schema)
+
+    const result = await update({
+      employeeId,
+      credentialId,
+      updatedByUserId,
+      data: body,
+
+      ...(req.file
+        ? {
+            document: req.file,
+          }
+        : {}),
+    })
+
+    res.status(200).json(result)
+  })
 }
 
 function createCredentialHandler<TData>({
@@ -235,6 +326,24 @@ function createCredentialHandler<TData>({
     })
 
     res.status(201).json(result)
+  })
+}
+
+function createDeleteCredentialHandler(kind: CredentialKind): RequestHandler {
+  return asyncHandler(async (req: Request, res: Response) => {
+    const { employeeId, id: credentialId } =
+      EmployeeCredentialRecordParamSchema.parse(req.params)
+
+    const deletedByUserId = getAuthenticatedUserId(req)
+
+    await CredentialService.softDeleteCredential({
+      kind,
+      employeeId,
+      credentialId,
+      deletedByUserId,
+    })
+
+    res.status(204).send()
   })
 }
 
@@ -317,6 +426,85 @@ const createCredentialHandlers = {
   }),
 } as const satisfies Record<CredentialKind, RequestHandler>
 
+const updateCredentialHandlers = {
+  degree: createUpdateCredentialHandler({
+    fieldName: 'degree',
+    schema: UpdateDegreeSchema,
+
+    update: (args) =>
+      CredentialService.updateCredential({
+        ...args,
+        kind: 'degree',
+      }),
+  }),
+
+  board: createUpdateCredentialHandler({
+    fieldName: 'board',
+    schema: UpdateBoardSchema,
+
+    update: (args) =>
+      CredentialService.updateCredential({
+        ...args,
+        kind: 'board',
+      }),
+  }),
+
+  fellowship: createUpdateCredentialHandler({
+    fieldName: 'fellowship',
+    schema: UpdateFellowshipSchema,
+
+    update: (args) =>
+      CredentialService.updateCredential({
+        ...args,
+        kind: 'fellowship',
+      }),
+  }),
+
+  membership: createUpdateCredentialHandler({
+    fieldName: 'membership',
+    schema: UpdateMembershipSchema,
+
+    update: (args) =>
+      CredentialService.updateCredential({
+        ...args,
+        kind: 'membership',
+      }),
+  }),
+
+  license: createUpdateCredentialHandler({
+    fieldName: 'license',
+    schema: UpdateLicenseSchema,
+
+    update: (args) =>
+      CredentialService.updateCredential({
+        ...args,
+        kind: 'license',
+      }),
+  }),
+
+  'life-support': createUpdateCredentialHandler({
+    fieldName: 'life_support',
+    schema: UpdateLifeSupportSchema,
+
+    update: (args) =>
+      CredentialService.updateCredential({
+        ...args,
+        kind: 'life-support',
+      }),
+  }),
+
+  malpractice: createUpdateCredentialHandler({
+    fieldName: 'malpractice',
+    schema: UpdateMalpracticeSchema,
+
+    update: (args) =>
+      CredentialService.updateCredential({
+        ...args,
+        kind: 'malpractice',
+      }),
+  }),
+} as const satisfies Record<CredentialKind, RequestHandler>
+
 export const CredentialController = {
   findByEmployeeId: asyncHandler(async (req: Request, res: Response) => {
     const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)
@@ -349,6 +537,18 @@ export const CredentialController = {
 
   createCredential: (kind: CredentialKind): RequestHandler => {
     return createCredentialHandlers[kind]
+  },
+
+  updateCredential: (kind: CredentialKind): RequestHandler => {
+    return updateCredentialHandlers[kind]
+  },
+
+  deleteCredential: (kind: CredentialKind): RequestHandler => {
+    return createDeleteCredentialHandler(kind)
+  },
+
+  updateCredentialVerification: (kind: CredentialKind): RequestHandler => {
+    return createUpdateCredentialVerificationHandler(kind)
   },
 
   // createDegree: asyncHandler(async (req: Request, res: Response) => {
@@ -491,159 +691,159 @@ export const CredentialController = {
   //   res.status(201).json(result)
   // }),
 
-  updateDegree: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId, id: degreeId } =
-      EmployeeCredentialRecordParamSchema.parse(req.params)
-    const updatedByUserId = getAuthenticatedUserId(req)
-    const body = parseCredentialMultipartBody(
-      req.body,
-      'degree',
-      UpdateDegreeSchema,
-    )
+  // updateDegree: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId, id: degreeId } =
+  //     EmployeeCredentialRecordParamSchema.parse(req.params)
+  //   const updatedByUserId = getAuthenticatedUserId(req)
+  //   const body = parseCredentialMultipartBody(
+  //     req.body,
+  //     'degree',
+  //     UpdateDegreeSchema,
+  //   )
 
-    const result = await CredentialService.updateCredential({
-      employeeId,
-      credentialId: degreeId,
-      data: body,
-      updatedByUserId,
-      kind: 'degree',
-      ...(req.file ? { document: req.file } : {}),
-    })
+  //   const result = await CredentialService.updateCredential({
+  //     employeeId,
+  //     credentialId: degreeId,
+  //     data: body,
+  //     updatedByUserId,
+  //     kind: 'degree',
+  //     ...(req.file ? { document: req.file } : {}),
+  //   })
 
-    res.status(200).json(result)
-  }),
+  //   res.status(200).json(result)
+  // }),
 
-  updateBoard: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId, id: boardId } =
-      EmployeeCredentialRecordParamSchema.parse(req.params)
-    const updatedByUserId = getAuthenticatedUserId(req)
-    const body = parseCredentialMultipartBody(
-      req.body,
-      'board',
-      UpdateBoardSchema,
-    )
+  // updateBoard: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId, id: boardId } =
+  //     EmployeeCredentialRecordParamSchema.parse(req.params)
+  //   const updatedByUserId = getAuthenticatedUserId(req)
+  //   const body = parseCredentialMultipartBody(
+  //     req.body,
+  //     'board',
+  //     UpdateBoardSchema,
+  //   )
 
-    const result = await CredentialService.updateCredential({
-      employeeId,
-      credentialId: boardId,
-      data: body,
-      updatedByUserId,
-      kind: 'board',
-      ...(req.file ? { document: req.file } : {}),
-    })
+  //   const result = await CredentialService.updateCredential({
+  //     employeeId,
+  //     credentialId: boardId,
+  //     data: body,
+  //     updatedByUserId,
+  //     kind: 'board',
+  //     ...(req.file ? { document: req.file } : {}),
+  //   })
 
-    res.status(200).json(result)
-  }),
+  //   res.status(200).json(result)
+  // }),
 
-  updateFellowship: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId, id: fellowshipId } =
-      EmployeeCredentialRecordParamSchema.parse(req.params)
-    const updatedByUserId = getAuthenticatedUserId(req)
-    const body = parseCredentialMultipartBody(
-      req.body,
-      'fellowship',
-      UpdateFellowshipSchema,
-    )
+  // updateFellowship: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId, id: fellowshipId } =
+  //     EmployeeCredentialRecordParamSchema.parse(req.params)
+  //   const updatedByUserId = getAuthenticatedUserId(req)
+  //   const body = parseCredentialMultipartBody(
+  //     req.body,
+  //     'fellowship',
+  //     UpdateFellowshipSchema,
+  //   )
 
-    const result = await CredentialService.updateCredential({
-      employeeId,
-      credentialId: fellowshipId,
-      data: body,
-      updatedByUserId,
-      kind: 'fellowship',
-      ...(req.file ? { document: req.file } : {}),
-    })
+  //   const result = await CredentialService.updateCredential({
+  //     employeeId,
+  //     credentialId: fellowshipId,
+  //     data: body,
+  //     updatedByUserId,
+  //     kind: 'fellowship',
+  //     ...(req.file ? { document: req.file } : {}),
+  //   })
 
-    res.status(200).json(result)
-  }),
+  //   res.status(200).json(result)
+  // }),
 
-  updateMembership: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId, id: membershipId } =
-      EmployeeCredentialRecordParamSchema.parse(req.params)
-    const updatedByUserId = getAuthenticatedUserId(req)
-    const body = parseCredentialMultipartBody(
-      req.body,
-      'membership',
-      UpdateMembershipSchema,
-    )
+  // updateMembership: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId, id: membershipId } =
+  //     EmployeeCredentialRecordParamSchema.parse(req.params)
+  //   const updatedByUserId = getAuthenticatedUserId(req)
+  //   const body = parseCredentialMultipartBody(
+  //     req.body,
+  //     'membership',
+  //     UpdateMembershipSchema,
+  //   )
 
-    const result = await CredentialService.updateCredential({
-      employeeId,
-      credentialId: membershipId,
-      data: body,
-      updatedByUserId,
-      kind: 'membership',
-      ...(req.file ? { document: req.file } : {}),
-    })
+  //   const result = await CredentialService.updateCredential({
+  //     employeeId,
+  //     credentialId: membershipId,
+  //     data: body,
+  //     updatedByUserId,
+  //     kind: 'membership',
+  //     ...(req.file ? { document: req.file } : {}),
+  //   })
 
-    res.status(200).json(result)
-  }),
+  //   res.status(200).json(result)
+  // }),
 
-  updateLicense: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId, id: licenseId } =
-      EmployeeCredentialRecordParamSchema.parse(req.params)
-    const updatedByUserId = getAuthenticatedUserId(req)
-    const body = parseCredentialMultipartBody(
-      req.body,
-      'license',
-      UpdateLicenseSchema,
-    )
+  // updateLicense: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId, id: licenseId } =
+  //     EmployeeCredentialRecordParamSchema.parse(req.params)
+  //   const updatedByUserId = getAuthenticatedUserId(req)
+  //   const body = parseCredentialMultipartBody(
+  //     req.body,
+  //     'license',
+  //     UpdateLicenseSchema,
+  //   )
 
-    const result = await CredentialService.updateCredential({
-      employeeId,
-      credentialId: licenseId,
-      data: body,
-      updatedByUserId,
-      kind: 'license',
-      ...(req.file ? { document: req.file } : {}),
-    })
+  //   const result = await CredentialService.updateCredential({
+  //     employeeId,
+  //     credentialId: licenseId,
+  //     data: body,
+  //     updatedByUserId,
+  //     kind: 'license',
+  //     ...(req.file ? { document: req.file } : {}),
+  //   })
 
-    res.status(200).json(result)
-  }),
+  //   res.status(200).json(result)
+  // }),
 
-  updateLifeSupport: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId, id: lifeSupportId } =
-      EmployeeCredentialRecordParamSchema.parse(req.params)
-    const updatedByUserId = getAuthenticatedUserId(req)
-    const body = parseCredentialMultipartBody(
-      req.body,
-      'life_support',
-      UpdateLifeSupportSchema,
-    )
+  // updateLifeSupport: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId, id: lifeSupportId } =
+  //     EmployeeCredentialRecordParamSchema.parse(req.params)
+  //   const updatedByUserId = getAuthenticatedUserId(req)
+  //   const body = parseCredentialMultipartBody(
+  //     req.body,
+  //     'life_support',
+  //     UpdateLifeSupportSchema,
+  //   )
 
-    const result = await CredentialService.updateCredential({
-      employeeId,
-      credentialId: lifeSupportId,
-      data: body,
-      updatedByUserId,
-      kind: 'life-support',
-      ...(req.file ? { document: req.file } : {}),
-    })
+  //   const result = await CredentialService.updateCredential({
+  //     employeeId,
+  //     credentialId: lifeSupportId,
+  //     data: body,
+  //     updatedByUserId,
+  //     kind: 'life-support',
+  //     ...(req.file ? { document: req.file } : {}),
+  //   })
 
-    res.status(200).json(result)
-  }),
+  //   res.status(200).json(result)
+  // }),
 
-  updateMalpractice: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId, id: malpracticeId } =
-      EmployeeCredentialRecordParamSchema.parse(req.params)
-    const updatedByUserId = getAuthenticatedUserId(req)
-    const body = parseCredentialMultipartBody(
-      req.body,
-      'malpractice',
-      UpdateMalpracticeSchema,
-    )
+  // updateMalpractice: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId, id: malpracticeId } =
+  //     EmployeeCredentialRecordParamSchema.parse(req.params)
+  //   const updatedByUserId = getAuthenticatedUserId(req)
+  //   const body = parseCredentialMultipartBody(
+  //     req.body,
+  //     'malpractice',
+  //     UpdateMalpracticeSchema,
+  //   )
 
-    const result = await CredentialService.updateCredential({
-      employeeId,
-      credentialId: malpracticeId,
-      data: body,
-      updatedByUserId,
-      kind: 'malpractice',
-      ...(req.file ? { document: req.file } : {}),
-    })
+  //   const result = await CredentialService.updateCredential({
+  //     employeeId,
+  //     credentialId: malpracticeId,
+  //     data: body,
+  //     updatedByUserId,
+  //     kind: 'malpractice',
+  //     ...(req.file ? { document: req.file } : {}),
+  //   })
 
-    res.status(200).json(result)
-  }),
+  //   res.status(200).json(result)
+  // }),
 
   // updateBoard: asyncHandler(async (req: Request, res: Response) => {
   //   const { id } = CredentialRecordIdSchema.parse(req.params)
@@ -693,150 +893,150 @@ export const CredentialController = {
   //   res.status(200).json(result)
   // }),
 
-  updateDegreeVerification: asyncHandler(
-    async (req: Request, res: Response) => {
-      const { employeeId, id: degreeId } =
-        EmployeeCredentialRecordParamSchema.parse(req.params)
+  // updateDegreeVerification: asyncHandler(
+  //   async (req: Request, res: Response) => {
+  //     const { employeeId, id: degreeId } =
+  //       EmployeeCredentialRecordParamSchema.parse(req.params)
 
-      const verifiedByUserId = getAuthenticatedUserId(req)
+  //     const verifiedByUserId = getAuthenticatedUserId(req)
 
-      /*
-       * Preserve JSON compatibility:
-       *
-       * JSON:
-       * {
-       *   "isVerified": true,
-       *   "remarks": "Reviewed"
-       * }
-       *
-       * Multipart:
-       * verification: JSON string
-       * evidence: File
-       */
-      const isMultipart = Boolean(req.is('multipart/form-data'))
+  //     /*
+  //      * Preserve JSON compatibility:
+  //      *
+  //      * JSON:
+  //      * {
+  //      *   "isVerified": true,
+  //      *   "remarks": "Reviewed"
+  //      * }
+  //      *
+  //      * Multipart:
+  //      * verification: JSON string
+  //      * evidence: File
+  //      */
+  //     const isMultipart = Boolean(req.is('multipart/form-data'))
 
-      const body = isMultipart
-        ? parseCredentialMultipartBody(
-            req.body,
-            'verification',
-            UpdateCredentialVerificationSchema,
-          )
-        : UpdateCredentialVerificationSchema.parse(req.body)
+  //     const body = isMultipart
+  //       ? parseCredentialMultipartBody(
+  //           req.body,
+  //           'verification',
+  //           UpdateCredentialVerificationSchema,
+  //         )
+  //       : UpdateCredentialVerificationSchema.parse(req.body)
 
-      const result = await CredentialService.updateDegreeVerification({
-        employeeId,
-        degreeId,
-        data: body,
-        verifiedByUserId,
-        ...(req.file ? { evidence: req.file } : {}),
-      })
+  //     const result = await CredentialService.updateDegreeVerification({
+  //       employeeId,
+  //       degreeId,
+  //       data: body,
+  //       verifiedByUserId,
+  //       ...(req.file ? { evidence: req.file } : {}),
+  //     })
 
-      res.status(200).json(result)
-    },
-  ),
+  //     res.status(200).json(result)
+  //   },
+  // ),
 
-  updateBoardVerification: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId, id: boardId } =
-      EmployeeCredentialRecordParamSchema.parse(req.params)
+  // updateBoardVerification: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId, id: boardId } =
+  //     EmployeeCredentialRecordParamSchema.parse(req.params)
 
-    const verifiedByUserId = getAuthenticatedUserId(req)
+  //   const verifiedByUserId = getAuthenticatedUserId(req)
 
-    /*
-     * Preserve JSON compatibility:
-     *
-     * JSON:
-     * {
-     *   "isVerified": true,
-     *   "remarks": "Reviewed"
-     * }
-     *
-     * Multipart:
-     * verification: JSON string
-     * evidence: File
-     */
-    const isMultipart = Boolean(req.is('multipart/form-data'))
+  //   /*
+  //    * Preserve JSON compatibility:
+  //    *
+  //    * JSON:
+  //    * {
+  //    *   "isVerified": true,
+  //    *   "remarks": "Reviewed"
+  //    * }
+  //    *
+  //    * Multipart:
+  //    * verification: JSON string
+  //    * evidence: File
+  //    */
+  //   const isMultipart = Boolean(req.is('multipart/form-data'))
 
-    const body = isMultipart
-      ? parseCredentialMultipartBody(
-          req.body,
-          'verification',
-          UpdateCredentialVerificationSchema,
-        )
-      : UpdateCredentialVerificationSchema.parse(req.body)
+  //   const body = isMultipart
+  //     ? parseCredentialMultipartBody(
+  //         req.body,
+  //         'verification',
+  //         UpdateCredentialVerificationSchema,
+  //       )
+  //     : UpdateCredentialVerificationSchema.parse(req.body)
 
-    const result = await CredentialService.updateBoardVerification({
-      employeeId,
-      boardId,
-      data: body,
-      verifiedByUserId,
-      ...(req.file ? { evidence: req.file } : {}),
-    })
+  //   const result = await CredentialService.updateBoardVerification({
+  //     employeeId,
+  //     boardId,
+  //     data: body,
+  //     verifiedByUserId,
+  //     ...(req.file ? { evidence: req.file } : {}),
+  //   })
 
-    res.status(200).json(result)
-  }),
+  //   res.status(200).json(result)
+  // }),
 
-  deleteDegree: asyncHandler(async (req: Request, res: Response) => {
-    const { employeeId, id: degreeId } =
-      EmployeeCredentialRecordParamSchema.parse(req.params)
+  // deleteDegree: asyncHandler(async (req: Request, res: Response) => {
+  //   const { employeeId, id: degreeId } =
+  //     EmployeeCredentialRecordParamSchema.parse(req.params)
 
-    const deletedByUserId = getAuthenticatedUserId(req)
+  //   const deletedByUserId = getAuthenticatedUserId(req)
 
-    await CredentialService.softDeleteDegree({
-      employeeId,
-      degreeId,
-      deletedByUserId,
-    })
+  //   await CredentialService.softDeleteDegree({
+  //     employeeId,
+  //     degreeId,
+  //     deletedByUserId,
+  //   })
 
-    res.status(204).send()
-  }),
+  //   res.status(204).send()
+  // }),
 
-  deleteBoard: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = CredentialRecordIdSchema.parse(req.params)
+  // deleteBoard: asyncHandler(async (req: Request, res: Response) => {
+  //   const { id } = CredentialRecordIdSchema.parse(req.params)
 
-    await CredentialService.softDeleteBoard(id, req.user?.id)
+  //   await CredentialService.softDeleteBoard(id, req.user?.id)
 
-    res.status(204).send()
-  }),
+  //   res.status(204).send()
+  // }),
 
-  deleteFellowship: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = CredentialRecordIdSchema.parse(req.params)
+  // deleteFellowship: asyncHandler(async (req: Request, res: Response) => {
+  //   const { id } = CredentialRecordIdSchema.parse(req.params)
 
-    await CredentialService.softDeleteFellowship(id, req.user?.id)
+  //   await CredentialService.softDeleteFellowship(id, req.user?.id)
 
-    res.status(204).send()
-  }),
+  //   res.status(204).send()
+  // }),
 
-  deleteMembership: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = CredentialRecordIdSchema.parse(req.params)
+  // deleteMembership: asyncHandler(async (req: Request, res: Response) => {
+  //   const { id } = CredentialRecordIdSchema.parse(req.params)
 
-    await CredentialService.softDeleteMembership(id, req.user?.id)
+  //   await CredentialService.softDeleteMembership(id, req.user?.id)
 
-    res.status(204).send()
-  }),
+  //   res.status(204).send()
+  // }),
 
-  deleteLicense: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = CredentialRecordIdSchema.parse(req.params)
+  // deleteLicense: asyncHandler(async (req: Request, res: Response) => {
+  //   const { id } = CredentialRecordIdSchema.parse(req.params)
 
-    await CredentialService.softDeleteLicense(id, req.user?.id)
+  //   await CredentialService.softDeleteLicense(id, req.user?.id)
 
-    res.status(204).send()
-  }),
+  //   res.status(204).send()
+  // }),
 
-  deleteLifeSupport: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = CredentialRecordIdSchema.parse(req.params)
+  // deleteLifeSupport: asyncHandler(async (req: Request, res: Response) => {
+  //   const { id } = CredentialRecordIdSchema.parse(req.params)
 
-    await CredentialService.softDeleteLifeSupport(id, req.user?.id)
+  //   await CredentialService.softDeleteLifeSupport(id, req.user?.id)
 
-    res.status(204).send()
-  }),
+  //   res.status(204).send()
+  // }),
 
-  deleteMalpractice: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = CredentialRecordIdSchema.parse(req.params)
+  // deleteMalpractice: asyncHandler(async (req: Request, res: Response) => {
+  //   const { id } = CredentialRecordIdSchema.parse(req.params)
 
-    await CredentialService.softDeleteMalpractice(id, req.user?.id)
+  //   await CredentialService.softDeleteMalpractice(id, req.user?.id)
 
-    res.status(204).send()
-  }),
+  //   res.status(204).send()
+  // }),
 
   // createDegree: asyncHandler(async (req: Request, res: Response) => {
   //   const { employeeId } = EmployeeCredentialParamSchema.parse(req.params)

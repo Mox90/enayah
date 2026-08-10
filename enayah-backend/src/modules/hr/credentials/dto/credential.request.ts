@@ -179,7 +179,7 @@ export const CreateLicenseSchema = z
     specialty: optionalNullableText(255),
     issueDate: optionalNullableDate,
     expiryDate: optionalNullableDate,
-    status: z.enum(['active', 'expired', 'suspended', 'revoked']),
+    //status: z.enum(['active', 'expired', 'suspended', 'revoked']),
     isPrimary: z.boolean().default(false),
   })
   .strict()
