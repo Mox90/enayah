@@ -45,6 +45,7 @@ import { useUpdatePersonalMutation } from '../../hooks/use-update-employee-profi
 import { useRenewContract } from '@/modules/hr/contracts/hooks/use-renew-contract'
 import { useContractRenewalDefaults } from '@/modules/hr/contracts/hooks/use-contract-renewal-defaults'
 import { EmployeeAvatarUploader } from './employee-avatar-uploader'
+import { usePermission } from '@/hooks/usePermission'
 
 type EmploymentStatus =
   | 'active'
@@ -151,6 +152,8 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
   const ct = useTranslations('common')
   const cont = useTranslations('contracts')
   const et = useTranslations('employees')
+  const canGoBack = usePermission('employee.view')
+  const canManageContract = usePermission('contract.update')
 
   const [editOpen, setEditOpen] = useState(false)
   const [renewOpen, setRenewOpen] = useState(false)
@@ -243,7 +246,7 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
             size='sm'
             className='text-white hover:bg-white/10 hover:text-white'
           >
-            <Link href={`/${locale}/employees`}>
+            <Link href={`/${locale}/${canGoBack ? 'employees' : 'dashboard'}`}>
               {isRtl ? (
                 <ArrowRight aria-hidden='true' className='me-2 h-4 w-4' />
               ) : (
@@ -273,43 +276,47 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
                 {ct('edit')}
               </DropdownMenuItem>
 
-              <DropdownMenuSeparator />
+              {canManageContract && (
+                <>
+                  <DropdownMenuSeparator />
 
-              <DropdownMenuItem
-                disabled={!currentContract || renewMutation.isPending}
-                onSelect={() => {
-                  if (!currentContract) {
-                    return
-                  }
+                  <DropdownMenuItem
+                    disabled={!currentContract || renewMutation.isPending}
+                    onSelect={() => {
+                      if (!currentContract) {
+                        return
+                      }
 
-                  setRenewOpen(true)
-                }}
-              >
-                <FilePenLine aria-hidden='true' className='me-2 h-4 w-4' />
-                {cont('renewContract')}
-              </DropdownMenuItem>
+                      setRenewOpen(true)
+                    }}
+                  >
+                    <FilePenLine aria-hidden='true' className='me-2 h-4 w-4' />
+                    {cont('renewContract')}
+                  </DropdownMenuItem>
 
-              <DropdownMenuItem>
-                {isRtl ? (
-                  <MoveLeft aria-hidden='true' className='me-2 h-4 w-4' />
-                ) : (
-                  <MoveRight aria-hidden='true' className='me-2 h-4 w-4' />
-                )}
+                  <DropdownMenuItem>
+                    {isRtl ? (
+                      <MoveLeft aria-hidden='true' className='me-2 h-4 w-4' />
+                    ) : (
+                      <MoveRight aria-hidden='true' className='me-2 h-4 w-4' />
+                    )}
 
-                {cont('transfer')}
-              </DropdownMenuItem>
+                    {cont('transfer')}
+                  </DropdownMenuItem>
 
-              <DropdownMenuSeparator />
+                  <DropdownMenuSeparator />
 
-              <DropdownMenuItem className='text-amber-700 focus:bg-amber-50 focus:text-amber-800 dark:text-amber-400 dark:focus:bg-amber-950/30 dark:focus:text-amber-300'>
-                <UserMinus aria-hidden='true' className='me-2 h-4 w-4' />
-                {ct('deactivate')}
-              </DropdownMenuItem>
+                  <DropdownMenuItem className='text-amber-700 focus:bg-amber-50 focus:text-amber-800 dark:text-amber-400 dark:focus:bg-amber-950/30 dark:focus:text-amber-300'>
+                    <UserMinus aria-hidden='true' className='me-2 h-4 w-4' />
+                    {ct('deactivate')}
+                  </DropdownMenuItem>
 
-              <DropdownMenuItem className='text-red-600 focus:bg-red-50 focus:text-red-700 dark:text-red-400 dark:focus:bg-red-950/30 dark:focus:text-red-300'>
-                <UserX aria-hidden='true' className='me-2 h-4 w-4' />
-                {ct('terminate')}
-              </DropdownMenuItem>
+                  <DropdownMenuItem className='text-red-600 focus:bg-red-50 focus:text-red-700 dark:text-red-400 dark:focus:bg-red-950/30 dark:focus:text-red-300'>
+                    <UserX aria-hidden='true' className='me-2 h-4 w-4' />
+                    {ct('terminate')}
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

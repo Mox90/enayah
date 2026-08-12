@@ -409,20 +409,14 @@ const PersonalTab = ({ personal }: Props) => {
       {/* Country */}
       {/* ---------------------------- */}
 
-      <Card className='transition-all duration-200 hover:shadow-md'>
+      {/* <Card className='transition-all duration-200 hover:shadow-md'>
         <CardHeader className='flex flex-row items-center justify-between'>
           <CardTitle className='flex items-center gap-2 text-blue-600'>
             <div className='flex h-10 w-10 items-center justify-center rounded-xl'>
-              {/* <Earth className='h-5 w-5' /> */}
               <span className='text-3xl'>🌏</span>
             </div>
             {et('countryInfo')}
           </CardTitle>
-
-          {/* <Button size='sm' variant='outline'>
-            <Pencil className='mr-2 h-4 w-4' />
-            Edit
-          </Button> */}
         </CardHeader>
 
         <CardContent>
@@ -460,7 +454,7 @@ const PersonalTab = ({ personal }: Props) => {
             />
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       {isLoading ? (
         <div className='text-sm text-muted-foreground'>
