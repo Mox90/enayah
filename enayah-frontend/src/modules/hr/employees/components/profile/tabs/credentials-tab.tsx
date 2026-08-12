@@ -43,7 +43,8 @@ import {
 } from '@/modules/hr/credentials/hooks/use-license-mutations'
 import {
   FellowshipDialog,
-  FellowshipFormValue,
+  type FellowshipFormSubmitValue,
+  type FellowshipFormValue,
 } from '@/components/dialogs/fellowship-dialog'
 import {
   useCreateFellowship,
@@ -369,6 +370,23 @@ const CredentialsTab = ({ employeeId }: Props) => {
     await createLicenseMutation.mutateAsync(payload)
   }
 
+  async function handleFellowshipSubmit(
+    value: FellowshipFormSubmitValue,
+  ): Promise<void> {
+    const { id, clientId: _clientId, ...payload } = value
+
+    if (id) {
+      await updateFellowshipMutation.mutateAsync({
+        id,
+        ...payload,
+      })
+
+      return
+    }
+
+    await createFellowshipMutation.mutateAsync(payload)
+  }
+
   async function handleCredentialVerificationSubmit(
     value: CredentialVerificationSubmitValue,
   ): Promise<void> {
@@ -559,6 +577,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
             expiryDate: license.expiryDate,
             //status: license.status,
             isPrimary: license.isPrimary,
+            isVerified: license.isVerified ?? false,
             document: license.document ?? null,
           })
 
@@ -611,7 +630,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
             specialty: fellowship.specialty ?? null,
             issueDate: fellowship.issueDate ?? null,
             expiryDate: fellowship.expiryDate ?? null,
-            documentFileId: fellowship.documentFileId ?? null,
+            //documentFileId: fellowship.documentFileId ?? null,
             isVerified: fellowship.isVerified ?? false,
           })
 
@@ -632,36 +651,15 @@ const CredentialsTab = ({ employeeId }: Props) => {
 
       <FellowshipDialog
         open={activeDialog === 'fellowship'}
-        onOpenChange={(open) => {
-          if (!open) setActiveDialog(null)
-        }}
+        employeeId={employeeId}
         initialValue={editingFellowship}
-        onSubmit={async (form) => {
-          if (editingFellowship?.id) {
-            await updateFellowshipMutation.mutateAsync({
-              id: editingFellowship.id,
-              fellowshipName: form.fellowshipName,
-              abbreviation: form.abbreviation ?? null,
-              issuingBody: form.issuingBody,
-              specialty: form.specialty ?? null,
-              issueDate: form.issueDate ?? null,
-              expiryDate: form.expiryDate ?? null,
-              documentFileId: form.documentFileId ?? null,
-              isVerified: form.isVerified ?? false,
-            })
-          } else {
-            await createFellowshipMutation.mutateAsync({
-              fellowshipName: form.fellowshipName,
-              abbreviation: form.abbreviation ?? null,
-              issuingBody: form.issuingBody,
-              specialty: form.specialty ?? null,
-              issueDate: form.issueDate ?? null,
-              expiryDate: form.expiryDate ?? null,
-              documentFileId: form.documentFileId ?? null,
-              isVerified: form.isVerified ?? false,
-            })
+        onOpenChange={(open) => {
+          if (!open) {
+            setActiveDialog(null)
+            setEditingFellowship(null)
           }
         }}
+        onSubmit={handleFellowshipSubmit}
       />
 
       <CredentialMemberships

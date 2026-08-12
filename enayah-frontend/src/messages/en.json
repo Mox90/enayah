@@ -479,6 +479,8 @@
     "licenseNum": "License #",
     "fellowLabel": "Fellowships",
     "addFellow": "Add Fellowship",
+    "fellowshipName": "Fellowship Name *",
+    "fellowAbb": "Abbreviation",
     "memberLabel": "Memberships",
     "addMember": "Add Membership",
     "lifeSupportLabel": "Life Support Certifications",
@@ -603,6 +605,14 @@
       "currentTitle": "Current board certificate",
       "currentDescription": "The document currently attached to this board certification.",
       "replaceTitle": "Replace board certificate",
+      "replaceDescription": "Upload a new document to replace the current certificate."
+    },
+    "fellowshipDocument": {
+      "title": "Fellowship certificate",
+      "description": "Upload the fellowship certification document.",
+      "currentTitle": "Current fellowship certificate",
+      "currentDescription": "The document currently attached to this fellowship certification.",
+      "replaceTitle": "Replace fellowship certificate",
       "replaceDescription": "Upload a new document to replace the current certificate."
     },
     "degree": "degree",

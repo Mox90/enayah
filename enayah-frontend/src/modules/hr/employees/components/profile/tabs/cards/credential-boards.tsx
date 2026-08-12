@@ -149,10 +149,12 @@ export function CredentialBoards({
                         /> */}
                         <VerificationBadge verified={isVerified} />
 
-                        <ExpiryStatusBadge
-                          expiryDate={board.expiryDate}
-                          showAttentionPulse
-                        />
+                        {board.expiryDate && (
+                          <ExpiryStatusBadge
+                            expiryDate={board.expiryDate}
+                            showAttentionPulse
+                          />
+                        )}
                       </div>
                     </div>
 

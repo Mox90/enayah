@@ -1,29 +1,47 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import {
-  CreateFellowshipPayload,
   credentialFellowshipService,
-  UpdateFellowshipPayload,
+  type CreateFellowshipPayload,
+  type UpdateFellowshipPayload,
 } from '../services/credential-fellowship.service'
+
+type CreateFellowshipMutationPayload = Omit<
+  CreateFellowshipPayload,
+  'employeeId'
+>
+
+type UpdateFellowshipMutationPayload = Omit<
+  UpdateFellowshipPayload,
+  'employeeId'
+>
 
 export function useCreateFellowship(employeeId: string) {
   const queryClient = useQueryClient()
   const t = useTranslations('credentials')
+  const locale = useLocale()
+  const isRtl = locale === 'ar' //locale.includes('/ar')
+
   return useMutation({
-    mutationFn: (payload: Omit<CreateFellowshipPayload, 'employeeId'>) =>
+    mutationFn: (payload: CreateFellowshipMutationPayload) =>
       credentialFellowshipService.create({
         employeeId,
         ...payload,
       }),
+
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['employee-credentials', employeeId],
       })
-      toast.success(t.rich('createSuccess', { name: 'Fellowship' }))
+      toast.success(
+        t.rich('createSuccess', { name: isRtl ? 'الزمالة' : 'Fellowship' }),
+      )
     },
     onError: () => {
-      toast.error(t.rich('createError', { name: 'fellowship' }))
+      toast.error(
+        t.rich('createError', { name: isRtl ? 'الزمالة' : 'fellowship' }),
+      )
     },
   })
 }
@@ -31,26 +49,33 @@ export function useCreateFellowship(employeeId: string) {
 export function useUpdateFellowship(employeeId: string) {
   const queryClient = useQueryClient()
   const t = useTranslations('credentials')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
 
   return useMutation({
-    mutationFn: (payload: UpdateFellowshipPayload) =>
-      credentialFellowshipService.update(payload),
+    mutationFn: (payload: UpdateFellowshipMutationPayload) =>
+      credentialFellowshipService.update({ employeeId, ...payload }),
 
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: ['employee-credentials', employeeId],
       })
+
       toast.success(
         t.rich('updateSuccess', {
-          name: `Fellowship ${variables.fellowshipName}`,
+          name: isRtl
+            ? `الزمالة ${variables.fellowshipName}`
+            : `Fellowship ${variables.fellowshipName}`,
         }),
       )
     },
 
-    onError: (error, variables) => {
+    onError: (_error, variables) => {
       toast.error(
         t.rich('updateError', {
-          name: `fellowship ${variables.fellowshipName}`,
+          name: isRtl
+            ? `الزمالة ${variables.fellowshipName}`
+            : `fellowship ${variables.fellowshipName}`,
         }),
       )
     },
@@ -60,18 +85,26 @@ export function useUpdateFellowship(employeeId: string) {
 export function useDeleteFellowship(employeeId: string) {
   const queryClient = useQueryClient()
   const t = useTranslations('credentials')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
+
   return useMutation({
-    mutationFn: (id: string) => credentialFellowshipService.delete(id),
+    mutationFn: (id: string) =>
+      credentialFellowshipService.delete({ employeeId, id }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['employee-credentials', employeeId],
       })
 
-      toast.success(t.rich('deleteSuccess', { name: 'Fellowship' }))
+      toast.success(
+        t.rich('deleteSuccess', { name: isRtl ? 'الزمالة' : 'Fellowship' }),
+      )
     },
 
     onError: () => {
-      toast.error(t.rich('deleteError', { name: 'fellowship' }))
+      toast.error(
+        t.rich('deleteError', { name: isRtl ? 'الزمالة' : 'fellowship' }),
+      )
     },
   })
 }

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 
 import { RowActions } from '@/components/dialogs/row-actions'
 import { ExpiryStatusBadge } from '@/components/badges/expiry-status-badge'
+import { CurrentBadge } from '@/components/badges/current-status-badge'
 
 function dash(value?: string | number | boolean | null) {
   if (value === true) return 'Yes'
@@ -235,12 +236,13 @@ export function PersonalDetailsCards({
                         />
 
                         {item.isCurrent && (
-                          <Badge
-                            variant='secondary'
-                            className='rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-600 shadow-sm dark:text-emerald-400'
-                          >
-                            {ct('current')}
-                          </Badge>
+                          // <Badge
+                          //   variant='secondary'
+                          //   className='rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-600 shadow-sm dark:text-emerald-400'
+                          // >
+                          //   {ct('current')}
+                          // </Badge>
+                          <CurrentBadge label={ct('current')} />
                         )}
 
                         <div className='relative z-20 shrink-0'>
