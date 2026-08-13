@@ -87,7 +87,7 @@ export const credentialLifeSupportService = {
 
   update: async ({ employeeId, id, ...payload }: UpdateLifeSupportPayload) => {
     const response = await api.patch(
-      `${API_ENDPOINTS.hr.credentials}/life-support/${employeeId}/life-support/${id}`,
+      `${API_ENDPOINTS.hr.credentials}/employee/${employeeId}/life-support/${id}`,
       buildLifeSupportFormData(payload),
     )
 
