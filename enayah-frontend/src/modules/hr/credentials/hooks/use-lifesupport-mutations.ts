@@ -1,29 +1,48 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import {
-  CreateLifeSupportPayload,
   credentialLifeSupportService,
-  UpdateLifeSupportPayload,
+  type CreateLifeSupportPayload,
+  type UpdateLifeSupportPayload,
 } from '../services/credential-lifesupport.service'
+
+type CreateLifeSupportMutationPayload = Omit<
+  CreateLifeSupportPayload,
+  'employeeId'
+>
+
+type UpdateLifeSupportMutationPayload = Omit<
+  UpdateLifeSupportPayload,
+  'employeeId'
+>
 
 export function useCreateLifeSupport(employeeId: string) {
   const queryClient = useQueryClient()
   const t = useTranslations('credentials')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
+
   return useMutation({
-    mutationFn: (payload: Omit<CreateLifeSupportPayload, 'employeeId'>) =>
+    mutationFn: (payload: CreateLifeSupportMutationPayload) =>
       credentialLifeSupportService.create({
         employeeId,
         ...payload,
       }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
         queryKey: ['employee-credentials', employeeId],
       })
-      toast.success(t.rich('createSuccess', { name: 'Life Support' }))
+      toast.success(
+        t.rich('createSuccess', {
+          name: isRtl ? 'دعم الحياة' : 'Life Support',
+        }),
+      )
     },
     onError: () => {
-      toast.error(t.rich('createError', { name: 'life support' }))
+      toast.error(
+        t.rich('createError', { name: isRtl ? 'دعم الحياة' : 'Life Support' }),
+      )
     },
   })
 }
@@ -31,23 +50,34 @@ export function useCreateLifeSupport(employeeId: string) {
 export function useUpdateLifeSupport(employeeId: string) {
   const queryClient = useQueryClient()
   const t = useTranslations('credentials')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
 
   return useMutation({
-    mutationFn: (payload: UpdateLifeSupportPayload) =>
-      credentialLifeSupportService.update(payload),
+    mutationFn: (payload: UpdateLifeSupportMutationPayload) =>
+      credentialLifeSupportService.update({ employeeId, ...payload }),
 
-    onSuccess: (_data, variables) => {
-      queryClient.invalidateQueries({
+    onSuccess: async (_data, variables) => {
+      await queryClient.invalidateQueries({
         queryKey: ['employee-credentials', employeeId],
       })
+
       toast.success(
-        t.rich('updateSuccess', { name: `Life Support ${variables.type}` }),
+        t.rich('updateSuccess', {
+          name: isRtl
+            ? `دعم الحياة ${variables.type}`
+            : `Life Support ${variables.type}`,
+        }),
       )
     },
 
-    onError: (error, variables) => {
+    onError: (_error, variables) => {
       toast.error(
-        t.rich('updateError', { name: `life support ${variables.type}` }),
+        t.rich('updateError', {
+          name: isRtl
+            ? `دعم الحياة ${variables.type}`
+            : `Life Support ${variables.type}`,
+        }),
       )
     },
   })
@@ -56,18 +86,28 @@ export function useUpdateLifeSupport(employeeId: string) {
 export function useDeleteLifeSupport(employeeId: string) {
   const queryClient = useQueryClient()
   const t = useTranslations('credentials')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
+
   return useMutation({
-    mutationFn: (id: string) => credentialLifeSupportService.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
+    mutationFn: (id: string) =>
+      credentialLifeSupportService.delete({ employeeId, id }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
         queryKey: ['employee-credentials', employeeId],
       })
 
-      toast.success(t.rich('deleteSuccess', { name: 'Life Support' }))
+      toast.success(
+        t.rich('deleteSuccess', {
+          name: isRtl ? 'دعم الحياة' : 'Life Support',
+        }),
+      )
     },
 
     onError: () => {
-      toast.error(t.rich('deleteError', { name: 'life support' }))
+      toast.error(
+        t.rich('deleteError', { name: isRtl ? 'دعم الحياة' : 'Life Support' }),
+      )
     },
   })
 }

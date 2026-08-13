@@ -94,12 +94,15 @@ export function ExpiryStatusBadge({
 
   // Track midnight boundary updates when no explicit referenceDate is provided
   const [today, setToday] = useState<Date>(() => referenceDate ?? new Date())
+  //const [today, setToday] = useState<Date>(() => new Date())
 
   // If referenceDate prop changes, keep state synchronized safely
   const effectiveReferenceDate = referenceDate ?? today
 
   useEffect(() => {
     if (referenceDate) return
+
+    //setToday(new Date())
 
     const checkMidnight = () => {
       const now = new Date()

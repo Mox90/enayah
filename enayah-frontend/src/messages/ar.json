@@ -462,6 +462,11 @@
     "noBoard": "لا توجد شهادات معتمدة من المجلس",
     "addBoard": "إضافة المجلس",
     "editBoard": "تعديل المجلس",
+    "editLicense": "تعديل ترخيص",
+    "editFellow": "تعديل الزمالة",
+    "addMembership": "إضافة عضوية",
+    "editMembership": "تعديل عضوية",
+    "editLifeSupport": "تعديل دعم الحياة",
     "boardSub": "أدخل تفاصيل مؤهلات الموظف.",
     "boardSub2": "شهادة المجلس",
     "boardSub3": "أدخل اسم المجلس، والتخصص، وسلطة الإصدار.",
@@ -616,6 +621,30 @@
       "currentDescription": "المستند المرفق حالياً بشهادة الزمالة.",
       "replaceTitle": "استبدال شهادة الزمالة",
       "replaceDescription": "قم برفع مستند جديد لاستبدال الشهادة الحالية."
+    },
+    "membershipDocument": {
+      "title": "شهادة عضوية",
+      "description": "قم برفع مستند شهادة عضوية.",
+      "currentTitle": "شهادة عضوية الحالية",
+      "currentDescription": "المستند المرفق حالياً بشهادة عضوية.",
+      "replaceTitle": "استبدال شهادة عضوية",
+      "replaceDescription": "قم برفع مستند جديد لاستبدال الشهادة الحالية."
+    },
+    "lifeSupportDocument": {
+      "title": "Life Support certificate",
+      "description": "Upload the Life Support certification document.",
+      "currentTitle": "Current Life Support certificate",
+      "currentDescription": "The document currently attached to this Life Support certification.",
+      "replaceTitle": "Replace Life Support certificate",
+      "replaceDescription": "Upload a new document to replace the current certificate."
+    },
+    "malpracticeDocument": {
+      "title": "Malpractice certificate",
+      "description": "Upload the malpractice certification document.",
+      "currentTitle": "Current malpractice certificate",
+      "currentDescription": "The document currently attached to this malpractice insurance policy.",
+      "replaceTitle": "Replace malpractice certificate",
+      "replaceDescription": "Upload a new document to replace the current insurance policy."
     },
     "degree": "degree",
     "board": "board",

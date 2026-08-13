@@ -53,7 +53,8 @@ import {
 } from '@/modules/hr/credentials/hooks/use-fellowship-mutations'
 import {
   LifeSupportDialog,
-  LifeSupportFormValue,
+  type LifeSupportFormSubmitValue,
+  type LifeSupportFormValue,
 } from '@/components/dialogs/life-support-dialog'
 import {
   useCreateLifeSupport,
@@ -62,7 +63,8 @@ import {
 } from '@/modules/hr/credentials/hooks/use-lifesupport-mutations'
 import {
   MembershipDialog,
-  MembershipFormValue,
+  type MembershipFormSubmitValue,
+  type MembershipFormValue,
 } from '@/components/dialogs/membership-dialog'
 import {
   useCreateMembership,
@@ -387,6 +389,40 @@ const CredentialsTab = ({ employeeId }: Props) => {
     await createFellowshipMutation.mutateAsync(payload)
   }
 
+  async function handleMembershipSubmit(
+    value: MembershipFormSubmitValue,
+  ): Promise<void> {
+    const { id, clientId: _clientId, ...payload } = value
+
+    if (id) {
+      await updateMembershipMutation.mutateAsync({
+        id,
+        ...payload,
+      })
+
+      return
+    }
+
+    await createMembershipMutation.mutateAsync(payload)
+  }
+
+  async function handleLifeSupportSubmit(
+    value: LifeSupportFormSubmitValue,
+  ): Promise<void> {
+    const { id, clientId: _clientId, ...payload } = value
+
+    if (id) {
+      await updateLifeSupportMutation.mutateAsync({
+        id,
+        ...payload,
+      })
+
+      return
+    }
+
+    await createLifeSupportMutation.mutateAsync(payload)
+  }
+
   async function handleCredentialVerificationSubmit(
     value: CredentialVerificationSubmitValue,
   ): Promise<void> {
@@ -680,7 +716,6 @@ const CredentialsTab = ({ employeeId }: Props) => {
             membershipLevel: membership.membershipLevel ?? null,
             startDate: membership.startDate ?? null,
             expiryDate: membership.expiryDate ?? null,
-            documentFileId: membership.documentFileId ?? null,
             isVerified: membership.isVerified ?? false,
           })
 
@@ -701,34 +736,15 @@ const CredentialsTab = ({ employeeId }: Props) => {
 
       <MembershipDialog
         open={activeDialog === 'membership'}
-        onOpenChange={(open) => {
-          if (!open) setActiveDialog(null)
-        }}
+        employeeId={employeeId}
         initialValue={editingMembership}
-        onSubmit={async (form) => {
-          if (editingMembership?.id) {
-            await updateMembershipMutation.mutateAsync({
-              id: editingMembership.id,
-              organization: form.organization,
-              membershipNumber: form.membershipNumber ?? null,
-              membershipLevel: form.membershipLevel ?? null,
-              startDate: form.startDate ?? null,
-              expiryDate: form.expiryDate ?? null,
-              isVerified: form.isVerified ?? false,
-              documentFileId: form.documentFileId ?? null,
-            })
-          } else {
-            await createMembershipMutation.mutateAsync({
-              organization: form.organization,
-              membershipNumber: form.membershipNumber ?? null,
-              membershipLevel: form.membershipLevel ?? null,
-              startDate: form.startDate ?? null,
-              expiryDate: form.expiryDate ?? null,
-              isVerified: form.isVerified ?? false,
-              documentFileId: form.documentFileId ?? null,
-            })
+        onOpenChange={(open) => {
+          if (!open) {
+            setActiveDialog(null)
+            setEditingMembership(null)
           }
         }}
+        onSubmit={handleMembershipSubmit}
       />
 
       <CredentialLifeSupport
@@ -749,7 +765,6 @@ const CredentialsTab = ({ employeeId }: Props) => {
             certificateNumber: lifeSupport.certificateNumber ?? null,
             issueDate: lifeSupport.issueDate ?? null,
             expiryDate: lifeSupport.expiryDate,
-            documentFileId: lifeSupport.documentFileId ?? null,
             isVerified: lifeSupport.isVerified ?? false,
           })
 
@@ -770,34 +785,15 @@ const CredentialsTab = ({ employeeId }: Props) => {
 
       <LifeSupportDialog
         open={activeDialog === 'life_support'}
-        onOpenChange={(open) => {
-          if (!open) setActiveDialog(null)
-        }}
+        employeeId={employeeId}
         initialValue={editingLifeSupport}
-        onSubmit={async (form) => {
-          if (editingLifeSupport?.id) {
-            await updateLifeSupportMutation.mutateAsync({
-              id: editingLifeSupport.id,
-              type: form.type,
-              provider: form.provider,
-              certificateNumber: form.certificateNumber ?? null,
-              issueDate: form.issueDate ?? null,
-              expiryDate: form.expiryDate,
-              isVerified: form.isVerified ?? false,
-              documentFileId: form.documentFileId ?? null,
-            })
-          } else {
-            await createLifeSupportMutation.mutateAsync({
-              type: form.type,
-              provider: form.provider,
-              certificateNumber: form.certificateNumber ?? null,
-              issueDate: form.issueDate ?? null,
-              expiryDate: form.expiryDate,
-              isVerified: form.isVerified ?? false,
-              documentFileId: form.documentFileId ?? null,
-            })
+        onOpenChange={(open) => {
+          if (!open) {
+            setActiveDialog(null)
+            setEditingLifeSupport(null)
           }
         }}
+        onSubmit={handleLifeSupportSubmit}
       />
 
       <CredentialMalpractice

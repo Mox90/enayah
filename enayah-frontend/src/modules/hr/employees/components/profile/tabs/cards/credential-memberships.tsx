@@ -14,6 +14,11 @@ import { RowActions } from '@/components/dialogs/row-actions'
 import { MembershipInput } from '@/modules/hr/onboarding/types/onboarding.types'
 import { formatDate, toPersianDigits } from '@/utils/utilities'
 import { DetailItem } from '@/components/forms/form-detail-item'
+import { cn } from '@/lib/utils'
+import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
+import { membershipDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
+import { CredentialVerificationSummary } from '@/modules/hr/credentials/components/credential-verification-summary'
+import { membershipVerificationService } from '@/modules/hr/credentials/services/credential-verification.service'
 
 interface Props {
   memberships: MembershipInput[]
@@ -117,6 +122,11 @@ export function CredentialMemberships({
             {memberships.map((membership, index) => {
               const membershipId = membership.id
 
+              const isVerified =
+                membership.verification?.isVerified ??
+                membership.isVerified ??
+                false
+
               const displayedMembershipNumber =
                 membership.membershipNumber && isRtl
                   ? toPersianDigits(membership.membershipNumber)
@@ -134,7 +144,17 @@ export function CredentialMemberships({
                     membershipId ??
                     `${membership.organization}-${membership.membershipNumber ?? index}`
                   }
-                  className='relative rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md sm:p-5'
+                  //className='relative rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md sm:p-5'
+                  className={cn(
+                    //'relative flex h-full min-w-0 flex-col rounded-xl border bg-card',
+                    //'p-4 shadow-sm transition-all duration-200 sm:p-5',
+                    //'hover:border-primary/20 hover:shadow-md',
+                    'relative flex min-w-0 flex-col rounded-xl border bg-card',
+                    'p-4 shadow-sm transition-all duration-200 sm:p-5',
+                    'hover:border-primary/20 hover:shadow-md',
+                    isVerified &&
+                      'border-emerald-500/20 shadow-[0_8px_30px_rgba(16,185,129,0.04)]',
+                  )}
                 >
                   <div className='mb-5 flex items-start justify-between gap-4 border-b pb-4'>
                     <div className='min-w-0'>
@@ -152,9 +172,7 @@ export function CredentialMemberships({
                       )}
 
                       <div className='mt-3 flex flex-wrap items-center gap-2'>
-                        <VerificationBadge
-                          verified={membership.isVerified ?? false}
-                        />
+                        <VerificationBadge verified={isVerified} />
 
                         {membershipLevelLabel && (
                           <Badge
@@ -165,10 +183,12 @@ export function CredentialMemberships({
                           </Badge>
                         )}
 
-                        <ExpiryStatusBadge
-                          expiryDate={membership.expiryDate}
-                          showAttentionPulse
-                        />
+                        {membership.expiryDate && (
+                          <ExpiryStatusBadge
+                            expiryDate={membership.expiryDate}
+                            showAttentionPulse
+                          />
+                        )}
                       </div>
                     </div>
 
@@ -182,6 +202,11 @@ export function CredentialMemberships({
                         onDelete={
                           membershipId && onDelete
                             ? () => onDelete(membershipId)
+                            : undefined
+                        }
+                        onVerify={
+                          membershipId && onVerify
+                            ? () => onVerify(membershipId)
                             : undefined
                         }
                         confirmDelete
@@ -207,6 +232,36 @@ export function CredentialMemberships({
                       value={formatDate(membership.expiryDate, isRtl)}
                     />
                   </div>
+                  {employeeId && membershipId && membership.document && (
+                    <div className='mt-5 border-t pt-4'>
+                      <p className='mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+                        {ct('credentialDocument.currentTitle')}
+                      </p>
+
+                      <CredentialDocumentSummary
+                        employeeId={employeeId}
+                        credentialId={membershipId}
+                        document={membership.document}
+                        service={membershipDocumentService}
+                      />
+                    </div>
+                  )}
+                  {employeeId &&
+                    membershipId &&
+                    isVerified &&
+                    membership.verification && (
+                      <CredentialVerificationSummary
+                        employeeId={employeeId}
+                        credentialId={membershipId}
+                        verification={membership.verification}
+                        service={membershipVerificationService}
+                        {...(onVerify
+                          ? {
+                              onManage: () => onVerify(membershipId),
+                            }
+                          : {})}
+                      />
+                    )}
                 </article>
               )
             })}

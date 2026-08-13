@@ -7,6 +7,11 @@ import { FormDialog } from '../forms'
 import { useLocale, useTranslations } from 'next-intl'
 import { Footer } from '../footer/footer'
 import { Save } from 'lucide-react'
+import { CredentialDocumentMetadata } from '@/modules/hr/credentials/types/credential-document.types'
+import { cn } from '@/lib/utils'
+import { membershipDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
+import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
+import { CredentialDocumentDropzone } from '../forms/credential-document-dropzone'
 
 export type MembershipFormValue = {
   id?: string
@@ -15,16 +20,46 @@ export type MembershipFormValue = {
   membershipLevel?: string | null
   startDate?: string | null
   expiryDate?: string | null
-  documentFileId?: string | null
-  isVerified: boolean
+
+  /*
+   * Read-only verification state.
+   * It is not submitted through the normal board form.
+   */
+  isVerified?: boolean | null
+
+  /*
+   * Existing document metadata when editing.
+   * This is not submitted to the backend.
+   */
+  document?: CredentialDocumentMetadata | null
+}
+
+export type MembershipFormSubmitValue = {
+  id?: string
+  clientId?: string
+  organization: string
+  membershipNumber?: string | null
+  membershipLevel?: string | null
+  startDate?: string | null
+  expiryDate?: string | null
+  documentFile: File | null
 }
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialValue?: MembershipFormValue | null
-  onSubmit: (value: MembershipFormValue) => void | Promise<void>
+  onSubmit: (value: MembershipFormSubmitValue) => void | Promise<void>
   generateId?: boolean
+  /*
+   * Existing employee profile:
+   * true — allow immediate upload.
+   *
+   * Onboarding:
+   * false — employee record may not exist yet.
+   */
+  allowDocumentUpload?: boolean
+  employeeId?: string
 }
 
 const emptyValue: MembershipFormValue = {
@@ -33,8 +68,8 @@ const emptyValue: MembershipFormValue = {
   membershipLevel: null,
   startDate: null,
   expiryDate: null,
-  documentFileId: null,
   isVerified: false,
+  document: null,
 }
 
 function MembershipDialogContent({
@@ -42,26 +77,34 @@ function MembershipDialogContent({
   onOpenChange,
   onSubmit,
   generateId,
+  allowDocumentUpload,
+  employeeId,
 }: {
   initialValue?: MembershipFormValue | null
   onOpenChange: (open: boolean) => void
-  onSubmit: (value: MembershipFormValue) => void | Promise<void>
+  onSubmit: (value: MembershipFormSubmitValue) => void | Promise<void>
   generateId: boolean
+  allowDocumentUpload: boolean
+  employeeId?: string | undefined
 }) {
-  const [form, setForm] = useState<MembershipFormValue>(
-    initialValue ?? emptyValue,
-  )
-
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
   const t = useTranslations('credentials')
   const locale = useLocale()
   const isRtl = locale.toLowerCase().startsWith('ar')
 
+  const [form, setForm] = useState<MembershipFormValue>(
+    initialValue ?? emptyValue,
+  )
+  const [selectedDocument, setSelectedDocument] = useState<File | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const currentDocument = initialValue?.document ?? null
+  const canAccessCurrentDocument = Boolean(
+    employeeId && initialValue?.id && currentDocument,
+  )
+
   const organization = form.organization.trim()
-  // const membershipNumber = form.membershipNumber?.trim()
-  // const startDate = form.startDate?.trim()
-  // const expiryDate = form.expiryDate?.trim()
+  const membershipNumber = form.membershipNumber?.trim() || null
+  const startDate = form.startDate?.trim() || null
+  const expiryDate = form.expiryDate?.trim() || null
 
   function update<K extends keyof MembershipFormValue>(
     field: K,
@@ -81,7 +124,8 @@ function MembershipDialogContent({
     return `membership-${Date.now()}-${Math.random().toString(36).slice(2)}`
   }
 
-  const formInvalid = !organization
+  const formInvalid =
+    !organization || Boolean(startDate && expiryDate && expiryDate < startDate)
 
   function closeDialog() {
     if (isSubmitting) return
@@ -95,15 +139,17 @@ function MembershipDialogContent({
     setIsSubmitting(true)
 
     try {
+      const clientId = generateId ? (form.id ?? createClientId()) : null
+
       await onSubmit({
-        ...form,
-        id: form.id ?? (generateId ? createClientId() : undefined),
-        membershipNumber: form.membershipNumber || null,
+        ...(!generateId && form.id ? { id: form.id } : {}),
+        ...(generateId && clientId ? { clientId } : {}),
+        organization,
+        membershipNumber,
         membershipLevel: form.membershipLevel || null,
-        startDate: form.startDate || null,
-        expiryDate: form.expiryDate || null,
-        documentFileId: form.documentFileId || null,
-        isVerified: form.isVerified ?? false,
+        startDate,
+        expiryDate,
+        documentFile: allowDocumentUpload ? selectedDocument : null,
       })
 
       onOpenChange(false)
@@ -153,6 +199,56 @@ function MembershipDialogContent({
             </div>
           </div>
         </section>
+
+        {allowDocumentUpload && (
+          <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+            {canAccessCurrentDocument &&
+              employeeId &&
+              initialValue?.id &&
+              currentDocument && (
+                <div className='mb-5'>
+                  <div className='mb-3'>
+                    <h3 className='text-sm font-semibold text-foreground'>
+                      {t('membershipDocument.currentTitle')}
+                    </h3>
+
+                    <p className='text-xs text-muted-foreground'>
+                      {t('membershipDocument.currentDescription')}
+                    </p>
+                  </div>
+
+                  <CredentialDocumentSummary
+                    employeeId={employeeId}
+                    credentialId={initialValue.id}
+                    document={currentDocument}
+                    service={membershipDocumentService}
+                  />
+                </div>
+              )}
+
+            <div className={cn(canAccessCurrentDocument && 'border-t pt-5')}>
+              <div className='mb-4'>
+                <h3 className='text-sm font-semibold text-foreground'>
+                  {canAccessCurrentDocument
+                    ? t('membershipDocument.replaceTitle')
+                    : t('membershipDocument.title')}
+                </h3>
+
+                <p className='text-xs text-muted-foreground'>
+                  {canAccessCurrentDocument
+                    ? t('membershipDocument.replaceDescription')
+                    : t('membershipDocument.description')}
+                </p>
+              </div>
+
+              <CredentialDocumentDropzone
+                value={selectedDocument}
+                onChange={setSelectedDocument}
+                disabled={isSubmitting}
+              />
+            </div>
+          </section>
+        )}
 
         <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
           <div className='mb-4'>
@@ -210,14 +306,18 @@ export function MembershipDialog({
   initialValue,
   onSubmit,
   generateId = false,
+  allowDocumentUpload = true,
+  employeeId,
 }: Props) {
+  const crt = useTranslations('credentials')
+
   const dialogKey = initialValue?.id ?? (open ? 'add-membership' : 'closed')
 
   return (
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Membership' : 'Add Membership'}
+      title={initialValue ? crt('editMembership') : crt('addMembership')}
       description="Enter the employee's professional membership details."
       className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'
@@ -229,6 +329,8 @@ export function MembershipDialog({
           onOpenChange={onOpenChange}
           onSubmit={onSubmit}
           generateId={generateId}
+          allowDocumentUpload={allowDocumentUpload}
+          employeeId={employeeId}
         />
       )}
     </FormDialog>
