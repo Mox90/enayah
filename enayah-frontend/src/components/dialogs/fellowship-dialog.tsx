@@ -257,14 +257,14 @@ function FellowshipDialogContent({
               <div className='mb-4'>
                 <h3 className='text-sm font-semibold text-foreground'>
                   {canAccessCurrentDocument
-                    ? t('boardDocument.replaceTitle')
-                    : t('boardDocument.title')}
+                    ? t('fellowshipDocument.replaceTitle')
+                    : t('fellowshipDocument.title')}
                 </h3>
 
                 <p className='text-xs text-muted-foreground'>
                   {canAccessCurrentDocument
-                    ? t('boardDocument.replaceDescription')
-                    : t('boardDocument.description')}
+                    ? t('fellowshipDocument.replaceDescription')
+                    : t('fellowshipDocument.description')}
                 </p>
               </div>
 

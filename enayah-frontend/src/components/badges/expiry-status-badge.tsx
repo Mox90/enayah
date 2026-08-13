@@ -1,4 +1,4 @@
-// src/components/badges/expiry-status-badge.tsx
+// enayah-frontend/src/components/badges/expiry-status-badge.tsx
 
 'use client'
 
@@ -9,7 +9,7 @@ import {
   startOfDay,
 } from 'date-fns'
 import { useLocale, useTranslations } from 'next-intl'
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { AlertOctagon, AlertTriangle, Clock, CheckCircle } from 'lucide-react'
 
 import { StatusBadge } from '@/components/badges/status-badge'
@@ -92,9 +92,32 @@ export function ExpiryStatusBadge({
   const wrapperRef = useRef<HTMLDivElement>(null)
   const [isInView, setIsInView] = useState(false)
 
-  const { status, daysRemaining } = useMemo(
-    () => getExpiryBadgeStatus(expiryDate, referenceDate),
-    [expiryDate, referenceDate],
+  // Track midnight boundary updates when no explicit referenceDate is provided
+  const [today, setToday] = useState<Date>(() => referenceDate ?? new Date())
+
+  // If referenceDate prop changes, keep state synchronized safely
+  const effectiveReferenceDate = referenceDate ?? today
+
+  useEffect(() => {
+    if (referenceDate) return
+
+    const checkMidnight = () => {
+      const now = new Date()
+      setToday((prev) => {
+        if (prev.toDateString() !== now.toDateString()) {
+          return now
+        }
+        return prev
+      })
+    }
+
+    const interval = setInterval(checkMidnight, 60 * 1000)
+    return () => clearInterval(interval)
+  }, [referenceDate])
+
+  const { status, daysRemaining } = getExpiryBadgeStatus(
+    expiryDate,
+    effectiveReferenceDate,
   )
 
   const isAttentionStatus =

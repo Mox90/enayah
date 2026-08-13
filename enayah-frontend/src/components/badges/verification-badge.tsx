@@ -32,7 +32,7 @@ export function VerificationBadge({ verified }: Props) {
       variant='outline'
       className={`flex items-center gap-1.5 font-medium ${config.className}`}
     >
-      <Icon className='h-3.5 w-3.5' />
+      <Icon className='h-3.5 w-3.5' aria-hidden='true' />
       {ct(status)}
     </Badge>
   )
