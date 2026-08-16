@@ -7,6 +7,11 @@ import { FormDialog } from '../forms'
 import { Footer } from '../footer/footer'
 import { Save } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
+import { CredentialDocumentMetadata } from '@/modules/hr/credentials/types/credential-document.types'
+import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
+import { malpracticeDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
+import { cn } from '@/lib/utils'
+import { CredentialDocumentDropzone } from '../forms/credential-document-dropzone'
 
 export type MalpracticeFormValue = {
   id?: string
@@ -15,16 +20,46 @@ export type MalpracticeFormValue = {
   coverageAmount?: string | number | null
   startDate?: string | null
   expiryDate: string | null
-  documentFileId?: string | null
-  isVerified?: boolean
+
+  /*
+   * Read-only verification state.
+   * It is not submitted through the normal board form.
+   */
+  isVerified?: boolean | null
+
+  /*
+   * Existing document metadata when editing.
+   * This is not submitted to the backend.
+   */
+  document?: CredentialDocumentMetadata | null
+}
+
+export type MalpracticeFormSubmitValue = {
+  id?: string
+  clientId?: string
+  insuranceCompany: string
+  policyNumber: string
+  coverageAmount?: string | number | null
+  startDate?: string | null
+  expiryDate: string | null
+  documentFile: File | null
 }
 
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialValue?: MalpracticeFormValue | null
-  onSubmit: (value: MalpracticeFormValue) => void | Promise<void>
+  onSubmit: (value: MalpracticeFormSubmitValue) => void | Promise<void>
   generateId?: boolean
+  /*
+   * Existing employee profile:
+   * true — allow immediate upload.
+   *
+   * Onboarding:
+   * false — employee record may not exist yet.
+   */
+  allowDocumentUpload?: boolean
+  employeeId?: string
 }
 
 const emptyValue: MalpracticeFormValue = {
@@ -32,9 +67,9 @@ const emptyValue: MalpracticeFormValue = {
   policyNumber: '',
   coverageAmount: null,
   startDate: null,
-  expiryDate: '',
-  documentFileId: null,
-  isVerified: false,
+  expiryDate: null,
+  //documentFileId: null,
+  //isVerified: false,
 }
 
 function MalpracticeDialogContent({
@@ -42,23 +77,39 @@ function MalpracticeDialogContent({
   onOpenChange,
   onSubmit,
   generateId,
+  allowDocumentUpload,
+  employeeId,
 }: {
   initialValue?: MalpracticeFormValue | null
   onOpenChange: (open: boolean) => void
-  onSubmit: (value: MalpracticeFormValue) => void | Promise<void>
+  onSubmit: (value: MalpracticeFormSubmitValue) => void | Promise<void>
   generateId: boolean
+  allowDocumentUpload: boolean
+  employeeId?: string | undefined
 }) {
-  const [form, setForm] = useState<MalpracticeFormValue>(
-    initialValue ?? emptyValue,
-  )
-  const [isSubmitting, setIsSubmitting] = useState(false)
-
   const crt = useTranslations('credentials')
   const locale = useLocale()
   const isRtl = locale.toLowerCase().startsWith('ar')
 
+  const [form, setForm] = useState<MalpracticeFormValue>(
+    initialValue ?? emptyValue,
+  )
+  const [selectedDocument, setSelectedDocument] = useState<File | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const currentDocument = initialValue?.document ?? null
+  const canAccessCurrentDocument = Boolean(
+    employeeId && initialValue?.id && currentDocument,
+  )
+
   const insuranceCompany = form.insuranceCompany.trim()
   const policyNumber = form.policyNumber.trim()
+  const coverageAmount =
+    form.coverageAmount === '' ||
+    form.coverageAmount === null ||
+    form.coverageAmount === undefined
+      ? null
+      : form.coverageAmount
+  const startDate = form.startDate || null
   const expiryDate = form.expiryDate?.trim()
 
   function update<K extends keyof MalpracticeFormValue>(
@@ -79,7 +130,11 @@ function MalpracticeDialogContent({
     return `malpractice-${Date.now()}-${Math.random().toString(36).slice(2)}`
   }
 
-  const formInvalid = !insuranceCompany || !policyNumber || !expiryDate
+  const formInvalid =
+    !insuranceCompany ||
+    !policyNumber ||
+    !expiryDate ||
+    Boolean(startDate && expiryDate && expiryDate < startDate)
 
   function closeDialog() {
     if (isSubmitting) return
@@ -93,20 +148,17 @@ function MalpracticeDialogContent({
     setIsSubmitting(true)
 
     try {
+      const clientId = generateId ? (form.id ?? createClientId()) : null
+
       await onSubmit({
-        ...form,
-        id: form.id ?? (generateId ? createClientId() : undefined),
-        //coverageAmount: form.coverageAmount || null,
-        coverageAmount:
-          form.coverageAmount === '' ||
-          form.coverageAmount === null ||
-          form.coverageAmount === undefined
-            ? null
-            : form.coverageAmount,
+        ...(!generateId && form.id ? { id: form.id } : {}),
+        ...(generateId && clientId ? { clientId } : {}),
+        insuranceCompany,
+        policyNumber,
+        coverageAmount,
         startDate: form.startDate || null,
         expiryDate,
-        documentFileId: form.documentFileId || null,
-        isVerified: form.isVerified ?? false,
+        documentFile: allowDocumentUpload ? selectedDocument : null,
       })
 
       onOpenChange(false)
@@ -173,6 +225,56 @@ function MalpracticeDialogContent({
           </div>
         </section>
 
+        {allowDocumentUpload && (
+          <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+            {canAccessCurrentDocument &&
+              employeeId &&
+              initialValue?.id &&
+              currentDocument && (
+                <div className='mb-5'>
+                  <div className='mb-3'>
+                    <h3 className='text-sm font-semibold text-foreground'>
+                      {crt('malpracticeDocument.currentTitle')}
+                    </h3>
+
+                    <p className='text-xs text-muted-foreground'>
+                      {crt('malpracticeDocument.currentDescription')}
+                    </p>
+                  </div>
+
+                  <CredentialDocumentSummary
+                    employeeId={employeeId}
+                    credentialId={initialValue.id}
+                    document={currentDocument}
+                    service={malpracticeDocumentService}
+                  />
+                </div>
+              )}
+
+            <div className={cn(canAccessCurrentDocument && 'border-t pt-5')}>
+              <div className='mb-4'>
+                <h3 className='text-sm font-semibold text-foreground'>
+                  {canAccessCurrentDocument
+                    ? crt('malpracticeDocument.replaceTitle')
+                    : crt('malpracticeDocument.title')}
+                </h3>
+
+                <p className='text-xs text-muted-foreground'>
+                  {canAccessCurrentDocument
+                    ? crt('malpracticeDocument.replaceDescription')
+                    : crt('malpracticeDocument.description')}
+                </p>
+              </div>
+
+              <CredentialDocumentDropzone
+                value={selectedDocument}
+                onChange={setSelectedDocument}
+                disabled={isSubmitting}
+              />
+            </div>
+          </section>
+        )}
+
         <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
@@ -231,6 +333,8 @@ export function MalpracticeDialog({
   initialValue,
   onSubmit,
   generateId = false,
+  allowDocumentUpload = true,
+  employeeId,
 }: Props) {
   const dialogKey = initialValue?.id ?? (open ? 'add-malpractice' : 'closed')
 
@@ -254,6 +358,8 @@ export function MalpracticeDialog({
           onOpenChange={onOpenChange}
           onSubmit={onSubmit}
           generateId={generateId}
+          allowDocumentUpload={allowDocumentUpload}
+          employeeId={employeeId}
         />
       )}
     </FormDialog>

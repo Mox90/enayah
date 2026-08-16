@@ -109,7 +109,17 @@ export function CredentialBoards({
             )}
           </div>
         ) : (
-          <div className='space-y-4'>
+          <div
+            //className='space-y-4'
+            className={cn(
+              //'grid grid-cols-1 auto-rows-fr items-stretch gap-4',
+              'grid grid-cols-1 items-start gap-4',
+              boards.length === 2 && 'lg:grid-cols-2',
+              boards.length === 3 && 'lg:grid-cols-2 xl:grid-cols-3',
+              boards.length >= 4 &&
+                'lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4',
+            )}
+          >
             {boards.map((board, index) => {
               const boardId = board.id
 

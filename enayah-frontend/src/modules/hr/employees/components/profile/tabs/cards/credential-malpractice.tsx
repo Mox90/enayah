@@ -13,6 +13,9 @@ import { RowActions } from '@/components/dialogs/row-actions'
 import { MalpracticeInput } from '@/modules/hr/onboarding/types/onboarding.types'
 import { formatDate, toPersianDigits } from '@/utils/utilities'
 import { DetailItem } from '@/components/forms/form-detail-item'
+import { malpracticeDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
+import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
+import { cn } from '@/lib/utils'
 
 interface Props {
   malpractice: MalpracticeInput[]
@@ -126,7 +129,17 @@ export function CredentialMalpractice({
             )}
           </div>
         ) : (
-          <div className='space-y-4'>
+          <div
+            //className='space-y-4'
+            className={cn(
+              //'grid grid-cols-1 auto-rows-fr items-stretch gap-4',
+              'grid grid-cols-1 items-start gap-4',
+              malpractice.length === 2 && 'lg:grid-cols-2',
+              malpractice.length === 3 && 'lg:grid-cols-2 xl:grid-cols-3',
+              malpractice.length >= 4 &&
+                'lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4',
+            )}
+          >
             {malpractice.map((insurance, index) => {
               const insuranceId = insurance.id
 
@@ -134,6 +147,11 @@ export function CredentialMalpractice({
                 insurance.policyNumber && isRtl
                   ? toPersianDigits(insurance.policyNumber)
                   : insurance.policyNumber
+
+              const isVerified =
+                insurance.verification?.isVerified ??
+                insurance.isVerified ??
+                false
 
               return (
                 <article
@@ -163,11 +181,13 @@ export function CredentialMalpractice({
                           verified={insurance.isVerified ?? false}
                         /> */}
 
-                        <ExpiryStatusBadge
-                          expiryDate={insurance.expiryDate}
-                          pulseOnParentHover
-                          pulseOnInView
-                        />
+                        {insurance.expiryDate && (
+                          <ExpiryStatusBadge
+                            expiryDate={insurance.expiryDate}
+                            pulseOnParentHover
+                            pulseOnInView
+                          />
+                        )}
                       </div>
                     </div>
 
@@ -215,6 +235,20 @@ export function CredentialMalpractice({
                       value={formatDate(insurance.expiryDate, isRtl)}
                     />
                   </div>
+                  {employeeId && insuranceId && insurance.document && (
+                    <div className='mt-5 border-t pt-4'>
+                      <p className='mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+                        {ct('malpracticeDocument.currentTitle')}
+                      </p>
+
+                      <CredentialDocumentSummary
+                        employeeId={employeeId}
+                        credentialId={insuranceId}
+                        document={insurance.document}
+                        service={malpracticeDocumentService}
+                      />
+                    </div>
+                  )}
                 </article>
               )
             })}
