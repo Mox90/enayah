@@ -43,6 +43,7 @@ import type {
 } from '@/modules/hr/credentials/types/credential-verification.types'
 
 import type { CredentialDocumentMetadata } from '@/modules/hr/credentials/types/credential-document.types'
+import { degreeTypeColors } from '@/modules/hr/employees/components/profile/tabs/cards/credential-degrees'
 
 const MAX_EVIDENCE_SIZE = 2 * 1024 * 1024
 
@@ -157,6 +158,7 @@ export function CredentialVerificationDialog({
   onSubmit,
 }: Props) {
   const t = useTranslations('credentials.verificationDialog')
+  const ct = useTranslations('credentials')
   const locale = useLocale()
   const isRtl = locale === 'ar'
 
@@ -388,14 +390,40 @@ export function CredentialVerificationDialog({
                         </p>
                       )}
 
-                      {credential.descriptor && (
+                      {/* {credential.descriptor && (
                         <Badge
                           variant='secondary'
                           className='mt-2 rounded-full'
                         >
                           {credential.descriptor}
                         </Badge>
-                      )}
+                      )} */}
+                      {credential.descriptor &&
+                        (() => {
+                          const degreeTypeClass =
+                            degreeTypeColors[credential.descriptor] ??
+                            degreeTypeColors.other
+
+                          return (
+                            <Badge
+                              variant='outline'
+                              className={cn(
+                                'justify-center whitespace-nowrap rounded-full',
+                                'px-2.5 py-1 text-xs font-semibold',
+                                'shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
+                                degreeTypeClass,
+                              )}
+                            >
+                              {ct.has(credential.descriptor)
+                                ? ct(credential.descriptor)
+                                : credential.descriptor
+                                    .replaceAll('_', ' ')
+                                    .replace(/\b\w/g, (character) =>
+                                      character.toUpperCase(),
+                                    )}
+                            </Badge>
+                          )
+                        })()}
                     </div>
                   </div>
                 </div>

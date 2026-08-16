@@ -631,28 +631,28 @@
       "replaceDescription": "قم برفع مستند جديد لاستبدال الشهادة الحالية."
     },
     "lifeSupportDocument": {
-      "title": "Life Support certificate",
-      "description": "Upload the Life Support certification document.",
-      "currentTitle": "Current Life Support certificate",
-      "currentDescription": "The document currently attached to this Life Support certification.",
-      "replaceTitle": "Replace Life Support certificate",
-      "replaceDescription": "Upload a new document to replace the current certificate."
+      "title": "شهادة دعم الحياة",
+      "description": "قم بتحميل وثيقة شهادة دعم الحياة.",
+      "currentTitle": "شهادة سارية المفعول في دعم الحياة",
+      "currentDescription": "المستند المرفق حالياً بشهادة دعم الحياة هذه.",
+      "replaceTitle": "استبدال شهادة دعم الحياة",
+      "replaceDescription": "قم بتحميل مستند جديد لاستبدال الشهادة الحالية."
     },
     "malpracticeDocument": {
-      "title": "Malpractice certificate",
-      "description": "Upload the malpractice certification document.",
-      "currentTitle": "Current malpractice certificate",
-      "currentDescription": "The document currently attached to this malpractice insurance policy.",
-      "replaceTitle": "Replace malpractice certificate",
-      "replaceDescription": "Upload a new document to replace the current insurance policy."
+      "title": "وثيقة التأمين ضد الأخطاء المهنية",
+      "description": "قم بتحميل وثيقة التأمين ضد الأخطاء المهنية.",
+      "currentTitle": "وثيقة التأمين الحالية ضد الأخطاء المهنية",
+      "currentDescription": "المستند المرفق حالياً بوثيقة التأمين هذه ضد الأخطاء المهنية.",
+      "replaceTitle": "استبدال تأمين المسؤولية المهنية",
+      "replaceDescription": "قم بتحميل مستند جديد لاستبدال وثيقة التأمين الحالية."
     },
-    "degree": "degree",
-    "board": "board",
-    "fellowship": "fellowship",
-    "membership": "membership",
-    "license": "license",
-    "lifeSupport": "life support",
-    "malpractice": "malpractice insurance"
+    "degree": "مرحلة",
+    "board": "مجلس",
+    "fellowship": "زمالة",
+    "membership": "عضوية",
+    "license": "رخصة",
+    "lifeSupport": "دعم الحياة",
+    "malpractice": "تأمين ضد الأخطاء المهنية"
   },
   "payroll": {},
   "attendance": {},

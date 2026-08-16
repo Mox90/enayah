@@ -30,7 +30,7 @@ interface Props {
   // document?: CredentialDocumentMetadata | null
 }
 
-const degreeTypeColors: Record<string, string> = {
+export const degreeTypeColors: Record<string, string> = {
   doctorate:
     'border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-800 dark:bg-violet-950/50 dark:text-violet-300',
 
