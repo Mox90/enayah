@@ -2,9 +2,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useTranslations } from 'next-intl'
 import {
-  CreateMalpracticePayload,
   credentialMalpracticeService,
-  UpdateMalpracticePayload,
+  type CreateMalpracticePayload,
+  type UpdateMalpracticePayload,
 } from '../services/credential-malpractice.service'
 
 export function useCreateMalpractice(employeeId: string) {

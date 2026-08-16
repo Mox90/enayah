@@ -9,6 +9,10 @@ import { useLocale, useTranslations } from 'next-intl'
 import { Footer } from '../footer/footer'
 import { Save } from 'lucide-react'
 import { CredentialDocumentMetadata } from '@/modules/hr/credentials/types/credential-document.types'
+import { cn } from '@/lib/utils'
+import { CredentialDocumentDropzone } from '../forms/credential-document-dropzone'
+import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
+import { fellowshipDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
 
 export type FellowshipFormValue = {
   id?: string
@@ -18,7 +22,8 @@ export type FellowshipFormValue = {
   specialty?: string | null
   issueDate?: string | null
   expiryDate?: string | null
-  documentFileId?: string | null
+  //documentFileId?: string | null
+
   /*
    * Read-only verification state.
    * It is not submitted through the normal board form.
@@ -32,12 +37,33 @@ export type FellowshipFormValue = {
   document?: CredentialDocumentMetadata | null
 }
 
+export type FellowshipFormSubmitValue = {
+  id?: string
+  clientId?: string
+  fellowshipName: string
+  abbreviation?: string | null
+  issuingBody: string
+  specialty?: string | null
+  issueDate?: string | null
+  expiryDate?: string | null
+  documentFile: File | null
+}
+
 interface Props {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialValue?: FellowshipFormValue | null
-  onSubmit: (value: FellowshipFormValue) => void | Promise<void>
+  onSubmit: (value: FellowshipFormSubmitValue) => void | Promise<void>
   generateId?: boolean
+  /*
+   * Existing employee profile:
+   * true — allow immediate upload.
+   *
+   * Onboarding:
+   * false — employee record may not exist yet.
+   */
+  allowDocumentUpload?: boolean
+  employeeId?: string
 }
 
 const emptyValue: FellowshipFormValue = {
@@ -47,7 +73,6 @@ const emptyValue: FellowshipFormValue = {
   specialty: null,
   issueDate: null,
   expiryDate: null,
-  documentFileId: null,
   isVerified: false,
   document: null,
 }
@@ -57,24 +82,35 @@ function FellowshipDialogContent({
   onOpenChange,
   onSubmit,
   generateId,
+  allowDocumentUpload,
+  employeeId,
 }: {
   initialValue?: FellowshipFormValue | null
   onOpenChange: (open: boolean) => void
-  onSubmit: (value: FellowshipFormValue) => void | Promise<void>
+  onSubmit: (value: FellowshipFormSubmitValue) => void | Promise<void>
   generateId: boolean
+  allowDocumentUpload: boolean
+  employeeId?: string | undefined
 }) {
   const t = useTranslations('credentials')
+  const cmt = useTranslations('common')
   const locale = useLocale()
   const isRtl = locale === 'ar'
 
   const [form, setForm] = useState<FellowshipFormValue>(
     initialValue ?? emptyValue,
   )
-
+  const [selectedDocument, setSelectedDocument] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const currentDocument = initialValue?.document ?? null
+  const canAccessCurrentDocument = Boolean(
+    employeeId && initialValue?.id && currentDocument,
+  )
 
   const fellowshipName = form.fellowshipName.trim()
   const issuingBody = form.issuingBody.trim()
+  const issueDate = form.issueDate?.trim() || null
+  const expiryDate = form.expiryDate?.trim() || null
 
   function update<K extends keyof FellowshipFormValue>(
     field: K,
@@ -94,7 +130,10 @@ function FellowshipDialogContent({
     return `fellowship-${Date.now()}-${Math.random().toString(36).slice(2)}`
   }
 
-  const formInvalid = !fellowshipName || !issuingBody
+  const formInvalid =
+    !fellowshipName ||
+    !issuingBody ||
+    Boolean(issueDate && expiryDate && expiryDate < issueDate)
 
   function closeDialog() {
     if (isSubmitting) return
@@ -102,28 +141,30 @@ function FellowshipDialogContent({
     onOpenChange(false)
   }
 
-  async function handleSubmit() {
+  async function handleSubmit(): Promise<void> {
     if (isSubmitting || formInvalid) return
 
     setIsSubmitting(true)
 
     try {
+      const clientId = generateId ? (form.id ?? createClientId()) : null
+
       await onSubmit({
-        ...form,
-        id: form.id ?? (generateId ? createClientId() : undefined),
+        ...(!generateId && form.id ? { id: form.id } : {}),
+        ...(generateId && clientId ? { clientId } : {}),
+        fellowshipName,
         abbreviation: form.abbreviation || null,
         specialty: form.specialty || null,
+        issuingBody,
         issueDate: form.issueDate || null,
         expiryDate: form.expiryDate || null,
-        documentFileId: form.documentFileId || null,
-        isVerified: form.isVerified ?? false,
+        documentFile: allowDocumentUpload ? selectedDocument : null,
       })
 
       onOpenChange(false)
-    } catch (error) {
+    } catch {
       // Keep the dialog open.
       // The parent mutation hook can display the error toast.
-      console.log(error)
     } finally {
       setIsSubmitting(false)
     }
@@ -145,7 +186,7 @@ function FellowshipDialogContent({
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2 xl:col-span-2'>
-              <Label>Fellowship Name *</Label>
+              <Label>{t('fellowshipName')}</Label>
               <Input
                 className='h-11'
                 value={form.fellowshipName}
@@ -155,7 +196,7 @@ function FellowshipDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>Abbreviation</Label>
+              <Label>{t('fellowAbb')}</Label>
               <Input
                 className='h-11'
                 value={form.abbreviation ?? ''}
@@ -165,7 +206,7 @@ function FellowshipDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>Specialty</Label>
+              <Label>{t('specialty')}</Label>
               <Input
                 className='h-11'
                 value={form.specialty ?? ''}
@@ -175,7 +216,7 @@ function FellowshipDialogContent({
             </div>
 
             <div className='space-y-2 xl:col-span-2'>
-              <Label>Issuing Body *</Label>
+              <Label>{t('issuingBody')}</Label>
               <Input
                 className='h-11'
                 value={form.issuingBody}
@@ -185,6 +226,56 @@ function FellowshipDialogContent({
             </div>
           </div>
         </section>
+
+        {allowDocumentUpload && (
+          <section className='rounded-2xl border bg-card p-5 shadow-sm'>
+            {canAccessCurrentDocument &&
+              employeeId &&
+              initialValue?.id &&
+              currentDocument && (
+                <div className='mb-5'>
+                  <div className='mb-3'>
+                    <h3 className='text-sm font-semibold text-foreground'>
+                      {t('fellowshipDocument.currentTitle')}
+                    </h3>
+
+                    <p className='text-xs text-muted-foreground'>
+                      {t('fellowshipDocument.currentDescription')}
+                    </p>
+                  </div>
+
+                  <CredentialDocumentSummary
+                    employeeId={employeeId}
+                    credentialId={initialValue.id}
+                    document={currentDocument}
+                    service={fellowshipDocumentService}
+                  />
+                </div>
+              )}
+
+            <div className={cn(canAccessCurrentDocument && 'border-t pt-5')}>
+              <div className='mb-4'>
+                <h3 className='text-sm font-semibold text-foreground'>
+                  {canAccessCurrentDocument
+                    ? t('fellowshipDocument.replaceTitle')
+                    : t('fellowshipDocument.title')}
+                </h3>
+
+                <p className='text-xs text-muted-foreground'>
+                  {canAccessCurrentDocument
+                    ? t('fellowshipDocument.replaceDescription')
+                    : t('fellowshipDocument.description')}
+                </p>
+              </div>
+
+              <CredentialDocumentDropzone
+                value={selectedDocument}
+                onChange={setSelectedDocument}
+                disabled={isSubmitting}
+              />
+            </div>
+          </section>
+        )}
 
         <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
           <div className='mb-4'>
@@ -198,7 +289,7 @@ function FellowshipDialogContent({
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>Issue Date</Label>
+              <Label>{cmt('issueDate')}</Label>
               <Input
                 type='date'
                 className='h-11 bg-background'
@@ -208,7 +299,7 @@ function FellowshipDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>Expiry Date</Label>
+              <Label>{cmt('expiryDate')}</Label>
               <Input
                 type='date'
                 className='h-11 bg-background'
@@ -242,6 +333,8 @@ export function FellowshipDialog({
   initialValue,
   onSubmit,
   generateId = false,
+  allowDocumentUpload = true,
+  employeeId,
 }: Props) {
   const dialogKey = initialValue?.id ?? (open ? 'add-fellowship' : 'closed')
 
@@ -261,6 +354,8 @@ export function FellowshipDialog({
           onOpenChange={onOpenChange}
           onSubmit={onSubmit}
           generateId={generateId}
+          allowDocumentUpload={allowDocumentUpload}
+          employeeId={employeeId}
         />
       )}
     </FormDialog>

@@ -13,6 +13,11 @@ import { RowActions } from '@/components/dialogs/row-actions'
 import { FellowshipInput } from '@/modules/hr/onboarding/types/onboarding.types'
 import { formatDate, toPersianDigits } from '@/utils/utilities'
 import { DetailItem } from '@/components/forms/form-detail-item'
+import { cn } from '@/lib/utils'
+import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
+import { fellowshipDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
+import { fellowshipVerificationService } from '@/modules/hr/credentials/services/credential-verification.service'
+import { CredentialVerificationSummary } from '@/modules/hr/credentials/components/credential-verification-summary'
 
 interface Props {
   fellowships: FellowshipInput[]
@@ -110,10 +115,22 @@ export function CredentialFellowships({
             {fellowships.map((fellowship, index) => {
               const fellowshipId = fellowship.id
 
+              const isVerified =
+                fellowship.verification?.isVerified ??
+                fellowship.isVerified ??
+                false
+
               return (
                 <article
                   key={fellowshipId ?? `${fellowship.fellowshipName}-${index}`}
-                  className='relative rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md sm:p-5'
+                  //className='relative rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md sm:p-5'
+                  className={cn(
+                    'relative flex min-w-0 flex-col rounded-xl border bg-card',
+                    'p-4 shadow-sm transition-all duration-200 sm:p-5',
+                    'hover:border-primary/20 hover:shadow-md',
+                    isVerified &&
+                      'border-emerald-500/20 shadow-[0_8px_30px_rgba(16,185,129,0.04)]',
+                  )}
                 >
                   <div className='mb-5 flex items-start justify-between gap-4 border-b pb-4'>
                     <div className='min-w-0'>
@@ -128,9 +145,7 @@ export function CredentialFellowships({
                       )}
 
                       <div className='mt-3 flex flex-wrap items-center gap-2'>
-                        <VerificationBadge
-                          verified={fellowship.isVerified ?? false}
-                        />
+                        <VerificationBadge verified={isVerified} />
 
                         {/* {fellowship.abbreviation && (
                           <Badge
@@ -162,6 +177,11 @@ export function CredentialFellowships({
                             ? () => onDelete(fellowshipId)
                             : undefined
                         }
+                        onVerify={
+                          fellowshipId && onVerify
+                            ? () => onVerify(fellowshipId)
+                            : undefined
+                        }
                         confirmDelete
                         deleteItemName={ct('fellowship')}
                       />
@@ -184,6 +204,36 @@ export function CredentialFellowships({
                       value={formatDate(fellowship.expiryDate, isRtl)}
                     />
                   </div>
+                  {employeeId && fellowshipId && fellowship.document && (
+                    <div className='mt-5 border-t pt-4'>
+                      <p className='mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+                        {ct('credentialDocument.currentTitle')}
+                      </p>
+
+                      <CredentialDocumentSummary
+                        employeeId={employeeId}
+                        credentialId={fellowshipId}
+                        document={fellowship.document}
+                        service={fellowshipDocumentService}
+                      />
+                    </div>
+                  )}
+                  {employeeId &&
+                    fellowshipId &&
+                    isVerified &&
+                    fellowship.verification && (
+                      <CredentialVerificationSummary
+                        employeeId={employeeId}
+                        credentialId={fellowshipId}
+                        verification={fellowship.verification}
+                        service={fellowshipVerificationService}
+                        {...(onVerify
+                          ? {
+                              onManage: () => onVerify(fellowshipId),
+                            }
+                          : {})}
+                      />
+                    )}
                 </article>
               )
             })}

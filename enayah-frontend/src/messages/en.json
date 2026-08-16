@@ -460,6 +460,11 @@
     "noBoard": "No Board Certifications",
     "addBoard": "Add Board",
     "editBoard": "Edit Board",
+    "editLicense": "Edit License",
+    "editFellow": "Edit Fellow",
+    "addMembership": "Add Membership",
+    "editMembership": "Edit Membership",
+    "editLifeSupport": "Edit Life Support",
     "boardSub": "Enter the employee's board qualification details.",
     "boardSub2": "Board Qualification",
     "boardSub3": "Enter the board name, specialty, and issuing authority.",
@@ -479,6 +484,8 @@
     "licenseNum": "License #",
     "fellowLabel": "Fellowships",
     "addFellow": "Add Fellowship",
+    "fellowshipName": "Fellowship Name *",
+    "fellowAbb": "Abbreviation",
     "memberLabel": "Memberships",
     "addMember": "Add Membership",
     "lifeSupportLabel": "Life Support Certifications",
@@ -604,6 +611,38 @@
       "currentDescription": "The document currently attached to this board certification.",
       "replaceTitle": "Replace board certificate",
       "replaceDescription": "Upload a new document to replace the current certificate."
+    },
+    "fellowshipDocument": {
+      "title": "Fellowship certificate",
+      "description": "Upload the fellowship certification document.",
+      "currentTitle": "Current fellowship certificate",
+      "currentDescription": "The document currently attached to this fellowship certification.",
+      "replaceTitle": "Replace fellowship certificate",
+      "replaceDescription": "Upload a new document to replace the current certificate."
+    },
+    "membershipDocument": {
+      "title": "Membership certificate",
+      "description": "Upload the membership certification document.",
+      "currentTitle": "Current membership certificate",
+      "currentDescription": "The document currently attached to this membership certification.",
+      "replaceTitle": "Replace membership certificate",
+      "replaceDescription": "Upload a new document to replace the current certificate."
+    },
+    "lifeSupportDocument": {
+      "title": "Life Support certificate",
+      "description": "Upload the Life Support certification document.",
+      "currentTitle": "Current Life Support certificate",
+      "currentDescription": "The document currently attached to this Life Support certification.",
+      "replaceTitle": "Replace Life Support certificate",
+      "replaceDescription": "Upload a new document to replace the current certificate."
+    },
+    "malpracticeDocument": {
+      "title": "Malpractice certificate",
+      "description": "Upload the malpractice certification document.",
+      "currentTitle": "Current malpractice certificate",
+      "currentDescription": "The document currently attached to this malpractice insurance policy.",
+      "replaceTitle": "Replace malpractice certificate",
+      "replaceDescription": "Upload a new document to replace the current insurance policy."
     },
     "degree": "degree",
     "board": "board",

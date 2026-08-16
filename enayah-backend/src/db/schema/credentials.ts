@@ -562,3 +562,58 @@ export const employeeDisciplinaryActions = pgTable(
 //       .defaultNow(),
 //   },
 // )
+
+// export const membershipStatusEnum = pgEnum('membership_status', [
+//   'active',
+//   'suspended',
+//   'lapsed',
+//   'lifetime',
+//   'resigned',
+// ])
+
+// export const verificationColumns = {
+//   isVerified: boolean('is_verified').default(false).notNull(),
+//   verifiedAt: timestamp('verified_at'),
+//   verifiedBy: uuid('verified_by'),
+//   verificationRemarks: text('verification_remarks'),
+// }
+
+// export const baseColumns = {
+//   createdAt: timestamp('created_at').defaultNow().notNull(),
+//   createdBy: uuid('created_by'),
+//   updatedAt: timestamp('updated_at').defaultNow().notNull(),
+//   updatedBy: uuid('updated_by'),
+//   isDeleted: boolean('is_deleted').default(false).notNull(),
+//   deletedAt: timestamp('deleted_at'),
+//   deletedBy: uuid('deleted_by'),
+//   version: integer('version').default(1).notNull(),
+// }
+
+// export const employeeMemberships = pgTable('employee_memberships', {
+//   id: uuid('id').defaultRandom().primaryKey(),
+//   employeeId: uuid('employee_id')
+//     .notNull()
+//     .references(() => employees.id, { onDelete: 'cascade' }),
+
+//   // Organization Details
+//   organization: varchar('organization', { length: 255 }).notNull(), // e.g., "Royal College of Pediatrics and Child Health"
+//   organizationCode: varchar('organization_code', { length: 50 }), // e.g., "RCPCH", "PCP", "SNA"
+//   issuingCountry: varchar('issuing_country', { length: 2 }), // ISO 2-letter country code (e.g., "GB", "IE", "PH", "SA")
+
+//   // Membership Specifics
+//   membershipNumber: varchar('membership_number', { length: 100 }).notNull(),
+//   membershipLevel: varchar('membership_level', { length: 100 }), // e.g., "Fellow", "Member", "Associate"
+//   status: membershipStatusEnum('status').default('active').notNull(),
+
+//   // Dates
+//   startDate: date('start_date'),
+//   expiryDate: date('expiry_date'), // Nullable to safely support lifetime memberships
+//   isLifetime: boolean('is_lifetime').default(false).notNull(),
+
+//   // Documentation
+//   documentFileId: uuid('document_file_id').references(() => files.id),
+
+//   // Reusable Audit & Verification Metadata
+//   ...verificationColumns,
+//   ...baseColumns,
+// })

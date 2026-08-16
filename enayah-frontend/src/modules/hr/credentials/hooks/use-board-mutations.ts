@@ -19,6 +19,7 @@ export function useCreateBoard(employeeId: string) {
   const t = useTranslations('credentials')
   const locale = useLocale()
   const isRtl = locale === 'ar'
+
   return useMutation({
     mutationFn: (payload: CreateBoardMutationPayload) =>
       credentialBoardService.create({
