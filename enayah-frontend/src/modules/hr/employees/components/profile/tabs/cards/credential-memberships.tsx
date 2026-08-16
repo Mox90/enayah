@@ -118,7 +118,17 @@ export function CredentialMemberships({
             )}
           </div>
         ) : (
-          <div className='space-y-4'>
+          <div
+            //className='space-y-4'
+            className={cn(
+              //'grid grid-cols-1 auto-rows-fr items-stretch gap-4',
+              'grid grid-cols-1 items-start gap-4',
+              memberships.length === 2 && 'lg:grid-cols-2',
+              memberships.length === 3 && 'lg:grid-cols-2 xl:grid-cols-3',
+              memberships.length >= 4 &&
+                'lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4',
+            )}
+          >
             {memberships.map((membership, index) => {
               const membershipId = membership.id
 

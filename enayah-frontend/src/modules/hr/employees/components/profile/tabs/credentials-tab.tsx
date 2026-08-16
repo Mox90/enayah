@@ -78,7 +78,8 @@ import {
 } from '@/modules/hr/credentials/hooks/use-malpractice-mutations'
 import {
   MalpracticeDialog,
-  MalpracticeFormValue,
+  type MalpracticeFormSubmitValue,
+  type MalpracticeFormValue,
 } from '@/components/dialogs/malpractice-dialog'
 import {
   CredentialVerificationDialog,
@@ -421,6 +422,20 @@ const CredentialsTab = ({ employeeId }: Props) => {
     }
 
     await createLifeSupportMutation.mutateAsync(payload)
+  }
+
+  async function handleMalpracticeSubmit(
+    value: MalpracticeFormSubmitValue,
+  ): Promise<void> {
+    const { id, clientId: _clientId, ...payload } = value
+
+    if (id) {
+      await updateMalpracticeMutation.mutateAsync({ id, ...payload })
+
+      return
+    }
+
+    await createMalpracticeMutation.mutateAsync(payload)
   }
 
   async function handleCredentialVerificationSubmit(
@@ -813,8 +828,7 @@ const CredentialsTab = ({ employeeId }: Props) => {
             policyNumber: item.policyNumber,
             coverageAmount: item.coverageAmount ?? null,
             startDate: item.startDate ?? null,
-            expiryDate: item.expiryDate! ?? null,
-            documentFileId: item.documentFileId ?? null,
+            expiryDate: item.expiryDate ?? null,
             isVerified: item.isVerified ?? false,
           })
 
@@ -835,32 +849,15 @@ const CredentialsTab = ({ employeeId }: Props) => {
 
       <MalpracticeDialog
         open={activeDialog === 'malpractice'}
-        onOpenChange={(open) => {
-          if (!open) setActiveDialog(null)
-        }}
+        employeeId={employeeId}
         initialValue={editingMalpractice}
-        onSubmit={async (form) => {
-          if (editingMalpractice?.id) {
-            await updateMalpracticeMutation.mutateAsync({
-              id: editingMalpractice.id,
-              insuranceCompany: form.insuranceCompany,
-              policyNumber: form.policyNumber,
-              coverageAmount: form.coverageAmount ?? null,
-              startDate: form.startDate ?? null,
-              expiryDate: form.expiryDate ?? null,
-              isVerified: form.isVerified ?? false,
-            })
-          } else {
-            await createMalpracticeMutation.mutateAsync({
-              insuranceCompany: form.insuranceCompany,
-              policyNumber: form.policyNumber,
-              coverageAmount: form.coverageAmount ?? null,
-              startDate: form.startDate ?? null,
-              expiryDate: form.expiryDate ?? null,
-              isVerified: form.isVerified ?? false,
-            })
+        onOpenChange={(open) => {
+          if (!open) {
+            setActiveDialog(null)
+            setEditingMalpractice(null)
           }
         }}
+        onSubmit={handleMalpracticeSubmit}
       />
 
       <CredentialVerificationDialog

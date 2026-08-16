@@ -104,7 +104,17 @@ export function CredentialLicenses({
             )}
           </div>
         ) : (
-          <div className='space-y-4'>
+          <div
+            //className='space-y-4'
+            className={cn(
+              //'grid grid-cols-1 auto-rows-fr items-stretch gap-4',
+              'grid grid-cols-1 items-start gap-4',
+              licenses.length === 2 && 'lg:grid-cols-2',
+              licenses.length === 3 && 'lg:grid-cols-2 xl:grid-cols-3',
+              licenses.length >= 4 &&
+                'lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4',
+            )}
+          >
             {licenses.map((license, index) => {
               const licenseId = license.id
 

@@ -13,6 +13,9 @@ import { RowActions } from '@/components/dialogs/row-actions'
 import { LifeSupportInput } from '@/modules/hr/onboarding/types/onboarding.types'
 import { formatDate, toPersianDigits } from '@/utils/utilities'
 import { DetailItem } from '@/components/forms/form-detail-item'
+import { cn } from '@/lib/utils'
+import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
+import { lifeSupportDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
 
 interface Props {
   lifeSupports: LifeSupportInput[]
@@ -139,7 +142,17 @@ export function CredentialLifeSupport({
             )}
           </div>
         ) : (
-          <div className='space-y-4'>
+          <div
+            //className='space-y-4'
+            className={cn(
+              //'grid grid-cols-1 auto-rows-fr items-stretch gap-4',
+              'grid grid-cols-1 items-start gap-4',
+              lifeSupports.length === 2 && 'lg:grid-cols-2',
+              lifeSupports.length === 3 && 'lg:grid-cols-2 xl:grid-cols-3',
+              lifeSupports.length >= 4 &&
+                'lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4',
+            )}
+          >
             {lifeSupports.map((lifeSupport, index) => {
               const lifeSupportId = lifeSupport.id
 
@@ -148,13 +161,25 @@ export function CredentialLifeSupport({
                   ? toPersianDigits(lifeSupport.certificateNumber)
                   : lifeSupport.certificateNumber
 
+              const isVerified =
+                lifeSupport.verification?.isVerified ??
+                lifeSupport.isVerified ??
+                false
+
               return (
                 <article
                   key={
                     lifeSupportId ??
                     `${lifeSupport.type}-${lifeSupport.certificateNumber ?? index}`
                   }
-                  className='relative rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md sm:p-5'
+                  //className='relative rounded-xl border bg-card p-4 shadow-sm transition-all duration-200 hover:border-primary/20 hover:shadow-md sm:p-5'
+                  className={cn(
+                    'relative flex min-w-0 flex-col rounded-xl border bg-card',
+                    'p-4 shadow-sm transition-all duration-200 sm:p-5',
+                    'hover:border-primary/20 hover:shadow-md',
+                    //isVerified &&
+                    'border-emerald-500/20 shadow-[0_8px_30px_rgba(16,185,129,0.04)]',
+                  )}
                 >
                   <div className='mb-5 flex items-start justify-between gap-4 border-b pb-4'>
                     <div className='min-w-0'>
@@ -213,6 +238,20 @@ export function CredentialLifeSupport({
                       value={formatDate(lifeSupport.expiryDate, isRtl)}
                     />
                   </div>
+                  {employeeId && lifeSupportId && lifeSupport.document && (
+                    <div className='mt-5 border-t pt-4'>
+                      <p className='mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground'>
+                        {t('lifeSupportDocument.currentTitle')}
+                      </p>
+
+                      <CredentialDocumentSummary
+                        employeeId={employeeId}
+                        credentialId={lifeSupportId}
+                        document={lifeSupport.document}
+                        service={lifeSupportDocumentService}
+                      />
+                    </div>
+                  )}
                 </article>
               )
             })}

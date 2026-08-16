@@ -111,7 +111,16 @@ export function CredentialFellowships({
             )}
           </div>
         ) : (
-          <div className='space-y-4'>
+          <div //className='space-y-4'
+            className={cn(
+              //'grid grid-cols-1 auto-rows-fr items-stretch gap-4',
+              'grid grid-cols-1 items-start gap-4',
+              fellowships.length === 2 && 'lg:grid-cols-2',
+              fellowships.length === 3 && 'lg:grid-cols-2 xl:grid-cols-3',
+              fellowships.length >= 4 &&
+                'lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4',
+            )}
+          >
             {fellowships.map((fellowship, index) => {
               const fellowshipId = fellowship.id
 

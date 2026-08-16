@@ -238,7 +238,8 @@ export const CreateMalpracticeSchema = z
       .trim()
       .min(1, 'Policy number is required.')
       .max(100),
-    issueDate: optionalNullableDate,
+    coverageAmount: z.coerce.number().positive(),
+    startDate: optionalNullableDate,
     expiryDate: z.iso.date(),
   })
   .strict()
