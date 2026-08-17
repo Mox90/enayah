@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/hr/employees/components/employee-workspace.tsx
+
 'use client'
 
 import { useEffect, useState } from 'react'

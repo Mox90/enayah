@@ -183,6 +183,7 @@
     "identification": "Identification",
     "identificationInfo": "National ID, Iqama, Passport, GCC ID, or other identification.",
     "national_id": "National ID",
+    "iqamaNumber": "Iqama Number",
     "iqama": "Iqama",
     "gcc_id": "GCC ID",
     "passport": "Passport",
@@ -637,11 +638,11 @@
       "replaceDescription": "Upload a new document to replace the current certificate."
     },
     "malpracticeDocument": {
-      "title": "Malpractice certificate",
-      "description": "Upload the malpractice certification document.",
-      "currentTitle": "Current malpractice certificate",
+      "title": "Malpractice Insurance Policy",
+      "description": "Upload the malpractice insurance document.",
+      "currentTitle": "Current malpractice insurance policy",
       "currentDescription": "The document currently attached to this malpractice insurance policy.",
-      "replaceTitle": "Replace malpractice certificate",
+      "replaceTitle": "Replace malpractice insurance",
       "replaceDescription": "Upload a new document to replace the current insurance policy."
     },
     "degree": "degree",

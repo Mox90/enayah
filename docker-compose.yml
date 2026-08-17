@@ -67,7 +67,7 @@ services:
     command: npm run dev
     labels:
       ofelia.enabled: 'true'
-      ofelia.job-exec.notification-generator.schedule: '0 0 7 * * *'
+      ofelia.job-exec.notification-generator.schedule: '0 0 1 * * *'
       ofelia.job-exec.notification-generator.command: 'npm run notifications:generate'
 
   frontend:

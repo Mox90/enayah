@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/hr/employees/components/list/use-employee-columns.tsx
+
 'use client'
 
 import { ColumnDef } from '@tanstack/react-table'
@@ -304,48 +306,21 @@ export function useEmployeeColumns(
       },
     },
 
-    // {
-    //   accessorKey: 'employmentStatus',
-    //   meta: {
-    //     label: t('status'),
-    //   },
-    //   header: t('status'),
+    {
+      id: 'iqamaNumber',
+      accessorFn: (row) => row.iqamaNumber ?? '',
 
-    //   cell: ({ row }) => {
-    //     const status = row.original.employmentStatus as
-    //       | EmploymentStatus
-    //       | null
-    //       | undefined
+      header: () => t('iqamaNumber'),
 
-    //     if (!status || !(status in employmentStatusStyles)) {
-    //       return (
-    //         <Badge
-    //           variant='outline'
-    //           className='min-w-[7rem] justify-center rounded-full border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400'
-    //         >
-    //           -
-    //         </Badge>
-    //       )
-    //     }
+      cell: ({ row }) => {
+        return (
+          <span className='font-mono'>{row.original.iqamaNumber ?? '—'}</span>
+        )
+      },
 
-    //     const config = employmentStatusStyles[status]
+      enableSorting: false,
+    },
 
-    //     return (
-    //       <Badge
-    //         variant='outline'
-    //         className={cn(
-    //           'min-w-28 justify-center gap-1.5 whitespace-nowrap rounded-full',
-    //           'px-2.5 py-1 text-xs font-semibold',
-    //           'shadow-[0_1px_2px_rgba(0,0,0,0.04)]',
-    //           'ring-1 ring-inset',
-    //           config.badgeClassName,
-    //         )}
-    //       >
-    //         <span>{employmentStatusLabels[status]}</span>
-    //       </Badge>
-    //     )
-    //   },
-    // },
     {
       accessorKey: 'employmentStatus',
       meta: {
