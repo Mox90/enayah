@@ -4,6 +4,7 @@ import {
   date,
   pgTable,
   text,
+  uniqueIndex,
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core'
@@ -46,23 +47,28 @@ export const employeeIdentifications = pgTable(
       length: 150,
     }),
     isCurrent: boolean('is_current').default(true).notNull(),
-    fileId: uuid('file_id').references(() => files.id),
+    documentFileId: uuid('document_file_id').references(() => files.id, {
+      onDelete: 'restrict',
+    }),
     ...baseColumns,
   },
-  (table) => ({
-    validDateRange: check(
+  (table) => [
+    check(
       'chk_employee_identification_valid_date_range',
       sql`${table.expiryDate} IS NULL
           OR ${table.issueDate} IS NULL
           OR ${table.expiryDate} >= ${table.issueDate}`,
     ),
-    validHijriDateRange: check(
+    check(
       'chk_employee_identification_valid_hijri_date_range',
       sql`${table.expiryDateHijri} IS NULL
           OR ${table.issueDateHijri} IS NULL
           OR ${table.expiryDateHijri} >= ${table.issueDateHijri}`,
     ),
-  }),
+    uniqueIndex('uq_employee_identification_document_file_id').on(
+      table.documentFileId,
+    ),
+  ],
 )
 
 export const employeeDependents = pgTable('employee_dependents', {
@@ -104,6 +110,9 @@ export const employeeDependents = pgTable('employee_dependents', {
   gender: genderEnum('gender'),
   dateOfBirth: date('date_of_birth'),
   countryId: uuid('country_id').references(() => countries.id),
+  documentFileId: uuid('document_file_id').references(() => files.id, {
+    onDelete: 'restrict',
+  }),
   ...baseColumns,
 })
 
@@ -187,7 +196,9 @@ export const employeeVisas = pgTable('employee_visas', {
   issueDate: date('issue_date'),
   expiryDate: date('expiry_date'),
   isCurrent: boolean('is_current').default(true).notNull(),
-  fileId: uuid('file_id').references(() => files.id),
+  documentFileId: uuid('document_file_id').references(() => files.id, {
+    onDelete: 'restrict',
+  }),
   ...baseColumns,
 })
 

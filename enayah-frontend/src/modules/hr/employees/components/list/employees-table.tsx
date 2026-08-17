@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/hr/employees/components/list/employee-table.tsx
+
 'use client'
 
 import { RowSelectionState, OnChangeFn } from '@tanstack/react-table'

@@ -19,9 +19,12 @@ export const EmployeeDirectoryQuerySchema = z.object({
         'active',
         'terminated',
         'resigned',
+        'eoc',
+        'transferred',
         'retired',
-        'deceased',
+        'on_leave',
         'suspended',
+        'deceased',
       ]),
     )
     .optional(),

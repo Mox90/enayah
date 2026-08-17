@@ -183,6 +183,7 @@
     "identification": "Identification",
     "identificationInfo": "National ID, Iqama, Passport, GCC ID, or other identification.",
     "national_id": "National ID",
+    "iqamaNumber": "Iqama Number",
     "iqama": "Iqama",
     "gcc_id": "GCC ID",
     "passport": "Passport",

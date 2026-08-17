@@ -53,6 +53,8 @@ export interface EmployeeDirectoryRow {
   positionId: string | null
   positionTitleEn: string | null
   positionTitleAr: string | null
+
+  iqamaNumber: string | null
 }
 
 export interface EmployeeDirectoryResponse {

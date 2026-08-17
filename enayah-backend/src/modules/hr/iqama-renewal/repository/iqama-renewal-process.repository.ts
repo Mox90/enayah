@@ -285,7 +285,7 @@ export const IqamaRenewalProcessRepository = {
           issuingAuthority: employeeIdentifications.issuingAuthority,
           occupation: employeeIdentifications.occupation,
           isCurrent: employeeIdentifications.isCurrent,
-          fileId: employeeIdentifications.fileId,
+          documentFileId: employeeIdentifications.documentFileId,
         },
         assignedToName: sql<string | null>`
         coalesce(

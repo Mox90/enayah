@@ -700,7 +700,7 @@ export const IqamaRenewalProcessService = {
           issuingAuthority: input.identification.issuingAuthority ?? null,
           occupation: input.identification.occupation ?? null,
           isCurrent: true,
-          fileId: input.identification.fileId ?? null,
+          documentFileId: input.identification.fileId ?? null,
           updatedAt: new Date(),
           updatedBy: actor.userId,
         })

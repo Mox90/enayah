@@ -25,6 +25,7 @@ import { latestContractMovement } from '../../../../core/utils/current-assignmen
 import { EmployeeDirectoryQueryDto } from '../dto/employee.request'
 import { latestEmployment } from '../../../../core/utils/latest-employment.query'
 import { latestContract } from '../../../../core/utils/latest-contract.query'
+import { currentIqamaIdentification } from '../../../../core/utils/current-iqama.query'
 
 export const EmployeeDirectoryRepository = {
   async findRange(tx: DB, params: EmployeeDirectoryQueryDto) {
@@ -49,6 +50,8 @@ export const EmployeeDirectoryRepository = {
     const latestEmploymentRow = latestEmployment(tx)
     const latestContractRow = latestContract(tx)
 
+    const currentIqama = currentIqamaIdentification(tx)
+
     const conditions = [
       eq(employees.isDeleted, false),
       isNull(employees.deletedAt),
@@ -70,6 +73,7 @@ export const EmployeeDirectoryRepository = {
           ilike(employees.secondNameAr, `%${search}%`),
           ilike(employees.thirdNameAr, `%${search}%`),
           ilike(employees.familyNameAr, `%${search}%`),
+          ilike(currentIqama.identificationNumber, `%${search}%`),
         )!,
       )
     }
@@ -214,10 +218,34 @@ export const EmployeeDirectoryRepository = {
           positionId: positions.id,
           positionTitleEn: positions.titleEn,
           positionTitleAr: positions.titleAr,
+          //--------------------------------
+          // Iqama
+          //--------------------------------
+          //iqamaId: currentIqama.id,
+          //iqamaType: currentIqama.type,
+          iqamaNumber: currentIqama.identificationNumber,
+
+          // iqamaIssueDate: currentIqama.issueDate,
+          // iqamaExpiryDate: currentIqama.expiryDate,
+
+          // iqamaIssueDateHijri: currentIqama.issueDateHijri,
+          // iqamaExpiryDateHijri: currentIqama.expiryDateHijri,
+
+          // iqamaSponsor: currentIqama.sponsor,
+          // iqamaIssuingAuthority: currentIqama.issuingAuthority,
+          // iqamaOccupation: currentIqama.occupation,
+
+          // iqamaDocumentFileId: currentIqama.documentFileId,
         })
 
         .from(employees)
         .leftJoin(countries, eq(employees.countryId, countries.id))
+
+        //--------------------------------
+        // Current Iqama
+        //--------------------------------
+
+        .leftJoin(currentIqama, eq(currentIqama.employeeId, employees.id))
 
         //--------------------------------
         // Employment
@@ -322,6 +350,8 @@ export const EmployeeDirectoryRepository = {
 
         .from(employees)
         .leftJoin(countries, eq(employees.countryId, countries.id))
+
+        .leftJoin(currentIqama, eq(currentIqama.employeeId, employees.id))
 
         // .leftJoin(
         //   employments,

@@ -182,7 +182,9 @@ export const employeeBoards = pgTable('employee_boards', {
   issueDate: date('issue_date'),
   expiryDate: date('expiry_date'),
   isLifetime: boolean('is_lifetime').default(false).notNull(),
-  documentFileId: uuid('document_file_id').references(() => files.id),
+  documentFileId: uuid('document_file_id').references(() => files.id, {
+    onDelete: 'restrict',
+  }),
   ...verificationColumns,
   ...baseColumns,
 })
@@ -198,7 +200,9 @@ export const employeeFellowships = pgTable('employee_fellowships', {
   specialty: varchar('specialty', { length: 255 }),
   issueDate: date('issue_date'),
   expiryDate: date('expiry_date'),
-  documentFileId: uuid('document_file_id').references(() => files.id),
+  documentFileId: uuid('document_file_id').references(() => files.id, {
+    onDelete: 'restrict',
+  }),
   ...verificationColumns,
   ...baseColumns,
 })
@@ -213,7 +217,9 @@ export const employeeMemberships = pgTable('employee_memberships', {
   membershipLevel: varchar('membership_level', { length: 100 }),
   startDate: date('start_date'),
   expiryDate: date('expiry_date'),
-  documentFileId: uuid('document_file_id').references(() => files.id),
+  documentFileId: uuid('document_file_id').references(() => files.id, {
+    onDelete: 'restrict',
+  }),
   ...verificationColumns,
   ...baseColumns,
 })
@@ -233,7 +239,9 @@ export const employeeLicenses = pgTable(
     expiryDate: date('expiry_date').notNull(),
     status: licenseStatusEnum('status').default('active').notNull(),
     isPrimary: boolean('is_primary').default(false).notNull(),
-    documentFileId: uuid('document_file_id').references(() => files.id),
+    documentFileId: uuid('document_file_id').references(() => files.id, {
+      onDelete: 'restrict',
+    }),
     ...verificationColumns,
     ...baseColumns,
   },
@@ -256,7 +264,9 @@ export const employeeLifeSupportCertifications = pgTable(
     certificateNumber: varchar('certificate_number', { length: 100 }),
     issueDate: date('issue_date'),
     expiryDate: date('expiry_date'),
-    documentFileId: uuid('document_file_id').references(() => files.id),
+    documentFileId: uuid('document_file_id').references(() => files.id, {
+      onDelete: 'restrict',
+    }),
     ...verificationColumns,
     ...baseColumns,
   },
@@ -274,7 +284,9 @@ export const employeeMalpracticeInsurance = pgTable(
     coverageAmount: numeric('coverage_amount', { precision: 15, scale: 2 }),
     startDate: date('start_date'),
     expiryDate: date('expiry_date'),
-    documentFileId: uuid('document_file_id').references(() => files.id),
+    documentFileId: uuid('document_file_id').references(() => files.id, {
+      onDelete: 'restrict',
+    }),
     ...verificationColumns,
     ...baseColumns,
   },
@@ -318,7 +330,9 @@ export const employeeTrainingRecords = pgTable('employee_training_records', {
   completionDate: date('completion_date').notNull(),
   expiryDate: date('expiry_date'),
   score: numeric('score', { precision: 5, scale: 2 }),
-  documentFileId: uuid('document_file_id').references(() => files.id),
+  documentFileId: uuid('document_file_id').references(() => files.id, {
+    onDelete: 'restrict',
+  }),
   ...baseColumns,
 })
 
@@ -345,7 +359,9 @@ export const employeeCpdRecords = pgTable('employee_cpd_records', {
   hours: numeric('hours', { precision: 5, scale: 2 }),
   creditPoints: numeric('credit_points', { precision: 5, scale: 2 }),
   activityDate: date('activity_date'),
-  documentFileId: uuid('document_file_id').references(() => files.id),
+  documentFileId: uuid('document_file_id').references(() => files.id, {
+    onDelete: 'restrict',
+  }),
   ...baseColumns,
 })
 
