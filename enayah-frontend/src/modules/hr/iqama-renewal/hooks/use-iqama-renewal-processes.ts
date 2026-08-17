@@ -9,7 +9,7 @@ import {
 import { toast } from 'sonner'
 
 import { iqamaRenewalService } from '../services/iqama-renewal.service'
-import type { IqamaRenewalListParams } from '../services/iqama-renewal.service'
+import type { ListIqamaRenewalProcessesParams } from '../services/iqama-renewal.service'
 import type {
   ChangeIqamaRenewalStatusPayload,
   CompleteIqamaRenewalPayload,
@@ -25,7 +25,7 @@ export const iqamaRenewalKeys = {
 
   lists: () => [...iqamaRenewalKeys.all, 'list'] as const,
 
-  list: (params: IqamaRenewalListParams) =>
+  list: (params: ListIqamaRenewalProcessesParams) =>
     [...iqamaRenewalKeys.lists(), params] as const,
 
   details: () => [...iqamaRenewalKeys.all, 'detail'] as const,
@@ -38,7 +38,9 @@ export const iqamaRenewalKeys = {
     [...iqamaRenewalKeys.assignees(), 'government-relations'] as const,
 }
 
-export function useIqamaRenewalProcesses(params: IqamaRenewalListParams) {
+export function useIqamaRenewalProcesses(
+  params: ListIqamaRenewalProcessesParams,
+) {
   //console.log(params)
   return useQuery({
     queryKey: iqamaRenewalKeys.list(params),

@@ -43,3 +43,13 @@ export const getRiyadhTodayDateOnly = (): string => {
 
   return `${year}-${month}-${day}`
 }
+
+export const startOfRiyadhDay = (value: string): Date => {
+  return new Date(`${value}T00:00:00.000+03:00`)
+}
+
+export const startOfNextRiyadhDay = (value: string): Date => {
+  const start = startOfRiyadhDay(value)
+
+  return new Date(start.getTime() + 24 * 60 * 60 * 1000)
+}

@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/hr/iqama-renewal/services/iqama-renewal.service.ts
+
 import { api } from '@/lib/api/client'
 import { API_ENDPOINTS } from '@/lib/api/endpoints'
 
@@ -21,6 +23,8 @@ export const IQAMA_RENEWAL_SORT_FIELDS = [
   'expiryDate',
   'status',
   'mhrsdUploadedAt',
+  'mhrsdApprovedAt',
+  'mhrsdDeniedAt',
   'mhrsdDecision',
   'governmentRelationsDueDate',
   'daysRemaining',
@@ -36,32 +40,68 @@ export function isIqamaRenewalSortBy(
   return (IQAMA_RENEWAL_SORT_FIELDS as readonly string[]).includes(value)
 }
 
-export type IqamaRenewalListParams = {
-  page: number
-  limit: number
+export interface ListIqamaRenewalProcessesParams {
+  page?: number
+  limit?: number
   search?: string
-  status?: IqamaRenewalStatus | ''
+
+  status?: IqamaRenewalStatus[]
+
+  expiryDateFrom?: string
+  expiryDateTo?: string
+
+  mhrsdUploadedFrom?: string
+  mhrsdUploadedTo?: string
+
+  mhrsdApprovedFrom?: string
+  mhrsdApprovedTo?: string
+
+  mhrsdDeniedFrom?: string
+  mhrsdDeniedTo?: string
+
+  governmentRelationsDueFrom?: string
+  governmentRelationsDueTo?: string
+
   sortBy?: IqamaRenewalSortBy
   sortOrder?: 'asc' | 'desc'
 }
 
 export const iqamaRenewalService = {
+  // list: async (
+  //   params: IqamaRenewalListParams,
+  // ): Promise<IqamaRenewalCaseListResponse> => {
+  //   const response = await api.get<IqamaRenewalCaseListResponse>(
+  //     API_ENDPOINTS.hr.iqamaRenewal,
+  //     {
+  //       params: {
+  //         page: params.page,
+  //         limit: params.limit,
+  //         search: params.search?.trim() || undefined,
+  //         status: params.status || undefined,
+  //         sortBy: params.sortBy || undefined,
+  //         sortOrder: params.sortOrder || undefined,
+  //       },
+  //     },
+  //   )
+
+  //   return response.data
+  // },
+
   list: async (
-    params: IqamaRenewalListParams,
+    params: ListIqamaRenewalProcessesParams,
   ): Promise<IqamaRenewalCaseListResponse> => {
-    const response = await api.get<IqamaRenewalCaseListResponse>(
-      API_ENDPOINTS.hr.iqamaRenewal,
-      {
-        params: {
-          page: params.page,
-          limit: params.limit,
-          search: params.search?.trim() || undefined,
-          status: params.status || undefined,
-          sortBy: params.sortBy || undefined,
-          sortOrder: params.sortOrder || undefined,
-        },
-      },
-    )
+    const { status, ...rest } = params
+
+    const requestParams = {
+      ...rest,
+      status: status && status.length > 0 ? status.join(',') : undefined,
+    }
+
+    //console.log('IQAMA RENEWAL LIST PARAMS:', requestParams)
+
+    const response = await api.get(API_ENDPOINTS.hr.iqamaRenewal, {
+      params: requestParams,
+    })
 
     return response.data
   },

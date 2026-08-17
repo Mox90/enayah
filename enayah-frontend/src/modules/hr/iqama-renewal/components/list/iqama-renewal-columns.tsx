@@ -14,10 +14,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-import type { IqamaRenewalSortBy } from '../services/iqama-renewal.service'
-import type { IqamaRenewalCase } from '../types/iqama-renewal.types'
-import { IqamaRenewalStatusBadge } from './iqama-renewal-status-badge'
+import type { IqamaRenewalSortBy } from '../../services/iqama-renewal.service'
+import type { IqamaRenewalCase } from '../../types/iqama-renewal.types'
+import { IqamaRenewalStatusBadge } from '../iqama-renewal-status-badge'
 import { formatDate, toPersianDigits } from '@/utils/utilities'
+import { Checkbox } from '@/components/ui/checkbox'
 
 type Labels = {
   employeeNumber: string
@@ -100,6 +101,33 @@ export function getIqamaRenewalColumns(
   isArabic: boolean,
 ): ColumnDef<IqamaRenewalCase>[] {
   return [
+    {
+      id: 'select',
+      enableSorting: false,
+      enableHiding: false,
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected()
+              ? true
+              : table.getIsSomePageRowsSelected()
+                ? 'indeterminate'
+                : false
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label='Select all rows'
+        />
+      ),
+
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label='Select row'
+        />
+      ),
+    },
+
     {
       accessorKey: 'employeeNumber',
       //enableSorting: false,
@@ -288,26 +316,26 @@ export function getIqamaRenewalColumns(
       },
     },
 
-    {
-      id: 'actions',
-      header: labels.actions,
-      enableSorting: false,
-      cell: ({ row }) => (
-        <DropdownMenu dir={isArabic ? 'rtl' : 'ltr'}>
-          <DropdownMenuTrigger asChild>
-            <Button variant='ghost' size='icon'>
-              <MoreHorizontal className='h-4 w-4 text-green-700' />
-            </Button>
-          </DropdownMenuTrigger>
+    // {
+    //   id: 'actions',
+    //   header: labels.actions,
+    //   enableSorting: false,
+    //   cell: ({ row }) => (
+    //     <DropdownMenu dir={isArabic ? 'rtl' : 'ltr'}>
+    //       <DropdownMenuTrigger asChild>
+    //         <Button variant='ghost' size='icon'>
+    //           <MoreHorizontal className='h-4 w-4 text-green-700' />
+    //         </Button>
+    //       </DropdownMenuTrigger>
 
-          <DropdownMenuContent align='end'>
-            <DropdownMenuItem onClick={() => onOpen(row.original.id)}>
-              <Pencil className='mr-2 h-4 w-4' />
-              {labels.open}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
-    },
+    //       <DropdownMenuContent align='end'>
+    //         <DropdownMenuItem onClick={() => onOpen(row.original.id)}>
+    //           <Pencil className='mr-2 h-4 w-4' />
+    //           {labels.open}
+    //         </DropdownMenuItem>
+    //       </DropdownMenuContent>
+    //     </DropdownMenu>
+    //   ),
+    // },
   ]
 }

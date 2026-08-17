@@ -56,10 +56,48 @@ export type IqamaRenewalCase = {
   identification: Identification
 }
 
+export interface IqamaRenewalFilters {
+  statuses: IqamaRenewalStatus[]
+
+  expiryDateFrom?: string
+  expiryDateTo?: string
+
+  mhrsdUploadedFrom?: string
+  mhrsdUploadedTo?: string
+
+  mhrsdApprovedFrom?: string
+  mhrsdApprovedTo?: string
+
+  mhrsdDeniedFrom?: string
+  mhrsdDeniedTo?: string
+
+  governmentRelationsDueFrom?: string
+  governmentRelationsDueTo?: string
+}
+
 export interface IqamaRenewalCaseListResponse {
   data: IqamaRenewalCase[]
   pagination: IqamaRenewalPagination
 }
+
+export const createEmptyIqamaRenewalFilters = (): IqamaRenewalFilters => ({
+  statuses: [],
+
+  expiryDateFrom: undefined,
+  expiryDateTo: undefined,
+
+  mhrsdUploadedFrom: undefined,
+  mhrsdUploadedTo: undefined,
+
+  mhrsdApprovedFrom: undefined,
+  mhrsdApprovedTo: undefined,
+
+  mhrsdDeniedFrom: undefined,
+  mhrsdDeniedTo: undefined,
+
+  governmentRelationsDueFrom: undefined,
+  governmentRelationsDueTo: undefined,
+})
 
 export type CreateIqamaRenewalCasePayload = {
   employeeId: string

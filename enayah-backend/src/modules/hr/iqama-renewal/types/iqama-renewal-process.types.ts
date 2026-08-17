@@ -1,4 +1,4 @@
-// src/modules/hr/iqama-renewal-process/types/iqama-renewal-process.types.ts
+// enayah-backend/src/modules/hr/iqama-renewal-process/types/iqama-renewal-process.types.ts
 
 import { z } from 'zod'
 
@@ -110,6 +110,32 @@ export const iqamaRenewalSortByValues = [
   'updatedAt',
 ] as const
 
+const IqamaRenewalStatusQuerySchema = z.preprocess(
+  (value) => {
+    if (Array.isArray(value)) {
+      return value
+    }
+
+    if (typeof value === 'string') {
+      const values = value
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean)
+
+      if (values.length === 0) {
+        return undefined
+      }
+
+      return values.length === 1 ? values[0] : values
+    }
+
+    return value
+  },
+  z
+    .union([IqamaRenewalStatusSchema, z.array(IqamaRenewalStatusSchema)])
+    .optional(),
+)
+
 export const ListIqamaRenewalCasesQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(500).default(25),
@@ -121,6 +147,15 @@ export const ListIqamaRenewalCasesQuerySchema = z.object({
   identificationId: z.string().uuid().optional(),
   assignedToUserId: z.string().uuid().optional(),
   unassigned: QueryBooleanSchema.optional(),
+  expiryDateFrom: z.string().date().optional(),
+  expiryDateTo: z.string().date().optional(),
+  mhrsdUploadedFrom: z.string().date().optional(),
+  mhrsdUploadedTo: z.string().date().optional(),
+  mhrsdApprovedFrom: z.string().date().optional(),
+  mhrsdApprovedTo: z.string().date().optional(),
+
+  mhrsdDeniedFrom: z.string().date().optional(),
+  mhrsdDeniedTo: z.string().date().optional(),
   governmentRelationsDueFrom: z.string().date().optional(),
   governmentRelationsDueTo: z.string().date().optional(),
   createdFrom: z.string().date().optional(),
