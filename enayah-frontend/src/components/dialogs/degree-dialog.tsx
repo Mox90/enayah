@@ -24,6 +24,7 @@ import { CredentialDocumentMetadata } from '@/modules/hr/onboarding/types/onboar
 import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
 import { cn } from '@/lib/utils'
 import { degreeDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
+import { DatePicker } from './date-picker'
 //import { degreeDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
 
 export type DegreeFormValue = {
@@ -353,7 +354,7 @@ function DegreeDialogContent({
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>{t('graduationDateLabel')}</Label>
+              {/* <Label>{t('graduationDateLabel')}</Label>
 
               <Input
                 type='date'
@@ -363,6 +364,18 @@ function DegreeDialogContent({
                 onChange={(event) =>
                   update('graduationDate', event.target.value || null)
                 }
+              /> */}
+              <label
+                htmlFor={'graduationDate'}
+                className='text-xs text-muted-foreground block'
+              >
+                {t('graduationDateLabel')}
+              </label>
+
+              <DatePicker
+                id='graduationDate'
+                value={form.graduationDate ?? null}
+                onChange={(value) => update('graduationDate', value)}
               />
             </div>
           </div>

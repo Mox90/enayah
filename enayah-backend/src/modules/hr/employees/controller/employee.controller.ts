@@ -1,3 +1,5 @@
+// enayah-backemd/src/modules/hr/employees/controller/employee.controller.ts
+
 import { Request, Response } from 'express'
 
 import { AppError } from '../../../../core/errors/AppError'
@@ -41,7 +43,7 @@ export const EmployeeController = {
   }),
 
   findEmployeeDirectory: asyncHandler(async (req: Request, res: Response) => {
-    console.log(req.query)
+    //console.log(req.query)
     const query = EmployeeDirectoryQuerySchema.parse({
       ...req.query,
 

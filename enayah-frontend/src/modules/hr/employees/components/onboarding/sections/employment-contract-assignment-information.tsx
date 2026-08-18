@@ -2,6 +2,7 @@
 
 'use client'
 
+import { DatePicker } from '@/components/dialogs/date-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -59,9 +60,10 @@ export function EmploymentContractAssignmentInformation({
   const locale = useLocale()
   const isRtl = locale === 'ar'
 
-  function updateEffectiveDate(date: string) {
+  function updateEffectiveDate(date: string | null) {
     onChange({
       ...value,
+
       employment: {
         ...employment,
         hireDate: date,
@@ -85,7 +87,7 @@ export function EmploymentContractAssignmentInformation({
     })
   }
 
-  function updateContractEndDate(date: string) {
+  function updateContractEndDate(date: string | null) {
     onChange({
       ...value,
 
@@ -168,22 +170,48 @@ export function EmploymentContractAssignmentInformation({
 
       <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
         <div className='space-y-2'>
-          <Label>{t('hireDate')}</Label>
+          {/* <Label>{t('hireDate')}</Label>
 
           <Input
             type='date'
             value={employment.hireDate ?? ''}
             onChange={(e) => updateEffectiveDate(e.target.value)}
+          /> */}
+          <label
+            htmlFor={'hireDate'}
+            className='text-xs text-muted-foreground block'
+          >
+            {t('hireDate')}
+          </label>
+
+          <DatePicker
+            id='hireDate'
+            value={employment.hireDate ?? null}
+            //onChange={(value) => updateEffectiveDate(value ?? '')}
+            onChange={updateEffectiveDate}
           />
         </div>
 
         <div className='space-y-2'>
-          <Label>{t('endDate')}</Label>
+          {/* <Label>{t('endDate')}</Label>
 
           <Input
             type='date'
             value={contract.endDate ?? ''}
             onChange={(e) => updateContractEndDate(e.target.value)}
+          /> */}
+          <label
+            htmlFor={'endDate'}
+            className='text-xs text-muted-foreground block'
+          >
+            {t('endDate')}
+          </label>
+
+          <DatePicker
+            id='endDate'
+            value={contract.endDate ?? null}
+            //onChange={(value) => updateContractEndDate(value ?? '')}
+            onChange={updateContractEndDate}
           />
         </div>
 

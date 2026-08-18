@@ -28,6 +28,7 @@ import { RefreshCcw, Trash2 } from 'lucide-react'
 import { AllowanceTypeCombobox } from '../comboboxes/allowance-combobox'
 import { useLocale, useTranslations } from 'next-intl'
 import { Footer } from '../footer/footer'
+import { DatePicker } from './date-picker'
 
 interface Props {
   open: boolean
@@ -77,9 +78,9 @@ function ContractRenewalDialogContent({
   //const cmt = useTranslations('common')
   const locale = useLocale()
   const isRtl = locale === 'ar'
-  const [startDate, setStartDate] = useState(defaultStartDate)
+  const [startDate, setStartDate] = useState<string | null>(defaultStartDate)
   const [durationMonths, setDurationMonths] = useState<'3' | '6' | '12'>('12')
-  const [endDate, setEndDate] = useState(
+  const [endDate, setEndDate] = useState<string | null>(
     addMonthsMinusOneDay(defaultStartDate, 12),
   )
   const [positionItemId, setPositionItemId] = useState(currentPositionItemId)
@@ -149,20 +150,31 @@ function ContractRenewalDialogContent({
     return allowanceOptions.filter((option) => !selected.has(option.value))
   }
 
-  function updateStartDate(value: string) {
+  function updateStartDate(value: string | null) {
     setStartDate(value)
-    setEndDate(addMonthsMinusOneDay(value, Number(durationMonths)))
+    setEndDate(
+      value ? addMonthsMinusOneDay(value, Number(durationMonths)) : null,
+    )
   }
 
   function updateDuration(value: '3' | '6' | '12') {
     setDurationMonths(value)
-    setEndDate(addMonthsMinusOneDay(startDate, Number(value)))
+    setEndDate(
+      startDate ? addMonthsMinusOneDay(startDate, Number(value)) : null,
+    )
   }
 
   async function handleSubmit() {
-    //if (isSubmitting) return
-    //if (!startDate || !endDate || !positionItemId) return
-    if (isSubmitting || formInvalid) return
+    //if (isSubmitting || formInvalid) return
+    if (
+      isSubmitting ||
+      !startDate ||
+      !endDate ||
+      !positionItemId ||
+      endDate < startDate
+    ) {
+      return
+    }
 
     setIsSubmitting(true)
 
@@ -232,12 +244,25 @@ function ContractRenewalDialogContent({
 
           <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>{ct('startDate')}</Label>
+              {/* <Label>{ct('startDate')}</Label>
               <Input
                 type='date'
                 className='h-11'
                 value={startDate}
                 onChange={(e) => updateStartDate(e.target.value)}
+              /> */}
+              <label
+                htmlFor={'renewalStartDate'}
+                className='text-xs text-muted-foreground block'
+              >
+                {ct('startDate')}
+              </label>
+
+              <DatePicker
+                id='renewalStartDate'
+                value={startDate}
+                //onChange={(value) => updateStartDate(value)}
+                onChange={updateStartDate}
               />
             </div>
 
@@ -257,12 +282,25 @@ function ContractRenewalDialogContent({
             </div>
 
             <div className='space-y-2 lg:col-span-2'>
-              <Label>{ct('endDate')}</Label>
+              {/* <Label>{ct('endDate')}</Label>
               <Input
                 type='date'
                 className='h-11'
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
+              /> */}
+              <label
+                htmlFor={'renewalEndDate'}
+                className='text-xs text-muted-foreground block'
+              >
+                {ct('endDate')}
+              </label>
+
+              <DatePicker
+                id='renewalEndDate'
+                value={endDate}
+                //onChange={(value) => setEndDate(value)}
+                onChange={setEndDate}
               />
             </div>
           </div>

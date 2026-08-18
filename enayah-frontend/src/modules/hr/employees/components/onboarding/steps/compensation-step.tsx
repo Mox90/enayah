@@ -1,6 +1,7 @@
 'use client'
 
 import { AllowanceTypeCombobox } from '@/components/comboboxes/allowance-combobox'
+import { DatePicker } from '@/components/dialogs/date-picker'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -102,7 +103,7 @@ export function CompensationStep({ value, onChange }: Props) {
 
       <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
         <div className='space-y-2'>
-          <Label>Effective Date</Label>
+          {/* <Label>Effective Date</Label>
 
           <Input
             type='date'
@@ -110,6 +111,18 @@ export function CompensationStep({ value, onChange }: Props) {
             onChange={(e) =>
               updateCompensation('effectiveDate', e.target.value)
             }
+          /> */}
+          <label
+            htmlFor={'effectiveDate'}
+            className='text-xs text-muted-foreground block'
+          >
+            {'Effective Date'}
+          </label>
+
+          <DatePicker
+            id='effectiveDate'
+            value={compensation.effectiveDate}
+            onChange={(value) => updateCompensation('effectiveDate', value)}
           />
         </div>
 

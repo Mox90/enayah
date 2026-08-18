@@ -1,5 +1,6 @@
 'use client'
 
+import { DatePicker } from '@/components/dialogs/date-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -13,7 +14,7 @@ import {
   HireEmployeePayload,
   IdentificationInput,
 } from '@/modules/hr/onboarding/types/onboarding.types'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 //import { HireEmployeePayload } from '../types/hire.types'
 
 interface Props {
@@ -24,6 +25,8 @@ interface Props {
 export function EmployeeIdentificationInformation({ value, onChange }: Props) {
   const t = useTranslations('employees')
   const ct = useTranslations('common')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
   const identification = value.personal?.identifications?.[0]
 
   function updateIdentification<K extends keyof IdentificationInput>(
@@ -44,9 +47,10 @@ export function EmployeeIdentificationInformation({ value, onChange }: Props) {
       ...value,
       personal: {
         ...value.personal,
-        identifications: nextIdentification.identificationNumber
-          ? [nextIdentification]
-          : [],
+        // identifications: nextIdentification.identificationNumber
+        //   ? [nextIdentification]
+        //   : [],
+        identifications: [nextIdentification],
       },
     })
   }
@@ -64,6 +68,7 @@ export function EmployeeIdentificationInformation({ value, onChange }: Props) {
         <div className='space-y-2'>
           <Label>{t('idType')}</Label>
           <Select
+            dir={isRtl ? 'rtl' : 'ltr'}
             value={identification?.type ?? 'iqama'}
             onValueChange={(v) =>
               updateIdentification('type', v as IdentificationInput['type'])
@@ -94,24 +99,48 @@ export function EmployeeIdentificationInformation({ value, onChange }: Props) {
         </div>
 
         <div className='space-y-2'>
-          <Label>{ct('issueDate')}</Label>
+          {/* <Label>{ct('issueDate')}</Label>
           <Input
             type='date'
             value={identification?.issueDate ?? ''}
             onChange={(e) =>
               updateIdentification('issueDate', e.target.value || null)
             }
+          /> */}
+          <label
+            htmlFor={'issueDate'}
+            className='text-xs text-muted-foreground block'
+          >
+            {ct('issueDate')}
+          </label>
+
+          <DatePicker
+            id='issueDate'
+            value={identification?.issueDate ?? ''}
+            onChange={(value) => updateIdentification('issueDate', value)}
           />
         </div>
 
         <div className='space-y-2'>
-          <Label>{ct('expiryDate')}</Label>
+          {/* <Label>{ct('expiryDate')}</Label>
           <Input
             type='date'
             value={identification?.expiryDate ?? ''}
             onChange={(e) =>
               updateIdentification('expiryDate', e.target.value || null)
             }
+          /> */}
+          <label
+            htmlFor={'expiryDate'}
+            className='text-xs text-muted-foreground block'
+          >
+            {ct('expiryDate')}
+          </label>
+
+          <DatePicker
+            id='expiryDate'
+            value={identification?.expiryDate ?? null}
+            onChange={(value) => updateIdentification('expiryDate', value)}
           />
         </div>
       </div>

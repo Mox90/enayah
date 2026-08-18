@@ -159,7 +159,7 @@ export type LicenseInput = {
   specialty?: string | null
   issueDate?: string | null
   expiryDate: string
-  status: 'active' | 'expired' | 'suspended' | 'revoked'
+  //status: 'active' | 'expired' | 'suspended' | 'revoked'
   isPrimary: boolean
   isVerified?: boolean
   documentFileId?: string | null
@@ -257,8 +257,8 @@ export interface HireEmployeePayload {
   }
 
   employment: {
-    hireDate: string
-    startDate: string
+    hireDate: string | null
+    startDate: string | null
     endDate?: string | null
     employmentType:
       | 'full_time'
@@ -271,8 +271,8 @@ export interface HireEmployeePayload {
 
   contract: {
     contractNumber?: string | null
-    startDate: string
-    endDate: string
+    startDate: string | null
+    endDate: string | null
     contractType?: 'initial' | 'renewal' | 'amendment'
     status?: 'draft' | 'active' | 'superseded' | 'cancelled' | 'expired'
     signedDate?: string | null
@@ -284,7 +284,7 @@ export interface HireEmployeePayload {
     positionItemId: string
     itemNumber?: string | null
 
-    startDate?: string
+    startDate?: string | null
     endDate: string | null
     remarks?: string | null
 
@@ -336,7 +336,7 @@ export interface HireEmployeePayload {
   }
 
   compensation?: {
-    effectiveDate: string
+    effectiveDate: string | null
     baseSalary: number
     status?: 'draft' | 'approved' | 'applied'
     reason?: string | null

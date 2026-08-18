@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils'
 import { CredentialDocumentDropzone } from '../forms/credential-document-dropzone'
 import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
 import { fellowshipDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
+import { DatePicker } from './date-picker'
 
 export type FellowshipFormValue = {
   id?: string
@@ -289,22 +290,46 @@ function FellowshipDialogContent({
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>{cmt('issueDate')}</Label>
+              {/* <Label>{cmt('issueDate')}</Label>
               <Input
                 type='date'
                 className='h-11 bg-background'
                 value={form.issueDate ?? ''}
                 onChange={(e) => update('issueDate', e.target.value || null)}
+              /> */}
+              <label
+                htmlFor={'issueDate'}
+                className='text-xs text-muted-foreground block'
+              >
+                {cmt('issueDate')}
+              </label>
+
+              <DatePicker
+                id='issueDate'
+                value={form.issueDate ?? ''}
+                onChange={(value) => update('issueDate', value ?? null)}
               />
             </div>
 
             <div className='space-y-2'>
-              <Label>{cmt('expiryDate')}</Label>
+              {/* <Label>{cmt('expiryDate')}</Label>
               <Input
                 type='date'
                 className='h-11 bg-background'
                 value={form.expiryDate ?? ''}
                 onChange={(e) => update('expiryDate', e.target.value || null)}
+              /> */}
+              <label
+                htmlFor={'expiryDate'}
+                className='text-xs text-muted-foreground block'
+              >
+                {cmt('expiryDate')}
+              </label>
+
+              <DatePicker
+                id='expiryDate'
+                value={form.expiryDate ?? null}
+                onChange={(value) => update('expiryDate', value)}
               />
             </div>
           </div>
