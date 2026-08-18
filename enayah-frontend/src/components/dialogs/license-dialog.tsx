@@ -268,11 +268,10 @@ function LicenseDialogContent({
                 {'Issue Date *'}
               </label>
 
-              {/* Passed the generated id to the DatePicker component */}
               <DatePicker
                 id='issueDate'
-                value={form.issueDate ?? undefined}
-                onChange={(value) => update('issueDate', value ?? null)}
+                value={form.issueDate ?? null}
+                onChange={(value) => update('issueDate', value)}
               />
             </div>
 
@@ -308,8 +307,8 @@ function LicenseDialogContent({
               /> */}
               <DatePicker
                 id='expiryDate'
-                value={form.expiryDate ?? undefined}
-                onChange={(value) => update('expiryDate', value ?? null)}
+                value={form.expiryDate ?? null}
+                onChange={(value) => update('expiryDate', value)}
               />
             </div>
           </div>

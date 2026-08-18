@@ -237,8 +237,8 @@ export function EmployeeBasicInformation({
 
           <DatePicker
             id='dateOfBirth'
-            value={employee.dateOfBirth ?? ''}
-            onChange={(value) => updateEmployee('dateOfBirth', value ?? null)}
+            value={employee.dateOfBirth ?? null}
+            onChange={(value) => updateEmployee('dateOfBirth', value)}
           />
           {personalErrors.dateOfBirth && (
             <p className='text-sm text-destructive'>

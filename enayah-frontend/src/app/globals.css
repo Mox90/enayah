@@ -326,7 +326,6 @@ html[dir='rtl'] {
     var(--destructive) 55%,
     var(--muted-foreground)
   ) !important;
-
   opacity: 0.7;
 }
 
@@ -337,7 +336,6 @@ html[dir='rtl'] {
     var(--calendar-friday) 55%,
     var(--muted-foreground)
   ) !important;
-
   opacity: 0.7;
 }
 

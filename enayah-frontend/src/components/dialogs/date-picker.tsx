@@ -3,103 +3,21 @@
 'use client'
 
 import * as React from 'react'
-import { format } from 'date-fns'
-import { CalendarDays, CalendarIcon } from 'lucide-react'
+import { CalendarDays } from 'lucide-react'
 import DatePickerBase, { DateObject } from 'react-multi-date-picker'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+
+export type DatePickerValue = string | null
 
 interface Props {
   id?: string
-  value?: string
-  onChange: (value?: string) => void
+  value?: DatePickerValue
+  onChange: (value: DatePickerValue) => void
   className?: string
   disabled?: boolean
 }
-
-/**
- *
- * @param id id
- * @returns the date Date picker which in the format dd/mm/yyyy
- * Date picker using react-multi-date-picker
- */
-// export function DatePicker({
-//   id,
-//   value,
-//   onChange,
-//   className,
-//   disabled = false,
-// }: Props) {
-//   return (
-//     <DatePickerBase
-//       value={
-//         value
-//           ? new DateObject({
-//               date: value,
-//               format: 'YYYY-MM-DD',
-//             })
-//           : undefined
-//       }
-//       disabled={disabled}
-//       format='DD/MM/YYYY'
-//       calendarPosition='bottom-left'
-//       className='enayah-date-picker'
-//       containerClassName='w-full'
-//       onOpenPickNewDate={false}
-//       showOtherDays
-//       mapDays={({ date, currentMonth }) => {
-//         const isOtherMonth = date.month.index !== currentMonth.index
-
-//         if (isOtherMonth) {
-//           return {
-//             className: 'enayah-other-month-day',
-//           }
-//         }
-
-//         return {}
-//       }}
-//       render={(displayValue, openCalendar) => (
-//         <Button
-//           id={id}
-//           type='button'
-//           variant='outline'
-//           disabled={disabled}
-//           onClick={openCalendar}
-//           className={cn(
-//             'h-11 w-full justify-start text-left font-normal',
-//             !value && 'text-muted-foreground',
-//             className,
-//           )}
-//         >
-//           <CalendarDays className='mr-2 h-4 w-4 shrink-0' />
-
-//           {displayValue || 'Select date'}
-//         </Button>
-//       )}
-//       onChange={(selectedDate: DateObject | null) => {
-//         if (!selectedDate) {
-//           onChange(undefined)
-//           return
-//         }
-
-//         /*
-//          * Keep API/form values in ISO format.
-//          *
-//          * Display: 18/08/2026
-//          * Stored:  2026-08-18
-//          */
-//         onChange(selectedDate.format('YYYY-MM-DD'))
-//       }}
-//     />
-//   )
-// }
 
 /**
  * Date picker using react-multi-date-picker.
@@ -172,7 +90,7 @@ export function DatePicker({
       )}
       onChange={(selectedDate: DateObject | null) => {
         if (!selectedDate) {
-          onChange(undefined)
+          onChange(null)
           return
         }
 

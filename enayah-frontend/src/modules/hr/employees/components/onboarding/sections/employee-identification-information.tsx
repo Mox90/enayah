@@ -117,9 +117,7 @@ export function EmployeeIdentificationInformation({ value, onChange }: Props) {
           <DatePicker
             id='issueDate'
             value={identification?.issueDate ?? ''}
-            onChange={(value) =>
-              updateIdentification('issueDate', value ?? null)
-            }
+            onChange={(value) => updateIdentification('issueDate', value)}
           />
         </div>
 
@@ -141,10 +139,8 @@ export function EmployeeIdentificationInformation({ value, onChange }: Props) {
 
           <DatePicker
             id='expiryDate'
-            value={identification?.expiryDate ?? ''}
-            onChange={(value) =>
-              updateIdentification('expiryDate', value ?? null)
-            }
+            value={identification?.expiryDate ?? null}
+            onChange={(value) => updateIdentification('expiryDate', value)}
           />
         </div>
       </div>

@@ -431,7 +431,7 @@
     "draft": "مسودة",
     "cancelled": "أُلغِيَ",
     "expired": "منتهي الصلاحية",
-    "notes": "Notes"
+    "notes": "ملاحظات العقد"
   },
   "credentials": {
     "createSuccess": "تم إنشاء {name}.",

@@ -509,7 +509,7 @@ function IdentificationDialogContent({
               /> */}
               <DatePicker
                 id='identification-issue-date'
-                value={form.issueDate ?? ''}
+                value={form.issueDate}
                 onChange={(value) => {
                   clearFieldError('issueDate')
                   clearFieldError('expiryDate')
@@ -604,7 +604,7 @@ function IdentificationDialogContent({
 
               <DatePicker
                 id='identification-expiry-date'
-                value={form.expiryDate ?? ''}
+                value={form.expiryDate}
                 onChange={(value) => {
                   clearFieldError('issueDate')
                   clearFieldError('expiryDate')
@@ -1505,8 +1505,8 @@ function DependentDialogContent({
 
               <DatePicker
                 id='dateOfBirth'
-                value={form.dateOfBirth ?? ''}
-                onChange={(value) => update('dateOfBirth', value ?? null)}
+                value={form.dateOfBirth}
+                onChange={(value) => update('dateOfBirth', value)}
               />
             </div>
           </div>
@@ -1841,8 +1841,8 @@ function VisaDialogContent({
 
               <DatePicker
                 id='issueDate'
-                value={form.issueDate ?? ''}
-                onChange={(value) => update('issueDate', value ?? null)}
+                value={form.issueDate}
+                onChange={(value) => update('issueDate', value)}
               />
             </div>
 
@@ -1863,8 +1863,8 @@ function VisaDialogContent({
 
               <DatePicker
                 id='expiryDate'
-                value={form.expiryDate ?? ''}
-                onChange={(value) => update('expiryDate', value ?? null)}
+                value={form.expiryDate}
+                onChange={(value) => update('expiryDate', value)}
               />
             </div>
 

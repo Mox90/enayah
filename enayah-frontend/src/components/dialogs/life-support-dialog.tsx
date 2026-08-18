@@ -341,8 +341,8 @@ function LifeSupportDialogContent({
 
               <DatePicker
                 id='issueDate'
-                value={form.issueDate ?? ''}
-                onChange={(value) => update('issueDate', value ?? null)}
+                value={form.issueDate}
+                onChange={(value) => update('issueDate', value)}
               />
             </div>
 
@@ -364,8 +364,8 @@ function LifeSupportDialogContent({
 
               <DatePicker
                 id='expiryDate'
-                value={form.expiryDate ?? ''}
-                onChange={(value) => update('expiryDate', value ?? null)}
+                value={form.expiryDate}
+                onChange={(value) => update('expiryDate', value)}
               />
             </div>
           </div>

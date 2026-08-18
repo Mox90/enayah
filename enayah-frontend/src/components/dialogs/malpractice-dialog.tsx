@@ -304,8 +304,8 @@ function MalpracticeDialogContent({
 
               <DatePicker
                 id='startDate'
-                value={form.startDate ?? ''}
-                onChange={(value) => update('startDate', value ?? null)}
+                value={form.startDate ?? null}
+                onChange={(value) => update('startDate', value)}
               />
             </div>
 

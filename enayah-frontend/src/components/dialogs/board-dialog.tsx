@@ -329,8 +329,8 @@ function BoardDialogContent({
 
               <DatePicker
                 id='boardIssueDate'
-                value={form.issueDate ?? undefined}
-                onChange={(value) => update('issueDate', value ?? null)}
+                value={form.issueDate ?? null}
+                onChange={(value) => update('issueDate', value)}
               />
             </div>
 
@@ -358,7 +358,7 @@ function BoardDialogContent({
                 id='boardExpiryDate'
                 value={isLifetime ? '' : (form.expiryDate ?? undefined)}
                 disabled={isSubmitting || isLifetime}
-                onChange={(value) => update('issueDate', value ?? null)}
+                onChange={(value) => update('expiryDate', value ?? null)}
               />
 
               <div className='xl:col-span-2'>

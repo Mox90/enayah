@@ -328,8 +328,8 @@ function FellowshipDialogContent({
 
               <DatePicker
                 id='expiryDate'
-                value={form.expiryDate ?? ''}
-                onChange={(value) => update('expiryDate', value ?? null)}
+                value={form.expiryDate ?? null}
+                onChange={(value) => update('expiryDate', value)}
               />
             </div>
           </div>

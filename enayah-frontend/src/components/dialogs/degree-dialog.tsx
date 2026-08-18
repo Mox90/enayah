@@ -374,8 +374,8 @@ function DegreeDialogContent({
 
               <DatePicker
                 id='graduationDate'
-                value={form.graduationDate ?? ''}
-                onChange={(value) => update('graduationDate', value ?? null)}
+                value={form.graduationDate ?? null}
+                onChange={(value) => update('graduationDate', value)}
               />
             </div>
           </div>

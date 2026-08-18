@@ -78,9 +78,9 @@ function ContractRenewalDialogContent({
   //const cmt = useTranslations('common')
   const locale = useLocale()
   const isRtl = locale === 'ar'
-  const [startDate, setStartDate] = useState(defaultStartDate)
+  const [startDate, setStartDate] = useState<string | null>(defaultStartDate)
   const [durationMonths, setDurationMonths] = useState<'3' | '6' | '12'>('12')
-  const [endDate, setEndDate] = useState(
+  const [endDate, setEndDate] = useState<string | null>(
     addMonthsMinusOneDay(defaultStartDate, 12),
   )
   const [positionItemId, setPositionItemId] = useState(currentPositionItemId)
@@ -150,20 +150,31 @@ function ContractRenewalDialogContent({
     return allowanceOptions.filter((option) => !selected.has(option.value))
   }
 
-  function updateStartDate(value: string) {
+  function updateStartDate(value: string | null) {
     setStartDate(value)
-    setEndDate(addMonthsMinusOneDay(value, Number(durationMonths)))
+    setEndDate(
+      value ? addMonthsMinusOneDay(value, Number(durationMonths)) : null,
+    )
   }
 
   function updateDuration(value: '3' | '6' | '12') {
     setDurationMonths(value)
-    setEndDate(addMonthsMinusOneDay(startDate, Number(value)))
+    setEndDate(
+      startDate ? addMonthsMinusOneDay(startDate, Number(value)) : null,
+    )
   }
 
   async function handleSubmit() {
-    //if (isSubmitting) return
-    //if (!startDate || !endDate || !positionItemId) return
-    if (isSubmitting || formInvalid) return
+    //if (isSubmitting || formInvalid) return
+    if (
+      isSubmitting ||
+      !startDate ||
+      !endDate ||
+      !positionItemId ||
+      endDate < startDate
+    ) {
+      return
+    }
 
     setIsSubmitting(true)
 
@@ -250,7 +261,8 @@ function ContractRenewalDialogContent({
               <DatePicker
                 id='renewalStartDate'
                 value={startDate}
-                onChange={(value) => setStartDate(value ?? '')}
+                //onChange={(value) => updateStartDate(value)}
+                onChange={updateStartDate}
               />
             </div>
 
@@ -287,7 +299,8 @@ function ContractRenewalDialogContent({
               <DatePicker
                 id='renewalEndDate'
                 value={endDate}
-                onChange={(value) => setEndDate(value ?? '')}
+                //onChange={(value) => setEndDate(value)}
+                onChange={setEndDate}
               />
             </div>
           </div>

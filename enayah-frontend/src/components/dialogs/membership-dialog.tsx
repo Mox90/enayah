@@ -279,8 +279,8 @@ function MembershipDialogContent({
 
               <DatePicker
                 id='startDate'
-                value={form.startDate ?? ''}
-                onChange={(value) => update('startDate', value ?? null)}
+                value={form.startDate}
+                onChange={(value) => update('startDate', value)}
               />
             </div>
 
@@ -301,8 +301,8 @@ function MembershipDialogContent({
 
               <DatePicker
                 id='expiryDate'
-                value={form.expiryDate ?? ''}
-                onChange={(value) => update('expiryDate', value ?? null)}
+                value={form.expiryDate}
+                onChange={(value) => update('expiryDate', value)}
               />
             </div>
           </div>

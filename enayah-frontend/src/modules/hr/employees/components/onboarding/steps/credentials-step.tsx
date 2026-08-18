@@ -182,23 +182,6 @@ export function CredentialsStep({ value, onChange }: Props) {
     })
   }
 
-  // function saveLicense(license: LicenseFormValue) {
-  //   const exists = licenses.some((item: LicenseInput) => item.id === license.id)
-
-  //   const nextLicenses = exists
-  //     ? licenses.map((item: LicenseInput) =>
-  //         item.id === license.id ? license : item,
-  //       )
-  //     : [...licenses, license]
-
-  //   onChange({
-  //     ...value,
-  //     credentials: {
-  //       ...(value.credentials ?? {}),
-  //       licenses: nextLicenses,
-  //     },
-  //   })
-  // }
   function saveLicense(licenseValue: LicenseFormSubmitValue) {
     const { clientId, id, documentFile: _documentFile, ...form } = licenseValue
 
@@ -521,7 +504,8 @@ export function CredentialsStep({ value, onChange }: Props) {
         }}
         initialValue={editingBoard}
         onSubmit={saveBoard}
-        generateId={true}
+        //generateId={true}
+        generateId
         allowDocumentUpload={false}
       />
 
@@ -557,7 +541,9 @@ export function CredentialsStep({ value, onChange }: Props) {
         }}
         initialValue={editingLicense}
         onSubmit={saveLicense}
-        generateId={true}
+        //generateId={true}
+        generateId
+        allowDocumentUpload={false}
       />
 
       <CredentialFellowships
@@ -594,7 +580,9 @@ export function CredentialsStep({ value, onChange }: Props) {
         }}
         initialValue={editingFellowship}
         onSubmit={saveFellowship}
-        generateId={true}
+        //generateId={true}
+        generateId
+        allowDocumentUpload={false}
       />
 
       <CredentialMemberships

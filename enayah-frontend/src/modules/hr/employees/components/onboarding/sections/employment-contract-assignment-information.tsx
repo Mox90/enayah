@@ -60,9 +60,10 @@ export function EmploymentContractAssignmentInformation({
   const locale = useLocale()
   const isRtl = locale === 'ar'
 
-  function updateEffectiveDate(date: string) {
+  function updateEffectiveDate(date: string | null) {
     onChange({
       ...value,
+
       employment: {
         ...employment,
         hireDate: date,
@@ -86,7 +87,7 @@ export function EmploymentContractAssignmentInformation({
     })
   }
 
-  function updateContractEndDate(date: string) {
+  function updateContractEndDate(date: string | null) {
     onChange({
       ...value,
 
@@ -185,8 +186,9 @@ export function EmploymentContractAssignmentInformation({
 
           <DatePicker
             id='hireDate'
-            value={employment.hireDate ?? ''}
-            onChange={(value) => updateEffectiveDate(value ?? '')}
+            value={employment.hireDate ?? null}
+            //onChange={(value) => updateEffectiveDate(value ?? '')}
+            onChange={updateEffectiveDate}
           />
         </div>
 
@@ -207,8 +209,9 @@ export function EmploymentContractAssignmentInformation({
 
           <DatePicker
             id='endDate'
-            value={contract.endDate ?? ''}
-            onChange={(value) => updateContractEndDate(value ?? '')}
+            value={contract.endDate ?? null}
+            //onChange={(value) => updateContractEndDate(value ?? '')}
+            onChange={updateContractEndDate}
           />
         </div>
 

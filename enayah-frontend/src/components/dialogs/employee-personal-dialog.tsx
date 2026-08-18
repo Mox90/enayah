@@ -285,8 +285,8 @@ export function EmployeePersonalDialog({
 
               <DatePicker
                 id='dateOfBirth'
-                value={form.dateOfBirth ?? ''}
-                onChange={(value) => update('dateOfBirth', value ?? null)}
+                value={form.dateOfBirth ?? null}
+                onChange={(value) => update('dateOfBirth', value)}
               />
             </div>
           </div>

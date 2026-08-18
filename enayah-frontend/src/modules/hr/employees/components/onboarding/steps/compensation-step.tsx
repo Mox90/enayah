@@ -121,10 +121,8 @@ export function CompensationStep({ value, onChange }: Props) {
 
           <DatePicker
             id='effectiveDate'
-            value={compensation.effectiveDate ?? ''}
-            onChange={(value) =>
-              updateCompensation('effectiveDate', value ?? '')
-            }
+            value={compensation.effectiveDate}
+            onChange={(value) => updateCompensation('effectiveDate', value)}
           />
         </div>
 
