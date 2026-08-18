@@ -57,7 +57,11 @@ export const IqamaRenewalProcessController = {
   list: asyncHandler(async (req: Request, res: Response) => {
     const query = ListIqamaRenewalCasesQuerySchema.parse(req.query)
 
+    //console.log('RAW IQAMA QUERY:', req.query)
+
     const result = await IqamaRenewalProcessService.list(query)
+
+    //console.log('PARSED IQAMA QUERY:', query)
 
     res.status(200).json(result)
   }),

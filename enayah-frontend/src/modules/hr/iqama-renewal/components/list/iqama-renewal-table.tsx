@@ -2,26 +2,26 @@
 
 'use client'
 
+import type { OnChangeFn, RowSelectionState } from '@tanstack/react-table'
 import { DataTable } from '@/components/tables'
 import { useTranslations } from 'next-intl'
-
 import { useIqamaRenewalColumns } from './use-iqama-renewal-columns'
-import { IqamaRenewalCaseListResponse } from '../types/iqama-renewal.types'
+import type { IqamaRenewalCaseListResponse } from '../../types/iqama-renewal.types'
 import {
   isIqamaRenewalSortBy,
   type IqamaRenewalSortBy,
-} from '../services/iqama-renewal.service'
+} from '../../services/iqama-renewal.service'
 
 interface Props {
   data?: IqamaRenewalCaseListResponse
   isLoading: boolean
-
   page: number
   limit: number
   search: string
   sortBy: IqamaRenewalSortBy
   sortOrder: 'asc' | 'desc'
-
+  rowSelection: RowSelectionState
+  onRowSelectionChange: OnChangeFn<RowSelectionState>
   onOpen: (id: string) => void
   onPageChange: (page: number) => void
   onLimitChange: (limit: number) => void
@@ -37,6 +37,8 @@ export function IqamaRenewalTable({
   search,
   sortBy,
   sortOrder,
+  rowSelection,
+  onRowSelectionChange,
   onOpen,
   onPageChange,
   onLimitChange,
@@ -57,6 +59,8 @@ export function IqamaRenewalTable({
       search={search}
       sortBy={sortBy}
       sortOrder={sortOrder}
+      rowSelection={rowSelection}
+      onRowSelectionChange={onRowSelectionChange}
       searchPlaceholder={t('searchPlaceholder')}
       onPageChange={onPageChange}
       onLimitChange={onLimitChange}
@@ -64,6 +68,7 @@ export function IqamaRenewalTable({
       onSortChange={(nextSortBy, nextSortOrder) => {
         if (!isIqamaRenewalSortBy(nextSortBy)) {
           console.error(`Unsupported Iqama sort field: ${nextSortBy}`)
+
           return
         }
 

@@ -41,6 +41,7 @@ export const EmployeeController = {
   }),
 
   findEmployeeDirectory: asyncHandler(async (req: Request, res: Response) => {
+    console.log(req.query)
     const query = EmployeeDirectoryQuerySchema.parse({
       ...req.query,
 

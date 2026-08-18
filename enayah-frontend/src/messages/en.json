@@ -62,7 +62,9 @@
     "deleteConfirmation": {
       "title": "Confirm deletion",
       "description": "Are you sure you want to delete this {item}? This action cannot be undone."
-    }
+    },
+    "from": "From",
+    "to": "To"
   },
   "auth": {
     "loginTitle": "Login to Your Account",
@@ -826,12 +828,28 @@
     "employeeNumber": "Employee Number",
     "employeeName": "Employee Name",
     "iqamaNumber": "Iqama Number",
-    "expiryDate": "Expiry Date",
     "currentStage": "Current Stage",
     "assignedTo": "Assigned To",
     "mhrsdUploadDate": "MHRSD Upload Date",
     "mhrsdDecision": "MHRSD Decision",
-    "governmentRelationsDueDate": "Government Relation Due",
+    "filterCases": "Filter Iqama Renewal Cases",
+    "dateFilters": "Date Filters",
+    "status": "Status",
+    "expiryDate": "Iqama Expiry Date",
+    "mhrsdApprovedDate": "MHRSD Approval Date",
+    "mhrsdDeniedDate": "MHRSD Denial Date",
+    "governmentRelationsDueDate": "Government Relations Due Date",
+    "statuses": {
+      "pending_upload": "Pending Upload",
+      "uploaded_to_mhrsd": "Uploaded to MHRSD",
+      "under_process": "Under Process",
+      "approved_by_mhrsd": "Approved by MHRSD",
+      "denied_by_mhrsd": "Denied by MHRSD",
+      "sent_to_government_relations": "Sent to Government Relations",
+      "completed": "Completed",
+      "eoc_required": "EOC Required",
+      "cancelled": "Cancelled"
+    },
     "daysRemaining": "Days Remain",
     "actions": "Actions",
     "editProcess": "Iqama Renewal Process",

@@ -62,7 +62,9 @@
     "deleteConfirmation": {
       "title": "تأكيد الحذف",
       "description": "هل أنت متأكد من رغبتك في حذف {item}؟ لا يمكن التراجع عن هذا الإجراء."
-    }
+    },
+    "from": "من",
+    "to": "إلى"
   },
 
   "auth": {
@@ -828,12 +830,29 @@
     "employeeNumber": "رقم الموظف",
     "employeeName": "اسم الموظف",
     "iqamaNumber": "رقم الإقامة",
-    "expiryDate": "تاريخ انتهاء الصلاحية",
     "currentStage": "المرحلة الحالية",
     "assignedTo": "مُسند إلى",
-    "mhrsdUploadDate": "تاريخ الرفع إلى وزارة الموارد البشرية والتنمية الاجتماعية",
+    "mhrsdUploadDate": "تاريخ الرفع إلى وزارة الموارد البشرية",
     "mhrsdDecision": "قرار وزارة الموارد البشرية والتنمية الاجتماعية",
-    "governmentRelationsDueDate": "استحقاق المعاملات الحكومية",
+    "governmentRelationsDueDate": "تاريخ الاستحقاق للعلاقات الحكومية",
+    "filterCases": "تصفية حالات تجديد الإقامة",
+    "dateFilters": "تصفية حسب التاريخ",
+    "status": "الحالة",
+    "expiryDate": "تاريخ انتهاء الإقامة",
+    "mhrsdApprovedDate": "تاريخ موافقة وزارة الموارد البشرية",
+    "mhrsdDeniedDate": "تاريخ رفض وزارة الموارد البشرية",
+
+    "statuses": {
+      "pending_upload": "بانتظار الرفع",
+      "uploaded_to_mhrsd": "تم الرفع إلى وزارة الموارد البشرية",
+      "under_process": "قيد المعالجة",
+      "approved_by_mhrsd": "تمت الموافقة من وزارة الموارد البشرية",
+      "denied_by_mhrsd": "تم الرفض من وزارة الموارد البشرية",
+      "sent_to_government_relations": "تم الإرسال إلى العلاقات الحكومية",
+      "completed": "مكتمل",
+      "eoc_required": "يتطلب إنهاء الخدمة",
+      "cancelled": "ملغي"
+    },
     "daysRemaining": "الأيام المتبقية",
     "actions": "إجراءات",
     "editProcess": "معاملة تجديد الإقامة",

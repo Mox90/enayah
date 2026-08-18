@@ -11,6 +11,7 @@ import {
   ilike,
   inArray,
   isNull,
+  lt,
   lte,
   ne,
   or,
@@ -31,6 +32,7 @@ import {
   ListIqamaRenewalCasesQuery,
 } from '../types/iqama-renewal-process.types'
 import { alias } from 'drizzle-orm/pg-core'
+import { startOfNextRiyadhDay } from '../../../../core/utils/date'
 
 type CreateCaseData = {
   employeeId: string
@@ -388,6 +390,92 @@ export const IqamaRenewalProcessRepository = {
       conditions.push(isNull(iqamaRenewalCases.assignedToUserId))
     }
 
+    //--------------------------------
+    // Iqama expiry
+    //--------------------------------
+
+    if (query.expiryDateFrom) {
+      conditions.push(
+        gte(employeeIdentifications.expiryDate, query.expiryDateFrom),
+      )
+    }
+
+    if (query.expiryDateTo) {
+      conditions.push(
+        lte(employeeIdentifications.expiryDate, query.expiryDateTo),
+      )
+    }
+
+    //--------------------------------
+    // MHRSD Uploaded
+    //--------------------------------
+
+    if (query.mhrsdUploadedFrom) {
+      conditions.push(
+        gte(
+          iqamaRenewalCases.mhrsdUploadedAt,
+          startOfNextRiyadhDay(query.mhrsdUploadedFrom),
+        ),
+      )
+    }
+
+    if (query.mhrsdUploadedTo) {
+      conditions.push(
+        lt(
+          iqamaRenewalCases.mhrsdUploadedAt,
+          startOfNextRiyadhDay(query.mhrsdUploadedTo),
+        ),
+      )
+    }
+
+    //--------------------------------
+    // MHRSD Approved
+    //--------------------------------
+
+    if (query.mhrsdApprovedFrom) {
+      conditions.push(
+        gte(
+          iqamaRenewalCases.mhrsdApprovedAt,
+          startOfNextRiyadhDay(query.mhrsdApprovedFrom),
+        ),
+      )
+    }
+
+    if (query.mhrsdApprovedTo) {
+      conditions.push(
+        lt(
+          iqamaRenewalCases.mhrsdApprovedAt,
+          startOfNextRiyadhDay(query.mhrsdApprovedTo),
+        ),
+      )
+    }
+
+    //--------------------------------
+    // MHRSD Denied
+    //--------------------------------
+
+    if (query.mhrsdDeniedFrom) {
+      conditions.push(
+        gte(
+          iqamaRenewalCases.mhrsdDeniedAt,
+          startOfNextRiyadhDay(query.mhrsdDeniedFrom),
+        ),
+      )
+    }
+
+    if (query.mhrsdDeniedTo) {
+      conditions.push(
+        lt(
+          iqamaRenewalCases.mhrsdDeniedAt,
+          startOfNextRiyadhDay(query.mhrsdDeniedTo),
+        ),
+      )
+    }
+
+    //--------------------------------
+    // Government Relations due date
+    //--------------------------------
+
     if (query.governmentRelationsDueFrom) {
       conditions.push(
         gte(
@@ -406,21 +494,22 @@ export const IqamaRenewalProcessRepository = {
       )
     }
 
+    //--------------------------------
+    // Created
+    //--------------------------------
+
     if (query.createdFrom) {
       conditions.push(
         gte(
           iqamaRenewalCases.createdAt,
-          new Date(`${query.createdFrom}T00:00:00.000Z`),
+          startOfNextRiyadhDay(query.createdFrom),
         ),
       )
     }
 
     if (query.createdTo) {
       conditions.push(
-        lte(
-          iqamaRenewalCases.createdAt,
-          new Date(`${query.createdTo}T23:59:59.999Z`),
-        ),
+        lt(iqamaRenewalCases.createdAt, startOfNextRiyadhDay(query.createdTo)),
       )
     }
 

@@ -1,6 +1,8 @@
+// enayah-frontend/src/modules/iqama-renewal/components/use-iqama-renewal-columns.tsx
+
 import { useLocale, useTranslations } from 'next-intl'
 
-import type { IqamaRenewalSortBy } from '../services/iqama-renewal.service'
+import type { IqamaRenewalSortBy } from '../../services/iqama-renewal.service'
 import { getIqamaRenewalColumns } from './iqama-renewal-columns'
 
 export function useIqamaRenewalColumns(
