@@ -12,6 +12,7 @@ import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/c
 import { malpracticeDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
 import { cn } from '@/lib/utils'
 import { CredentialDocumentDropzone } from '../forms/credential-document-dropzone'
+import { DatePicker } from './date-picker'
 
 export type MalpracticeFormValue = {
   id?: string
@@ -41,7 +42,7 @@ export type MalpracticeFormSubmitValue = {
   policyNumber: string
   coverageAmount?: string | number | null
   startDate?: string | null
-  expiryDate: string | null
+  expiryDate: string
   documentFile: File | null
 }
 
@@ -287,22 +288,46 @@ function MalpracticeDialogContent({
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>Start Date</Label>
+              {/* <Label>Start Date</Label>
               <Input
                 type='date'
                 className='h-11 bg-background'
                 value={form.startDate ?? ''}
                 onChange={(e) => update('startDate', e.target.value || null)}
+              /> */}
+              <label
+                htmlFor={'startDate'}
+                className='text-xs text-muted-foreground block'
+              >
+                {'Start Date'}
+              </label>
+
+              <DatePicker
+                id='startDate'
+                value={form.startDate ?? ''}
+                onChange={(value) => update('startDate', value ?? null)}
               />
             </div>
 
             <div className='space-y-2'>
-              <Label>Expiry Date</Label>
+              {/* <Label>Expiry Date</Label>
               <Input
                 type='date'
                 className='h-11 bg-background'
                 value={form.expiryDate ?? ''}
                 onChange={(e) => update('expiryDate', e.target.value)}
+              /> */}
+              <label
+                htmlFor={'expiryDate'}
+                className='text-xs text-muted-foreground block'
+              >
+                {'Expiry Date'}
+              </label>
+
+              <DatePicker
+                id='expiryDate'
+                value={form.expiryDate ?? ''}
+                onChange={(value) => update('expiryDate', value ?? null)}
               />
             </div>
           </div>

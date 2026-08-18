@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils'
 import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
 import { lifeSupportDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
 import { CredentialDocumentDropzone } from '../forms/credential-document-dropzone'
+import { DatePicker } from './date-picker'
 
 export type LifeSupportType =
   | 'bls'
@@ -324,22 +325,47 @@ function LifeSupportDialogContent({
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>Issue Date</Label>
+              {/* <Label>Issue Date</Label>
               <Input
                 type='date'
                 className='h-11 bg-background'
                 value={form.issueDate ?? ''}
                 onChange={(e) => update('issueDate', e.target.value || null)}
+              /> */}
+              <label
+                htmlFor={'issueDate'}
+                className='text-xs text-muted-foreground block'
+              >
+                {'Issue Date'}
+              </label>
+
+              <DatePicker
+                id='issueDate'
+                value={form.issueDate ?? ''}
+                onChange={(value) => update('issueDate', value ?? null)}
               />
             </div>
 
             <div className='space-y-2'>
-              <Label>Expiry Date *</Label>
+              {/* <Label>Expiry Date *</Label>
               <Input
                 type='date'
                 className='h-11 bg-background'
                 value={form.expiryDate ?? ''}
                 onChange={(e) => update('expiryDate', e.target.value)}
+              /> */}
+
+              <label
+                htmlFor={'expiryDate'}
+                className='text-xs text-muted-foreground block'
+              >
+                {'Expiry Date *'}
+              </label>
+
+              <DatePicker
+                id='expiryDate'
+                value={form.expiryDate ?? ''}
+                onChange={(value) => update('expiryDate', value ?? null)}
               />
             </div>
           </div>

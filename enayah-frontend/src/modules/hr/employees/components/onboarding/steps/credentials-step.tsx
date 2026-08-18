@@ -30,6 +30,7 @@ import {
 } from '@/components/dialogs/board-dialog'
 import {
   LicenseDialog,
+  LicenseFormSubmitValue,
   LicenseFormValue,
 } from '@/components/dialogs/license-dialog'
 import {
@@ -38,14 +39,17 @@ import {
 } from '@/components/dialogs/fellowship-dialog'
 import {
   LifeSupportDialog,
+  LifeSupportFormSubmitValue,
   LifeSupportFormValue,
 } from '@/components/dialogs/life-support-dialog'
 import {
   MembershipDialog,
+  MembershipFormSubmitValue,
   MembershipFormValue,
 } from '@/components/dialogs/membership-dialog'
 import {
   MalpracticeDialog,
+  MalpracticeFormSubmitValue,
   MalpracticeFormValue,
 } from '@/components/dialogs/malpractice-dialog'
 
@@ -139,22 +143,6 @@ export function CredentialsStep({ value, onChange }: Props) {
     })
   }
 
-  // function saveBoard(board: BoardFormValue) {
-  //   const exists = boards.some((item: BoardInput) => item.id === board.id)
-
-  //   const nextBoards = exists
-  //     ? boards.map((item: BoardInput) => (item.id === board.id ? board : item))
-  //     : [...boards, board]
-
-  //   onChange({
-  //     ...value,
-  //     credentials: {
-  //       ...(value.credentials ?? {}),
-  //       boards: nextBoards,
-  //     },
-  //   })
-  // }
-
   function saveBoard(boardValue: BoardFormSubmitValue) {
     const { clientId, id, documentFile: _documentFile, ...form } = boardValue
 
@@ -194,13 +182,48 @@ export function CredentialsStep({ value, onChange }: Props) {
     })
   }
 
-  function saveLicense(license: LicenseFormValue) {
-    const exists = licenses.some((item: LicenseInput) => item.id === license.id)
+  // function saveLicense(license: LicenseFormValue) {
+  //   const exists = licenses.some((item: LicenseInput) => item.id === license.id)
 
-    const nextLicenses = exists
-      ? licenses.map((item: LicenseInput) =>
-          item.id === license.id ? license : item,
-        )
+  //   const nextLicenses = exists
+  //     ? licenses.map((item: LicenseInput) =>
+  //         item.id === license.id ? license : item,
+  //       )
+  //     : [...licenses, license]
+
+  //   onChange({
+  //     ...value,
+  //     credentials: {
+  //       ...(value.credentials ?? {}),
+  //       licenses: nextLicenses,
+  //     },
+  //   })
+  // }
+  function saveLicense(licenseValue: LicenseFormSubmitValue) {
+    const { clientId, id, documentFile: _documentFile, ...form } = licenseValue
+
+    const localId = clientId ?? id
+
+    if (!localId || !form.expiryDate) {
+      return
+    }
+
+    const license: LicenseInput = {
+      id: localId,
+      authority: form.authority,
+      licenseNumber: form.licenseNumber,
+      profession: form.profession,
+      specialty: form.specialty ?? null,
+      issueDate: form.issueDate ?? null,
+      expiryDate: form.expiryDate,
+      isPrimary: form.isPrimary,
+      isVerified: false,
+    }
+
+    const exists = licenses.some((item) => item.id === localId)
+
+    const nextLicenses: LicenseInput[] = exists
+      ? licenses.map((item) => (item.id === localId ? license : item))
       : [...licenses, license]
 
     onChange({
@@ -255,15 +278,53 @@ export function CredentialsStep({ value, onChange }: Props) {
     })
   }
 
-  function saveLifeSupport(lifeSupport: LifeSupportFormValue) {
-    const exists = lifeSupports.some(
-      (item: LifeSupportInput) => item.id === lifeSupport.id,
-    )
+  // function saveLifeSupport(lifeSupport: LifeSupportFormValue) {
+  //   const exists = lifeSupports.some(
+  //     (item: LifeSupportInput) => item.id === lifeSupport.id,
+  //   )
+
+  //   const nextLifeSupports: LifeSupportInput[] = exists
+  //     ? lifeSupports.map((item: LifeSupportInput) =>
+  //         item.id === lifeSupport.id ? lifeSupport : item,
+  //       )
+  //     : [...lifeSupports, lifeSupport]
+
+  //   onChange({
+  //     ...value,
+  //     credentials: {
+  //       ...(value.credentials ?? {}),
+  //       lifeSupport: nextLifeSupports,
+  //     },
+  //   })
+  // }
+  function saveLifeSupport(lifeSupportValue: LifeSupportFormSubmitValue) {
+    const {
+      clientId,
+      id,
+      documentFile: _documentFile,
+      ...form
+    } = lifeSupportValue
+
+    const localId = clientId ?? id
+
+    if (!localId) {
+      return
+    }
+
+    const lifeSupport: LifeSupportInput = {
+      id: localId,
+      type: form.type,
+      provider: form.provider,
+      certificateNumber: form.certificateNumber ?? null,
+      issueDate: form.issueDate ?? null,
+      expiryDate: form.expiryDate,
+      isVerified: false,
+    }
+
+    const exists = lifeSupports.some((item) => item.id === localId)
 
     const nextLifeSupports: LifeSupportInput[] = exists
-      ? lifeSupports.map((item: LifeSupportInput) =>
-          item.id === lifeSupport.id ? lifeSupport : item,
-        )
+      ? lifeSupports.map((item) => (item.id === localId ? lifeSupport : item))
       : [...lifeSupports, lifeSupport]
 
     onChange({
@@ -287,15 +348,34 @@ export function CredentialsStep({ value, onChange }: Props) {
     })
   }
 
-  function saveMembership(membership: MembershipFormValue) {
-    const exists = memberships.some(
-      (item: MembershipInput) => item.id === membership.id,
-    )
+  function saveMembership(membershipValue: MembershipFormSubmitValue) {
+    const {
+      clientId,
+      id,
+      documentFile: _documentFile,
+      ...form
+    } = membershipValue
+
+    const localId = clientId ?? id
+
+    if (!localId) {
+      return
+    }
+
+    const membership: MembershipInput = {
+      id: localId,
+      organization: form.organization,
+      membershipNumber: form.membershipNumber ?? null,
+      membershipLevel: form.membershipLevel ?? null,
+      startDate: form.startDate ?? null,
+      expiryDate: form.expiryDate ?? null,
+      isVerified: false,
+    }
+
+    const exists = memberships.some((item) => item.id === localId)
 
     const nextMemberships: MembershipInput[] = exists
-      ? memberships.map((item: MembershipInput) =>
-          item.id === membership.id ? membership : item,
-        )
+      ? memberships.map((item) => (item.id === localId ? membership : item))
       : [...memberships, membership]
 
     onChange({
@@ -319,11 +399,34 @@ export function CredentialsStep({ value, onChange }: Props) {
     })
   }
 
-  function saveMalpractice(item: MalpracticeFormValue) {
-    const exists = malpractice.some((x: MalpracticeInput) => x.id === item.id)
+  function saveMalpractice(malpracticeValue: MalpracticeFormSubmitValue) {
+    const {
+      clientId,
+      id,
+      documentFile: _documentFile,
+      ...form
+    } = malpracticeValue
+
+    const localId = clientId ?? id
+
+    if (!localId) {
+      return
+    }
+
+    const item: MalpracticeInput = {
+      id: localId,
+      insuranceCompany: form.insuranceCompany,
+      policyNumber: form.policyNumber,
+      coverageAmount: form.coverageAmount ?? null,
+      startDate: form.startDate ?? null,
+      expiryDate: form.expiryDate,
+      isVerified: false,
+    }
+
+    const exists = malpractice.some((x) => x.id === localId)
 
     const nextMalpractice: MalpracticeInput[] = exists
-      ? malpractice.map((x: MalpracticeInput) => (x.id === item.id ? item : x))
+      ? malpractice.map((x) => (x.id === localId ? item : x))
       : [...malpractice, item]
 
     onChange({
@@ -439,7 +542,7 @@ export function CredentialsStep({ value, onChange }: Props) {
             specialty: license.specialty ?? null,
             issueDate: license.issueDate ?? null,
             expiryDate: license.expiryDate,
-            status: license.status ?? 'active',
+            //status: license.status ?? 'active',
             isPrimary: license.isPrimary ?? false,
           })
           setActiveDialog('license')
@@ -475,7 +578,7 @@ export function CredentialsStep({ value, onChange }: Props) {
             specialty: fellowship.specialty ?? null,
             issueDate: fellowship.issueDate ?? null,
             expiryDate: fellowship.expiryDate ?? null,
-            documentFileId: fellowship.documentFileId ?? null,
+            //documentFileId: fellowship.documentFileId ?? null,
             isVerified: fellowship.isVerified ?? false,
           })
 
@@ -511,7 +614,7 @@ export function CredentialsStep({ value, onChange }: Props) {
             membershipLevel: membership.membershipLevel ?? null,
             startDate: membership.startDate ?? null,
             expiryDate: membership.expiryDate ?? null,
-            documentFileId: membership.documentFileId ?? null,
+            //documentFileId: membership.documentFileId ?? null,
             isVerified: membership.isVerified ?? false,
           })
 
@@ -523,11 +626,15 @@ export function CredentialsStep({ value, onChange }: Props) {
       <MembershipDialog
         open={activeDialog === 'membership'}
         onOpenChange={(open) => {
-          if (!open) setActiveDialog(null)
+          if (!open) {
+            setActiveDialog(null)
+            setEditingMembership(null)
+          }
         }}
         initialValue={editingMembership}
         onSubmit={saveMembership}
-        generateId={true}
+        generateId
+        allowDocumentUpload={false}
       />
 
       <CredentialLifeSupport
@@ -547,7 +654,7 @@ export function CredentialsStep({ value, onChange }: Props) {
             certificateNumber: lifeSupport.certificateNumber ?? null,
             issueDate: lifeSupport.issueDate ?? null,
             expiryDate: lifeSupport.expiryDate,
-            documentFileId: lifeSupport.documentFileId ?? null,
+            //documentFileId: lifeSupport.documentFileId ?? null,
             isVerified: lifeSupport.isVerified ?? false,
           })
 
@@ -559,11 +666,16 @@ export function CredentialsStep({ value, onChange }: Props) {
       <LifeSupportDialog
         open={activeDialog === 'life_support'}
         onOpenChange={(open) => {
-          if (!open) setActiveDialog(null)
+          if (!open) {
+            setActiveDialog(null)
+            setEditingLifeSupport(null)
+          }
         }}
         initialValue={editingLifeSupport}
         onSubmit={saveLifeSupport}
-        generateId={true}
+        // generateId={true}
+        generateId
+        allowDocumentUpload={false}
       />
 
       <CredentialMalpractice
@@ -583,7 +695,7 @@ export function CredentialsStep({ value, onChange }: Props) {
             coverageAmount: item.coverageAmount ?? null,
             startDate: item.startDate ?? null,
             expiryDate: item.expiryDate ?? null,
-            documentFileId: item.documentFileId ?? null,
+            //documentFileId: item.documentFileId ?? null,
             isVerified: item.isVerified ?? false,
           })
 
@@ -595,11 +707,15 @@ export function CredentialsStep({ value, onChange }: Props) {
       <MalpracticeDialog
         open={activeDialog === 'malpractice'}
         onOpenChange={(open) => {
-          if (!open) setActiveDialog(null)
+          if (!open) {
+            setActiveDialog(null)
+            setEditingMalpractice(null)
+          }
         }}
         initialValue={editingMalpractice}
         onSubmit={saveMalpractice}
-        generateId={true}
+        generateId
+        allowDocumentUpload={false}
       />
     </div>
   )

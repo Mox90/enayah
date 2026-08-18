@@ -1,5 +1,6 @@
 'use client'
 
+import { DatePicker } from '@/components/dialogs/date-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -217,7 +218,7 @@ export function EmployeeBasicInformation({
         </div>
 
         <div className='space-y-2'>
-          <Label
+          {/* <Label
             className={`${personalErrors.dateOfBirth ? 'text-destructive' : ''}`}
           >
             {et('dateOfBirth')}
@@ -226,6 +227,18 @@ export function EmployeeBasicInformation({
             type='date'
             value={employee.dateOfBirth ?? ''}
             onChange={(e) => updateEmployee('dateOfBirth', e.target.value)}
+          /> */}
+          <label
+            htmlFor={'dateOfBirth'}
+            className={`${personalErrors.dateOfBirth ? 'text-destructive' : ''}`}
+          >
+            {et('dateOfBirth')}
+          </label>
+
+          <DatePicker
+            id='dateOfBirth'
+            value={employee.dateOfBirth ?? ''}
+            onChange={(value) => updateEmployee('dateOfBirth', value ?? null)}
           />
           {personalErrors.dateOfBirth && (
             <p className='text-sm text-destructive'>

@@ -32,7 +32,10 @@ import {
   ListIqamaRenewalCasesQuery,
 } from '../types/iqama-renewal-process.types'
 import { alias } from 'drizzle-orm/pg-core'
-import { startOfNextRiyadhDay } from '../../../../core/utils/date'
+import {
+  startOfNextRiyadhDay,
+  startOfRiyadhDay,
+} from '../../../../core/utils/date'
 
 type CreateCaseData = {
   employeeId: string
@@ -414,7 +417,8 @@ export const IqamaRenewalProcessRepository = {
       conditions.push(
         gte(
           iqamaRenewalCases.mhrsdUploadedAt,
-          startOfNextRiyadhDay(query.mhrsdUploadedFrom),
+          //startOfNextRiyadhDay(query.mhrsdUploadedFrom),
+          startOfRiyadhDay(query.mhrsdUploadedFrom),
         ),
       )
     }
@@ -436,7 +440,8 @@ export const IqamaRenewalProcessRepository = {
       conditions.push(
         gte(
           iqamaRenewalCases.mhrsdApprovedAt,
-          startOfNextRiyadhDay(query.mhrsdApprovedFrom),
+          //startOfNextRiyadhDay(query.mhrsdApprovedFrom),
+          startOfRiyadhDay(query.mhrsdApprovedFrom),
         ),
       )
     }
@@ -458,7 +463,8 @@ export const IqamaRenewalProcessRepository = {
       conditions.push(
         gte(
           iqamaRenewalCases.mhrsdDeniedAt,
-          startOfNextRiyadhDay(query.mhrsdDeniedFrom),
+          //startOfNextRiyadhDay(query.mhrsdDeniedFrom),
+          startOfRiyadhDay(query.mhrsdDeniedFrom),
         ),
       )
     }
@@ -502,7 +508,8 @@ export const IqamaRenewalProcessRepository = {
       conditions.push(
         gte(
           iqamaRenewalCases.createdAt,
-          startOfNextRiyadhDay(query.createdFrom),
+          //startOfNextRiyadhDay(query.createdFrom),
+          startOfRiyadhDay(query.createdFrom),
         ),
       )
     }

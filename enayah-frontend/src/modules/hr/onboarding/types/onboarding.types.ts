@@ -159,7 +159,7 @@ export type LicenseInput = {
   specialty?: string | null
   issueDate?: string | null
   expiryDate: string
-  status: 'active' | 'expired' | 'suspended' | 'revoked'
+  //status: 'active' | 'expired' | 'suspended' | 'revoked'
   isPrimary: boolean
   isVerified?: boolean
   documentFileId?: string | null

@@ -13,6 +13,7 @@ import { CredentialDocumentDropzone } from '../forms/credential-document-dropzon
 import { cn } from '@/lib/utils'
 import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
 import { boardDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
+import { DatePicker } from './date-picker'
 
 export type BoardFormValue = {
   id?: string
@@ -306,7 +307,7 @@ function BoardDialogContent({
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label htmlFor='boardIssueDate'>{crt('issued')}</Label>
+              {/* <Label htmlFor='boardIssueDate'>{crt('issued')}</Label>
 
               <Input
                 id='boardIssueDate'
@@ -317,23 +318,25 @@ function BoardDialogContent({
                 onChange={(event) =>
                   update('issueDate', event.target.value || null)
                 }
+              /> */}
+
+              <label
+                htmlFor={'boardIssueDate'}
+                className='text-xs text-muted-foreground block'
+              >
+                {crt('issued')}
+              </label>
+
+              <DatePicker
+                id='boardIssueDate'
+                value={form.issueDate ?? undefined}
+                onChange={(value) => update('issueDate', value ?? null)}
               />
             </div>
 
             <div className='space-y-2'>
-              <Label htmlFor='boardExpiryDate'>{crt('expires')}</Label>
+              {/* <Label htmlFor='boardExpiryDate'>{crt('expires')}</Label>
 
-              {/* <Input
-                id='boardExpiryDate'
-                type='date'
-                className='h-11 bg-background'
-                min={issueDate ?? undefined}
-                value={form.expiryDate ?? ''}
-                disabled={isSubmitting}
-                onChange={(event) =>
-                  update('expiryDate', event.target.value || null)
-                }
-              /> */}
               <Input
                 id='boardExpiryDate'
                 type='date'
@@ -343,7 +346,19 @@ function BoardDialogContent({
                 disabled={isSubmitting || isLifetime}
                 onChange={(event) =>
                   update('expiryDate', event.target.value || null)
-                }
+                } */}
+              <label
+                htmlFor={'boardExpiryDate'}
+                className='text-xs text-muted-foreground block'
+              >
+                {crt('expires')}
+              </label>
+
+              <DatePicker
+                id='boardExpiryDate'
+                value={isLifetime ? '' : (form.expiryDate ?? undefined)}
+                disabled={isSubmitting || isLifetime}
+                onChange={(value) => update('issueDate', value ?? null)}
               />
 
               <div className='xl:col-span-2'>

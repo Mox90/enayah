@@ -16,6 +16,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { FormDialog } from '../forms'
 import { Footer } from '../footer/footer'
 import { Save } from 'lucide-react'
+import { DatePicker } from './date-picker'
 // import { EmployeeProfile } from '../../types/employee-profile.types'
 
 type PersonalFormValue = {
@@ -268,12 +269,24 @@ export function EmployeePersonalDialog({
             </div>
 
             <div className='space-y-2'>
-              <Label>{et('dateOfBirth')}</Label>
+              {/* <Label>{et('dateOfBirth')}</Label>
               <Input
                 type='date'
                 className='h-11 bg-background'
                 value={form.dateOfBirth ?? ''}
                 onChange={(e) => update('dateOfBirth', e.target.value)}
+              /> */}
+              <label
+                htmlFor={'dateOfBirth'}
+                className='text-xs text-muted-foreground block'
+              >
+                {et('dateOfBirth')}
+              </label>
+
+              <DatePicker
+                id='dateOfBirth'
+                value={form.dateOfBirth ?? ''}
+                onChange={(value) => update('dateOfBirth', value ?? null)}
               />
             </div>
           </div>

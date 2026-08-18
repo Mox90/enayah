@@ -35,6 +35,7 @@ import arabic from 'react-date-object/calendars/arabic'
 import { AlertCircle, Save } from 'lucide-react'
 import axios from 'axios'
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert'
+import { DatePicker } from './date-picker'
 
 type DialogProps<T> = {
   open: boolean
@@ -462,7 +463,7 @@ function IdentificationDialogContent({
                 {it('issueDate')}
               </Label>
 
-              <Input
+              {/* <Input
                 id='identification-issue-date'
                 type='date'
                 className='h-11'
@@ -476,6 +477,40 @@ function IdentificationDialogContent({
                 onChange={(event) => {
                   const value = event.target.value
 
+                  clearFieldError('issueDate')
+                  clearFieldError('expiryDate')
+                  setSubmitError(null)
+
+                  if (!value) {
+                    setForm((previous) => ({
+                      ...previous,
+                      issueDate: null,
+                      issueDateHijri: null,
+                    }))
+
+                    return
+                  }
+
+                  const hijriConverted = new DateObject({
+                    date: value,
+                    calendar: gregorian,
+                    format: 'YYYY-MM-DD',
+                  })
+                    .convert(arabic)
+                    .format('YYYY-MM-DD')
+
+                  setForm((previous) => ({
+                    ...previous,
+                    issueDate: value,
+                    issueDateHijri: hijriConverted,
+                    dateCalendar: 'gregorian',
+                  }))
+                }}
+              /> */}
+              <DatePicker
+                id='identification-issue-date'
+                value={form.issueDate ?? ''}
+                onChange={(value) => {
                   clearFieldError('issueDate')
                   clearFieldError('expiryDate')
                   setSubmitError(null)
@@ -522,7 +557,7 @@ function IdentificationDialogContent({
                 {it('expiryDate')}
               </Label>
 
-              <Input
+              {/* <Input
                 id='identification-expiry-date'
                 type='date'
                 className='h-11'
@@ -536,6 +571,41 @@ function IdentificationDialogContent({
                 onChange={(event) => {
                   const value = event.target.value
 
+                  clearFieldError('issueDate')
+                  clearFieldError('expiryDate')
+                  setSubmitError(null)
+
+                  if (!value) {
+                    setForm((previous) => ({
+                      ...previous,
+                      expiryDate: null,
+                      expiryDateHijri: null,
+                    }))
+
+                    return
+                  }
+
+                  const hijriConverted = new DateObject({
+                    date: value,
+                    calendar: gregorian,
+                    format: 'YYYY-MM-DD',
+                  })
+                    .convert(arabic)
+                    .format('YYYY-MM-DD')
+
+                  setForm((previous) => ({
+                    ...previous,
+                    expiryDate: value,
+                    expiryDateHijri: hijriConverted,
+                    dateCalendar: 'gregorian',
+                  }))
+                }}
+              /> */}
+
+              <DatePicker
+                id='identification-expiry-date'
+                value={form.expiryDate ?? ''}
+                onChange={(value) => {
                   clearFieldError('issueDate')
                   clearFieldError('expiryDate')
                   setSubmitError(null)
@@ -1419,12 +1489,24 @@ function DependentDialogContent({
             </div>
 
             <div className='space-y-2'>
-              <Label>{dt('dateOfBirth')}</Label>
+              {/* <Label>{dt('dateOfBirth')}</Label>
               <Input
                 type='date'
                 className='h-11'
                 value={form.dateOfBirth ?? ''}
                 onChange={(e) => update('dateOfBirth', e.target.value || null)}
+              /> */}
+              <label
+                htmlFor={'dateOfBirth'}
+                className='text-xs text-muted-foreground block'
+              >
+                {dt('dateOfBirth')}
+              </label>
+
+              <DatePicker
+                id='dateOfBirth'
+                value={form.dateOfBirth ?? ''}
+                onChange={(value) => update('dateOfBirth', value ?? null)}
               />
             </div>
           </div>
@@ -1743,22 +1825,46 @@ function VisaDialogContent({
             />
 
             <div className='space-y-2'>
-              <Label>{vt('issueDate')}</Label>
+              {/* <Label>{vt('issueDate')}</Label>
               <Input
                 type='date'
                 className='h-11'
                 value={form.issueDate ?? ''}
                 onChange={(e) => update('issueDate', e.target.value || null)}
+              /> */}
+              <label
+                htmlFor={'issueDate'}
+                className='text-xs text-muted-foreground block'
+              >
+                {vt('issueDate')}
+              </label>
+
+              <DatePicker
+                id='issueDate'
+                value={form.issueDate ?? ''}
+                onChange={(value) => update('issueDate', value ?? null)}
               />
             </div>
 
             <div className='space-y-2'>
-              <Label>{vt('expiryDate')}</Label>
+              {/* <Label>{vt('expiryDate')}</Label>
               <Input
                 type='date'
                 className='h-11'
                 value={form.expiryDate ?? ''}
                 onChange={(e) => update('expiryDate', e.target.value || null)}
+              /> */}
+              <label
+                htmlFor={'expiryDate'}
+                className='text-xs text-muted-foreground block'
+              >
+                {vt('expiryDate')}
+              </label>
+
+              <DatePicker
+                id='expiryDate'
+                value={form.expiryDate ?? ''}
+                onChange={(value) => update('expiryDate', value ?? null)}
               />
             </div>
 

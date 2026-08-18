@@ -93,6 +93,7 @@
     Helvetica, Arial, sans-serif; */
     -apple-system, 'BlinkMacSystemFont', 'SF Pro Display', 'Segoe UI', 'Roboto',
     'Helvetica', 'Arial', sans-serif;
+  --calendar-friday: oklch(0.527 0.154 150.069);
 }
 
 .dark {
@@ -127,6 +128,7 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --calendar-friday: oklch(0.723 0.219 149.579);
 }
 
 @layer base {
@@ -146,4 +148,204 @@
 
 html[dir='rtl'] {
   --font-ui: var(--font-cairo);
+}
+
+/* =========================================================
+   Enayah React Multi Date Picker
+   ========================================================= */
+
+.enayah-date-picker.rmdp-wrapper {
+  background: var(--popover);
+  color: var(--popover-foreground);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 2px);
+  box-shadow:
+    0 10px 30px rgb(0 0 0 / 0.15),
+    0 4px 10px rgb(0 0 0 / 0.08);
+}
+
+/* Calendar body */
+.enayah-date-picker .rmdp-calendar {
+  background: var(--popover);
+}
+
+/* Header */
+.enayah-date-picker .rmdp-header {
+  color: var(--popover-foreground);
+}
+
+/* Month + year */
+.enayah-date-picker .rmdp-header-values {
+  color: var(--foreground);
+}
+
+.enayah-date-picker .rmdp-header-values span {
+  color: var(--foreground);
+}
+
+/* Week names */
+.enayah-date-picker .rmdp-week-day {
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+/* Normal days */
+.enayah-date-picker .rmdp-day span {
+  color: var(--foreground);
+}
+
+/* Hover */
+.enayah-date-picker
+  .rmdp-day:not(.rmdp-disabled):not(.rmdp-day-hidden)
+  span:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* Selected day */
+.enayah-date-picker .rmdp-day.rmdp-selected span {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  box-shadow: none;
+}
+
+/* Selected hover */
+.enayah-date-picker .rmdp-day.rmdp-selected span:hover {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+}
+
+/* Today, when it is not selected */
+.enayah-date-picker .rmdp-day.rmdp-today:not(.rmdp-selected) span {
+  background: transparent;
+  color: var(--foreground);
+  border: 2px solid var(--primary);
+  font-weight: 600;
+}
+
+/* Previous/next month dates */
+/* .enayah-date-picker .rmdp-day.rmdp-deactive span {
+  color: var(--muted-foreground);
+  opacity: 0.55;
+} */
+
+/* Disabled dates */
+.enayah-date-picker .rmdp-day.rmdp-disabled span {
+  color: var(--muted-foreground);
+  opacity: 0.4;
+}
+
+/* Navigation arrows */
+.enayah-date-picker .rmdp-arrow {
+  border-color: var(--foreground);
+}
+
+/* Navigation arrow container */
+.enayah-date-picker .rmdp-arrow-container {
+  border-radius: var(--radius);
+}
+
+/* Navigation hover */
+.enayah-date-picker .rmdp-arrow-container:hover {
+  background: var(--accent);
+  box-shadow: none;
+}
+
+.enayah-date-picker .rmdp-arrow-container:hover .rmdp-arrow {
+  border-color: var(--accent-foreground);
+}
+
+/* Month/year picker overlays */
+.enayah-date-picker .rmdp-month-picker,
+.enayah-date-picker .rmdp-year-picker {
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+
+/* Month/year items */
+.enayah-date-picker .rmdp-month-picker .rmdp-day span,
+.enayah-date-picker .rmdp-year-picker .rmdp-day span {
+  color: var(--foreground);
+}
+
+.rmdp-container .enayah-date-picker.ep-arrow::after {
+  background: var(--popover);
+}
+
+.rmdp-container .enayah-date-picker.ep-arrow[direction='bottom'] {
+  border-top-color: var(--border);
+}
+
+.rmdp-container .enayah-date-picker.ep-arrow[direction='top'] {
+  border-bottom-color: var(--border);
+}
+
+/** ===== **/
+/* =========================================================
+   WEEKDAY COLORS
+   ========================================================= */
+
+/* Sunday header */
+.enayah-date-picker .rmdp-week-day:nth-child(1) {
+  color: var(--destructive);
+}
+
+/* Friday header */
+.enayah-date-picker .rmdp-week-day:nth-child(6) {
+  color: var(--calendar-friday);
+}
+
+/* =========================================================
+   CURRENT MONTH
+   ========================================================= */
+
+/* Sunday */
+.enayah-date-picker .rmdp-day span.enayah-sunday {
+  color: var(--destructive);
+}
+
+/* Friday */
+.enayah-date-picker .rmdp-day span.enayah-friday {
+  color: var(--calendar-friday);
+}
+
+/* =========================================================
+   OTHER MONTHS
+   ========================================================= */
+
+/* Normal previous/next month dates */
+.enayah-date-picker .rmdp-day span.enayah-other-month-day {
+  color: var(--muted-foreground) !important;
+  opacity: 0.55;
+}
+
+/* Previous/next month Sunday = muted red */
+.enayah-date-picker .rmdp-day span.enayah-other-month-day.enayah-sunday {
+  color: color-mix(
+    in oklab,
+    var(--destructive) 55%,
+    var(--muted-foreground)
+  ) !important;
+
+  opacity: 0.7;
+}
+
+/* Previous/next month Friday = muted green */
+.enayah-date-picker .rmdp-day span.enayah-other-month-day.enayah-friday {
+  color: color-mix(
+    in oklab,
+    var(--calendar-friday) 55%,
+    var(--muted-foreground)
+  ) !important;
+
+  opacity: 0.7;
+}
+
+.enayah-date-picker .rmdp-day.rmdp-selected span,
+.enayah-date-picker .rmdp-day.rmdp-selected span.enayah-sunday,
+.enayah-date-picker .rmdp-day.rmdp-selected span.enayah-friday,
+.enayah-date-picker .rmdp-day.rmdp-selected span.enayah-other-month-day {
+  background: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  opacity: 1;
 }

@@ -2,6 +2,7 @@
 
 'use client'
 
+import { DatePicker } from '@/components/dialogs/date-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -168,22 +169,46 @@ export function EmploymentContractAssignmentInformation({
 
       <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
         <div className='space-y-2'>
-          <Label>{t('hireDate')}</Label>
+          {/* <Label>{t('hireDate')}</Label>
 
           <Input
             type='date'
             value={employment.hireDate ?? ''}
             onChange={(e) => updateEffectiveDate(e.target.value)}
+          /> */}
+          <label
+            htmlFor={'hireDate'}
+            className='text-xs text-muted-foreground block'
+          >
+            {t('hireDate')}
+          </label>
+
+          <DatePicker
+            id='hireDate'
+            value={employment.hireDate ?? ''}
+            onChange={(value) => updateEffectiveDate(value ?? '')}
           />
         </div>
 
         <div className='space-y-2'>
-          <Label>{t('endDate')}</Label>
+          {/* <Label>{t('endDate')}</Label>
 
           <Input
             type='date'
             value={contract.endDate ?? ''}
             onChange={(e) => updateContractEndDate(e.target.value)}
+          /> */}
+          <label
+            htmlFor={'endDate'}
+            className='text-xs text-muted-foreground block'
+          >
+            {t('endDate')}
+          </label>
+
+          <DatePicker
+            id='endDate'
+            value={contract.endDate ?? ''}
+            onChange={(value) => updateContractEndDate(value ?? '')}
           />
         </div>
 

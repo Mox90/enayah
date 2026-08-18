@@ -54,6 +54,7 @@ import {
 import { IqamaRenewalStatusBadge } from './iqama-renewal-status-badge'
 import { Identification } from '../../employees/types/employee-personal-details.types'
 import { IdentificationDialog } from '@/components/dialogs/personal-detail-dialogs'
+import { DatePicker } from '@/components/dialogs/date-picker'
 
 interface Props {
   renewalCase: IqamaRenewalCase
@@ -934,7 +935,7 @@ export function IqamaRenewalWorkflowActions({
                         <span className='ms-1 text-destructive'>*</span>
                       </Label>
 
-                      <Input
+                      {/* <Input
                         id='governmentRelationsDueDate'
                         type='date'
                         required
@@ -943,6 +944,13 @@ export function IqamaRenewalWorkflowActions({
                         className='h-11 w-full min-w-0'
                         onChange={(event) =>
                           setGovernmentRelationsDueDate(event.target.value)
+                        }
+                      /> */}
+                      <DatePicker
+                        id='governmentRelationsDueDate'
+                        value={governmentRelationsDueDate ?? ''}
+                        onChange={(value) =>
+                          setGovernmentRelationsDueDate(value ?? '')
                         }
                       />
                     </div>

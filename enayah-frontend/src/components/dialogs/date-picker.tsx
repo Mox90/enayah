@@ -1,8 +1,11 @@
+// enayah-frontend/src/components/dialogs/date-picker.tsx
+
 'use client'
 
 import * as React from 'react'
 import { format } from 'date-fns'
-import { CalendarIcon } from 'lucide-react'
+import { CalendarDays, CalendarIcon } from 'lucide-react'
+import DatePickerBase, { DateObject } from 'react-multi-date-picker'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -14,38 +17,167 @@ import {
 } from '@/components/ui/popover'
 
 interface Props {
+  id?: string
   value?: string
   onChange: (value?: string) => void
+  className?: string
+  disabled?: boolean
 }
 
-export function DatePicker({ value, onChange }: Props) {
-  const date = value ? new Date(value) : undefined
+/**
+ *
+ * @param id id
+ * @returns the date Date picker which in the format dd/mm/yyyy
+ * Date picker using react-multi-date-picker
+ */
+// export function DatePicker({
+//   id,
+//   value,
+//   onChange,
+//   className,
+//   disabled = false,
+// }: Props) {
+//   return (
+//     <DatePickerBase
+//       value={
+//         value
+//           ? new DateObject({
+//               date: value,
+//               format: 'YYYY-MM-DD',
+//             })
+//           : undefined
+//       }
+//       disabled={disabled}
+//       format='DD/MM/YYYY'
+//       calendarPosition='bottom-left'
+//       className='enayah-date-picker'
+//       containerClassName='w-full'
+//       onOpenPickNewDate={false}
+//       showOtherDays
+//       mapDays={({ date, currentMonth }) => {
+//         const isOtherMonth = date.month.index !== currentMonth.index
+
+//         if (isOtherMonth) {
+//           return {
+//             className: 'enayah-other-month-day',
+//           }
+//         }
+
+//         return {}
+//       }}
+//       render={(displayValue, openCalendar) => (
+//         <Button
+//           id={id}
+//           type='button'
+//           variant='outline'
+//           disabled={disabled}
+//           onClick={openCalendar}
+//           className={cn(
+//             'h-11 w-full justify-start text-left font-normal',
+//             !value && 'text-muted-foreground',
+//             className,
+//           )}
+//         >
+//           <CalendarDays className='mr-2 h-4 w-4 shrink-0' />
+
+//           {displayValue || 'Select date'}
+//         </Button>
+//       )}
+//       onChange={(selectedDate: DateObject | null) => {
+//         if (!selectedDate) {
+//           onChange(undefined)
+//           return
+//         }
+
+//         /*
+//          * Keep API/form values in ISO format.
+//          *
+//          * Display: 18/08/2026
+//          * Stored:  2026-08-18
+//          */
+//         onChange(selectedDate.format('YYYY-MM-DD'))
+//       }}
+//     />
+//   )
+// }
+
+/**
+ * Date picker using react-multi-date-picker.
+ *
+ * Display format: DD/MM/YYYY
+ * Stored value: YYYY-MM-DD
+ */
+export function DatePicker({
+  id,
+  value,
+  onChange,
+  className,
+  disabled = false,
+}: Props) {
+  const selectedDate = value
+    ? new DateObject({
+        date: value,
+        format: 'YYYY-MM-DD',
+      })
+    : null
+
+  const displayValue = selectedDate
+    ? selectedDate.format('DD/MM/YYYY')
+    : 'Select date'
 
   return (
-    <Popover>
-      <PopoverTrigger asChild>
+    <DatePickerBase
+      value={selectedDate}
+      disabled={disabled}
+      format='DD/MM/YYYY'
+      calendarPosition='bottom-left'
+      className='enayah-date-picker'
+      containerClassName='w-full'
+      onOpenPickNewDate={false}
+      showOtherDays
+      mapDays={({ date, currentMonth }) => {
+        const isOtherMonth = date.month.index !== currentMonth.index
+        const isSunday = date.weekDay.index === 0
+        const isFriday = date.weekDay.index === 5
+
+        const classes = [
+          isOtherMonth && 'enayah-other-month-day',
+          isSunday && 'enayah-sunday',
+          isFriday && 'enayah-friday',
+        ]
+          .filter(Boolean)
+          .join(' ')
+
+        return {
+          className: classes,
+        }
+      }}
+      render={(_, openCalendar) => (
         <Button
+          id={id}
+          type='button'
           variant='outline'
+          disabled={disabled}
+          onClick={openCalendar}
           className={cn(
-            'w-full justify-start text-left font-normal',
-            !date && 'text-muted-foreground',
+            'h-11 w-full justify-start text-left font-normal',
+            !value && 'text-muted-foreground',
+            className,
           )}
         >
-          <CalendarIcon className='mr-2 h-4 w-4' />
+          <CalendarDays className='mr-2 h-4 w-4 shrink-0' />
 
-          {date ? format(date, 'PPP') : 'Select date'}
+          {displayValue}
         </Button>
-      </PopoverTrigger>
+      )}
+      onChange={(selectedDate: DateObject | null) => {
+        if (!selectedDate) {
+          onChange(undefined)
+          return
+        }
 
-      <PopoverContent className='w-auto p-0'>
-        <Calendar
-          mode='single'
-          selected={date}
-          onSelect={(d) => onChange(d ? format(d, 'yyyy-MM-dd') : undefined)}
-          //initialFocus
-          captionLayout='dropdown'
-        />
-      </PopoverContent>
-    </Popover>
+        onChange(selectedDate.format('YYYY-MM-DD'))
+      }}
+    />
   )
 }

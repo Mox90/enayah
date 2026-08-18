@@ -46,21 +46,55 @@ function DateRangeFilter({
   onFromChange,
   onToChange,
 }: DateRangeFilterProps) {
+  const baseId = label.toLowerCase().replace(/\s+/g, '-')
+  const fromId = `${baseId}-from`
+  const toId = `${baseId}-to`
+
+  // return (
+  //   <div className='space-y-3'>
+  //     <Label className='text-base font-medium'>{label}</Label>
+
+  //     <div className='grid grid-cols-2 gap-3'>
+  //       <div className='space-y-1'>
+  //         <div className='text-xs text-muted-foreground'>{fromLabel}</div>
+
+  //         <DatePicker value={from} onChange={onFromChange} />
+  //       </div>
+
+  //       <div className='space-y-1'>
+  //         <div className='text-xs text-muted-foreground'>{toLabel}</div>
+
+  //         <DatePicker value={to} onChange={onToChange} />
+  //       </div>
+  //     </div>
+  //   </div>
+  // )
   return (
     <div className='space-y-3'>
       <Label className='text-base font-medium'>{label}</Label>
 
       <div className='grid grid-cols-2 gap-3'>
         <div className='space-y-1'>
-          <div className='text-xs text-muted-foreground'>{fromLabel}</div>
+          {/* Changed div to label and associated it using htmlFor */}
+          <label
+            htmlFor={fromId}
+            className='text-xs text-muted-foreground block'
+          >
+            {fromLabel}
+          </label>
 
-          <DatePicker value={from} onChange={onFromChange} />
+          {/* Passed the generated id to the DatePicker component */}
+          <DatePicker id={fromId} value={from} onChange={onFromChange} />
         </div>
 
         <div className='space-y-1'>
-          <div className='text-xs text-muted-foreground'>{toLabel}</div>
+          {/* Changed div to label and associated it using htmlFor */}
+          <label htmlFor={toId} className='text-xs text-muted-foreground block'>
+            {toLabel}
+          </label>
 
-          <DatePicker value={to} onChange={onToChange} />
+          {/* Passed the generated id to the DatePicker component */}
+          <DatePicker id={toId} value={to} onChange={onToChange} />
         </div>
       </div>
     </div>

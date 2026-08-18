@@ -15,6 +15,8 @@ import { cn } from '@/lib/utils'
 import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
 import { licenseDocumentService } from '@/modules/hr/credentials/services/credential-document.service'
 import { CredentialDocumentDropzone } from '../forms/credential-document-dropzone'
+import { DatePicker } from './date-picker'
+//import DatePicker from 'react-multi-date-picker'
 
 export type LicenseStatus = 'active' | 'expired' | 'suspended' | 'revoked'
 
@@ -142,6 +144,7 @@ function LicenseDialogContent({
     !authority ||
     !licenseNumber ||
     !profession ||
+    !expiryDate ||
     Boolean(issueDate && expiryDate && expiryDate < issueDate)
 
   function closeDialog() {
@@ -251,22 +254,62 @@ function LicenseDialogContent({
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>Issue Date *</Label>
+              {/* <Label>Issue Date *</Label>
               <Input
                 type='date'
                 className='h-11 bg-background'
                 value={form.issueDate ?? ''}
                 onChange={(e) => update('issueDate', e.target.value)}
+              /> */}
+              <label
+                htmlFor={'issueDate'}
+                className='text-xs text-muted-foreground block'
+              >
+                {'Issue Date *'}
+              </label>
+
+              {/* Passed the generated id to the DatePicker component */}
+              <DatePicker
+                id='issueDate'
+                value={form.issueDate ?? undefined}
+                onChange={(value) => update('issueDate', value ?? null)}
               />
             </div>
 
             <div className='space-y-2'>
-              <Label>Expiry Date *</Label>
+              {/* <Label>Expiry Date *</Label>
               <Input
                 type='date'
                 className='h-11 bg-background'
                 value={form.expiryDate ?? ''}
                 onChange={(e) => update('expiryDate', e.target.value)}
+              /> */}
+              <label
+                htmlFor={'expiryDate'}
+                className='text-xs text-muted-foreground block'
+              >
+                {'Expiry Date *'}
+              </label>
+
+              {/* Passed the generated id to the DatePicker component */}
+              {/* <DatePicker
+                id='expiryDate'
+                value={form.expiryDate ?? ''}
+                onChange={(value) => {
+                  if (!value) {
+                    update('expiryDate', null)
+                  } else if (typeof value === 'string') {
+                    update('expiryDate', value)
+                  } else {
+                    // If it's an object, convert it to a string cleanly
+                    update('expiryDate', String(value))
+                  }
+                }}
+              /> */}
+              <DatePicker
+                id='expiryDate'
+                value={form.expiryDate ?? undefined}
+                onChange={(value) => update('expiryDate', value ?? null)}
               />
             </div>
           </div>
