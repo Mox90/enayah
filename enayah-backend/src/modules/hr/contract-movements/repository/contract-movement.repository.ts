@@ -1,3 +1,5 @@
+// enayah-backend/src/modules/hr/contract-movements/repository/contract-movement.repository.ts
+
 import { and, eq, max, sql } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
 import { contractMovements, DB, positionItems } from '../../../../db'
@@ -101,6 +103,33 @@ export const ContractMovementRepository = {
       .returning({ id: contractMovements.id })
 
     const updated = assertExists(updatedRaw, 'Update failed')
+
+    return findByIdOrThrow(tx, updated.id)
+  },
+
+  endMovement: async (tx: DB, id: string, endDate: string) => {
+    const existing = await findByIdOrThrow(tx, id)
+
+    if (endDate < existing.startDate) {
+      throw new AppError(
+        'Movement end date cannot be before movement start date',
+        400,
+      )
+    }
+
+    const [updatedRaw] = await tx
+      .update(contractMovements)
+      .set({
+        endDate,
+        updatedAt: new Date(),
+        version: sql`${contractMovements.version} + 1`,
+      })
+      .where(and(eq(contractMovements.id, id), isActive))
+      .returning({
+        id: contractMovements.id,
+      })
+
+    const updated = assertExists(updatedRaw, 'Failed to end contract movement')
 
     return findByIdOrThrow(tx, updated.id)
   },

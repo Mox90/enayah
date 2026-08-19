@@ -127,6 +127,13 @@
       "when": 1786902492344,
       "tag": "0017_clear_dust",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1787166668149,
+      "tag": "0018_true_rumiko_fujikawa",
+      "breakpoints": true
     }
   ]
 }

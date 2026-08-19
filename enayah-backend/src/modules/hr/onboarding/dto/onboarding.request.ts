@@ -10,25 +10,13 @@ import { CreateEmployeePersonalSchema } from '../../employees/dto/employee-perso
 export const OnboardingEmploymentSchema = z.object({
   hireDate: z.iso.date(),
   startDate: z.iso.date(),
-  endDate: z.iso.date().nullable().optional(),
   employmentType: z
     .enum(['full_time', 'part_time', 'contract', 'temporary', 'locum'])
     .default('full_time'),
   staffCategory: z
     .enum(['civilian', 'military', 'contractual'])
     .default('contractual'),
-  status: z
-    .enum([
-      'active',
-      'terminated',
-      'resigned',
-      'eoc',
-      'transferred',
-      'on_leave',
-    ])
-    .default('active'),
-
-  causeOfLeaving: z.string().trim().max(255).nullable().optional(),
+  status: z.literal('active').default('active'),
 })
 
 // ----------------------------------
@@ -39,10 +27,8 @@ export const OnboardingContractSchema = z.object({
   contractNumber: z.string().trim().min(1).max(50).optional(),
   startDate: z.iso.date(),
   endDate: z.iso.date(),
-  contractType: z.enum(['initial', 'renewal', 'amendment']).default('initial'),
-  status: z
-    .enum(['draft', 'active', 'superseded', 'cancelled', 'expired'])
-    .default('active'),
+  contractType: z.literal('initial').default('initial'),
+  status: z.literal('active').default('active'),
   signedDate: z.iso.date().nullable().optional(),
   documentPath: z.string().trim().nullable().optional(),
   notes: z.string().trim().nullable().optional(),
@@ -54,8 +40,6 @@ export const OnboardingContractSchema = z.object({
 
 export const OnboardingMovementSchema = z.object({
   positionItemId: z.uuid(),
-  startDate: z.iso.date().optional(),
-  endDate: z.iso.date().nullable().optional(),
   remarks: z.string().trim().nullable().optional(),
 })
 

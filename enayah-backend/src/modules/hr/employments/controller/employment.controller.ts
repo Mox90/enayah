@@ -2,22 +2,13 @@ import { Request, Response } from 'express'
 import { EmploymentService } from '../service/employment.service'
 import {
   createEmploymentSchema,
-  terminateEmploymentSchema,
   employeeIdParamSchema,
   employmentIdSchema,
   updateEmploymentSchema,
 } from '../dto/employment.request'
-//import { toEmploymentResponse } from '../dto/employment.mapper'
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
 
 export const EmploymentController = {
-  // hire: asyncHandler(async (req: Request, res: Response) => {
-  //   const dto = createEmploymentSchema.parse(req.body)
-  //   //console.log('DTO>>>> ', dto)
-  //   const result = await EmploymentService.hire(dto)
-  //   res.status(201).json(toEmploymentResponse(result))
-  // }),
-
   create: asyncHandler(async (req: Request, res: Response) => {
     const body = createEmploymentSchema.parse(req.body)
     const employment = await EmploymentService.create(body)
@@ -72,14 +63,23 @@ export const EmploymentController = {
     res.status(200).json(updated)
   }),
 
-  terminate: asyncHandler(async (req: Request, res: Response) => {
-    const { id } = employmentIdSchema.parse(req.params)
-    const body = terminateEmploymentSchema.parse(req.body)
-    const updated = await EmploymentService.terminate(id, body)
-    res.locals.resourceId = id
-    res.locals.after = updated
-    res.status(200).json(updated)
-  }),
+  // terminate: asyncHandler(async (req: Request, res: Response) => {
+  //   const { id } = employmentIdSchema.parse(req.params)
+  //   const body = terminateEmploymentSchema.parse(req.body)
+  //   const updated = await EmploymentService.terminate(id, body)
+  //   res.locals.resourceId = id
+  //   res.locals.after = updated
+  //   res.status(200).json(updated)
+  // }),
+
+  // endEmployment: asyncHandler(async (req: Request, res: Response) => {
+  //   const { id } = employmentIdSchema.parse(req.params)
+  //   const body = endEmploymentSchema.parse(req.body)
+  //   const result = await EmploymentService.endEmployment(id, body, req.user?.id)
+  //   res.locals.resourceId = id
+  //   res.locals.after = result
+  //   res.status(200).json(result)
+  // }),
 
   softDelete: asyncHandler(async (req: Request, res: Response) => {
     const { id } = employmentIdSchema.parse(req.params)

@@ -1,3 +1,5 @@
+// enayah-backend/src/modules/hr/appointments/repository/appointment.repository.ts
+
 import { and, eq } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
 import { appointments, DB } from '../../../../db'

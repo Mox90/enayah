@@ -16,7 +16,7 @@ export function toEmploymentDb(dto: CreateEmploymentDto) {
     staffCategory: dto.staffCategory,
     status: dto.status,
 
-    causeOfLeaving: dto.causeOfLeaving ?? null,
+    //causeOfLeaving: dto.causeOfLeaving ?? null,
   }
 }
 
@@ -30,9 +30,9 @@ export function toEmploymentUpdateDb(dto: UpdateEmploymentDto) {
       startDate: dto.startDate,
     }),
 
-    ...(dto.endDate !== undefined && {
-      endDate: dto.endDate,
-    }),
+    // ...(dto.endDate !== undefined && {
+    //   endDate: dto.endDate,
+    // }),
 
     ...(dto.employmentType !== undefined && {
       employmentType: dto.employmentType,
@@ -46,9 +46,9 @@ export function toEmploymentUpdateDb(dto: UpdateEmploymentDto) {
       status: dto.status,
     }),
 
-    ...(dto.causeOfLeaving !== undefined && {
-      causeOfLeaving: dto.causeOfLeaving,
-    }),
+    // ...(dto.causeOfLeaving !== undefined && {
+    //   causeOfLeaving: dto.causeOfLeaving,
+    // }),
   }
 }
 

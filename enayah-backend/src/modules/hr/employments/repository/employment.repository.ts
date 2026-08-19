@@ -1,8 +1,11 @@
-import { and, eq, sql } from 'drizzle-orm'
+// enayah-backend/src/modules/hr/employments/repository/employment.repository.ts
+
+import { and, eq, isNull, sql } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
 import {
   appointments,
   contractMovements,
+  contractMovementActions,
   contracts,
   DB,
   employments,
@@ -89,8 +92,8 @@ export const EmploymentRepository = {
   update: async (tx: DB, id: string, dto: UpdateEmploymentDto) => {
     const existing = await findByIdOrThrow(tx, id)
 
-    if (existing.status === 'terminated') {
-      throw new AppError('Cannot update terminated employment', 400)
+    if (existing.status === 'ended') {
+      throw new AppError('Cannot update ended employment', 400)
     }
 
     const [updatedRaw] = await tx
@@ -108,23 +111,55 @@ export const EmploymentRepository = {
     return findByIdOrThrow(tx, updated.id)
   },
 
-  terminate: async (tx: DB, id: string, data: UpdateEmploymentDto) => {
+  // terminate: async (tx: DB, id: string, data: UpdateEmploymentDto) => {
+  //   const existing = await findByIdOrThrow(tx, id)
+
+  //   if (existing.status !== 'active') {
+  //     throw new AppError('Employment already terminated', 400)
+  //   }
+
+  //   const [updatedRaw] = await tx
+  //     .update(employments)
+  //     .set({
+  //       ...toEmploymentUpdateDb(data),
+  //       updatedAt: new Date(),
+  //     })
+  //     .where(and(eq(employments.id, id), isActive))
+  //     .returning({ id: employments.id })
+
+  //   const updated = assertExists(updatedRaw, 'Termination failed')
+
+  //   return findByIdOrThrow(tx, updated.id)
+  // },
+
+  endEmployment: async (tx: DB, id: string, endDate: string) => {
     const existing = await findByIdOrThrow(tx, id)
 
-    if (existing.status !== 'active') {
-      throw new AppError('Employment already terminated', 400)
+    if (existing.status === 'ended') {
+      throw new AppError('Employment has already ended', 400)
+    }
+
+    if (endDate < existing.startDate) {
+      throw new AppError(
+        'Employment end date cannot be before employment start date',
+        400,
+      )
     }
 
     const [updatedRaw] = await tx
       .update(employments)
       .set({
-        ...toEmploymentUpdateDb(data),
+        status: 'ended',
+        endDate,
         updatedAt: new Date(),
+        version: sql`${employments.version} + 1`,
       })
       .where(and(eq(employments.id, id), isActive))
-      .returning({ id: employments.id })
+      .returning({
+        id: employments.id,
+      })
 
-    const updated = assertExists(updatedRaw, 'Termination failed')
+    const updated = assertExists(updatedRaw, 'Failed to end employment')
 
     return findByIdOrThrow(tx, updated.id)
   },
@@ -144,14 +179,20 @@ export const EmploymentRepository = {
     return existing
   },
 
-  findCurrentEmploymentByEmployeeId: async (tx: DB, employeeId: string) => {
-    return tx.query.employments.findFirst({
+  findCurrentByEmploymentId: async (tx: DB, employmentId: string) => {
+    return tx.query.appointments.findFirst({
       where: and(
-        eq(employments.employeeId, employeeId),
-        eq(employments.status, 'active'),
+        eq(appointments.employmentId, employmentId),
+        isNull(appointments.endDate),
         isActive,
       ),
-      orderBy: (e, { desc }) => [desc(e.startDate)],
+      with: {
+        department: true,
+        position: true,
+        manager: true,
+      },
+
+      orderBy: (a, { desc }) => [desc(a.startDate)],
     })
   },
 
@@ -176,14 +217,17 @@ export const EmploymentRepository = {
                 positionItem: true,
                 department: true,
                 position: true,
+                actions: {
+                  where: eq(contractMovementActions.isDeleted, false),
+                },
               },
             },
           },
         },
-        appointments: {
-          where: eq(appointments.isDeleted, false),
-          orderBy: (a, { desc }) => [desc(a.startDate)],
-        },
+        // appointments: {
+        //   where: eq(appointments.isDeleted, false),
+        //   orderBy: (a, { desc }) => [desc(a.startDate)],
+        // },
       },
     })
   },

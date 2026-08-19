@@ -1,3 +1,5 @@
+// enayah-backend/src/modules/hr/onboarding/service/onboarding.service.ts
+
 import { db } from '../../../../db'
 import { AppError } from '../../../../core/errors/AppError'
 
@@ -50,6 +52,9 @@ export const OnboardingService = {
       const employment = await EmploymentRepository.create(tx, {
         ...dto.employment,
         employeeId: employee.id,
+        endDate: null,
+        status: 'active',
+        //causeOfLeaving: null,
       })
 
       // ----------------------------------
@@ -71,12 +76,21 @@ export const OnboardingService = {
         )
       }
 
+      if (dto.contract.endDate < dto.contract.startDate) {
+        throw new AppError(
+          'Contract endDate must be on or after contract startDate',
+          400,
+        )
+      }
+
       const contract = await ContractRepository.create(tx, {
         ...dto.contract,
         contractNumber,
         employmentId: employment.id,
-        contractType: dto.contract.contractType ?? 'initial',
-        status: dto.contract.status ?? 'active',
+        // contractType: dto.contract.contractType ?? 'initial',
+        // status: dto.contract.status ?? 'active',
+        contractType: 'initial',
+        status: 'active',
       })
 
       // ----------------------------------
@@ -112,8 +126,8 @@ export const OnboardingService = {
         positionItemId: positionItem.id,
         officialDepartmentId: positionItem.departmentId,
         officialPositionId: positionItem.positionId,
-        startDate: dto.movement.startDate ?? dto.contract.startDate,
-        endDate: dto.movement.endDate ?? null,
+        startDate: contract.startDate,
+        endDate: contract.endDate,
         sequenceNumber: 1,
         movementType: 'initial',
         remarks: dto.movement.remarks ?? null,
