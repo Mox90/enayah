@@ -14,7 +14,11 @@ import {
   files,
 } from '../../../../db'
 
-import { CreateEmployeeCredentialsDto } from '../dto/credential.request'
+import {
+  CreateEmployeeCredentialsDto,
+  CreateMalpracticeDto,
+  UpdateMalpracticeDto,
+} from '../dto/credential.request'
 import {
   boardDocumentRepository,
   degreeDocumentRepository,
@@ -26,13 +30,6 @@ import {
 } from './credential-document-repositories'
 
 export type CredentialPayload = CreateEmployeeCredentialsDto
-
-// export type CredentialDocumentMetadata = {
-//   id: string
-//   originalName: string
-//   mimeType: string
-//   fileSize: number
-// }
 
 function hasItems<T>(items?: T[] | null): items is T[] {
   return Array.isArray(items) && items.length > 0
@@ -95,6 +92,48 @@ export type ActiveDegreeDocument = {
   storageKey: string
 }
 
+function toMalpracticeInsert(
+  employeeId: string,
+  item: CreateMalpracticeDto,
+): MalpracticeInsert {
+  return {
+    employeeId,
+    insuranceCompany: item.insuranceCompany,
+    policyNumber: item.policyNumber,
+
+    coverageAmount: item.coverageAmount.toFixed(2),
+
+    startDate: item.startDate ?? null,
+    expiryDate: item.expiryDate,
+  }
+}
+
+function toMalpracticeUpdate(
+  data: UpdateMalpracticeDto,
+): Partial<MalpracticeInsert> {
+  return {
+    ...(data.insuranceCompany !== undefined && {
+      insuranceCompany: data.insuranceCompany,
+    }),
+
+    ...(data.policyNumber !== undefined && {
+      policyNumber: data.policyNumber,
+    }),
+
+    ...(data.coverageAmount !== undefined && {
+      coverageAmount: data.coverageAmount.toFixed(2),
+    }),
+
+    ...(data.startDate !== undefined && {
+      startDate: data.startDate,
+    }),
+
+    ...(data.expiryDate !== undefined && {
+      expiryDate: data.expiryDate,
+    }),
+  }
+}
+
 async function findOneOrThrow(tx: DB, table: any, id: string, name: string) {
   const [row] = await tx
     .select()
@@ -106,79 +145,6 @@ async function findOneOrThrow(tx: DB, table: any, id: string, name: string) {
 
   return row
 }
-
-// async function findDegreesWithDocument(tx: DB, employeeId: string) {
-//   const degreeColumns = getTableColumns(employeeDegrees)
-
-//   const rows = await tx
-//     .select({
-//       ...degreeColumns,
-//       documentId: files.id,
-//       documentOriginalName: files.originalName,
-//       documentMimeType: files.mimeType,
-//       documentFileSize: files.fileSize,
-//     })
-//     .from(employeeDegrees)
-//     .leftJoin(
-//       files,
-//       and(
-//         eq(files.id, employeeDegrees.documentFileId),
-//         eq(files.isDeleted, false),
-//         eq(files.category, 'employee_degree'),
-//       ),
-//     )
-//     .where(
-//       and(
-//         eq(employeeDegrees.employeeId, employeeId),
-//         eq(employeeDegrees.isDeleted, false),
-//       ),
-//     )
-//     .orderBy(
-//       sql`
-//         ${employeeDegrees.graduationDate}
-//         DESC NULLS LAST
-//       `,
-//       sql`
-//         CASE ${employeeDegrees.degreeType}
-//           WHEN 'doctorate' THEN 1
-//           WHEN 'master' THEN 2
-//           WHEN 'bachelor' THEN 3
-//           WHEN 'diploma' THEN 4
-//           WHEN 'associate' THEN 5
-//           WHEN 'other' THEN 6
-//           ELSE 7
-//         END ASC
-//       `,
-//     )
-
-//   return rows.map((row) => {
-//     const {
-//       documentId,
-//       documentOriginalName,
-//       documentMimeType,
-//       documentFileSize,
-//       ...degree
-//     } = row
-
-//     const document: CredentialDocumentMetadata | null =
-//       documentId &&
-//       documentOriginalName &&
-//       documentMimeType &&
-//       documentFileSize !== null
-//         ? {
-//             id: documentId,
-//             originalName: documentOriginalName,
-//             mimeType: documentMimeType,
-//             fileSize: documentFileSize,
-//           }
-//         : null
-
-//     return {
-//       ...degree,
-//       document,
-//     }
-//   })
-// }
 
 async function updateRecord(
   tx: DB,
@@ -234,19 +200,12 @@ export const CredentialRepository = {
       malpractice,
     ] = await Promise.all([
       //findDegreesWithDocument(tx, employeeId),
-
       degreeDocumentRepository.findManyWithDocument(tx, employeeId),
-
       boardDocumentRepository.findManyWithDocument(tx, employeeId),
-
       fellowshipDocumentRepository.findManyWithDocument(tx, employeeId),
-
       membershipDocumentRepository.findManyWithDocument(tx, employeeId),
-
       licenseDocumentRepository.findManyWithDocument(tx, employeeId),
-
       lifeSupportDocumentRepository.findManyWithDocument(tx, employeeId),
-
       malpracticeDocumentRepository.findManyWithDocument(tx, employeeId),
     ])
 
@@ -573,16 +532,26 @@ export const CredentialRepository = {
             .returning()
         : [],
 
+      // hasItems(credentials.malpractice)
+      //   ? tx
+      //       .insert(employeeMalpracticeInsurance)
+      //       .values(
+      //         credentials.malpractice.map(
+      //           (item) =>
+      //             ({
+      //               ...clean(item),
+      //               employeeId,
+      //             }) as MalpracticeInsert,
+      //         ),
+      //       )
+      //       .returning()
+      //   : [],
       hasItems(credentials.malpractice)
         ? tx
             .insert(employeeMalpracticeInsurance)
             .values(
-              credentials.malpractice.map(
-                (item) =>
-                  ({
-                    ...clean(item),
-                    employeeId,
-                  }) as MalpracticeInsert,
+              credentials.malpractice.map((item) =>
+                toMalpracticeInsert(employeeId, item),
               ),
             )
             .returning()
@@ -654,10 +623,22 @@ export const CredentialRepository = {
     return row
   },
 
-  createMalpractice: async (tx: DB, employeeId: string, data: any) => {
+  // createMalpractice: async (tx: DB, employeeId: string, data: any) => {
+  //   const [row] = await tx
+  //     .insert(employeeMalpracticeInsurance)
+  //     .values({ ...clean(data), employeeId })
+  //     .returning()
+
+  //   return row
+  // },
+  createMalpractice: async (
+    tx: DB,
+    employeeId: string,
+    data: CreateMalpracticeDto,
+  ) => {
     const [row] = await tx
       .insert(employeeMalpracticeInsurance)
-      .values({ ...clean(data), employeeId })
+      .values(toMalpracticeInsert(employeeId, data))
       .returning()
 
     return row
@@ -687,8 +668,15 @@ export const CredentialRepository = {
       'Life support certification',
     ),
 
-  updateMalpractice: (tx: DB, id: string, data: any) =>
-    updateRecord(tx, employeeMalpracticeInsurance, id, data, 'Malpractice'),
+  updateMalpractice: (tx: DB, id: string, data: UpdateMalpracticeDto) =>
+    //updateRecord(tx, employeeMalpracticeInsurance, id, data, 'Malpractice'),
+    updateRecord(
+      tx,
+      employeeMalpracticeInsurance,
+      id,
+      toMalpracticeUpdate(data),
+      'Malpractice',
+    ),
 
   softDeleteDegree: (tx: DB, id: string, userId?: string) =>
     softDeleteRecord(tx, employeeDegrees, id, 'Degree', userId),

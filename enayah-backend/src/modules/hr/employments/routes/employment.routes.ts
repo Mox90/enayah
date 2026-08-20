@@ -56,15 +56,25 @@ router.patch(
   EmploymentController.update,
 )
 
-router.patch(
-  '/:id/terminate',
-  requirePermission('employee.update'),
-  audit('EMPLOYMENT_TERMINATE', {
-    resource: 'EMPLOYMENT',
-    getResourceId: (req) => getParam(req.params.id),
-  }),
-  EmploymentController.terminate,
-)
+// router.patch(
+//   '/:id/terminate',
+//   requirePermission('employee.update'),
+//   audit('EMPLOYMENT_TERMINATE', {
+//     resource: 'EMPLOYMENT',
+//     getResourceId: (req) => getParam(req.params.id),
+//   }),
+//   EmploymentController.terminate,
+// )
+
+// router.patch(
+//   '/:id/end-employment',
+//   requirePermission('employee.update'),
+//   audit('EMPLOYMENT_END_EMPLOYMENT', {
+//     resource: 'EMPLOYMENT',
+//     getResourceId: (req) => getParam(req.params.id),
+//   }),
+//   EmploymentController.endEmployment,
+// )
 
 router.delete(
   '/:id',

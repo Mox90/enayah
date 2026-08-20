@@ -40,18 +40,6 @@ export const workforceCategoryEnum = pgEnum('workforce_category', [
   'support_service', // 5000
 ])
 
-export const employmentStatusEnum = pgEnum('employment_status', [
-  'active',
-  'terminated',
-  'resigned',
-  'eoc',
-  'transferred',
-  'retired',
-  'on_leave',
-  'suspended',
-  'deceased',
-])
-
 export const appraisalStatusEnum = pgEnum('appraisal_status', [
   'draft',
   'planning_submitted',
@@ -99,23 +87,6 @@ export const lifeSupportTypeEnum = pgEnum('life_support_type', [
   'other',
 ])
 
-export const contractTypeEnum = pgEnum('contract_type', [
-  'initial',
-  'renewal',
-  'amendment',
-])
-
-export const movementTypeEnum = pgEnum('movement_type', [
-  'initial',
-  'renewal',
-  'promotion',
-  'transfer',
-  'demotion',
-  'temporary_assignment',
-  'acting',
-  'amendment',
-])
-
 export const appointmentTypeEnum = pgEnum('appointment_type', [
   'primary',
   'acting',
@@ -134,14 +105,6 @@ export const assignmentReasonEnum = pgEnum('assignment_reason', [
   'acting_capacity',
   'rotation',
   'service_need',
-])
-
-export const contractStatusEnum = pgEnum('status', [
-  'draft',
-  'active',
-  'superseded',
-  'cancelled',
-  'expired',
 ])
 
 export const employeeDocumentTypeEnum = pgEnum('employee_document_type', [
@@ -343,3 +306,84 @@ export const credentialVerificationActionEnum = pgEnum(
   'credential_verification_action',
   ['verified', 'revoked'],
 )
+
+export const employmentStatusValues = [
+  'pending',
+  'active',
+  'on_leave',
+  'suspended',
+  'ended',
+] as const
+
+export const employmentStatusEnum = pgEnum(
+  'employment_status',
+  employmentStatusValues,
+)
+
+export const contractTypeValues = ['initial', 'renewal'] as const
+
+export const contractTypeEnum = pgEnum('contract_type', contractTypeValues)
+
+export const contractStatusValues = [
+  'draft',
+  'active',
+  'superseded',
+  'expired',
+  'ended_early',
+  'cancelled',
+] as const
+
+export const contractStatusEnum = pgEnum(
+  'contract_status',
+  contractStatusValues,
+)
+
+export const movementTypeValues = ['initial', 'renewal', 'amendment'] as const
+
+export const movementTypeEnum = pgEnum('movement_type', movementTypeValues)
+
+export const movementActionTypeValues = [
+  'promotion',
+  'demotion',
+  'transfer',
+] as const
+
+export const movementActionTypeEnum = pgEnum(
+  'movement_action_type',
+  movementActionTypeValues,
+)
+
+export const employmentSeparationTypeValues = [
+  'eoc',
+  'resignation',
+  'termination',
+  'retirement',
+  'transfer_out',
+  'death',
+  'mutual_agreement',
+  'other',
+] as const
+
+export const employmentSeparationTypeEnum = pgEnum(
+  'employment_separation_type',
+  employmentSeparationTypeValues,
+)
+
+export const employmentSeparationStatusValues = [
+  'draft',
+  'pending_approval',
+  'approved',
+  'completed',
+  'cancelled',
+] as const
+
+export const employmentSeparationStatusEnum = pgEnum(
+  'employment_separation_status',
+  employmentSeparationStatusValues,
+)
+
+export const contractDocumentTypeEnum = pgEnum('contract_document_type', [
+  'initial',
+  'renewal',
+  'amendment',
+])

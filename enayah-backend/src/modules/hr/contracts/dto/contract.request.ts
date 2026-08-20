@@ -1,52 +1,48 @@
 import { z } from 'zod'
+import { contractStatusValues, contractTypeValues } from '../../../../db'
 
-export const contractBaseSchema = z.object({
+const contractBaseSchema = z.object({
   employmentId: z.uuid(),
   contractNumber: z.string().trim().min(1).max(50).optional(),
   startDate: z.iso.date(),
   endDate: z.iso.date(),
-  contractType: z.enum(['initial', 'renewal', 'amendment']).default('initial'),
-  status: z
-    .enum(['draft', 'active', 'superseded', 'cancelled', 'expired'])
-    .default('draft'),
+  contractType: z.enum(contractTypeValues),
+  status: z.enum(contractStatusValues),
   signedDate: z.iso.date().nullable().optional(),
   documentPath: z.string().trim().nullable().optional(),
   notes: z.string().trim().nullable().optional(),
 })
-// .refine(({ startDate, endDate }) => endDate >= startDate, {
-//   path: ['endDate'],
-//   message: 'endDate must be on or after startDate',
-// })
 
-export const createContractSchema = contractBaseSchema.refine(
-  ({ startDate, endDate }) => endDate >= startDate,
-  {
-    path: ['endDate'],
+export const createContractSchema = contractBaseSchema
+  .extend({
+    contractType: z.enum(contractTypeValues).default('initial'),
+    status: z.enum(contractStatusValues).default('draft'),
+  })
+  .refine((contract) => contract.endDate >= contract.startDate, {
     message: 'endDate must be on or after startDate',
-  },
-)
+    path: ['endDate'],
+  })
 
 export const updateContractSchema = contractBaseSchema
   .omit({
     employmentId: true,
+    contractNumber: true,
+    contractType: true,
   })
   .partial()
-  .extend({
-    contractType: z.enum(['initial', 'renewal', 'amendment']).optional(),
-    status: z
-      .enum(['draft', 'active', 'superseded', 'cancelled', 'expired'])
-      .optional(),
+  .superRefine((contract, ctx) => {
+    if (
+      contract.startDate !== undefined &&
+      contract.endDate !== undefined &&
+      contract.endDate < contract.startDate
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['endDate'],
+        message: 'endDate must be on or after startDate',
+      })
+    }
   })
-  .refine(
-    (data) => {
-      if (!data.startDate || !data.endDate) return true
-      return data.endDate >= data.startDate
-    },
-    {
-      path: ['endDate'],
-      message: 'endDate must be on or after startDate',
-    },
-  )
 
 export const contractIdSchema = z.object({
   id: z.uuid(),

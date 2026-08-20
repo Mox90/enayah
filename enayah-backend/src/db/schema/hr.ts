@@ -18,11 +18,15 @@ import { baseColumns } from './base'
 import {
   appointmentTypeEnum,
   assignmentReasonEnum,
+  contractDocumentTypeEnum,
   contractStatusEnum,
   contractTypeEnum,
+  employmentSeparationStatusEnum,
+  employmentSeparationTypeEnum,
   employmentStatusEnum,
   employmentTypeEnum,
   genderEnum,
+  movementActionTypeEnum,
   movementTypeEnum,
   staffCategoryEnum,
   workforceCategoryEnum,
@@ -71,24 +75,20 @@ export const employments = pgTable(
   'employments',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-
     employeeId: uuid('employee_id')
       .notNull()
       .references(() => employees.id, { onDelete: 'cascade' }),
-
     hireDate: date('hire_date').notNull(),
     startDate: date('start_date').notNull(),
-    endDate: date('end_date'),
-
+    endDate: date('end_date'), //actual employment cessation date
     employmentType: employmentTypeEnum('employment_type'), // full-time, part-time, locum //HOW they work
     staffCategory: staffCategoryEnum('staff_category')
       .default('contractual')
       .notNull(), //WHO they are
-
     status: employmentStatusEnum('employment_status')
       .default('active')
       .notNull(), // active, terminated
-    causeOfLeaving: varchar('cause_of_leaving', { length: 255 }),
+    //causeOfLeaving: varchar('cause_of_leaving', { length: 255 }),
     ...baseColumns,
   },
   (table) => [
@@ -96,10 +96,16 @@ export const employments = pgTable(
     index('idx_employments_hire_date_active')
       .on(table.hireDate)
       .where(sql`${table.isDeleted} = false`),
-
     index('idx_employments_status_employee')
       .on(table.status, table.employeeId)
       .where(sql`${table.isDeleted} = false`),
+    check(
+      'chk_employments_valid_date_range',
+      sql`
+        ${table.endDate} IS NULL
+        OR ${table.endDate} >= ${table.startDate}
+      `,
+    ),
   ],
 )
 //CREATE INDEX idx_employments_employee_id ON employments(employee_id);
@@ -155,9 +161,9 @@ export const contracts = pgTable(
       .unique() // must be deterministic ex: 2026-000001, 2026-000002
       .notNull(),
     startDate: date('start_date').notNull(),
-    endDate: date('end_date').notNull(),
+    endDate: date('end_date').notNull(), // remains the agreed end of the contractual term
     contractType: contractTypeEnum('contract_type')
-      .default('initial') // initial | renewal | amendment
+      .default('initial') // initial | renewal
       .notNull(),
     status: contractStatusEnum('status').default('draft').notNull(),
     signedDate: date('signed_date'),
@@ -167,11 +173,9 @@ export const contracts = pgTable(
   },
   (table) => [
     index('idx_contracts_employment_id').on(table.employmentId),
-
     index('idx_contracts_status_end_date')
       .on(table.status, table.endDate)
       .where(sql`${table.isDeleted} = false`),
-
     check(
       'chk_contracts_valid_date_range',
       sql`
@@ -191,22 +195,24 @@ export const contractMovements = pgTable(
       .references(() => contracts.id, {
         onDelete: 'cascade',
       }),
-    positionItemId: uuid('position_item_id')
-      .references(() => positionItems.id, { onDelete: 'restrict' })
-      .notNull(), // WHERE they are budgeted (PCN) or what PCN funds the employee
+    positionItemId: uuid('position_item_id').references(
+      () => positionItems.id,
+      { onDelete: 'restrict' },
+    ),
+    //.notNull(), // WHERE they are budgeted (PCN) or what PCN funds the employee
     officialDepartmentId: uuid('official_department_id')
       .references(() => departments.id)
-      .notNull(), // point to the legal department of an employee
+      .notNull(), // point to the official legal department of an employee
     officialPositionId: uuid('official_position_id')
       .references(() => positions.id)
-      .notNull(), // point to the legal role/position of an employee
+      .notNull(), // point to the offivial legal role/position of an employee
 
     startDate: date('start_date').notNull(),
     endDate: date('end_date'),
 
     sequenceNumber: integer('sequence_number').default(1).notNull(),
     movementType: movementTypeEnum('movement_type')
-      .default('initial')
+      //.default('initial')
       .notNull(),
     remarks: text('remarks'),
 
@@ -230,6 +236,108 @@ export const contractMovements = pgTable(
     ),
 
     check('sequence_number_whole_number', sql`${table.sequenceNumber} >= 1`),
+  ],
+)
+
+export const contractMovementActions = pgTable(
+  'contract_movement_actions',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    contractMovementId: uuid('contract_movement_id')
+      .notNull()
+      .references(() => contractMovements.id, {
+        onDelete: 'cascade',
+      }),
+    actionType: movementActionTypeEnum('action_type').notNull(),
+    ...baseColumns,
+  },
+
+  (table) => [
+    index('idx_contract_movement_actions_movement').on(
+      table.contractMovementId,
+    ),
+    index('idx_contract_movement_actions_type').on(table.actionType),
+    uniqueIndex('uq_contract_movement_action_active')
+      .on(table.contractMovementId, table.actionType)
+      .where(sql`${table.isDeleted} = false`),
+  ],
+)
+
+export const employmentSeparations = pgTable(
+  'employment_separations',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    employmentId: uuid('employment_id')
+      .notNull()
+      .references(() => employments.id, {
+        onDelete: 'cascade',
+      }),
+    separationType: employmentSeparationTypeEnum('separation_type').notNull(),
+    status: employmentSeparationStatusEnum('status').default('draft').notNull(),
+    noticeDate: date('notice_date'),
+    effectiveDate: date('effective_date').notNull(),
+    reason: text('reason'),
+    remarks: text('remarks'),
+    approvedBy: uuid('approved_by'),
+    approvedAt: timestamp('approved_at'),
+    ...baseColumns,
+  },
+  (table) => [
+    index('idx_employment_separations_employment').on(table.employmentId),
+    index('idx_employment_separations_status').on(table.status),
+    index('idx_employment_separations_effective_date').on(table.effectiveDate),
+    uniqueIndex('uq_employment_separation_open')
+      .on(table.employmentId)
+      .where(
+        sql`
+          ${table.isDeleted} = false
+          AND ${table.status} IN (
+            'draft',
+            'pending_approval',
+            'approved'
+          )
+        `,
+      ),
+  ],
+)
+
+export const contractDocuments = pgTable(
+  'contract_documents',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    contractId: uuid('contract_id')
+      .notNull()
+      .references(() => contracts.id, {
+        onDelete: 'cascade',
+      }),
+    contractMovementId: uuid('contract_movement_id').references(
+      () => contractMovements.id,
+      {
+        onDelete: 'set null',
+      },
+    ),
+    fileId: uuid('file_id')
+      .notNull()
+      .references(() => files.id, {
+        onDelete: 'restrict',
+      }),
+    documentType: contractDocumentTypeEnum('document_type').notNull(),
+    versionNumber: integer('version_number').default(1).notNull(),
+    effectiveDate: date('effective_date').notNull(),
+    signedDate: date('signed_date'),
+    acknowledgedAt: timestamp('acknowledged_at'),
+    remarks: text('remarks'),
+    ...baseColumns,
+  },
+  (table) => [
+    index('idx_contract_documents_contract').on(table.contractId),
+
+    unique('uq_contract_document_version').on(
+      table.contractId,
+      table.versionNumber,
+    ),
+
+    check('chk_contract_document_version', sql`${table.versionNumber} >= 1`),
   ],
 )
 
@@ -323,6 +431,7 @@ export const employmentsRelations = relations(employments, ({ one, many }) => ({
   }),
   contracts: many(contracts),
   appointments: many(appointments),
+  separations: many(employmentSeparations),
 }))
 
 export const appointmentsRelations = relations(appointments, ({ one }) => ({
@@ -359,6 +468,8 @@ export const contractsRelations = relations(contracts, ({ one, many }) => ({
   }),
 
   movements: many(contractMovements),
+
+  documents: many(contractDocuments),
 }))
 
 export const contractMovementsRelations = relations(
@@ -383,6 +494,8 @@ export const contractMovementsRelations = relations(
       fields: [contractMovements.officialPositionId],
       references: [positions.id],
     }),
+
+    actions: many(contractMovementActions),
 
     compensations: many(compensations),
   }),
@@ -429,6 +542,46 @@ export const compensationAllowancesRelations = relations(
     compensation: one(compensations, {
       fields: [compensationAllowances.compensationId],
       references: [compensations.id],
+    }),
+  }),
+)
+
+export const contractMovementActionsRelations = relations(
+  contractMovementActions,
+  ({ one }) => ({
+    movement: one(contractMovements, {
+      fields: [contractMovementActions.contractMovementId],
+      references: [contractMovements.id],
+    }),
+  }),
+)
+
+export const employmentSeparationsRelations = relations(
+  employmentSeparations,
+  ({ one }) => ({
+    employment: one(employments, {
+      fields: [employmentSeparations.employmentId],
+      references: [employments.id],
+    }),
+  }),
+)
+
+export const contractDocumentsRelations = relations(
+  contractDocuments,
+  ({ one }) => ({
+    contract: one(contracts, {
+      fields: [contractDocuments.contractId],
+      references: [contracts.id],
+    }),
+
+    movement: one(contractMovements, {
+      fields: [contractDocuments.contractMovementId],
+      references: [contractMovements.id],
+    }),
+
+    file: one(files, {
+      fields: [contractDocuments.fileId],
+      references: [files.id],
     }),
   }),
 )

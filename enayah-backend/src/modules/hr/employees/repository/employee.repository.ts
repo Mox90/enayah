@@ -1,4 +1,5 @@
-// employee.repository.ts
+// enayah-backend/src/modules/hr/employees/repository/employee.repository.ts
+
 import { AppError } from '../../../../core/errors/AppError'
 import { DB, employees, files, users } from '../../../../db'
 import { and, eq, sql } from 'drizzle-orm'

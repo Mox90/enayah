@@ -1,3 +1,5 @@
+// enayah-backend/src/modules/hr/onboarding/service/onboarding.service.ts
+
 import { db } from '../../../../db'
 import { AppError } from '../../../../core/errors/AppError'
 
@@ -50,6 +52,9 @@ export const OnboardingService = {
       const employment = await EmploymentRepository.create(tx, {
         ...dto.employment,
         employeeId: employee.id,
+        endDate: null,
+        status: 'active',
+        //causeOfLeaving: null,
       })
 
       // ----------------------------------
@@ -71,55 +76,85 @@ export const OnboardingService = {
         )
       }
 
+      if (dto.contract.endDate < dto.contract.startDate) {
+        throw new AppError(
+          'Contract endDate must be on or after contract startDate',
+          400,
+        )
+      }
+
       const contract = await ContractRepository.create(tx, {
         ...dto.contract,
         contractNumber,
         employmentId: employment.id,
-        contractType: dto.contract.contractType ?? 'initial',
-        status: dto.contract.status ?? 'active',
+        // contractType: dto.contract.contractType ?? 'initial',
+        // status: dto.contract.status ?? 'active',
+        contractType: 'initial',
+        status: 'active',
       })
 
       // ----------------------------------
       // 5. Initial Contract Movement / PCN
       // ----------------------------------
 
-      if (!dto.movement?.positionItemId) {
-        throw new AppError('Position item is required for assignment', 400)
-      }
+      const requiresPositionItem =
+        dto.employment.staffCategory === 'civilian' ||
+        dto.employment.staffCategory === 'contractual'
 
-      // const positionItem = await PositionItemRepository.findById(
-      //   tx,
-      //   dto.movement.positionItemId,
-      // )
-      const positionItem = await PositionItemRepository.assignIfAvailable(
-        tx,
-        dto.movement.positionItemId,
-      )
+      let positionItem = null
 
-      if (!positionItem) {
+      if (dto.movement.positionItemId) {
+        positionItem = await PositionItemRepository.assignIfAvailable(
+          tx,
+          dto.movement.positionItemId,
+        )
+
+        if (!positionItem) {
+          throw new AppError(
+            'Position item not found or is no longer vacant',
+            409,
+          )
+        }
+      } else if (requiresPositionItem) {
+        // Defensive service validation.
+        // Zod should already reject this.
         throw new AppError(
-          'Position item not found or is no longer vacant',
-          404,
+          'Position item is required for civilian and contractual employees',
+          400,
         )
       }
 
-      // if (positionItem.status !== 'vacant') {
-      //   throw new AppError('Position item is not vacant', 400)
-      // }
+      const officialDepartmentId =
+        positionItem?.departmentId ?? dto.movement.officialDepartmentId
+
+      const officialPositionId =
+        positionItem?.positionId ?? dto.movement.officialPositionId
+
+      if (!officialDepartmentId) {
+        throw new AppError(
+          'Official department is required for the legal assignment',
+          400,
+        )
+      }
+
+      if (!officialPositionId) {
+        throw new AppError(
+          'Official position is required for the legal assignment',
+          400,
+        )
+      }
 
       const movement = await ContractMovementRepository.create(tx, {
         contractId: contract.id,
-        positionItemId: positionItem.id,
-        officialDepartmentId: positionItem.departmentId,
-        officialPositionId: positionItem.positionId,
-        startDate: dto.movement.startDate ?? dto.contract.startDate,
-        endDate: dto.movement.endDate ?? null,
+        positionItemId: positionItem?.id ?? null,
+        officialDepartmentId,
+        officialPositionId,
+        startDate: contract.startDate,
+        endDate: contract.endDate,
         sequenceNumber: 1,
         movementType: 'initial',
         remarks: dto.movement.remarks ?? null,
       })
-
-      //await PositionItemRepository.updateStatus(tx, positionItem.id, 'filled')
 
       // ----------------------------------
       // 6. Appointment / Actual Assignment

@@ -34,6 +34,23 @@ import { Tx } from '../../../../core/types/db.types'
 
 const isActive = eq(positionItems.isDeleted, false)
 
+type PositionItemRow = typeof positionItems.$inferSelect
+
+export type ReleasePositionItemResult =
+  | {
+      released: true
+      positionItem: PositionItemRow
+    }
+  | {
+      released: false
+      reason: 'not_filled'
+      positionItem: PositionItemRow
+    }
+  | {
+      released: false
+      reason: 'not_found'
+    }
+
 function findByIdOrThrow(executor: DB | Tx, id: string): Promise<any>
 async function findByIdOrThrow(executor: any, id: string) {
   const result = await executor.query.positionItems.findFirst({
@@ -105,8 +122,11 @@ export const PositionItemRepository = {
     return row
   },
 
-  releaseIfFilled: async (tx: DB, id: string) => {
-    const [row] = await tx
+  releaseIfFilled: async (
+    tx: DB,
+    id: string,
+  ): Promise<ReleasePositionItemResult> => {
+    const [released] = await tx
       .update(positionItems)
       .set({
         status: 'vacant',
@@ -123,7 +143,33 @@ export const PositionItemRepository = {
       )
       .returning()
 
-    return row ?? null
+    if (released) {
+      return {
+        released: true,
+        positionItem: released,
+      }
+    }
+
+    const existing = await tx.query.positionItems.findFirst({
+      where: and(
+        eq(positionItems.id, id),
+        eq(positionItems.isDeleted, false),
+        isNull(positionItems.deletedAt),
+      ),
+    })
+
+    if (!existing) {
+      return {
+        released: false,
+        reason: 'not_found',
+      }
+    }
+
+    return {
+      released: false,
+      reason: 'not_filled',
+      positionItem: existing,
+    }
   },
 
   create: async (tx: DB, data: CreatePositionItemDTO) => {

@@ -1,53 +1,14 @@
+// enayah-backend/src/modules/hr/employments/service/employment.service.ts
+
 import { AppError } from '../../../../core/errors/AppError'
 import { db } from '../../../../db'
 import {
   CreateEmploymentDto,
-  TerminateEmploymentDto,
   UpdateEmploymentDto,
 } from '../dto/employment.request'
 import { EmploymentRepository } from '../repository/employment.repository'
 
 export const EmploymentService = {
-  // hire: async (dto: CreateEmploymentDto) => {
-  //   return db.transaction(async (tx) => {
-  //     const existing = await EmploymentRepository.findActiveByEmployee(
-  //       tx,
-  //       dto.employeeId,
-  //     )
-
-  //     if (existing) {
-  //       throw new AppError('Employee already has an active employment', 400)
-  //     }
-
-  //     /*if(dto.staffCategory === 'military' && dto.positionItemId) {
-  //       throw new AppError('Military cannot have position item', 400)
-  //     }*/
-
-  //     if (
-  //       (dto.staffCategory === 'civilian' ||
-  //         dto.staffCategory === 'contractual') &&
-  //       !dto.positionItemId
-  //     ) {
-  //       throw new AppError('Civilian/Contractual must have position item', 400)
-  //     }
-
-  //     if (dto.positionItemId) {
-  //       const position = await EmploymentRepository.findPositionItemOrThrow(
-  //         tx,
-  //         dto.positionItemId,
-  //       )
-
-  //       if (position.status !== 'vacant') {
-  //         throw new AppError('Position item not available', 400)
-  //       }
-  //     }
-
-  //     const employment = await EmploymentRepository.create(tx, dto)
-
-  //     return employment
-  //   })
-  // },
-
   create: async (dto: CreateEmploymentDto) => {
     return db.transaction((tx) => EmploymentRepository.create(tx, dto))
   },
@@ -73,14 +34,15 @@ export const EmploymentService = {
   },
 
   update: async (id: string, dto: UpdateEmploymentDto) => {
+    // if (dto.status === 'ended' || dto.endDate !== undefined) {
+    //   throw new AppError(
+    //     'Employment must be ended through the offboarding workflow',
+    //     400,
+    //   )
+    // }
     return db.transaction((tx) => EmploymentRepository.update(tx, id, dto))
   },
 
-  terminate: async (id: string, dto: UpdateEmploymentDto) => {
-    return db.transaction((tx) =>
-      EmploymentRepository.terminate(tx, id, { ...dto, status: 'terminated' }),
-    )
-  },
   softDelete: async (id: string, userId?: string) => {
     return db.transaction(async (tx) => {
       const existing = await EmploymentRepository.softDelete(tx, id, userId)

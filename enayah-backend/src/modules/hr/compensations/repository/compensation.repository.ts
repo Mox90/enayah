@@ -1,4 +1,4 @@
-// src/modules/hr/compensations/repository/compensation.repository.ts
+// enayah-backend/src/modules/hr/compensations/repository/compensation.repository.ts
 
 import { eq } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'

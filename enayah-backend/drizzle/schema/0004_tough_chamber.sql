@@ -1,0 +1,1 @@
+ALTER TABLE "employee_addresses" ADD COLUMN "state_province" varchar(100);

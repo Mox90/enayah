@@ -1,0 +1,1 @@
+ALTER TYPE "public"."life_support_type" ADD VALUE 'stls' BEFORE 'nrp';

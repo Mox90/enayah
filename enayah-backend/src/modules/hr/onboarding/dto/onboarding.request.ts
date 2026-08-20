@@ -10,25 +10,13 @@ import { CreateEmployeePersonalSchema } from '../../employees/dto/employee-perso
 export const OnboardingEmploymentSchema = z.object({
   hireDate: z.iso.date(),
   startDate: z.iso.date(),
-  endDate: z.iso.date().nullable().optional(),
   employmentType: z
     .enum(['full_time', 'part_time', 'contract', 'temporary', 'locum'])
     .default('full_time'),
   staffCategory: z
     .enum(['civilian', 'military', 'contractual'])
     .default('contractual'),
-  status: z
-    .enum([
-      'active',
-      'terminated',
-      'resigned',
-      'eoc',
-      'transferred',
-      'on_leave',
-    ])
-    .default('active'),
-
-  causeOfLeaving: z.string().trim().max(255).nullable().optional(),
+  status: z.literal('active').default('active'),
 })
 
 // ----------------------------------
@@ -39,10 +27,8 @@ export const OnboardingContractSchema = z.object({
   contractNumber: z.string().trim().min(1).max(50).optional(),
   startDate: z.iso.date(),
   endDate: z.iso.date(),
-  contractType: z.enum(['initial', 'renewal', 'amendment']).default('initial'),
-  status: z
-    .enum(['draft', 'active', 'superseded', 'cancelled', 'expired'])
-    .default('active'),
+  contractType: z.literal('initial').default('initial'),
+  status: z.literal('active').default('active'),
   signedDate: z.iso.date().nullable().optional(),
   documentPath: z.string().trim().nullable().optional(),
   notes: z.string().trim().nullable().optional(),
@@ -53,9 +39,9 @@ export const OnboardingContractSchema = z.object({
 // ----------------------------------
 
 export const OnboardingMovementSchema = z.object({
-  positionItemId: z.uuid(),
-  startDate: z.iso.date().optional(),
-  endDate: z.iso.date().nullable().optional(),
+  positionItemId: z.uuid().nullable().optional(),
+  officialDepartmentId: z.uuid().nullable().optional(),
+  officialPositionId: z.uuid().nullable().optional(),
   remarks: z.string().trim().nullable().optional(),
 })
 
@@ -138,17 +124,55 @@ export const OnboardingCredentialsSchema = z
 // Full Onboarding Submit
 // ----------------------------------
 
-export const OnboardingSubmitSchema = z.object({
-  employee: CreateEmployeeSchema,
-  personal: CreateEmployeePersonalSchema.optional(),
-  employment: OnboardingEmploymentSchema,
-  contract: OnboardingContractSchema,
-  movement: OnboardingMovementSchema,
-  appointment: OnboardingAppointmentSchema.optional(),
-  compensation: OnboardingCompensationSchema.optional(),
-  allowances: z.array(OnboardingAllowanceSchema).default([]),
-  credentials: OnboardingCredentialsSchema.optional(),
-})
+export const OnboardingSubmitSchema = z
+  .object({
+    employee: CreateEmployeeSchema,
+    personal: CreateEmployeePersonalSchema.optional(),
+    employment: OnboardingEmploymentSchema,
+    contract: OnboardingContractSchema,
+    movement: OnboardingMovementSchema,
+    appointment: OnboardingAppointmentSchema.optional(),
+    compensation: OnboardingCompensationSchema.optional(),
+    allowances: z.array(OnboardingAllowanceSchema).default([]),
+    credentials: OnboardingCredentialsSchema.optional(),
+  })
+  .superRefine((data, ctx) => {
+    const requiresPositionItem =
+      data.employment.staffCategory === 'civilian' ||
+      data.employment.staffCategory === 'contractual'
+
+    if (requiresPositionItem && data.movement.positionItemId == null) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['movement', 'positionItemId'],
+        message:
+          'Position item is required for civilian and contractual employees',
+      })
+    }
+
+    if (
+      data.employment.staffCategory === 'military' &&
+      data.movement.positionItemId == null
+    ) {
+      if (!data.movement.officialDepartmentId) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['movement', 'officialDepartmentId'],
+          message:
+            'Official department is required when no position item is assigned',
+        })
+      }
+
+      if (!data.movement.officialPositionId) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['movement', 'officialPositionId'],
+          message:
+            'Official position is required when no position item is assigned',
+        })
+      }
+    }
+  })
 
 export type OnboardingSubmitDto = z.infer<typeof OnboardingSubmitSchema>
 export type OnboardingEmploymentDto = z.infer<typeof OnboardingEmploymentSchema>
