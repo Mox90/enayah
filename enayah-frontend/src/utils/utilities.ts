@@ -169,8 +169,8 @@ export const getExpiryStatus = (
     return {
       bgClass: 'bg-red-500/5 dark:bg-red-500/10',
       borderClass: isRtl
-        ? 'border-r-red-600 border-red-500/30'
-        : 'border-l-red-600 border-red-500/30',
+        ? 'border-r-red-600 border-red-500/85'
+        : 'border-l-red-600 border-red-500/85',
       //pulseClass: 'animate-[pulse_0.5s_infinite] shadow-[0_0_15px_rgba(239,68,68,0.2)]',
       pulseClass: urgentAttentionClass,
       diffDays,
@@ -180,8 +180,8 @@ export const getExpiryStatus = (
     return {
       bgClass: 'bg-red-500/5 dark:bg-red-500/10',
       borderClass: isRtl
-        ? 'border-r-red-500 border-red-500/20'
-        : 'border-l-red-500 border-red-500/20',
+        ? 'border-r-red-500 border-red-500/75'
+        : 'border-l-red-500 border-red-500/75',
       //pulseClass: 'animate-[pulse_0.7s_infinite]',
       pulseClass: urgentAttentionClass,
       diffDays,
@@ -191,8 +191,8 @@ export const getExpiryStatus = (
     return {
       bgClass: 'bg-amber-500/5 dark:bg-amber-500/10',
       borderClass: isRtl
-        ? 'border-r-amber-500 border-amber-500/20'
-        : 'border-l-amber-500 border-amber-500/20',
+        ? 'border-r-amber-500 border-amber-500/45'
+        : 'border-l-amber-500 border-amber-500/45',
       //pulseClass: 'animate-[pulse_0.9s_infinite]',
       pulseClass: '',
       diffDays,
@@ -202,8 +202,8 @@ export const getExpiryStatus = (
     return {
       bgClass: 'bg-yellow-500/5 dark:bg-yellow-500/10',
       borderClass: isRtl
-        ? 'border-r-yellow-500 border-yellow-500/20'
-        : 'border-l-yellow-500 border-yellow-500/20',
+        ? 'border-r-yellow-500 border-yellow-500/70'
+        : 'border-l-yellow-500 border-yellow-500/70',
       //pulseClass: 'animate-pulse',
       pulseClass: '',
       diffDays,
@@ -212,8 +212,8 @@ export const getExpiryStatus = (
   return {
     bgClass: 'bg-emerald-500/5 dark:bg-emerald-500/10',
     borderClass: isRtl
-      ? 'border-r-emerald-500 border-emerald-500/20'
-      : 'border-l-emerald-500 border-emerald-500/20',
+      ? 'border-r-emerald-500 border-emerald-500/100'
+      : 'border-l-emerald-500 border-emerald-500/100',
     pulseClass: '',
     diffDays,
   }

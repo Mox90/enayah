@@ -1664,10 +1664,11 @@ function EmergencyContactDialogContent({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent dir={isRtl ? 'rtl' : 'ltr'}>
-                  <SelectItem value='spouse'>{ect('spouse')}</SelectItem>
-                  <SelectItem value='child'>{ect('child')}</SelectItem>
                   <SelectItem value='father'>{ect('father')}</SelectItem>
                   <SelectItem value='mother'>{ect('mother')}</SelectItem>
+                  <SelectItem value='spouse'>{ect('spouse')}</SelectItem>
+                  <SelectItem value='child'>{ect('child')}</SelectItem>
+                  <SelectItem value='sibling'>{ect('sibling')}</SelectItem>
                   <SelectItem value='other'>{ect('other')}</SelectItem>
                 </SelectContent>
               </Select>

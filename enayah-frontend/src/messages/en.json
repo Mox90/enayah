@@ -710,6 +710,8 @@
     "authority": "Issuing Authority",
     "saveIdentification": "Save Identification",
     "idTitleSub": "Enter employee identification details.",
+    "noIdentificationRecords": "No identification records found",
+    "addIdentification": "Add Identification",
     "validation": {
       "typeRequired": "Identification type is required.",
       "numberRequired": "Identification number is required.",
@@ -766,6 +768,7 @@
     "spouse": "Spouse",
     "father": "Father",
     "mother": "Mother",
+    "sibling": "Sibling",
     "other": "Other",
     "phoneNumber": "Phone Number",
     "alternateMobile": "Alternate Mobile",

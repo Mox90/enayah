@@ -13,6 +13,7 @@ import {
   // Change this import only if your credentials schema uses another name,
   // such as employeeLicenses.
   employeeLicenses,
+  contractMovementActions,
 } from '../../../../db'
 
 const monthExpression = sql<number>`
@@ -160,23 +161,46 @@ export const HrDashboardRepository = {
       /*
        * Transfer and promotion activity for the year.
        */
+      /*
+       * Promotion and transfer activity for the year.
+       *
+       * Movement type represents the lifecycle event:
+       * initial / renewal / amendment.
+       *
+       * Promotion / demotion / transfer are stored
+       * separately as movement actions.
+       */
       db
         .select({
           transfers: sql<number>`
-          count(*) filter (
-            where ${contractMovements.movementType}
-              = 'transfer'
-          )::int
-        `,
+      count(
+        distinct ${contractMovementActions.contractMovementId}
+      ) filter (
+        where ${contractMovementActions.actionType}
+          = 'transfer'
+      )::int
+    `,
 
           promotions: sql<number>`
-          count(*) filter (
-            where ${contractMovements.movementType}
-              = 'promotion'
-          )::int
-        `,
+      count(
+        distinct ${contractMovementActions.contractMovementId}
+      ) filter (
+        where ${contractMovementActions.actionType}
+          = 'promotion'
+      )::int
+    `,
         })
         .from(contractMovements)
+        .innerJoin(
+          contractMovementActions,
+          and(
+            eq(
+              contractMovementActions.contractMovementId,
+              contractMovements.id,
+            ),
+            eq(contractMovementActions.isDeleted, false),
+          ),
+        )
         .where(
           and(
             eq(contractMovements.isDeleted, false),

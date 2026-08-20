@@ -18,17 +18,21 @@ export type HrAdminDashboardSummary = {
 
   expiringLicenses: number
   expiringContracts: number
-
-  transfers: number
-  promotions: number
 }
 
-export type HrAdminDashboardData = {
-  selectedYear: number
+export type HrAdminDashboardSummaryData = {
   activityYear: number
   alertWindowDays: number
   availableYears: number[]
   summary: HrAdminDashboardSummary
+}
+
+export type HrAdminDashboardActivityData = {
+  selectedYear: number
+
+  transfers: number
+  promotions: number
+
   hiringTrend: HiringTrendItem[]
 }
 

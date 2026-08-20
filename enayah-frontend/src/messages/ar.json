@@ -710,6 +710,8 @@
     "authority": "سلطة الإصدار",
     "saveIdentification": "حفظ الهوية",
     "idTitleSub": "أدخل تفاصيل الهوية.",
+    "noIdentificationRecords": "No identification records found",
+    "addIdentification": "Add Identification",
     "validation": {
       "typeRequired": "نوع الهوية مطلوب.",
       "numberRequired": "رقم الهوية مطلوب.",
@@ -766,6 +768,7 @@
     "spouse": "زوج/زوجة",
     "father": "أب",
     "mother": "أم",
+    "sibling": "أخ أو أخت",
     "other": "آخر",
     "phoneNumber": "رقم الهاتف",
     "alternateMobile": "رقم الهاتف البديل",

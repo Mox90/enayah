@@ -58,9 +58,7 @@ function createYearRange(
 }
 
 export const HrDashboardService = {
-  getAdminDashboard: async (
-    requestedYear?: number,
-  ): Promise<HrAdminDashboardResponse> => {
+  getAdminSummary: async () => {
     const currentYear = new Date().getUTCFullYear()
 
     const [oldestHiringYear, summary] = await Promise.all([
@@ -71,6 +69,21 @@ export const HrDashboardService = {
 
     const availableYears = createYearRange(oldestHiringYear, currentYear)
 
+    return {
+      activityYear: currentYear,
+      alertWindowDays: ALERT_WINDOW_DAYS,
+      availableYears,
+      summary,
+    }
+  },
+
+  getHiringTrend: async (requestedYear?: number) => {
+    const currentYear = new Date().getUTCFullYear()
+
+    const oldestHiringYear = await HrDashboardRepository.getOldestHiringYear()
+
+    const availableYears = createYearRange(oldestHiringYear, currentYear)
+
     const selectedYear =
       requestedYear &&
       Number.isInteger(requestedYear) &&
@@ -78,15 +91,44 @@ export const HrDashboardService = {
         ? requestedYear
         : currentYear
 
-    const hiringRows = await HrDashboardRepository.getHiringTrend(selectedYear)
+    const rows = await HrDashboardRepository.getHiringTrend(selectedYear)
 
     return {
       selectedYear,
-      activityYear: currentYear,
-      alertWindowDays: ALERT_WINDOW_DAYS,
-      availableYears,
-      summary,
-      hiringTrend: mergeHiringTrend(hiringRows),
+      hiringTrend: mergeHiringTrend(rows),
     }
   },
 }
+// export const HrDashboardService = {
+//   getAdminDashboard: async (
+//     requestedYear?: number,
+//   ): Promise<HrAdminDashboardResponse> => {
+//     const currentYear = new Date().getUTCFullYear()
+
+//     const [oldestHiringYear, summary] = await Promise.all([
+//       HrDashboardRepository.getOldestHiringYear(),
+
+//       HrDashboardRepository.getSummary(currentYear, ALERT_WINDOW_DAYS),
+//     ])
+
+//     const availableYears = createYearRange(oldestHiringYear, currentYear)
+
+//     const selectedYear =
+//       requestedYear &&
+//       Number.isInteger(requestedYear) &&
+//       availableYears.includes(requestedYear)
+//         ? requestedYear
+//         : currentYear
+
+//     const hiringRows = await HrDashboardRepository.getHiringTrend(selectedYear)
+
+//     return {
+//       selectedYear,
+//       activityYear: currentYear,
+//       alertWindowDays: ALERT_WINDOW_DAYS,
+//       availableYears,
+//       summary,
+//       hiringTrend: mergeHiringTrend(hiringRows),
+//     }
+//   },
+// }

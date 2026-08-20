@@ -12,12 +12,24 @@ const router = Router()
 router.use(requireAuth)
 router.use(attachPermissions)
 
+// router.get(
+//   '/hr-admin',
+//   // Use your existing permission initially, or replace this with
+//   // hr.dashboard.view when that permission exists.
+//   requirePermission('hr.dashboard.view'),
+//   HrDashboardController.getAdminDashboard,
+// )
+
 router.get(
-  '/hr-admin',
-  // Use your existing permission initially, or replace this with
-  // hr.dashboard.view when that permission exists.
+  '/hr-admin/summary',
   requirePermission('hr.dashboard.view'),
-  HrDashboardController.getAdminDashboard,
+  HrDashboardController.getAdminSummary,
+)
+
+router.get(
+  '/hr-admin/activity',
+  requirePermission('hr.dashboard.view'),
+  HrDashboardController.getHiringTrend,
 )
 
 export default router
