@@ -6,46 +6,22 @@ const contractBaseSchema = z.object({
   contractNumber: z.string().trim().min(1).max(50).optional(),
   startDate: z.iso.date(),
   endDate: z.iso.date(),
-  contractType: z.enum(contractTypeValues).default('initial'),
-  status: z.enum(contractStatusValues).default('draft'),
+  contractType: z.enum(contractTypeValues),
+  status: z.enum(contractStatusValues),
   signedDate: z.iso.date().nullable().optional(),
   documentPath: z.string().trim().nullable().optional(),
   notes: z.string().trim().nullable().optional(),
 })
-// .refine(({ startDate, endDate }) => endDate >= startDate, {
-//   path: ['endDate'],
-//   message: 'endDate must be on or after startDate',
-// })
 
-export const createContractSchema = contractBaseSchema.refine(
-  (contract) => contract.endDate >= contract.startDate,
-  {
+export const createContractSchema = contractBaseSchema
+  .extend({
+    contractType: z.enum(contractTypeValues).default('initial'),
+    status: z.enum(contractStatusValues).default('draft'),
+  })
+  .refine((contract) => contract.endDate >= contract.startDate, {
     message: 'endDate must be on or after startDate',
     path: ['endDate'],
-  },
-)
-
-// export const updateContractSchema = contractBaseSchema
-//   .omit({
-//     employmentId: true,
-//   })
-//   .partial()
-//   .extend({
-//     contractType: z.enum(['initial', 'renewal', 'amendment']).optional(),
-//     status: z
-//       .enum(['draft', 'active', 'superseded', 'cancelled', 'expired'])
-//       .optional(),
-//   })
-//   .refine(
-//     (data) => {
-//       if (!data.startDate || !data.endDate) return true
-//       return data.endDate >= data.startDate
-//     },
-//     {
-//       path: ['endDate'],
-//       message: 'endDate must be on or after startDate',
-//     },
-//   )
+  })
 
 export const updateContractSchema = contractBaseSchema
   .omit({

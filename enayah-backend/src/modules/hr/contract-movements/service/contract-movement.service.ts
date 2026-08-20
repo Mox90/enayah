@@ -37,19 +37,19 @@ export const ContractMovementService = {
         throw new AppError('Employment not found', 404)
       }
 
-      // ----------------------------------
-      // 3. Determine PCN requirement
-      //
-      // Civilian / contractual:
-      //   PCN required
-      //
-      // Military:
-      //   PCN optional
-      // ----------------------------------
-
       const requiresPositionItem =
         employment.staffCategory === 'civilian' ||
         employment.staffCategory === 'contractual'
+
+      // ----------------------------------
+      // 3. Resolve latest legal movement
+      // ----------------------------------
+
+      const latestMovement =
+        await ContractMovementRepository.findLatestByContractId(
+          tx,
+          dto.contractId,
+        )
 
       // ----------------------------------
       // 4. Resolve / claim PCN
@@ -58,14 +58,31 @@ export const ContractMovementService = {
       let positionItem = null
 
       if (dto.positionItemId) {
-        positionItem = await PositionItemRepository.assignIfAvailable(
-          tx,
-          dto.positionItemId,
-        )
+        const isSamePositionItem =
+          latestMovement?.positionItemId === dto.positionItemId
+
+        if (isSamePositionItem) {
+          // Current PCN is already filled by
+          // this employee. Reuse it instead
+          // of attempting to claim it again.
+          positionItem = await PositionItemRepository.findById(
+            tx,
+            dto.positionItemId,
+          )
+        } else {
+          // A genuinely new PCN must still
+          // be vacant before it can be used.
+          positionItem = await PositionItemRepository.assignIfAvailable(
+            tx,
+            dto.positionItemId,
+          )
+        }
 
         if (!positionItem) {
           throw new AppError(
-            'Position item is not vacant or no longer available',
+            isSamePositionItem
+              ? 'Current position item could not be found'
+              : 'Position item is not vacant or no longer available',
             409,
           )
         }
@@ -78,19 +95,17 @@ export const ContractMovementService = {
 
       // ----------------------------------
       // 5. Resolve legal assignment
-      //
-      // If a PCN exists, its department /
-      // position are authoritative.
-      //
-      // Without PCN (e.g. military),
-      // they must be supplied explicitly.
       // ----------------------------------
 
       const officialDepartmentId =
-        positionItem?.departmentId ?? dto.officialDepartmentId
+        positionItem?.departmentId ??
+        dto.officialDepartmentId ??
+        latestMovement?.officialDepartmentId
 
       const officialPositionId =
-        positionItem?.positionId ?? dto.officialPositionId
+        positionItem?.positionId ??
+        dto.officialPositionId ??
+        latestMovement?.officialPositionId
 
       if (!officialDepartmentId) {
         throw new AppError('Official department is required', 400)
@@ -101,7 +116,7 @@ export const ContractMovementService = {
       }
 
       // ----------------------------------
-      // 6. Determine movement sequence
+      // 6. Determine sequence
       // ----------------------------------
 
       const sequenceNumber =
@@ -112,7 +127,7 @@ export const ContractMovementService = {
         ))
 
       // ----------------------------------
-      // 7. Create legal movement
+      // 7. Create movement
       // ----------------------------------
 
       return ContractMovementRepository.create(tx, {

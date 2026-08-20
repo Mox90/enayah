@@ -14,7 +14,7 @@ export const RenewContractSchema = z.object({
       notes: z.string().trim().nullable().optional(),
     })
     .refine((c) => c.endDate >= c.startDate, {
-      message: 'endDate must be after startDate',
+      message: 'endDate must be on or after startDate',
       path: ['endDate'],
     }),
   movement: z

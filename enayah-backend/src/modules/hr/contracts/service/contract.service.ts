@@ -64,6 +64,10 @@ export const ContractService = {
         throw new AppError('Contract not found', 404)
       }
 
+      if (existing.status !== 'draft' && existing.status !== 'active') {
+        throw new AppError('Only draft or active contracts can be updated', 409)
+      }
+
       const nextStartDate = dto.startDate ?? existing.startDate
       const nextEndDate = dto.endDate ?? existing.endDate
       if (nextEndDate < nextStartDate) {
