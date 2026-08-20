@@ -46,11 +46,15 @@ Database.xlsx
 data/Iqama.xlsx
 Iqama.xlsx
 
-*.sql
-*.sql.gz
-*.tar.gz
+# *.sql
+# *.sql.gz
+# *.tar.gz
 
-backups/
+/*.sql
+/*.sql.gz
+/*.tar.gz
+
+/backups/
 
 storage/public/*
 storage/private/*

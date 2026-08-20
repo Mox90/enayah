@@ -1,6 +1,6 @@
 // enayah-backend/src/modules/hr/contract-movements/repository/contract-movement-action.repository.ts
 
-import { and, eq, isNull, sql } from 'drizzle-orm'
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm'
 
 import { AppError } from '../../../../core/errors/AppError'
 import { contractMovementActions, DB } from '../../../../db'
@@ -48,6 +48,7 @@ export const ContractMovementActionRepository = {
    * movementType = renewal
    * actions = ['promotion', 'transfer']
    */
+
   createMany: async (
     tx: DB,
     contractMovementId: string,
@@ -81,6 +82,31 @@ export const ContractMovementActionRepository = {
       )
     }
 
+    const existingActions = await tx
+      .select({
+        actionType: contractMovementActions.actionType,
+      })
+      .from(contractMovementActions)
+      .where(
+        and(
+          eq(contractMovementActions.contractMovementId, contractMovementId),
+          inArray(contractMovementActions.actionType, uniqueActions),
+          eq(contractMovementActions.isDeleted, false),
+          isNull(contractMovementActions.deletedAt),
+        ),
+      )
+
+    if (existingActions.length > 0) {
+      const existingTypes = existingActions
+        .map((item) => item.actionType)
+        .join(', ')
+
+      throw new AppError(
+        `Contract movement action already exists: ${existingTypes}`,
+        409,
+      )
+    }
+
     return tx
       .insert(contractMovementActions)
       .values(
@@ -95,7 +121,6 @@ export const ContractMovementActionRepository = {
       )
       .returning()
   },
-
   /**
    * Return active actions belonging to a movement.
    */

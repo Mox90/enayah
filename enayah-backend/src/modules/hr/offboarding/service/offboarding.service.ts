@@ -1,14 +1,15 @@
 // enayah-backend/src/modules/hr/offboarding/service/offboarding.service.ts
 
 import { AppError } from '../../../../core/errors/AppError'
+import { logger } from '../../../../core/logging/logger'
 import { DB, db } from '../../../../db'
 
 import { AppointmentRepository } from '../../appointments/repository/appointment.repository'
 import { ContractMovementRepository } from '../../contract-movements/repository/contract-movement.repository'
 import { ContractRepository } from '../../contracts/repository/contract.repository'
-import { CreateSeparationDto } from '../../employments/dto/employment.request'
 import { EmploymentRepository } from '../../employments/repository/employment.repository'
 import { PositionItemRepository } from '../../position-items/repository/positionItem.repository'
+import { CreateSeparationDto } from '../dto/offboarding.request'
 
 import { EmploymentSeparationRepository } from '../repository/employment-separation.repository'
 
@@ -74,6 +75,10 @@ async function completeSeparationInTransaction(tx: DB, separationId: string) {
     separation.employmentId,
   )
 
+  if (!employment) {
+    throw new AppError('Employment not found', 404)
+  }
+
   if (employment.status === 'ended') {
     throw new AppError('Employment has already ended', 400)
   }
@@ -105,6 +110,9 @@ async function completeSeparationInTransaction(tx: DB, separationId: string) {
     )
   }
 
+  // EOC means natural expiry of the
+  // contractual term, therefore its date
+  // must exactly equal the contract end.
   if (
     separation.separationType === 'eoc' &&
     separation.effectiveDate !== contract.endDate
@@ -136,7 +144,7 @@ async function completeSeparationInTransaction(tx: DB, separationId: string) {
   }
 
   // ----------------------------------
-  // 5. Resolve appointment
+  // 5. Resolve operational appointment
   // ----------------------------------
 
   const appointment = await AppointmentRepository.findCurrentByEmploymentId(
@@ -153,6 +161,9 @@ async function completeSeparationInTransaction(tx: DB, separationId: string) {
 
   // ----------------------------------
   // 6. End employment
+  //
+  // employment.endDate is the actual
+  // final employment date.
   // ----------------------------------
 
   const endedEmployment = await EmploymentRepository.endEmployment(
@@ -163,6 +174,14 @@ async function completeSeparationInTransaction(tx: DB, separationId: string) {
 
   // ----------------------------------
   // 7. Close contract
+  //
+  // Do NOT modify contract.endDate.
+  //
+  // Before agreed end:
+  //   active -> ended_early
+  //
+  // Exactly on agreed end:
+  //   active -> expired
   // ----------------------------------
 
   const endedContract =
@@ -171,7 +190,7 @@ async function completeSeparationInTransaction(tx: DB, separationId: string) {
       : await ContractRepository.expire(tx, contract.id)
 
   // ----------------------------------
-  // 8. Close legal movement
+  // 8. Close current legal movement
   // ----------------------------------
 
   const endedMovement = await ContractMovementRepository.endMovement(
@@ -181,7 +200,7 @@ async function completeSeparationInTransaction(tx: DB, separationId: string) {
   )
 
   // ----------------------------------
-  // 9. Close appointment
+  // 9. Close current appointment
   // ----------------------------------
 
   const endedAppointment = appointment
@@ -193,24 +212,64 @@ async function completeSeparationInTransaction(tx: DB, separationId: string) {
     : null
 
   // ----------------------------------
-  // 10. Release PCN
+  // 10. Release PCN when applicable
+  //
+  // Military employees may legitimately
+  // have no positionItemId, so null is
+  // NOT an error.
   // ----------------------------------
 
-  const releasedPositionItem = await PositionItemRepository.releaseIfFilled(
-    tx,
-    movement.positionItemId,
-  )
+  let positionItemRelease: Awaited<
+    ReturnType<typeof PositionItemRepository.releaseIfFilled>
+  > | null = null
 
-  if (!releasedPositionItem) {
-    throw new AppError('Current position item could not be released', 400)
+  if (movement.positionItemId) {
+    positionItemRelease = await PositionItemRepository.releaseIfFilled(
+      tx,
+      movement.positionItemId,
+    )
+
+    // Referenced PCN no longer exists.
+    // This is an integrity problem.
+    if (
+      !positionItemRelease.released &&
+      positionItemRelease.reason === 'not_found'
+    ) {
+      throw new AppError('Current position item could not be found', 500)
+    }
+
+    // The PCN exists, but somebody/system
+    // already changed it away from filled.
+    //
+    // Separation itself remains valid,
+    // therefore log and continue.
+    if (
+      !positionItemRelease.released &&
+      positionItemRelease.reason === 'not_filled'
+    ) {
+      logger.warn('Position item was already non-filled during offboarding', {
+        employmentId: employment.id,
+        separationId: separation.id,
+        positionItemId: movement.positionItemId,
+        positionItemStatus: positionItemRelease.positionItem.status,
+      })
+    }
   }
 
   // ----------------------------------
   // 11. Mark separation completed
+  //
+  // Do this last so a failure anywhere
+  // above rolls the whole transaction
+  // back.
   // ----------------------------------
 
   const completedSeparation =
     await EmploymentSeparationRepository.markCompleted(tx, separation.id)
+
+  // ----------------------------------
+  // 12. Return completed lifecycle state
+  // ----------------------------------
 
   return {
     employment: endedEmployment,
@@ -218,7 +277,10 @@ async function completeSeparationInTransaction(tx: DB, separationId: string) {
     contract: endedContract,
     movement: endedMovement,
     appointment: endedAppointment,
-    positionItem: releasedPositionItem,
+
+    // null is legitimate for employees
+    // without a PCN, e.g. military.
+    positionItem: positionItemRelease,
   }
 }
 
@@ -332,12 +394,36 @@ export const OffboardingService = {
 
     const completed = []
 
-    for (const separation of due) {
-      const result = await OffboardingService.completeSeparation(separation.id)
+    const failed: {
+      separationId: string
+      message: string
+    }[] = []
 
-      completed.push(result)
+    for (const separation of due) {
+      try {
+        const result = await OffboardingService.completeSeparation(
+          separation.id,
+        )
+
+        completed.push(result)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error'
+
+        failed.push({
+          separationId: separation.id,
+          message,
+        })
+
+        logger.error('Failed to complete due employment separation', {
+          separationId: separation.id,
+          message,
+        })
+      }
     }
 
-    return completed
+    return {
+      completed,
+      failed,
+    }
   },
 }

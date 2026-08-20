@@ -4,13 +4,13 @@ import { Request, Response } from 'express'
 
 import { asyncHandler } from '../../../../core/utils/asyncHandler'
 
-import { employmentIdParamSchema } from '../dto/offboarding.request'
-
-import { OffboardingService } from '../service/offboarding.service'
 import {
   createSeparationSchema,
+  employmentIdParamSchema,
   separationIdParamSchema,
-} from '../../employments/dto/employment.request'
+} from '../dto/offboarding.request'
+
+import { OffboardingService } from '../service/offboarding.service'
 
 export const OffboardingController = {
   createSeparation: asyncHandler(async (req: Request, res: Response) => {

@@ -1,0 +1,2 @@
+ALTER TABLE "iqama_renewal_case_comments" ADD CONSTRAINT "iqama_renewal_case_comments_parent_comment_id_iqama_renewal_case_comments_id_fk" FOREIGN KEY ("parent_comment_id") REFERENCES "public"."iqama_renewal_case_comments"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "iqama_renewal_case_comments" ADD CONSTRAINT "iqama_renewal_case_comments_thread_root_id_iqama_renewal_case_comments_id_fk" FOREIGN KEY ("thread_root_id") REFERENCES "public"."iqama_renewal_case_comments"("id") ON DELETE no action ON UPDATE no action;

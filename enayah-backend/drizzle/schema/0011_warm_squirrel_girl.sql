@@ -1,0 +1,3 @@
+-- No-op migration.
+-- The obsolete composite unique index/constraint is no longer required
+-- because comment self-references now point directly to the primary key "id".

@@ -10,7 +10,7 @@ export function toEmploymentDb(dto: CreateEmploymentDto) {
 
     hireDate: dto.hireDate,
     startDate: dto.startDate,
-    endDate: dto.endDate ?? null,
+    //endDate: dto.endDate ?? null,
 
     employmentType: dto.employmentType,
     staffCategory: dto.staffCategory,
@@ -56,6 +56,6 @@ export function toEmploymentTerminateDb(dto: TerminateEmploymentDto) {
   return {
     endDate: dto.endDate,
     status: dto.status,
-    causeOfLeaving: dto.causeOfLeaving ?? null,
+    //causeOfLeaving: dto.causeOfLeaving ?? null,
   }
 }

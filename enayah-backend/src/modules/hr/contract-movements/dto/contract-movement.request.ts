@@ -5,7 +5,7 @@ const movementTypeSchema = z.enum(movementTypeValues)
 
 export const createContractMovementSchema = z.object({
   contractId: z.uuid(),
-  positionItemId: z.uuid(),
+  positionItemId: z.uuid().nullable().optional(),
   officialDepartmentId: z.uuid().optional(),
   officialPositionId: z.uuid().optional(),
   startDate: z.iso.date(),

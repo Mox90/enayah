@@ -195,9 +195,11 @@ export const contractMovements = pgTable(
       .references(() => contracts.id, {
         onDelete: 'cascade',
       }),
-    positionItemId: uuid('position_item_id')
-      .references(() => positionItems.id, { onDelete: 'restrict' })
-      .notNull(), // WHERE they are budgeted (PCN) or what PCN funds the employee
+    positionItemId: uuid('position_item_id').references(
+      () => positionItems.id,
+      { onDelete: 'restrict' },
+    ),
+    //.notNull(), // WHERE they are budgeted (PCN) or what PCN funds the employee
     officialDepartmentId: uuid('official_department_id')
       .references(() => departments.id)
       .notNull(), // point to the official legal department of an employee
@@ -249,15 +251,15 @@ export const contractMovementActions = pgTable(
     actionType: movementActionTypeEnum('action_type').notNull(),
     ...baseColumns,
   },
+
   (table) => [
     index('idx_contract_movement_actions_movement').on(
       table.contractMovementId,
     ),
     index('idx_contract_movement_actions_type').on(table.actionType),
-    unique('uq_contract_movement_action').on(
-      table.contractMovementId,
-      table.actionType,
-    ),
+    uniqueIndex('uq_contract_movement_action_active')
+      .on(table.contractMovementId, table.actionType)
+      .where(sql`${table.isDeleted} = false`),
   ],
 )
 
@@ -272,8 +274,8 @@ export const employmentSeparations = pgTable(
       }),
     separationType: employmentSeparationTypeEnum('separation_type').notNull(),
     status: employmentSeparationStatusEnum('status').default('draft').notNull(),
-    noticeDate: date('notice_date'), // e.g. resignation letter received
-    effectiveDate: date('effective_date').notNull(), // Proposed/approved final working date
+    noticeDate: date('notice_date'),
+    effectiveDate: date('effective_date').notNull(),
     reason: text('reason'),
     remarks: text('remarks'),
     approvedBy: uuid('approved_by'),
@@ -284,6 +286,18 @@ export const employmentSeparations = pgTable(
     index('idx_employment_separations_employment').on(table.employmentId),
     index('idx_employment_separations_status').on(table.status),
     index('idx_employment_separations_effective_date').on(table.effectiveDate),
+    uniqueIndex('uq_employment_separation_open')
+      .on(table.employmentId)
+      .where(
+        sql`
+          ${table.isDeleted} = false
+          AND ${table.status} IN (
+            'draft',
+            'pending_approval',
+            'approved'
+          )
+        `,
+      ),
   ],
 )
 

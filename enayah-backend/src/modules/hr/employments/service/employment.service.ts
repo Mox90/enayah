@@ -34,12 +34,12 @@ export const EmploymentService = {
   },
 
   update: async (id: string, dto: UpdateEmploymentDto) => {
-    if (dto.status === 'ended' || dto.endDate !== undefined) {
-      throw new AppError(
-        'Employment must be ended through the offboarding workflow',
-        400,
-      )
-    }
+    // if (dto.status === 'ended' || dto.endDate !== undefined) {
+    //   throw new AppError(
+    //     'Employment must be ended through the offboarding workflow',
+    //     400,
+    //   )
+    // }
     return db.transaction((tx) => EmploymentRepository.update(tx, id, dto))
   },
 

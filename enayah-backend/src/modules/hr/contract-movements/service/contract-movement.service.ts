@@ -1,33 +1,108 @@
 import { db } from '../../../../db'
 import { AppError } from '../../../../core/errors/AppError'
+
 import {
   CreateContractMovementDto,
   UpdateContractMovementDto,
 } from '../dto/contract-movement.request'
+
 import { ContractMovementRepository } from '../repository/contract-movement.repository'
 import { PositionItemRepository } from '../../position-items/repository/positionItem.repository'
-//import { PositionItemRepository } from '../../position-items/repository/position-item.repository'
+import { ContractRepository } from '../../contracts/repository/contract.repository'
+import { EmploymentRepository } from '../../employments/repository/employment.repository'
 
 export const ContractMovementService = {
   create: async (dto: CreateContractMovementDto) => {
     return db.transaction(async (tx) => {
-      // const positionItem = await PositionItemRepository.findById(
-      //   tx,
-      //   dto.positionItemId,
-      // )
+      // ----------------------------------
+      // 1. Resolve contract
+      // ----------------------------------
 
-      // if (!positionItem) {
-      //   throw new AppError('Position item not found', 404)
-      // }
+      const contract = await ContractRepository.findById(tx, dto.contractId)
 
-      // if (positionItem.status !== 'vacant') {
-      //   throw new AppError('Position item is not vacant', 400)
-      // }
+      if (!contract) {
+        throw new AppError('Contract not found', 404)
+      }
 
-      const positionItem = await PositionItemRepository.assignIfAvailable(
+      // ----------------------------------
+      // 2. Resolve employment
+      // ----------------------------------
+
+      const employment = await EmploymentRepository.findById(
         tx,
-        dto.positionItemId,
+        contract.employmentId,
       )
+
+      if (!employment) {
+        throw new AppError('Employment not found', 404)
+      }
+
+      // ----------------------------------
+      // 3. Determine PCN requirement
+      //
+      // Civilian / contractual:
+      //   PCN required
+      //
+      // Military:
+      //   PCN optional
+      // ----------------------------------
+
+      const requiresPositionItem =
+        employment.staffCategory === 'civilian' ||
+        employment.staffCategory === 'contractual'
+
+      // ----------------------------------
+      // 4. Resolve / claim PCN
+      // ----------------------------------
+
+      let positionItem = null
+
+      if (dto.positionItemId) {
+        positionItem = await PositionItemRepository.assignIfAvailable(
+          tx,
+          dto.positionItemId,
+        )
+
+        if (!positionItem) {
+          throw new AppError(
+            'Position item is not vacant or no longer available',
+            409,
+          )
+        }
+      } else if (requiresPositionItem) {
+        throw new AppError(
+          'Position item is required for civilian and contractual employees',
+          400,
+        )
+      }
+
+      // ----------------------------------
+      // 5. Resolve legal assignment
+      //
+      // If a PCN exists, its department /
+      // position are authoritative.
+      //
+      // Without PCN (e.g. military),
+      // they must be supplied explicitly.
+      // ----------------------------------
+
+      const officialDepartmentId =
+        positionItem?.departmentId ?? dto.officialDepartmentId
+
+      const officialPositionId =
+        positionItem?.positionId ?? dto.officialPositionId
+
+      if (!officialDepartmentId) {
+        throw new AppError('Official department is required', 400)
+      }
+
+      if (!officialPositionId) {
+        throw new AppError('Official position is required', 400)
+      }
+
+      // ----------------------------------
+      // 6. Determine movement sequence
+      // ----------------------------------
 
       const sequenceNumber =
         dto.sequenceNumber ??
@@ -36,17 +111,20 @@ export const ContractMovementService = {
           dto.contractId,
         ))
 
-      const movement = await ContractMovementRepository.create(tx, {
+      // ----------------------------------
+      // 7. Create legal movement
+      // ----------------------------------
+
+      return ContractMovementRepository.create(tx, {
         ...dto,
-        officialDepartmentId:
-          dto.officialDepartmentId ?? positionItem.departmentId,
-        officialPositionId: dto.officialPositionId ?? positionItem.positionId,
+
+        positionItemId: positionItem?.id ?? null,
+
+        officialDepartmentId,
+        officialPositionId,
+
         sequenceNumber,
       })
-
-      //await PositionItemRepository.updateStatus(tx, positionItem.id, 'filled')
-
-      return movement
     })
   },
 

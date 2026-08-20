@@ -1,6 +1,6 @@
 // enayah-backend/src/modules/hr/appointments/repository/appointment.repository.ts
 
-import { and, eq } from 'drizzle-orm'
+import { and, eq, isNull } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
 import { appointments, DB } from '../../../../db'
 import {
@@ -72,7 +72,8 @@ export const AppointmentRepository = {
     return tx.query.appointments.findFirst({
       where: and(
         eq(appointments.employmentId, employmentId),
-        eq(appointments.endDate, null as any),
+        //eq(appointments.endDate, null as any),
+        isNull(appointments.endDate),
         isActive,
       ),
       with: {

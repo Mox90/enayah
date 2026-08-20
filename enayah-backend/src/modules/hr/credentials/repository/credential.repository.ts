@@ -669,7 +669,14 @@ export const CredentialRepository = {
     ),
 
   updateMalpractice: (tx: DB, id: string, data: UpdateMalpracticeDto) =>
-    updateRecord(tx, employeeMalpracticeInsurance, id, data, 'Malpractice'),
+    //updateRecord(tx, employeeMalpracticeInsurance, id, data, 'Malpractice'),
+    updateRecord(
+      tx,
+      employeeMalpracticeInsurance,
+      id,
+      toMalpracticeUpdate(data),
+      'Malpractice',
+    ),
 
   softDeleteDegree: (tx: DB, id: string, userId?: string) =>
     softDeleteRecord(tx, employeeDegrees, id, 'Degree', userId),

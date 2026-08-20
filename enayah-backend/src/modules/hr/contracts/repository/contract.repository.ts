@@ -125,7 +125,9 @@ export const ContractRepository = {
         status: 'superseded',
         updatedAt: new Date(),
       })
-      .where(and(eq(contracts.id, id), isActive))
+      .where(
+        and(eq(contracts.id, id), eq(contracts.status, 'active'), isActive),
+      )
       .returning({
         id: contracts.id,
       })
@@ -140,7 +142,9 @@ export const ContractRepository = {
         status: 'ended_early',
         updatedAt: new Date(),
       })
-      .where(and(eq(contracts.id, id), isActive))
+      .where(
+        and(eq(contracts.id, id), eq(contracts.status, 'active'), isActive),
+      )
       .returning({
         id: contracts.id,
       })
@@ -168,7 +172,9 @@ export const ContractRepository = {
         status: 'expired',
         updatedAt: new Date(),
       })
-      .where(and(eq(contracts.id, id), isActive))
+      .where(
+        and(eq(contracts.id, id), eq(contracts.status, 'active'), isActive),
+      )
       .returning({ id: contracts.id })
 
     return assertExists(row, 'Expire failed')

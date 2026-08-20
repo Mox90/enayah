@@ -6,7 +6,6 @@ const movementActionSchema = z.enum(['promotion', 'demotion', 'transfer'])
 
 export const RenewContractSchema = z.object({
   currentContractId: z.uuid(),
-
   contract: z
     .object({
       startDate: z.iso.date(),
@@ -14,17 +13,16 @@ export const RenewContractSchema = z.object({
       signedDate: z.iso.date().nullable().optional(),
       notes: z.string().trim().nullable().optional(),
     })
-    .refine((c) => c.endDate > c.startDate, {
+    .refine((c) => c.endDate >= c.startDate, {
       message: 'endDate must be after startDate',
       path: ['endDate'],
     }),
-
   movement: z
     .object({
-      positionItemId: z.uuid(),
-
+      positionItemId: z.uuid().nullable().optional(),
+      officialDepartmentId: z.uuid().nullable().optional(),
+      officialPositionId: z.uuid().nullable().optional(),
       actions: z.array(movementActionSchema).default([]),
-
       remarks: z.string().trim().nullable().optional(),
     })
     .superRefine((movement, ctx) => {
@@ -86,9 +84,7 @@ export const RenewContractSchema = z.object({
   compensation: z
     .object({
       baseSalary: z.coerce.number().positive(),
-
       reason: z.string().trim().nullable().optional(),
-
       allowances: z
         .array(
           z.object({
