@@ -72,6 +72,7 @@ export function CredentialLicenses({
             type='button'
             onClick={() => setIsOpen((previous) => !previous)}
             aria-expanded={isOpen}
+            aria-controls='credential-licenses-content'
             className={cn(
               'group min-w-0 text-start',
               'rounded-md outline-none',
@@ -175,7 +176,7 @@ export function CredentialLicenses({
           Content
       ========================================================= */}
       {isOpen && (
-        <CardContent className='p-4 sm:p-5'>
+        <CardContent id='credential-licenses-content' className='p-4 sm:p-5'>
           {licenses.length === 0 ? (
             /* =====================================================
                 Empty State

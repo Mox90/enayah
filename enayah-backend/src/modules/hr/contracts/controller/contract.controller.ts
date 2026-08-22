@@ -8,6 +8,7 @@ import {
 } from '../dto/contract.request'
 import { ContractService } from '../service/contract.service'
 import { RenewContractSchema } from '../dto/contract-renewal.request'
+import { ApplyContractMovementSchema } from '../dto/contract-movement.request'
 
 export const ContractController = {
   create: asyncHandler(async (req: Request, res: Response) => {
@@ -19,8 +20,14 @@ export const ContractController = {
 
   renew: asyncHandler(async (req: Request, res: Response) => {
     const body = RenewContractSchema.parse(req.body)
-
     const result = await ContractService.renew(body)
+
+    res.status(201).json(result)
+  }),
+
+  applyMovement: asyncHandler(async (req: Request, res: Response) => {
+    const body = ApplyContractMovementSchema.parse(req.body)
+    const result = await ContractService.applyMovement(body)
 
     res.status(201).json(result)
   }),

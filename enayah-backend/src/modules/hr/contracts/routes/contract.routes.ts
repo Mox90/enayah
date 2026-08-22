@@ -37,6 +37,18 @@ router.post(
   ContractController.renew,
 )
 
+router.post(
+  '/movement',
+  requirePermission('contract.update'),
+  audit('APPLY_CONTRACT_MOVEMENT', {
+    resource: 'CONTRACT',
+    sanitize: {
+      allowList: ['currentContractId', 'effectiveDate'],
+    },
+  }),
+  ContractController.applyMovement,
+)
+
 router.get(
   '/:id/renewal-defaults',
   requirePermission('contract.view'),

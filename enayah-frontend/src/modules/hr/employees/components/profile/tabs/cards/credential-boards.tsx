@@ -70,6 +70,7 @@ export function CredentialBoards({
             type='button'
             onClick={() => setIsOpen((previous) => !previous)}
             aria-expanded={isOpen}
+            aria-controls='credential-boards-content'
             className={cn(
               'group min-w-0 text-start',
               'rounded-md outline-none',
@@ -173,7 +174,7 @@ export function CredentialBoards({
           Content
       ========================================================= */}
       {isOpen && (
-        <CardContent className='p-4 sm:p-5'>
+        <CardContent id='credential-boards-content' className='p-4 sm:p-5'>
           {boards.length === 0 ? (
             /* =====================================================
                 Empty state

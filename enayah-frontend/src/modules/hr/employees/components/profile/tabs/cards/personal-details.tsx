@@ -112,6 +112,7 @@ function SectionCard({
 }) {
   const locale = useLocale()
   const isRtl = locale === 'ar'
+  const t = useTranslations('common')
 
   const [isOpen, setIsOpen] = useState(defaultOpen)
 
@@ -140,6 +141,7 @@ function SectionCard({
             onClick={toggle}
             disabled={!collapsible}
             aria-expanded={collapsible ? isOpen : undefined}
+            aria-controls={title}
             className={cn(
               'group min-w-0 text-start',
               'rounded-md outline-none',
@@ -216,7 +218,7 @@ function SectionCard({
                   size='icon'
                   variant='outline'
                   onClick={onAdd}
-                  aria-label={`${isRtl ? 'إضافة' : 'Add'} ${title}`}
+                  aria-label={t('add', { item: title })} //{`${isRtl ? 'إضافة' : 'Add'} ${title}`}
                   className={cn(
                     'h-8 w-8 shrink-0 rounded-full',
                     'border-emerald-500/30',
@@ -244,7 +246,9 @@ function SectionCard({
       </CardHeader>
 
       {(!collapsible || isOpen) && (
-        <CardContent className='p-4 sm:p-5'>{children}</CardContent>
+        <CardContent id={title} className='p-4 sm:p-5'>
+          {children}
+        </CardContent>
       )}
     </Card>
   )
@@ -523,10 +527,9 @@ export function PersonalDetailsCards({
                   ☎️
                 </span>
               }
-              message={`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${pt(
-                'phoneTitle',
-              )}`}
-              addLabel={`${isRtl ? 'إضافة' : 'Add'} ${pt('phoneTitle')}`}
+              message={ct('noRecords', { item: pt('phoneTitle') })}
+              //{`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${pt('phoneTitle',)}`}
+              addLabel={ct('add', { item: pt('phoneTitle') })} //{`${isRtl ? 'إضافة' : 'Add'} ${pt('phoneTitle')}`}
               onAdd={onAddPhone}
             />
           ) : (
@@ -613,10 +616,8 @@ export function PersonalDetailsCards({
                   📬
                 </span>
               }
-              message={`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${emt(
-                'emailTitle',
-              )}`}
-              addLabel={`${isRtl ? 'إضافة' : 'Add'} ${emt('emailTitle')}`}
+              message={ct('noRecords', { item: emt('emailTitle') })} //{`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${emt('emailTitle',)}`}
+              addLabel={ct('add', { item: emt('emailTitle') })} //{`${isRtl ? 'إضافة' : 'Add'} ${emt('emailTitle')}`}
               onAdd={onAddEmail}
             />
           ) : (
@@ -685,10 +686,8 @@ export function PersonalDetailsCards({
                 🚨
               </span>
             }
-            message={`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${ect(
-              'emergencyContactTitle',
-            )}`}
-            addLabel={`${isRtl ? 'إضافة' : 'Add'} ${ect('emergencyContactTitle')}`}
+            message={ct('noRecords', { item: ect('emergencyContactTitle') })} //{`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${ect(  'emergencyContactTitle',)}`}
+            addLabel={ct('add', { item: ect('emergencyContactTitle') })} //{`${isRtl ? 'إضافة' : 'Add'} ${ect('emergencyContactTitle')}`}
             onAdd={onAddEmergencyContact}
           />
         ) : (
@@ -741,18 +740,22 @@ export function PersonalDetailsCards({
                   <InfoRow
                     label={ect('phoneNumber')}
                     value={
-                      isRtl
-                        ? dash(toPersianDigits(contact.mobile))
-                        : dash(contact.mobile)
+                      contact.mobile
+                        ? isRtl
+                          ? dash(toPersianDigits(contact.mobile))
+                          : dash(contact.mobile)
+                        : '-'
                     }
                   />
 
                   <InfoRow
                     label={ect('alternateMobile')}
                     value={
-                      isRtl
-                        ? dash(toPersianDigits(contact.alternateMobile))
-                        : dash(contact.alternateMobile)
+                      contact.alternateMobile
+                        ? isRtl
+                          ? dash(toPersianDigits(contact.alternateMobile))
+                          : dash(contact.alternateMobile)
+                        : '-'
                     }
                   />
 
@@ -793,10 +796,8 @@ export function PersonalDetailsCards({
                 <Users className='h-4 w-4 text-sky-500 sm:h-5 sm:w-5' />
               </span>
             }
-            message={`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${dt(
-              'dependentsTitle',
-            )}`}
-            addLabel={`${isRtl ? 'إضافة' : 'Add'} ${dt('dependentsTitle')}`}
+            message={ct('noRecords', { item: dt('dependentsTitle') })} //{`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${dt(  'dependentsTitle',)}`}
+            addLabel={ct('add', { item: dt('dependentsTitle') })} //{`${isRtl ? 'إضافة' : 'Add'} ${dt('dependentsTitle')}`}
             onAdd={onAddDependent}
           />
         ) : (
@@ -887,10 +888,8 @@ export function PersonalDetailsCards({
                   🗺️
                 </span>
               }
-              message={`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${at(
-                'addressesTitle',
-              )}`}
-              addLabel={`${isRtl ? 'إضافة' : 'Add'} ${at('addressesTitle')}`}
+              message={ct('noRecords', { item: at('addressesTitle') })} //{`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${at(  'addressesTitle',)}`}
+              addLabel={ct('add', { item: at('addressesTitle') })} //{`${isRtl ? 'إضافة' : 'Add'} ${at('addressesTitle')}`}
               onAdd={onAddAddress}
             />
           ) : (
@@ -913,12 +912,13 @@ export function PersonalDetailsCards({
 
                   <div className='mb-4 border-b pb-3 pe-10'>
                     <h3 className='font-semibold capitalize'>
-                      {address.addressType}
+                      {at(address.addressType)}
                     </h3>
 
                     <p className='mt-2 break-words text-sm leading-6 text-muted-foreground'>
                       {[
-                        address.building && `Building ${address.building}`,
+                        address.building &&
+                          `${at('building')} ${address.building}`,
                         address.street,
                         address.district,
                         address.city,
@@ -977,10 +977,8 @@ export function PersonalDetailsCards({
                   🛫
                 </span>
               }
-              message={`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${vt(
-                'visasTitle',
-              )}`}
-              addLabel={`${isRtl ? 'إضافة' : 'Add'} ${vt('visasTitle')}`}
+              message={ct('noRecords', { item: vt('visasTitle') })} //{`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${vt(  'visasTitle',)}`}
+              addLabel={ct('add', { item: vt('visasTitle') })} //{`${isRtl ? 'إضافة' : 'Add'} ${vt('visasTitle')}`}
               onAdd={onAddVisa}
             />
           ) : (

@@ -88,6 +88,7 @@ export function CredentialMalpractice({
             type='button'
             onClick={() => setIsOpen((previous) => !previous)}
             aria-expanded={isOpen}
+            aria-controls='credential-malpractice-content'
             className={cn(
               'group min-w-0 text-start',
               'rounded-md outline-none',
@@ -191,7 +192,7 @@ export function CredentialMalpractice({
           Content
       ========================================================= */}
       {isOpen && (
-        <CardContent className='p-4 sm:p-5'>
+        <CardContent id='credential-malpractice-content' className='p-4 sm:p-5'>
           {malpractice.length === 0 ? (
             /* =====================================================
                 Empty State

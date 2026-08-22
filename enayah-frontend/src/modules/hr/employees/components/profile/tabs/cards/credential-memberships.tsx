@@ -79,6 +79,7 @@ export function CredentialMemberships({
             type='button'
             onClick={() => setIsOpen((previous) => !previous)}
             aria-expanded={isOpen}
+            aria-controls='credential-memberships-content'
             className={cn(
               'group min-w-0 text-start',
               'rounded-md outline-none',
@@ -182,7 +183,7 @@ export function CredentialMemberships({
           Content
       ========================================================= */}
       {isOpen && (
-        <CardContent className='p-4 sm:p-5'>
+        <CardContent id='credential-memberships-content' className='p-4 sm:p-5'>
           {memberships.length === 0 ? (
             /* =====================================================
                 Empty State

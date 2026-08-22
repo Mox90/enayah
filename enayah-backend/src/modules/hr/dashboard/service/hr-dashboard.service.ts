@@ -1,7 +1,4 @@
-import type {
-  HiringTrendRow,
-  HrAdminDashboardResponse,
-} from '../types/hr-dashboard.types'
+import type { HiringTrendRow } from '../types/hr-dashboard.types'
 
 import { HrDashboardRepository } from '../repository/hr-dashboard.repository'
 
@@ -23,11 +20,9 @@ function mergeHiringTrend(rows: HiringTrendRow[]): HiringTrendRow[] {
 
   for (const row of rows) {
     const index = Number(row.month) - 1
-
     if (index < 0 || index > 11) {
       continue
     }
-
     result[index] = {
       month: Number(row.month),
       physician: Number(row.physician ?? 0),
@@ -60,13 +55,10 @@ function createYearRange(
 export const HrDashboardService = {
   getAdminSummary: async () => {
     const currentYear = new Date().getUTCFullYear()
-
     const [oldestHiringYear, summary] = await Promise.all([
       HrDashboardRepository.getOldestHiringYear(),
-
       HrDashboardRepository.getSummary(currentYear, ALERT_WINDOW_DAYS),
     ])
-
     const availableYears = createYearRange(oldestHiringYear, currentYear)
 
     return {
@@ -79,11 +71,8 @@ export const HrDashboardService = {
 
   getHiringTrend: async (requestedYear?: number) => {
     const currentYear = new Date().getUTCFullYear()
-
     const oldestHiringYear = await HrDashboardRepository.getOldestHiringYear()
-
     const availableYears = createYearRange(oldestHiringYear, currentYear)
-
     const selectedYear =
       requestedYear &&
       Number.isInteger(requestedYear) &&
@@ -91,44 +80,17 @@ export const HrDashboardService = {
         ? requestedYear
         : currentYear
 
-    const rows = await HrDashboardRepository.getHiringTrend(selectedYear)
+    //const rows = await HrDashboardRepository.getHiringTrend(selectedYear)
+    const [rows, movementActivity] = await Promise.all([
+      HrDashboardRepository.getHiringTrend(selectedYear),
+      HrDashboardRepository.getMovementActivity(selectedYear),
+    ])
 
     return {
       selectedYear,
       hiringTrend: mergeHiringTrend(rows),
+      transfers: movementActivity.transfers,
+      promotions: movementActivity.promotions,
     }
   },
 }
-// export const HrDashboardService = {
-//   getAdminDashboard: async (
-//     requestedYear?: number,
-//   ): Promise<HrAdminDashboardResponse> => {
-//     const currentYear = new Date().getUTCFullYear()
-
-//     const [oldestHiringYear, summary] = await Promise.all([
-//       HrDashboardRepository.getOldestHiringYear(),
-
-//       HrDashboardRepository.getSummary(currentYear, ALERT_WINDOW_DAYS),
-//     ])
-
-//     const availableYears = createYearRange(oldestHiringYear, currentYear)
-
-//     const selectedYear =
-//       requestedYear &&
-//       Number.isInteger(requestedYear) &&
-//       availableYears.includes(requestedYear)
-//         ? requestedYear
-//         : currentYear
-
-//     const hiringRows = await HrDashboardRepository.getHiringTrend(selectedYear)
-
-//     return {
-//       selectedYear,
-//       activityYear: currentYear,
-//       alertWindowDays: ALERT_WINDOW_DAYS,
-//       availableYears,
-//       summary,
-//       hiringTrend: mergeHiringTrend(hiringRows),
-//     }
-//   },
-// }

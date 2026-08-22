@@ -72,6 +72,7 @@ export function CredentialFellowships({
             type='button'
             onClick={() => setIsOpen((previous) => !previous)}
             aria-expanded={isOpen}
+            aria-controls='credential-fellowship-content'
             className={cn(
               'group min-w-0 text-start',
               'rounded-md outline-none',
@@ -175,7 +176,7 @@ export function CredentialFellowships({
           Content
       ========================================================= */}
       {isOpen && (
-        <CardContent className='p-4 sm:p-5'>
+        <CardContent id='credential-fellowship-content' className='p-4 sm:p-5'>
           {fellowships.length === 0 ? (
             /* =====================================================
                 Empty state

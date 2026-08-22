@@ -87,6 +87,7 @@ export function CredentialDegrees({
             type='button'
             onClick={() => setIsOpen((previous) => !previous)}
             aria-expanded={isOpen}
+            aria-controls='credential-degrees-content'
             className={cn(
               'group min-w-0 text-start',
               'rounded-md outline-none',
@@ -196,7 +197,7 @@ export function CredentialDegrees({
           Section Content
       ========================================================= */}
       {isOpen && (
-        <CardContent className='p-5'>
+        <CardContent id='credential-degrees-content' className='p-5'>
           {degrees.length === 0 ? (
             /* =====================================================
                 Empty State

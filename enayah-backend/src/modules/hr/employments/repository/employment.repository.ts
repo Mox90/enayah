@@ -199,11 +199,6 @@ export const EmploymentRepository = {
   findTimelineByEmployeeId: async (tx: DB, employeeId: string) => {
     return tx.query.employments.findMany({
       where: and(eq(employments.employeeId, employeeId), isActive),
-      // where: and(
-      //   eq(employments.employeeId, employeeId),
-      //   eq(employments.status, 'active'),
-      //   isActive,
-      // ),
       orderBy: (e, { desc }) => [desc(e.startDate)],
       with: {
         contracts: {
@@ -212,7 +207,8 @@ export const EmploymentRepository = {
           with: {
             movements: {
               where: eq(contractMovements.isDeleted, false),
-              orderBy: (m, { asc }) => [asc(m.sequenceNumber)],
+              // Latest legal state first.
+              orderBy: (m, { desc }) => [desc(m.sequenceNumber)],
               with: {
                 positionItem: true,
                 department: true,
@@ -224,10 +220,6 @@ export const EmploymentRepository = {
             },
           },
         },
-        // appointments: {
-        //   where: eq(appointments.isDeleted, false),
-        //   orderBy: (a, { desc }) => [desc(a.startDate)],
-        // },
       },
     })
   },
