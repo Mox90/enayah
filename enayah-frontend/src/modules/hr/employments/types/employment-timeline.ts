@@ -1,5 +1,10 @@
 // src/modules/hr/employments/types/employment-timeline.ts
 
+export type ContractMovementAction = {
+  id: string
+  actionType: 'promotion' | 'demotion' | 'transfer' | 'pcn_alignment'
+}
+
 export type EmploymentTimelineResponse = EmploymentTimelineItem[]
 
 export type EmploymentTimelineItem = {
@@ -60,6 +65,7 @@ export type ContractMovement = {
     titleEn: string
     titleAr: string | null
   }
+  actions?: ContractMovementAction[]
 }
 
 export type EmploymentAppointment = {

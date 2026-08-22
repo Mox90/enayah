@@ -12,6 +12,7 @@ import { ContractMovementActionRepository } from '../../contract-movements/repos
 import { ContractMovementRepository } from '../../contract-movements/repository/contract-movement.repository'
 import { EmploymentRepository } from '../../employments/repository/employment.repository'
 import { PositionItemRepository } from '../../position-items/repository/positionItem.repository'
+import { ApplyContractMovementDto } from '../dto/contract-movement.request'
 
 import { RenewContractDto } from '../dto/contract-renewal.request'
 import { CreateContractDto, UpdateContractDto } from '../dto/contract.request'
@@ -21,6 +22,13 @@ import { ContractRepository } from '../repository/contract.repository'
 function addOneDay(date: string): string {
   const parsed = new Date(`${date}T00:00:00Z`)
   parsed.setUTCDate(parsed.getUTCDate() + 1)
+
+  return parsed.toISOString().slice(0, 10)
+}
+
+function subtractOneDay(date: string): string {
+  const parsed = new Date(`${date}T00:00:00Z`)
+  parsed.setUTCDate(parsed.getUTCDate() - 1)
 
   return parsed.toISOString().slice(0, 10)
 }
@@ -162,7 +170,11 @@ export const ContractService = {
 
       const actions = dto.movement.actions ?? []
 
-      if (actions.includes('promotion') && actions.includes('demotion')) {
+      const hasTransfer = actions.includes('transfer')
+      const hasPromotion = actions.includes('promotion')
+      const hasDemotion = actions.includes('demotion')
+
+      if (hasPromotion && hasDemotion) {
         throw new AppError(
           'A contract renewal cannot contain both promotion and demotion',
           400,
@@ -228,18 +240,31 @@ export const ContractService = {
       })
 
       // ----------------------------------
-      // 8. Create initial legal state
+      // 8. Resolve initial legal state
       //    for the renewal contract
+      //
+      // PCN ownership and employee legal
+      // assignment are intentionally
+      // separate concepts.
+      //
+      // When keeping the same PCN, inherit
+      // the employee's latest legal state
+      // instead of reverting to the PCN's
+      // owning department.
       // ----------------------------------
 
       const officialDepartmentId =
-        newPositionItem?.departmentId ??
         dto.movement.officialDepartmentId ??
+        (isSamePositionItem
+          ? latestMovement.officialDepartmentId
+          : newPositionItem?.departmentId) ??
         latestMovement.officialDepartmentId
 
       const officialPositionId =
-        newPositionItem?.positionId ??
         dto.movement.officialPositionId ??
+        (isSamePositionItem
+          ? latestMovement.officialPositionId
+          : newPositionItem?.positionId) ??
         latestMovement.officialPositionId
 
       if (!officialDepartmentId) {
@@ -248,6 +273,51 @@ export const ContractService = {
 
       if (!officialPositionId) {
         throw new AppError('Official position is required for renewal', 400)
+      }
+
+      const departmentChanged =
+        officialDepartmentId !== latestMovement.officialDepartmentId
+
+      const positionChanged =
+        officialPositionId !== latestMovement.officialPositionId
+
+      if (departmentChanged && !hasTransfer) {
+        throw new AppError(
+          'Changing the official department requires a transfer action',
+          400,
+        )
+      }
+
+      if (positionChanged && !hasPromotion && !hasDemotion) {
+        throw new AppError(
+          'Changing the official position requires a promotion or demotion action',
+          400,
+        )
+      }
+
+      // if (
+      //   newPositionItem?.positionId &&
+      //   officialPositionId !== newPositionItem.positionId &&
+      //   !hasPromotion &&
+      //   !hasDemotion
+      // ) {
+      //   throw new AppError(
+      //     'The official position must match the position item unless the renewal includes a promotion or demotion',
+      //     400,
+      //   )
+      // }
+
+      // A PCN may temporarily belong to a different department,
+      // but its position must remain compatible with the employee's
+      // official position.
+      if (
+        newPositionItem?.positionId &&
+        officialPositionId !== newPositionItem.positionId
+      ) {
+        throw new AppError(
+          'The official position must match the selected position item',
+          400,
+        )
       }
 
       const movement = await ContractMovementRepository.create(tx, {
@@ -382,6 +452,557 @@ export const ContractService = {
         compensation,
         allowances,
         appointment,
+      }
+    })
+  },
+
+  applyMovement: async (dto: ApplyContractMovementDto) => {
+    return db.transaction(async (tx) => {
+      // ----------------------------------
+      // 1. Lock current contract
+      // ----------------------------------
+
+      const currentContract = await ContractRepository.findByIdForUpdate(
+        tx,
+        dto.currentContractId,
+      )
+
+      if (currentContract.status !== 'active') {
+        throw new AppError('Only active contracts can receive a movement', 400)
+      }
+
+      // ----------------------------------
+      // 2. Resolve employment
+      // ----------------------------------
+
+      const employment = await EmploymentRepository.findById(
+        tx,
+        currentContract.employmentId,
+      )
+
+      if (!employment) {
+        throw new AppError('Employment not found', 404)
+      }
+
+      const requiresPositionItem =
+        employment.staffCategory === 'civilian' ||
+        employment.staffCategory === 'contractual'
+
+      // ----------------------------------
+      // 3. Get latest legal movement
+      // ----------------------------------
+
+      const latestMovement =
+        await ContractMovementRepository.findLatestByContractId(
+          tx,
+          currentContract.id,
+        )
+
+      if (!latestMovement) {
+        throw new AppError('Current contract has no movement record', 400)
+      }
+
+      // ----------------------------------
+      // 4. Validate effective date
+      // ----------------------------------
+
+      const currentMovementEndDate =
+        latestMovement.endDate ?? currentContract.endDate
+
+      if (dto.effectiveDate <= latestMovement.startDate) {
+        throw new AppError(
+          'Movement effective date must be after the current movement start date',
+          400,
+        )
+      }
+
+      if (dto.effectiveDate > currentContract.endDate) {
+        throw new AppError(
+          'Movement effective date cannot be after the contract end date',
+          400,
+        )
+      }
+
+      if (
+        currentMovementEndDate &&
+        dto.effectiveDate > currentMovementEndDate
+      ) {
+        throw new AppError(
+          'Movement effective date cannot be after the current movement end date',
+          400,
+        )
+      }
+
+      // ----------------------------------
+      // 5. Resolve movement actions
+      // ----------------------------------
+
+      const actions = [...new Set(dto.movement.actions)]
+
+      const hasTransfer = actions.includes('transfer')
+      const hasPromotion = actions.includes('promotion')
+      const hasDemotion = actions.includes('demotion')
+      const hasPcnAlignment = actions.includes('pcn_alignment')
+
+      if (hasPromotion && hasDemotion) {
+        throw new AppError(
+          'A movement cannot contain both promotion and demotion',
+          400,
+        )
+      }
+
+      /**
+       * PCN alignment is intentionally a pure action:
+       *
+       * same department
+       * same position
+       * different PCN
+       *
+       * Therefore it should not be combined with transfer,
+       * promotion or demotion.
+       */
+      if (hasPcnAlignment && actions.length > 1) {
+        throw new AppError(
+          'PCN alignment cannot be combined with another movement action',
+          400,
+        )
+      }
+
+      // ----------------------------------
+      // 6. Resolve requested PCN
+      // ----------------------------------
+
+      /**
+       * If positionItemId is omitted, keep the employee's
+       * current PCN.
+       *
+       * This makes a simple transfer request possible without
+       * repeatedly sending the existing PCN.
+       */
+      const requestedPositionItemId =
+        dto.movement.positionItemId ?? latestMovement.positionItemId ?? null
+
+      if (requiresPositionItem && !requestedPositionItemId) {
+        throw new AppError(
+          'Position item is required for civilian and contractual employees',
+          400,
+        )
+      }
+
+      const isSamePositionItem =
+        latestMovement.positionItemId === requestedPositionItemId
+
+      const pcnChanged = !isSamePositionItem
+
+      let targetPositionItem = null
+
+      if (requestedPositionItemId) {
+        /**
+         * Same PCN:
+         *
+         * The PCN is already filled by this employee.
+         * Do NOT run assignIfAvailable().
+         */
+        targetPositionItem = isSamePositionItem
+          ? await PositionItemRepository.findById(tx, requestedPositionItemId)
+          : await PositionItemRepository.assignIfAvailable(
+              tx,
+              requestedPositionItemId,
+            )
+
+        if (!targetPositionItem) {
+          throw new AppError(
+            isSamePositionItem
+              ? 'Current position item could not be found'
+              : 'Selected position item is not vacant or no longer available',
+            409,
+          )
+        }
+      }
+
+      // ----------------------------------
+      // 7. Resolve target legal state
+      // ----------------------------------
+
+      /**
+       * Explicit movement values have highest priority.
+       *
+       * Same PCN:
+       * inherit the employee's current legal state.
+       *
+       * New PCN:
+       * default to the new PCN's department/position.
+       *
+       * IMPORTANT:
+       *
+       * position_items.departmentId represents PCN ownership.
+       *
+       * contract_movements.officialDepartmentId represents
+       * employee legal assignment.
+       *
+       * They are allowed to differ.
+       */
+      const officialDepartmentId =
+        dto.movement.officialDepartmentId ??
+        (isSamePositionItem
+          ? latestMovement.officialDepartmentId
+          : targetPositionItem?.departmentId) ??
+        latestMovement.officialDepartmentId
+
+      const officialPositionId =
+        dto.movement.officialPositionId ??
+        (isSamePositionItem
+          ? latestMovement.officialPositionId
+          : targetPositionItem?.positionId) ??
+        latestMovement.officialPositionId
+
+      if (!officialDepartmentId) {
+        throw new AppError('Official department is required for movement', 400)
+      }
+
+      if (!officialPositionId) {
+        throw new AppError('Official position is required for movement', 400)
+      }
+
+      // ----------------------------------
+      // 8. Determine actual changes
+      // ----------------------------------
+
+      const departmentChanged =
+        officialDepartmentId !== latestMovement.officialDepartmentId
+
+      const positionChanged =
+        officialPositionId !== latestMovement.officialPositionId
+
+      // ----------------------------------
+      // 9. Validate transfer
+      // ----------------------------------
+
+      /**
+       * If department changes, the movement MUST
+       * explicitly contain transfer.
+       */
+      if (departmentChanged && !hasTransfer) {
+        throw new AppError(
+          'Changing the official department requires a transfer action',
+          400,
+        )
+      }
+
+      /**
+       * Conversely, a transfer should actually change
+       * the official department.
+       */
+      if (hasTransfer && !departmentChanged) {
+        throw new AppError(
+          'Transfer requires a change of official department',
+          400,
+        )
+      }
+
+      // ----------------------------------
+      // 10. Validate promotion / demotion
+      // ----------------------------------
+
+      /**
+       * A position change requires either promotion
+       * or demotion.
+       */
+      if (positionChanged && !hasPromotion && !hasDemotion) {
+        throw new AppError(
+          'Changing the official position requires a promotion or demotion action',
+          400,
+        )
+      }
+
+      /**
+       * Promotion/demotion must actually change
+       * the official position.
+       */
+      if ((hasPromotion || hasDemotion) && !positionChanged) {
+        throw new AppError(
+          'Promotion or demotion requires a change of official position',
+          400,
+        )
+      }
+
+      /**
+       * NAFH business rule:
+       *
+       * promotion/demotion must use another PCN.
+       */
+      if ((hasPromotion || hasDemotion) && !pcnChanged) {
+        throw new AppError(
+          'Promotion or demotion requires a different position item',
+          400,
+        )
+      }
+
+      // ----------------------------------
+      // 11. Validate PCN alignment
+      // ----------------------------------
+
+      if (hasPcnAlignment) {
+        if (!pcnChanged) {
+          throw new AppError(
+            'PCN alignment requires a different position item',
+            400,
+          )
+        }
+
+        if (departmentChanged) {
+          throw new AppError(
+            'PCN alignment cannot change the official department',
+            400,
+          )
+        }
+
+        if (positionChanged) {
+          throw new AppError(
+            'PCN alignment cannot change the official position',
+            400,
+          )
+        }
+
+        /**
+         * Alignment means we are finally assigning
+         * the employee to a PCN that belongs to the
+         * department where the employee is already
+         * officially assigned.
+         */
+        if (
+          targetPositionItem?.departmentId !==
+          latestMovement.officialDepartmentId
+        ) {
+          throw new AppError(
+            'PCN alignment requires a position item belonging to the current official department',
+            400,
+          )
+        }
+      }
+
+      // ----------------------------------
+      // 12. Validate PCN-position
+      //     compatibility
+      // ----------------------------------
+
+      /**
+       * Department mismatch is allowed.
+       *
+       * Example:
+       *
+       * ER Staff Nurse PCN
+       * used temporarily by
+       * ICU Staff Nurse.
+       *
+       * But position mismatch is NOT allowed.
+       */
+      if (
+        targetPositionItem?.positionId &&
+        targetPositionItem.positionId !== officialPositionId
+      ) {
+        throw new AppError(
+          'The official position must match the selected position item',
+          400,
+        )
+      }
+
+      // ----------------------------------
+      // 13. Reject no-op movement
+      // ----------------------------------
+
+      if (!departmentChanged && !positionChanged && !pcnChanged) {
+        throw new AppError(
+          'Movement does not change department, position, or position item',
+          400,
+        )
+      }
+
+      // ----------------------------------
+      // 14. Preserve original end date
+      // ----------------------------------
+
+      /**
+       * Example:
+       *
+       * latest:
+       * 2022-08-20 -> 2023-08-19
+       *
+       * effective:
+       * 2023-02-22
+       *
+       * previous becomes:
+       * 2022-08-20 -> 2023-02-21
+       *
+       * new becomes:
+       * 2023-02-22 -> 2023-08-19
+       */
+      const originalEndDate = latestMovement.endDate ?? currentContract.endDate
+
+      const previousMovementEndDate = subtractOneDay(dto.effectiveDate)
+
+      // ----------------------------------
+      // 15. Close previous legal state
+      // ----------------------------------
+
+      const previousMovement = await ContractMovementRepository.endMovement(
+        tx,
+        latestMovement.id,
+        previousMovementEndDate,
+      )
+
+      // ----------------------------------
+      // 16. Create next sequence
+      // ----------------------------------
+
+      /**
+       * The current contract row is locked FOR UPDATE.
+       *
+       * Therefore movements for this contract are serialized
+       * through this transaction, making latest + 1 safe.
+       */
+      const sequenceNumber = latestMovement.sequenceNumber + 1
+
+      // ----------------------------------
+      // 17. Create new legal state
+      // ----------------------------------
+
+      const movement = await ContractMovementRepository.create(tx, {
+        contractId: currentContract.id,
+        positionItemId: targetPositionItem?.id ?? null,
+        officialDepartmentId,
+        officialPositionId,
+        startDate: dto.effectiveDate,
+        endDate: originalEndDate,
+        sequenceNumber,
+
+        /**
+         * The movement itself represents an amendment
+         * to the current contractual legal state.
+         *
+         * contract_movement_actions tells us what
+         * actually occurred:
+         *
+         * transfer
+         * promotion
+         * demotion
+         * pcn_alignment
+         * etc.
+         */
+        movementType: 'amendment',
+        remarks: dto.movement.remarks ?? null,
+      })
+
+      // ----------------------------------
+      // 18. Create movement actions
+      // ----------------------------------
+
+      const movementActions = await ContractMovementActionRepository.createMany(
+        tx,
+        movement.id,
+        actions,
+      )
+
+      // ----------------------------------
+      // 19. Optional compensation
+      // ----------------------------------
+
+      let defaultCompensationReason = 'Contract amendment'
+
+      if (hasPromotion && hasTransfer) {
+        defaultCompensationReason = 'Promotion and transfer'
+      } else if (hasDemotion && hasTransfer) {
+        defaultCompensationReason = 'Demotion and transfer'
+      } else if (hasPromotion) {
+        defaultCompensationReason = 'Promotion'
+      } else if (hasDemotion) {
+        defaultCompensationReason = 'Demotion'
+      } else if (hasTransfer) {
+        defaultCompensationReason = 'Transfer'
+      } else if (hasPcnAlignment) {
+        defaultCompensationReason = 'PCN alignment'
+      }
+
+      const compensation = dto.compensation
+        ? await CompensationRepository.create(tx, {
+            contractMovementId: movement.id,
+
+            /**
+             * Compensation takes effect on exactly
+             * the same day as the movement.
+             */
+            effectiveDate: dto.effectiveDate,
+            baseSalary: dto.compensation.baseSalary,
+            status: 'approved',
+            reason: dto.compensation.reason ?? defaultCompensationReason,
+            allowances: [],
+          })
+        : null
+
+      // ----------------------------------
+      // 20. Compensation allowances
+      // ----------------------------------
+
+      const allowances =
+        compensation && dto.compensation?.allowances?.length
+          ? await CompensationAllowanceRepository.createMany(
+              tx,
+              compensation.id,
+              dto.compensation.allowances,
+            )
+          : []
+
+      // ----------------------------------
+      // 21. Release previous PCN
+      //
+      // Only when the employee actually
+      // changes position items.
+      // ----------------------------------
+
+      let releasedPositionItem = null
+
+      if (pcnChanged && latestMovement.positionItemId) {
+        const releaseResult = await PositionItemRepository.releaseIfFilled(
+          tx,
+          latestMovement.positionItemId,
+        )
+
+        if (!releaseResult.released && releaseResult.reason === 'not_found') {
+          throw new AppError(
+            'Previous position item could not be found during movement',
+            500,
+          )
+        }
+
+        if (!releaseResult.released && releaseResult.reason === 'not_filled') {
+          logger.warn(
+            'Previous position item was already non-filled during contract movement',
+            {
+              employmentId: currentContract.employmentId,
+              contractId: currentContract.id,
+              movementId: latestMovement.id,
+              positionItemId: latestMovement.positionItemId,
+              positionItemStatus: releaseResult.positionItem.status,
+            },
+          )
+        }
+
+        releasedPositionItem = releaseResult
+      }
+
+      // ----------------------------------
+      // 22. Return completed movement
+      // ----------------------------------
+
+      return {
+        contract: currentContract,
+        previousMovement,
+        movement,
+        actions: movementActions,
+        compensation,
+        allowances,
+        positionItem: targetPositionItem,
+        releasedPositionItem,
       }
     })
   },

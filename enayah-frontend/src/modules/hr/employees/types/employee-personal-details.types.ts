@@ -26,7 +26,7 @@ export type Dependent = {
   secondNameAr?: string | null
   thirdNameAr?: string | null
   familyNameAr: string
-  relationship: 'spouse' | 'child' | 'father' | 'mother' | 'other'
+  relationship: 'spouse' | 'child' | 'father' | 'mother' | 'sibling' | 'other'
   gender: 'male' | 'female'
   dateOfBirth?: string | null
 }

@@ -99,25 +99,6 @@ export const ContractRepository = {
     return findByIdOrThrow(tx, updated.id)
   },
 
-  // supersede: async (tx: DB, id: string, newStartDate: string) => {
-  //   const previousEndDate = new Date(
-  //     new Date(newStartDate).getTime() - 86400000,
-  //   )
-  //     .toISOString()
-  //     .split('T')[0]
-
-  //   const [row] = await tx
-  //     .update(contracts)
-  //     .set({
-  //       endDate: previousEndDate,
-  //       status: 'superseded',
-  //       updatedAt: new Date(),
-  //     })
-  //     .where(and(eq(contracts.id, id), isActive))
-  //     .returning({ id: contracts.id })
-
-  //   return assertExists(row, 'Failed to supersede contract')
-  // },
   supersede: async (tx: DB, id: string) => {
     const [row] = await tx
       .update(contracts)

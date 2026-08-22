@@ -346,6 +346,7 @@ export const movementActionTypeValues = [
   'promotion',
   'demotion',
   'transfer',
+  'pcn_alignment',
 ] as const
 
 export const movementActionTypeEnum = pgEnum(

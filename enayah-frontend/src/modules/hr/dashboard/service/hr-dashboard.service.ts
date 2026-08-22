@@ -5,14 +5,23 @@ import { api } from '@/lib/api/client'
 
 import type {
   ApiResponse,
-  HrAdminDashboardData,
+  HrAdminDashboardActivityData,
+  HrAdminDashboardSummaryData,
 } from '../types/hr-dashboard.types'
 
-export async function getHrAdminDashboard(
+export async function getHrAdminDashboardSummary(): Promise<HrAdminDashboardSummaryData> {
+  const response = await api.get<ApiResponse<HrAdminDashboardSummaryData>>(
+    `${API_ENDPOINTS.hr.dashboard.admin}/summary`,
+  )
+
+  return response.data.data
+}
+
+export async function getHrAdminDashboardActivity(
   year: number,
-): Promise<HrAdminDashboardData> {
-  const response = await api.get<ApiResponse<HrAdminDashboardData>>(
-    API_ENDPOINTS.hr.dashboard.admin,
+): Promise<HrAdminDashboardActivityData> {
+  const response = await api.get<ApiResponse<HrAdminDashboardActivityData>>(
+    `${API_ENDPOINTS.hr.dashboard.admin}/activity`,
     {
       params: {
         year,

@@ -64,7 +64,9 @@
       "description": "هل أنت متأكد من رغبتك في حذف {item}؟ لا يمكن التراجع عن هذا الإجراء."
     },
     "from": "من",
-    "to": "إلى"
+    "to": "إلى",
+    "add": "أضف {item}",
+    "noRecords": "لم يتم العثور على سجلات {item}"
   },
 
   "auth": {
@@ -710,6 +712,8 @@
     "authority": "سلطة الإصدار",
     "saveIdentification": "حفظ الهوية",
     "idTitleSub": "أدخل تفاصيل الهوية.",
+    "noIdentificationRecords": "لم يتم العثور على سجلات هوية",
+    "addIdentification": "إضافة هوية",
     "validation": {
       "typeRequired": "نوع الهوية مطلوب.",
       "numberRequired": "رقم الهوية مطلوب.",
@@ -766,6 +770,7 @@
     "spouse": "زوج/زوجة",
     "father": "أب",
     "mother": "أم",
+    "sibling": "أخ أو أخت",
     "other": "آخر",
     "phoneNumber": "رقم الهاتف",
     "alternateMobile": "رقم الهاتف البديل",

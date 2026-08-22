@@ -13,6 +13,7 @@ import {
   // Change this import only if your credentials schema uses another name,
   // such as employeeLicenses.
   employeeLicenses,
+  contractMovementActions,
 } from '../../../../db'
 
 const monthExpression = sql<number>`
@@ -25,8 +26,8 @@ const yearExpression = sql<number>`
 
 export const HrDashboardRepository = {
   getSummary: async (activityYear: number, alertWindowDays: number) => {
-    const activityStartDate = `${activityYear}-01-01`
-    const activityEndDate = `${activityYear + 1}-01-01`
+    //const activityStartDate = `${activityYear}-01-01`
+    //const activityEndDate = `${activityYear + 1}-01-01`
 
     const [
       [workforce],
@@ -34,7 +35,7 @@ export const HrDashboardRepository = {
       [manpower],
       [licenseAlerts],
       [contractAlerts],
-      [movementActivity],
+      movementActivity,
     ] = await Promise.all([
       /*
        * All non-deleted employees.
@@ -160,30 +161,54 @@ export const HrDashboardRepository = {
       /*
        * Transfer and promotion activity for the year.
        */
-      db
-        .select({
-          transfers: sql<number>`
-          count(*) filter (
-            where ${contractMovements.movementType}
-              = 'transfer'
-          )::int
-        `,
+      /*
+       * Promotion and transfer activity for the year.
+       *
+       * Movement type represents the lifecycle event:
+       * initial / renewal / amendment.
+       *
+       * Promotion / demotion / transfer are stored
+       * separately as movement actions.
+       */
+      //   db
+      //     .select({
+      //       transfers: sql<number>`
+      //   count(
+      //     distinct ${contractMovementActions.contractMovementId}
+      //   ) filter (
+      //     where ${contractMovementActions.actionType}
+      //       = 'transfer'
+      //   )::int
+      // `,
 
-          promotions: sql<number>`
-          count(*) filter (
-            where ${contractMovements.movementType}
-              = 'promotion'
-          )::int
-        `,
-        })
-        .from(contractMovements)
-        .where(
-          and(
-            eq(contractMovements.isDeleted, false),
-            gte(contractMovements.startDate, activityStartDate),
-            lt(contractMovements.startDate, activityEndDate),
-          ),
-        ),
+      //       promotions: sql<number>`
+      //   count(
+      //     distinct ${contractMovementActions.contractMovementId}
+      //   ) filter (
+      //     where ${contractMovementActions.actionType}
+      //       = 'promotion'
+      //   )::int
+      // `,
+      //     })
+      //     .from(contractMovements)
+      //     .innerJoin(
+      //       contractMovementActions,
+      //       and(
+      //         eq(
+      //           contractMovementActions.contractMovementId,
+      //           contractMovements.id,
+      //         ),
+      //         eq(contractMovementActions.isDeleted, false),
+      //       ),
+      //     )
+      //     .where(
+      //       and(
+      //         eq(contractMovements.isDeleted, false),
+      //         gte(contractMovements.startDate, activityStartDate),
+      //         lt(contractMovements.startDate, activityEndDate),
+      //       ),
+      //     ),
+      HrDashboardRepository.getMovementActivity(activityYear),
     ])
 
     return {
@@ -193,8 +218,8 @@ export const HrDashboardRepository = {
       vacantPositionItems: Number(manpower?.vacantPositionItems ?? 0),
       expiringLicenses: Number(licenseAlerts?.expiringLicenses ?? 0),
       expiringContracts: Number(contractAlerts?.expiringContracts ?? 0),
-      transfers: Number(movementActivity?.transfers ?? 0),
-      promotions: Number(movementActivity?.promotions ?? 0),
+      transfers: movementActivity.transfers, //Number(movementActivity?.transfers ?? 0),
+      promotions: movementActivity.promotions, //Number(movementActivity?.promotions ?? 0),
     }
   },
 
@@ -334,5 +359,49 @@ export const HrDashboardRepository = {
       )
       .groupBy(monthExpression)
       .orderBy(monthExpression)
+  },
+
+  getMovementActivity: async (year: number) => {
+    const startDate = `${year}-01-01`
+    const endDate = `${year + 1}-01-01`
+
+    const [movementActivity] = await db
+      .select({
+        transfers: sql<number>`
+        count(
+          distinct ${contractMovementActions.contractMovementId}
+        ) filter (
+          where ${contractMovementActions.actionType} = 'transfer'
+        )::int
+      `,
+
+        promotions: sql<number>`
+        count(
+          distinct ${contractMovementActions.contractMovementId}
+        ) filter (
+          where ${contractMovementActions.actionType} = 'promotion'
+        )::int
+      `,
+      })
+      .from(contractMovements)
+      .innerJoin(
+        contractMovementActions,
+        and(
+          eq(contractMovementActions.contractMovementId, contractMovements.id),
+          eq(contractMovementActions.isDeleted, false),
+        ),
+      )
+      .where(
+        and(
+          eq(contractMovements.isDeleted, false),
+          gte(contractMovements.startDate, startDate),
+          lt(contractMovements.startDate, endDate),
+        ),
+      )
+
+    return {
+      transfers: Number(movementActivity?.transfers ?? 0),
+      promotions: Number(movementActivity?.promotions ?? 0),
+    }
   },
 }

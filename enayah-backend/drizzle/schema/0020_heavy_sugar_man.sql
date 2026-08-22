@@ -1,0 +1,1 @@
+ALTER TYPE "public"."movement_action_type" ADD VALUE 'pcn_alignment';

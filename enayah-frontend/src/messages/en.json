@@ -64,7 +64,9 @@
       "description": "Are you sure you want to delete this {item}? This action cannot be undone."
     },
     "from": "From",
-    "to": "To"
+    "to": "To",
+    "add": "Add {item}",
+    "noRecords": "No {item} records found"
   },
   "auth": {
     "loginTitle": "Login to Your Account",
@@ -710,6 +712,8 @@
     "authority": "Issuing Authority",
     "saveIdentification": "Save Identification",
     "idTitleSub": "Enter employee identification details.",
+    "noIdentificationRecords": "No identification records found",
+    "addIdentification": "Add Identification",
     "validation": {
       "typeRequired": "Identification type is required.",
       "numberRequired": "Identification number is required.",
@@ -766,6 +770,7 @@
     "spouse": "Spouse",
     "father": "Father",
     "mother": "Mother",
+    "sibling": "Sibling",
     "other": "Other",
     "phoneNumber": "Phone Number",
     "alternateMobile": "Alternate Mobile",

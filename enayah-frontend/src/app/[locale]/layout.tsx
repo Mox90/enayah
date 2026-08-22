@@ -14,6 +14,7 @@ import { getMessages, getTranslations } from 'next-intl/server'
 import AuthProvider from '@/components/providers/auth-provider'
 import QueryProvider from '@/components/providers/query-provider'
 import { Toaster } from '@/components/ui/sonner'
+import { TooltipProvider } from '@/components/ui/tooltip'
 
 /*const inter = Inter({
   subsets: ['latin'],
@@ -88,8 +89,10 @@ export default async function LocaleLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <QueryProvider>
             <ThemeProvider>
-              <AuthProvider>{children}</AuthProvider>
-              <Toaster richColors duration={10000} />
+              <TooltipProvider delayDuration={300}>
+                <AuthProvider>{children}</AuthProvider>
+                <Toaster richColors duration={10000} />
+              </TooltipProvider>
             </ThemeProvider>
           </QueryProvider>
         </NextIntlClientProvider>
