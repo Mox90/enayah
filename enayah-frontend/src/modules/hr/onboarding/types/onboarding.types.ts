@@ -281,17 +281,17 @@ export interface HireEmployeePayload {
   }
 
   movement: {
-    positionItemId: string
+    positionItemId?: string | null
     itemNumber?: string | null
 
     startDate?: string | null
     endDate: string | null
     remarks?: string | null
 
-    officialDepartmentId: string
-    officialPositionId: string
+    // officialDepartmentId: string
+    // officialPositionId: string
 
-    sequenceNumber: string
+    sequenceNumber: number
     movementType:
       | 'initial'
       | 'renewal'

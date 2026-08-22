@@ -1,4 +1,4 @@
-// src/modules/hr/employees/hire/services/hire.service.ts
+// enayah-frontend/src/modules/hr/employees/hire/services/hire.service.ts
 
 import { api } from '@/lib/api/client'
 import { HireEmployeePayload } from '../types/onboarding.types'

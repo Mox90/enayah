@@ -89,20 +89,10 @@ export function CredentialMemberships({
           >
             <div className='flex min-w-0 items-center gap-2 sm:gap-3'>
               {/* Section icon */}
-              <div
-                className={cn(
-                  'flex h-9 w-9 shrink-0 items-center justify-center',
-                  'rounded-lg bg-cyan-500/10',
-                  'sm:h-10 sm:w-10 sm:rounded-xl',
-                )}
-              >
+              <div className='flex size-9 shrink-0 items-center justify-center rounded-lg bg-cyan-500/10 sm:size-10 sm:rounded-xl'>
                 <Handshake
                   aria-hidden='true'
-                  className={cn(
-                    'h-4 w-4 text-cyan-600',
-                    'sm:h-5 sm:w-5',
-                    'dark:text-cyan-400',
-                  )}
+                  className='size-4 text-cyan-600 sm:size-5 dark:text-cyan-400'
                 />
               </div>
 
@@ -192,7 +182,7 @@ export function CredentialMemberships({
               <div className='mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-muted'>
                 <Handshake
                   aria-hidden='true'
-                  className='h-5 w-5 text-muted-foreground'
+                  className='size-5 text-muted-foreground'
                 />
               </div>
 
@@ -223,11 +213,8 @@ export function CredentialMemberships({
             <div
               className={cn(
                 'grid grid-cols-1 items-start gap-4',
-
                 memberships.length === 2 && 'lg:grid-cols-2',
-
                 memberships.length === 3 && 'lg:grid-cols-2 xl:grid-cols-3',
-
                 memberships.length >= 4 &&
                   'lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4',
               )}

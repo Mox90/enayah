@@ -1,27 +1,42 @@
+// enayah-frontend/src/modules/hr/employees/components/onboarding/sections/employee-contact-information.tsx
+
 'use client'
 
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { PhoneCodeCombobox } from '@/modules/countries/components/phone-code'
+import { PersonalErrors } from '@/modules/hr/onboarding/types/onboarding-errors.types'
 import { HireEmployeePayload } from '@/modules/hr/onboarding/types/onboarding.types'
 import { useTranslations } from 'next-intl'
-//import { HireEmployeePayload } from '../types/hire.types'
+import { OnboardingFormSection } from './onboarding-form-section'
 
 interface Props {
   value: HireEmployeePayload
   onChange: (value: HireEmployeePayload) => void
+  personalErrors: PersonalErrors
+  onClearError: (field: keyof PersonalErrors) => void
 }
 
-export function EmployeeContactInformation({ value, onChange }: Props) {
+export function EmployeeContactInformation({
+  value,
+  onChange,
+  personalErrors,
+  onClearError,
+}: Props) {
   const et = useTranslations('employees')
+
   const email = value.personal?.emails?.[0]
   const phone = value.personal?.phoneNumbers?.[0]
 
   function updateEmail(emailValue: string) {
+    onClearError('primaryEmail')
+
     onChange({
       ...value,
+
       personal: {
         ...value.personal,
+
         emails: emailValue
           ? [
               {
@@ -36,17 +51,21 @@ export function EmployeeContactInformation({ value, onChange }: Props) {
     })
   }
 
-  function normalizePhone(phone: string) {
-    return phone.replace(/^0+/, '')
+  function normalizePhone(value: string) {
+    return value.replace(/\D/g, '').replace(/^0+/, '')
   }
 
   function updatePhoneCode(countryCode: string) {
+    onClearError('primaryMobile')
+
     const currentPhone = phone?.phoneNumber ?? ''
 
     onChange({
       ...value,
+
       personal: {
         ...value.personal,
+
         phoneNumbers: currentPhone
           ? [
               {
@@ -57,26 +76,22 @@ export function EmployeeContactInformation({ value, onChange }: Props) {
                 isWhatsapp: phone?.isWhatsapp ?? false,
               },
             ]
-          : [
-              {
-                type: 'mobile',
-                countryCode,
-                phoneNumber: '',
-                isPrimary: true,
-                isWhatsapp: false,
-              },
-            ],
+          : [],
       },
     })
   }
 
   function updatePhone(phoneValue: string) {
-    const normalized = normalizePhone(phoneValue) //phoneValue.replace(/^0+/, '')
+    onClearError('primaryMobile')
+
+    const normalized = normalizePhone(phoneValue)
 
     onChange({
       ...value,
+
       personal: {
         ...value.personal,
+
         phoneNumbers: normalized
           ? [
               {
@@ -93,42 +108,91 @@ export function EmployeeContactInformation({ value, onChange }: Props) {
   }
 
   return (
-    <section className='space-y-4'>
-      <div>
-        <h3 className='text-lg font-semibold'>{et('contactInfo')}</h3>
-        <p className='text-sm text-muted-foreground'>{et('contactInfoSub')}</p>
-      </div>
+    <OnboardingFormSection
+      title={et('contactInfo')}
+      description={et('contactInfoSub')}
+      badge={et('optional')}
+    >
+      <div className='grid grid-cols-1 gap-x-5 gap-y-5 md:grid-cols-2'>
+        {/* Email */}
 
-      <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
         <div className='space-y-2'>
-          <Label>{et('primaryEmail')}</Label>
+          <Label
+            htmlFor='primary-email'
+            className={
+              personalErrors.primaryEmail ? 'text-destructive' : undefined
+            }
+          >
+            {et('primaryEmail')}
+          </Label>
+
           <Input
+            id='primary-email'
             type='email'
+            autoComplete='email'
+            className='h-11'
             value={email?.email ?? ''}
-            onChange={(e) => updateEmail(e.target.value)}
+            aria-invalid={Boolean(personalErrors.primaryEmail)}
+            onChange={(event) => updateEmail(event.target.value)}
             placeholder='employee@hospital.sa'
           />
+
+          {personalErrors.primaryEmail && (
+            <p className='text-xs font-medium text-destructive'>
+              {personalErrors.primaryEmail}
+            </p>
+          )}
         </div>
 
-        <div className='space-y-2'>
-          <Label>{et('primaryMobile')}</Label>
+        {/* Mobile */}
 
-          <div className='flex h-10 overflow-hidden rounded-md border border-input bg-background'>
+        <div className='space-y-2'>
+          <Label
+            htmlFor='primary-mobile'
+            className={
+              personalErrors.primaryMobile ? 'text-destructive' : undefined
+            }
+          >
+            {et('primaryMobile')}
+          </Label>
+
+          <div
+            className={[
+              'flex h-11 overflow-hidden rounded-md border bg-background transition-shadow',
+              'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2',
+              personalErrors.primaryMobile
+                ? 'border-destructive'
+                : 'border-input',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
             <PhoneCodeCombobox
               value={phone?.countryCode ?? '+966'}
               onChange={updatePhoneCode}
-              className='border-0 border-r rounded-none'
+              className='rounded-none border-0 border-e'
             />
 
             <Input
-              className='!border-0 !shadow-none !bg-transparent !rounded-none focus-visible:ring-0 focus-visible:ring-offset-0'
+              id='primary-mobile'
+              type='tel'
+              inputMode='numeric'
+              autoComplete='tel'
+              className='h-full rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0'
               value={phone?.phoneNumber ?? ''}
-              onChange={(e) => updatePhone(e.target.value)}
+              aria-invalid={Boolean(personalErrors.primaryMobile)}
+              onChange={(event) => updatePhone(event.target.value)}
               placeholder='512345678'
             />
           </div>
+
+          {personalErrors.primaryMobile && (
+            <p className='text-xs font-medium text-destructive'>
+              {personalErrors.primaryMobile}
+            </p>
+          )}
         </div>
       </div>
-    </section>
+    </OnboardingFormSection>
   )
 }

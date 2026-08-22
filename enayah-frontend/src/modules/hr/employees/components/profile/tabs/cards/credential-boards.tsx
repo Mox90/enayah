@@ -80,20 +80,10 @@ export function CredentialBoards({
           >
             <div className='flex min-w-0 items-center gap-2 sm:gap-3'>
               {/* Icon */}
-              <div
-                className={cn(
-                  'flex h-9 w-9 shrink-0 items-center justify-center',
-                  'rounded-lg bg-violet-500/10',
-                  'sm:h-10 sm:w-10 sm:rounded-xl',
-                )}
-              >
+              <div className='flex size-9 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 sm:size-10 sm:rounded-xl'>
                 <Award
                   aria-hidden='true'
-                  className={cn(
-                    'h-4 w-4 text-violet-600',
-                    'sm:h-5 sm:w-5',
-                    'dark:text-violet-400',
-                  )}
+                  className='size-4 text-violet-600 sm:size-5 dark:text-violet-400'
                 />
               </div>
 
@@ -180,10 +170,10 @@ export function CredentialBoards({
                 Empty state
             ===================================================== */
             <div className='rounded-xl border border-dashed bg-muted/10 px-4 py-8 text-center sm:px-6 sm:py-10'>
-              <div className='mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-muted'>
+              <div className='mx-auto mb-3 flex size-11 items-center justify-center rounded-full bg-muted'>
                 <Award
                   aria-hidden='true'
-                  className='h-5 w-5 text-muted-foreground'
+                  className='size-5 text-muted-foreground'
                 />
               </div>
 

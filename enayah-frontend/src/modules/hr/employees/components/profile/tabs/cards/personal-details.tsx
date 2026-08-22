@@ -6,7 +6,17 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { ChevronDown, Plus, Users } from 'lucide-react'
+import {
+  AtSignIcon,
+  BellElectric,
+  ChevronDown,
+  IdCard,
+  MapPinHouse,
+  PhoneCallIcon,
+  PlaneTakeoff,
+  Plus,
+  Users,
+} from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { ExpiryStatusBadge } from '@/components/badges/expiry-status-badge'
@@ -66,7 +76,7 @@ function EmptyState({
 }) {
   return (
     <div className='rounded-xl border border-dashed bg-muted/10 px-4 py-8 text-center sm:px-6 sm:py-10'>
-      <div className='mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-muted'>
+      <div className='mx-auto mb-3 flex size-11 items-center justify-center rounded-full bg-muted'>
         {icon}
       </div>
 
@@ -155,9 +165,9 @@ function SectionCard({
               {/* Icon */}
               <div
                 className={cn(
-                  'flex h-9 w-9 shrink-0 items-center justify-center',
+                  'flex size-9 shrink-0 items-center justify-center',
                   'rounded-lg',
-                  'sm:h-10 sm:w-10 sm:rounded-xl',
+                  'sm:size-10 sm:rounded-xl',
                   className,
                 )}
               >
@@ -353,14 +363,18 @@ export function PersonalDetailsCards({
         title={it('idTitle')}
         count={identifications.length}
         icon={
-          <span
-            className={cn(
-              'inline-block text-2xl leading-none sm:text-3xl',
-              !isRtl && '-scale-x-100',
-            )}
-          >
-            📇
-          </span>
+          // <span
+          //   className={cn(
+          //     'inline-block text-2xl leading-none sm:text-3xl',
+          //     !isRtl && '-scale-x-100',
+          //   )}
+          // >
+          //   📇
+          // </span>
+          <IdCard
+            aria-hidden='true'
+            className='size-4 text-green-600 sm:size-5 dark:text-green-400'
+          />
         }
         className='bg-green-500/10'
         spanClass='text-green-600 dark:text-green-400'
@@ -369,15 +383,19 @@ export function PersonalDetailsCards({
         {identifications.length === 0 ? (
           <EmptyState
             icon={
-              <span
+              // <span
+              //   aria-hidden='true'
+              //   className={cn(
+              //     'inline-block text-2xl leading-none',
+              //     !isRtl && '-scale-x-100',
+              //   )}
+              // >
+              //   📇
+              // </span>
+              <IdCard
                 aria-hidden='true'
-                className={cn(
-                  'inline-block text-2xl leading-none',
-                  !isRtl && '-scale-x-100',
-                )}
-              >
-                📇
-              </span>
+                className='size-5 text-muted-foreground'
+              />
             }
             message={it('noIdentificationRecords')}
             addLabel={it('addIdentification')}
@@ -509,7 +527,13 @@ export function PersonalDetailsCards({
         <SectionCard
           title={pt('phoneTitle')}
           count={phones.length}
-          icon={<span className='text-2xl leading-none sm:text-3xl'>☎️</span>}
+          icon={
+            // <span className='text-2xl leading-none sm:text-3xl'>☎️</span>
+            <PhoneCallIcon
+              aria-hidden='true'
+              className='size-4 text-purple-600 sm:size-5 dark:text-purple-400'
+            />
+          }
           className='bg-purple-500/10'
           spanClass='text-purple-500 dark:text-purple-400'
           onAdd={onAddPhone}
@@ -517,15 +541,19 @@ export function PersonalDetailsCards({
           {phones.length === 0 ? (
             <EmptyState
               icon={
-                <span
+                // <span
+                //   aria-hidden='true'
+                //   className={cn(
+                //     'inline-block text-2xl leading-none',
+                //     !isRtl && '-scale-x-100',
+                //   )}
+                // >
+                //   ☎️
+                // </span>
+                <PhoneCallIcon
                   aria-hidden='true'
-                  className={cn(
-                    'inline-block text-2xl leading-none',
-                    !isRtl && '-scale-x-100',
-                  )}
-                >
-                  ☎️
-                </span>
+                  className='size-5 text-muted-foreground'
+                />
               }
               message={ct('noRecords', { item: pt('phoneTitle') })}
               //{`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${pt('phoneTitle',)}`}
@@ -590,14 +618,18 @@ export function PersonalDetailsCards({
           title={emt('emailTitle')}
           count={emails.length}
           icon={
-            <span
-              className={cn(
-                'inline-block text-2xl leading-none sm:text-3xl',
-                !isRtl && '-scale-x-100',
-              )}
-            >
-              📬
-            </span>
+            // <span
+            //   className={cn(
+            //     'inline-block text-2xl leading-none sm:text-3xl',
+            //     !isRtl && '-scale-x-100',
+            //   )}
+            // >
+            //   📬
+            // </span>
+            <AtSignIcon
+              aria-hidden='true'
+              className='size-4 text-teal-600 sm:size-5 dark:text-teal-400'
+            />
           }
           className='bg-teal-500/10'
           spanClass='text-teal-600 dark:text-teal-400'
@@ -606,15 +638,19 @@ export function PersonalDetailsCards({
           {emails.length === 0 ? (
             <EmptyState
               icon={
-                <span
+                // <span
+                //   aria-hidden='true'
+                //   className={cn(
+                //     'inline-block text-2xl leading-none',
+                //     !isRtl && '-scale-x-100',
+                //   )}
+                // >
+                //   📬
+                // </span>
+                <AtSignIcon
                   aria-hidden='true'
-                  className={cn(
-                    'inline-block text-2xl leading-none',
-                    !isRtl && '-scale-x-100',
-                  )}
-                >
-                  📬
-                </span>
+                  className='size-5 text-muted-foreground'
+                />
               }
               message={ct('noRecords', { item: emt('emailTitle') })} //{`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${emt('emailTitle',)}`}
               addLabel={ct('add', { item: emt('emailTitle') })} //{`${isRtl ? 'إضافة' : 'Add'} ${emt('emailTitle')}`}
@@ -668,7 +704,13 @@ export function PersonalDetailsCards({
       <SectionCard
         title={ect('emergencyContactTitle')}
         count={emergencyContacts.length}
-        icon={<span className='text-2xl leading-none sm:text-3xl'>🚨</span>}
+        icon={
+          //<span className='text-2xl leading-none sm:text-3xl'>🚨</span>
+          <BellElectric
+            aria-hidden='true'
+            className='size-4 text-red-600 sm:size-5 dark:text-red-400'
+          />
+        }
         className='bg-red-500/10'
         spanClass='text-red-600 dark:text-red-400'
         onAdd={onAddEmergencyContact}
@@ -676,15 +718,19 @@ export function PersonalDetailsCards({
         {emergencyContacts.length === 0 ? (
           <EmptyState
             icon={
-              <span
+              // <span
+              //   aria-hidden='true'
+              //   className={cn(
+              //     'inline-block text-2xl leading-none',
+              //     !isRtl && '-scale-x-100',
+              //   )}
+              // >
+              //   🚨
+              // </span>
+              <BellElectric
                 aria-hidden='true'
-                className={cn(
-                  'inline-block text-2xl leading-none',
-                  !isRtl && '-scale-x-100',
-                )}
-              >
-                🚨
-              </span>
+                className='size-5 text-muted-foreground'
+              />
             }
             message={ct('noRecords', { item: ect('emergencyContactTitle') })} //{`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${ect(  'emergencyContactTitle',)}`}
             addLabel={ct('add', { item: ect('emergencyContactTitle') })} //{`${isRtl ? 'إضافة' : 'Add'} ${ect('emergencyContactTitle')}`}
@@ -778,9 +824,14 @@ export function PersonalDetailsCards({
       <SectionCard
         title={dt('dependentsTitle')}
         count={dependents.length}
-        icon={<Users className='h-4 w-4 text-sky-500 sm:h-5 sm:w-5' />}
-        className='bg-sky-500/10'
-        spanClass='text-sky-500 dark:text-sky-400'
+        icon={
+          <Users
+            aria-hidden='true'
+            className='size-4 text-cyan-600 sm:size-5 dark:text-cyan-400'
+          />
+        }
+        className='bg-cyan-500/10'
+        spanClass='text-cyan-500 dark:text-cyan-400'
         onAdd={onAddDependent}
       >
         {dependents.length === 0 ? (
@@ -793,7 +844,10 @@ export function PersonalDetailsCards({
                   !isRtl && '-scale-x-100',
                 )}
               >
-                <Users className='h-4 w-4 text-sky-500 sm:h-5 sm:w-5' />
+                <Users
+                  aria-hidden='true'
+                  className='size-5 text-muted-foreground'
+                />
               </span>
             }
             message={ct('noRecords', { item: dt('dependentsTitle') })} //{`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${dt(  'dependentsTitle',)}`}
@@ -870,7 +924,13 @@ export function PersonalDetailsCards({
         <SectionCard
           title={at('addressesTitle')}
           count={addresses.length}
-          icon={<span className='text-2xl leading-none sm:text-3xl'>🗺️</span>}
+          icon={
+            // <span className='text-2xl leading-none sm:text-3xl'>🗺️</span>
+            <MapPinHouse
+              aria-hidden='true'
+              className='size-4 text-pink-600 sm:size-5 dark:text-pink-400'
+            />
+          }
           className='bg-pink-500/10'
           spanClass='text-pink-500 dark:text-pink-400'
           onAdd={onAddAddress}
@@ -878,15 +938,19 @@ export function PersonalDetailsCards({
           {addresses.length === 0 ? (
             <EmptyState
               icon={
-                <span
+                // <span
+                //   aria-hidden='true'
+                //   className={cn(
+                //     'inline-block text-2xl leading-none text-muted-foreground',
+                //     !isRtl && '-scale-x-100',
+                //   )}
+                // >
+                //   🗺️
+                // </span>
+                <MapPinHouse
                   aria-hidden='true'
-                  className={cn(
-                    'inline-block text-2xl leading-none',
-                    !isRtl && '-scale-x-100',
-                  )}
-                >
-                  🗺️
-                </span>
+                  className='size-5 text-muted-foreground sm:h-5 sm:w-5'
+                />
               }
               message={ct('noRecords', { item: at('addressesTitle') })} //{`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${at(  'addressesTitle',)}`}
               addLabel={ct('add', { item: at('addressesTitle') })} //{`${isRtl ? 'إضافة' : 'Add'} ${at('addressesTitle')}`}
@@ -951,14 +1015,18 @@ export function PersonalDetailsCards({
           title={vt('visasTitle')}
           count={visas.length}
           icon={
-            <span
-              className={cn(
-                'inline-block text-2xl leading-none sm:text-3xl',
-                isRtl && '-scale-x-100',
-              )}
-            >
-              🛫
-            </span>
+            // <span
+            //   className={cn(
+            //     'inline-block text-2xl leading-none sm:text-3xl',
+            //     isRtl && '-scale-x-100',
+            //   )}
+            // >
+            //   🛫
+            // </span>
+            <PlaneTakeoff
+              aria-hidden='true'
+              className='size-4 text-sky-600 sm:size-5 dark:text-sky-400'
+            />
           }
           className='bg-sky-500/10'
           spanClass='text-sky-500 dark:text-sky-400'
@@ -967,15 +1035,19 @@ export function PersonalDetailsCards({
           {visas.length === 0 ? (
             <EmptyState
               icon={
-                <span
+                // <span
+                //   aria-hidden='true'
+                //   className={cn(
+                //     'inline-block text-2xl leading-none',
+                //     !isRtl && '-scale-x-100',
+                //   )}
+                // >
+                //   🛫
+                // </span>
+                <PlaneTakeoff
                   aria-hidden='true'
-                  className={cn(
-                    'inline-block text-2xl leading-none',
-                    !isRtl && '-scale-x-100',
-                  )}
-                >
-                  🛫
-                </span>
+                  className='size-5 text-muted-foreground'
+                />
               }
               message={ct('noRecords', { item: vt('visasTitle') })} //{`${isRtl ? 'لا توجد سجلات' : 'No records found'} — ${vt(  'visasTitle',)}`}
               addLabel={ct('add', { item: vt('visasTitle') })} //{`${isRtl ? 'إضافة' : 'Add'} ${vt('visasTitle')}`}

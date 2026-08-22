@@ -97,16 +97,10 @@ export function CredentialDegrees({
           >
             <div className='flex min-w-0 items-center gap-2 sm:gap-3'>
               {/* Section icon */}
-              <div
-                className={cn(
-                  'flex shrink-0 items-center justify-center rounded-lg',
-                  'h-9 w-9 sm:h-10 sm:w-10 sm:rounded-xl',
-                  'bg-emerald-500/10',
-                )}
-              >
+              <div className='flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10  sm:size-10 sm:rounded-xl'>
                 <GraduationCap
                   aria-hidden='true'
-                  className='h-4 w-4 text-emerald-600 sm:h-5 sm:w-5 dark:text-emerald-400'
+                  className='size-4 text-emerald-600 sm:size-5 dark:text-emerald-400'
                 />
               </div>
 
@@ -211,7 +205,7 @@ export function CredentialDegrees({
               <div className='mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-muted'>
                 <GraduationCap
                   aria-hidden='true'
-                  className='h-5 w-5 text-muted-foreground'
+                  className='size-5 text-muted-foreground'
                 />
               </div>
 
@@ -242,11 +236,8 @@ export function CredentialDegrees({
             <div
               className={cn(
                 'grid grid-cols-1 items-start gap-4',
-
                 degrees.length === 2 && 'lg:grid-cols-2',
-
                 degrees.length === 3 && 'lg:grid-cols-2 xl:grid-cols-3',
-
                 degrees.length >= 4 &&
                   'lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4',
               )}
@@ -291,7 +282,6 @@ export function CredentialDegrees({
                       'p-4 shadow-sm sm:p-5',
                       'transition-all duration-200',
                       'hover:border-primary/20 hover:shadow-md',
-
                       isVerified &&
                         'border-emerald-500/30 dark:border-emerald-500/25',
                     )}

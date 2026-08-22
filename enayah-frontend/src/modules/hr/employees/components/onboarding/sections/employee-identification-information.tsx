@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/hr/employees/components/onboarding/sections/employee-identification-information.tsx
+
 'use client'
 
 import { DatePicker } from '@/components/dialogs/date-picker'
@@ -10,34 +12,115 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { PersonalErrors } from '@/modules/hr/onboarding/types/onboarding-errors.types'
 import {
   HireEmployeePayload,
   IdentificationInput,
 } from '@/modules/hr/onboarding/types/onboarding.types'
 import { useLocale, useTranslations } from 'next-intl'
-//import { HireEmployeePayload } from '../types/hire.types'
+import { OnboardingFormSection } from './onboarding-form-section'
 
 interface Props {
   value: HireEmployeePayload
   onChange: (value: HireEmployeePayload) => void
+  personalErrors: PersonalErrors
+  onClearError: (field: keyof PersonalErrors) => void
 }
 
-export function EmployeeIdentificationInformation({ value, onChange }: Props) {
+export function EmployeeIdentificationInformation({
+  value,
+  onChange,
+  personalErrors,
+  onClearError,
+}: Props) {
   const t = useTranslations('employees')
   const ct = useTranslations('common')
   const locale = useLocale()
   const isRtl = locale === 'ar'
+
   const identification = value.personal?.identifications?.[0]
+
+  const identificationType = identification?.type ?? 'iqama'
+
+  const hasIdentificationData = Boolean(
+    identification?.identificationNumber?.trim() ||
+    identification?.issueDate ||
+    identification?.expiryDate ||
+    identification?.sponsor?.trim() ||
+    identification?.issuingAuthority?.trim(),
+  )
+
+  const requiresCommonFields = hasIdentificationData
+
+  const requiresSponsor =
+    hasIdentificationData && identificationType === 'iqama'
+
+  function clearIdentificationError(field: keyof IdentificationInput) {
+    switch (field) {
+      case 'identificationNumber':
+        onClearError('identificationNumber')
+        break
+
+      case 'issueDate':
+        onClearError('identificationIssueDate')
+        break
+
+      case 'expiryDate':
+        onClearError('identificationExpiryDate')
+        break
+
+      case 'sponsor':
+        onClearError('identificationSponsor')
+        break
+
+      case 'issuingAuthority':
+        onClearError('identificationIssuingAuthority')
+        break
+    }
+  }
 
   function updateIdentification<K extends keyof IdentificationInput>(
     field: K,
     fieldValue: IdentificationInput[K],
   ) {
+    clearIdentificationError(field)
+
+    /*
+     * If the identification number is removed, none of the
+     * conditional identification fields remain required.
+     */
+    // if (field === 'identificationNumber' && !String(fieldValue ?? '').trim()) {
+    //   onClearError('identificationIssueDate')
+    //   onClearError('identificationExpiryDate')
+    //   onClearError('identificationSponsor')
+    //   onClearError('identificationIssuingAuthority')
+    // }
+
+    /*
+     * Changing away from Iqama means Sponsor is no longer
+     * required.
+     */
+    if (field === 'type' && fieldValue !== 'iqama') {
+      onClearError('identificationSponsor')
+    }
+
+    // if (
+    //   field === 'type' &&
+    //   (fieldValue === 'national_id' || fieldValue === 'gcc_id')
+    // ) {
+    //   onClearError('identificationIssueDate')
+    //   onClearError('identificationExpiryDate')
+    //   onClearError('identificationSponsor')
+    //   onClearError('identificationIssuingAuthority')
+    // }
+
     const nextIdentification = {
       type: identification?.type ?? 'iqama',
       identificationNumber: identification?.identificationNumber ?? '',
       issueDate: identification?.issueDate ?? null,
       expiryDate: identification?.expiryDate ?? null,
+      sponsor: identification?.sponsor ?? null,
+      issuingAuthority: identification?.issuingAuthority ?? null,
       isCurrent: true,
       ...identification,
       [field]: fieldValue,
@@ -45,37 +128,34 @@ export function EmployeeIdentificationInformation({ value, onChange }: Props) {
 
     onChange({
       ...value,
+
       personal: {
         ...value.personal,
-        // identifications: nextIdentification.identificationNumber
-        //   ? [nextIdentification]
-        //   : [],
         identifications: [nextIdentification],
       },
     })
   }
 
   return (
-    <section className='space-y-4'>
-      <div>
-        <h3 className='text-lg font-semibold'>{t('identification')}</h3>
-        <p className='text-sm text-muted-foreground'>
-          {t('identificationInfo')}
-        </p>
-      </div>
-
-      <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+    <OnboardingFormSection
+      title={t('identification')}
+      description={t('identificationInfo')}
+      badge={t('optional')}
+    >
+      <div className='grid grid-cols-1 gap-x-5 gap-y-5 md:grid-cols-2'>
+        {/* Identification Type */}
         <div className='space-y-2'>
-          <Label>{t('idType')}</Label>
+          <Label htmlFor='identification-type'>{t('idType')}</Label>
+
           <Select
             dir={isRtl ? 'rtl' : 'ltr'}
-            value={identification?.type ?? 'iqama'}
-            onValueChange={(v) =>
-              updateIdentification('type', v as IdentificationInput['type'])
+            value={identificationType}
+            onValueChange={(value) =>
+              updateIdentification('type', value as IdentificationInput['type'])
             }
           >
-            <SelectTrigger>
-              <SelectValue placeholder='Select type' />
+            <SelectTrigger id='identification-type' className='h-11'>
+              <SelectValue placeholder={t('idType')} />
             </SelectTrigger>
 
             <SelectContent>
@@ -88,62 +168,183 @@ export function EmployeeIdentificationInformation({ value, onChange }: Props) {
           </Select>
         </div>
 
+        {/* Identification Number */}
         <div className='space-y-2'>
-          <Label>{t('idNumber')}</Label>
+          <Label
+            htmlFor='identification-number'
+            className={
+              personalErrors.identificationNumber
+                ? 'text-destructive'
+                : undefined
+            }
+          >
+            {t('idNumber')}
+
+            {hasIdentificationData && (
+              <span className='ms-1 text-destructive'>*</span>
+            )}
+          </Label>
+
           <Input
+            id='identification-number'
+            className='h-11'
             value={identification?.identificationNumber ?? ''}
-            onChange={(e) =>
-              updateIdentification('identificationNumber', e.target.value)
+            aria-invalid={Boolean(personalErrors.identificationNumber)}
+            aria-describedby={
+              personalErrors.identificationNumber
+                ? 'identification-number-error'
+                : undefined
+            }
+            onChange={(event) =>
+              updateIdentification('identificationNumber', event.target.value)
             }
           />
+
+          {personalErrors.identificationNumber && (
+            <p
+              id='identification-number-error'
+              className='text-xs font-medium text-destructive'
+            >
+              {personalErrors.identificationNumber}
+            </p>
+          )}
         </div>
 
+        {/* Issue Date */}
         <div className='space-y-2'>
-          {/* <Label>{ct('issueDate')}</Label>
-          <Input
-            type='date'
-            value={identification?.issueDate ?? ''}
-            onChange={(e) =>
-              updateIdentification('issueDate', e.target.value || null)
+          <Label
+            htmlFor='identification-issue-date'
+            className={
+              personalErrors.identificationIssueDate
+                ? 'text-destructive'
+                : undefined
             }
-          /> */}
-          <label
-            htmlFor={'issueDate'}
-            className='text-xs text-muted-foreground block'
           >
             {ct('issueDate')}
-          </label>
+
+            {requiresCommonFields && (
+              <span className='ms-1 text-destructive'>*</span>
+            )}
+          </Label>
 
           <DatePicker
-            id='issueDate'
-            value={identification?.issueDate ?? ''}
-            onChange={(value) => updateIdentification('issueDate', value)}
+            id='identification-issue-date'
+            value={identification?.issueDate ?? null}
+            onChange={(date) => updateIdentification('issueDate', date)}
           />
+
+          {personalErrors.identificationIssueDate && (
+            <p className='text-sm text-destructive'>
+              {personalErrors.identificationIssueDate}
+            </p>
+          )}
         </div>
 
+        {/* Expiry Date */}
         <div className='space-y-2'>
-          {/* <Label>{ct('expiryDate')}</Label>
-          <Input
-            type='date'
-            value={identification?.expiryDate ?? ''}
-            onChange={(e) =>
-              updateIdentification('expiryDate', e.target.value || null)
+          <Label
+            htmlFor='identification-expiry-date'
+            className={
+              personalErrors.identificationExpiryDate
+                ? 'text-destructive'
+                : undefined
             }
-          /> */}
-          <label
-            htmlFor={'expiryDate'}
-            className='text-xs text-muted-foreground block'
           >
             {ct('expiryDate')}
-          </label>
+
+            {requiresCommonFields && (
+              <span className='ms-1 text-destructive'>*</span>
+            )}
+          </Label>
 
           <DatePicker
-            id='expiryDate'
+            id='identification-expiry-date'
             value={identification?.expiryDate ?? null}
-            onChange={(value) => updateIdentification('expiryDate', value)}
+            onChange={(date) => updateIdentification('expiryDate', date)}
           />
+
+          {personalErrors.identificationExpiryDate && (
+            <p className='text-sm text-destructive'>
+              {personalErrors.identificationExpiryDate}
+            </p>
+          )}
+        </div>
+
+        {/* Sponsor - Iqama only */}
+        {identificationType === 'iqama' && (
+          <div className='space-y-2'>
+            <Label
+              htmlFor='identification-sponsor'
+              className={
+                personalErrors.identificationSponsor
+                  ? 'text-destructive'
+                  : undefined
+              }
+            >
+              {t('sponsor')}
+
+              {requiresSponsor && (
+                <span className='ms-1 text-destructive'>*</span>
+              )}
+            </Label>
+
+            <Input
+              id='identification-sponsor'
+              className='h-11'
+              value={identification?.sponsor ?? ''}
+              aria-invalid={Boolean(personalErrors.identificationSponsor)}
+              onChange={(event) =>
+                updateIdentification('sponsor', event.target.value || null)
+              }
+            />
+
+            {personalErrors.identificationSponsor && (
+              <p className='text-sm text-destructive'>
+                {personalErrors.identificationSponsor}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Issuing Authority */}
+        <div className='space-y-2'>
+          <Label
+            htmlFor='identification-issuing-authority'
+            className={
+              personalErrors.identificationIssuingAuthority
+                ? 'text-destructive'
+                : undefined
+            }
+          >
+            {t('issuingAuthority')}
+
+            {requiresCommonFields && (
+              <span className='ms-1 text-destructive'>*</span>
+            )}
+          </Label>
+
+          <Input
+            id='identification-issuing-authority'
+            className='h-11'
+            value={identification?.issuingAuthority ?? ''}
+            aria-invalid={Boolean(
+              personalErrors.identificationIssuingAuthority,
+            )}
+            onChange={(event) =>
+              updateIdentification(
+                'issuingAuthority',
+                event.target.value || null,
+              )
+            }
+          />
+
+          {personalErrors.identificationIssuingAuthority && (
+            <p className='text-sm text-destructive'>
+              {personalErrors.identificationIssuingAuthority}
+            </p>
+          )}
         </div>
       </div>
-    </section>
+    </OnboardingFormSection>
   )
 }

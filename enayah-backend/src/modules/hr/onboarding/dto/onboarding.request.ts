@@ -38,8 +38,16 @@ export const OnboardingContractSchema = z.object({
 // Contract Movement / Legal Assignment
 // ----------------------------------
 
+const optionalUuid = z.preprocess((value) => {
+  if (value === '' || value === null || value === undefined) {
+    return undefined
+  }
+
+  return value
+}, z.uuid().nullable().optional())
+
 export const OnboardingMovementSchema = z.object({
-  positionItemId: z.uuid().nullable().optional(),
+  positionItemId: z.uuid().nullable().optional(), //optionalUuid,
   officialDepartmentId: z.uuid().nullable().optional(),
   officialPositionId: z.uuid().nullable().optional(),
   remarks: z.string().trim().nullable().optional(),
@@ -150,25 +158,45 @@ export const OnboardingSubmitSchema = z
       })
     }
 
+    // if (
+    //   data.employment.staffCategory === 'military' &&
+    //   data.movement.positionItemId == null
+    // ) {
+    //   if (!data.movement.officialDepartmentId) {
+    //     ctx.addIssue({
+    //       code: 'custom',
+    //       path: ['movement', 'officialDepartmentId'],
+    //       message:
+    //         'Official department is required when no position item is assigned',
+    //     })
+    //   }
+
+    //   if (!data.movement.officialPositionId) {
+    //     ctx.addIssue({
+    //       code: 'custom',
+    //       path: ['movement', 'officialPositionId'],
+    //       message:
+    //         'Official position is required when no position item is assigned',
+    //     })
+    //   }
+    // }
     if (
       data.employment.staffCategory === 'military' &&
       data.movement.positionItemId == null
     ) {
-      if (!data.movement.officialDepartmentId) {
+      if (!data.appointment?.actualDepartmentId) {
         ctx.addIssue({
           code: 'custom',
-          path: ['movement', 'officialDepartmentId'],
-          message:
-            'Official department is required when no position item is assigned',
+          path: ['appointment', 'actualDepartmentId'],
+          message: 'Department is required for military employees',
         })
       }
 
-      if (!data.movement.officialPositionId) {
+      if (!data.appointment?.actualPositionId) {
         ctx.addIssue({
           code: 'custom',
-          path: ['movement', 'officialPositionId'],
-          message:
-            'Official position is required when no position item is assigned',
+          path: ['appointment', 'actualPositionId'],
+          message: 'Position is required for military employees',
         })
       }
     }
