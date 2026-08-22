@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/hr/employees/components/onboarding/sections/employee-basic-information.tsx
+
 'use client'
 
 import { DatePicker } from '@/components/dialogs/date-picker'
@@ -142,14 +144,10 @@ export function EmployeeBasicInformation({
         {/* English name */}
         <div className='rounded-xl border bg-muted/10 p-4 sm:p-5'>
           <div className='mb-4'>
-            <h4 className='text-sm font-semibold'>
-              {isRtl ? 'الاسم باللغة الإنجليزية' : 'English name'}
-            </h4>
+            <h4 className='text-sm font-semibold'>{et('englishName')}</h4>
 
             <p className='mt-0.5 text-xs text-muted-foreground'>
-              {isRtl
-                ? 'أدخل الاسم كما يظهر في السجلات الرسمية'
-                : 'Enter the name as it appears on official records'}
+              {et('englishNameHint')}
             </p>
           </div>
 
@@ -233,14 +231,10 @@ export function EmployeeBasicInformation({
         {/* Arabic name */}
         <div className='rounded-xl border bg-muted/10 p-4 sm:p-5'>
           <div className='mb-4'>
-            <h4 className='text-sm font-semibold'>
-              {isRtl ? 'الاسم باللغة العربية' : 'Arabic name'}
-            </h4>
+            <h4 className='text-sm font-semibold'>{et('arabicName')}</h4>
 
             <p className='mt-0.5 text-xs text-muted-foreground'>
-              {isRtl
-                ? 'أدخل الاسم باللغة العربية كما يظهر في السجلات الرسمية'
-                : 'Enter the Arabic name as it appears on official records'}
+              {et('arabicName')}
             </p>
           </div>
 
@@ -375,251 +369,3 @@ export function EmployeeBasicInformation({
     </section>
   )
 }
-
-// 'use client'
-
-// import { DatePicker } from '@/components/dialogs/date-picker'
-// import { Input } from '@/components/ui/input'
-// import { Label } from '@/components/ui/label'
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from '@/components/ui/select'
-// import { CountryCombobox } from '@/modules/countries/components/country-combobox'
-// import { PersonalErrors } from '@/modules/hr/onboarding/types/onboarding-errors.types'
-// import { HireEmployeePayload } from '@/modules/hr/onboarding/types/onboarding.types'
-// import { useLocale, useTranslations } from 'next-intl'
-// //import { HireEmployeePayload } from '../types/hire.types'
-
-// interface Props {
-//   value: HireEmployeePayload
-//   onChange: (value: HireEmployeePayload) => void
-//   personalErrors: PersonalErrors
-// }
-
-// type Employee = HireEmployeePayload['employee']
-// type EmployeeGender = Employee['gender'] //HireEmployeePayload['employee']['gender']
-
-// export function EmployeeBasicInformation({
-//   value,
-//   onChange,
-//   personalErrors,
-// }: Props) {
-//   const employee = value.employee
-//   const et = useTranslations('employees')
-//   const locale = useLocale()
-//   const isRtl = locale === 'ar'
-
-//   function updateEmployee<K extends keyof Employee>(
-//     field: K,
-//     fieldValue: Employee[K],
-//   ) {
-//     onChange({
-//       ...value,
-//       employee: {
-//         ...employee,
-//         [field]: fieldValue,
-//       },
-//     })
-//   }
-
-//   return (
-//     <section className='space-y-4'>
-//       <div>
-//         <h3 className='text-lg font-semibold'>{et('basicInfo')}</h3>
-//         <p className='text-sm text-muted-foreground'>{et('masterRecord')}</p>
-//       </div>
-
-//       <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-//         <div className='space-y-2'>
-//           <Label
-//             className={`${personalErrors.employeeNumber ? 'text-destructive' : ''}`}
-//           >
-//             {et('employeeNumberRequired')}{' '}
-//             <span className='text-destructive'>*</span>
-//           </Label>
-//           <Input
-//             value={employee.employeeNumber ?? ''}
-//             onChange={(e) => updateEmployee('employeeNumber', e.target.value)}
-//           />
-//           {personalErrors.employeeNumber && (
-//             <p className='text-sm text-destructive'>
-//               {personalErrors.employeeNumber}
-//             </p>
-//           )}
-//         </div>
-
-//         <div className='space-y-2'>
-//           <Label>{et('nationality')}</Label>
-//           <CountryCombobox
-//             value={employee.countryId}
-//             onChange={(country) => {
-//               onChange({
-//                 ...value,
-//                 employee: {
-//                   ...employee,
-//                   countryId: country.id,
-//                   countryNameEn: country.name,
-//                   countryNameAr: country.nameAr,
-//                 },
-//               })
-//             }}
-//           />
-//         </div>
-
-//         <div className='space-y-2'>
-//           <Label
-//             className={`${personalErrors.firstNameEn ? 'text-destructive' : ''}`}
-//           >
-//             {et('firstNameEn')}
-//             <span className='text-destructive'>*</span>
-//           </Label>
-//           <Input
-//             value={employee.firstNameEn ?? ''}
-//             onChange={(e) => updateEmployee('firstNameEn', e.target.value)}
-//           />
-//           {personalErrors.firstNameEn && (
-//             <p className='text-sm text-destructive'>
-//               {personalErrors.firstNameEn}
-//             </p>
-//           )}
-//         </div>
-
-//         <div className='space-y-2'>
-//           <Label>{et('secondNameEn')}</Label>
-//           <Input
-//             value={employee.secondNameEn ?? ''}
-//             onChange={(e) => updateEmployee('secondNameEn', e.target.value)}
-//           />
-//         </div>
-
-//         <div className='space-y-2'>
-//           <Label>{et('thirdNameEn')}</Label>
-//           <Input
-//             value={employee.thirdNameEn ?? ''}
-//             onChange={(e) => updateEmployee('thirdNameEn', e.target.value)}
-//           />
-//         </div>
-
-//         <div className='space-y-2'>
-//           <Label
-//             className={`${personalErrors.familyNameEn ? 'text-destructive' : ''}`}
-//           >
-//             {et('familyNameEn')}
-//             <span className='text-destructive'>*</span>
-//           </Label>
-//           <Input
-//             value={employee.familyNameEn ?? ''}
-//             onChange={(e) => updateEmployee('familyNameEn', e.target.value)}
-//           />
-//           {personalErrors.familyNameEn && (
-//             <p className='text-sm text-destructive'>
-//               {personalErrors.familyNameEn}
-//             </p>
-//           )}
-//         </div>
-
-//         <div className='space-y-2'>
-//           <Label
-//             className={`${personalErrors.firstNameAr ? 'text-destructive' : ''}`}
-//           >
-//             {et('firstNameAr')}
-//             <span className='text-destructive'>*</span>
-//           </Label>
-//           <Input
-//             value={employee.firstNameAr ?? ''}
-//             onChange={(e) => updateEmployee('firstNameAr', e.target.value)}
-//             dir='rtl'
-//           />
-//           {personalErrors.firstNameAr && (
-//             <p className='text-sm text-destructive'>
-//               {personalErrors.firstNameAr}
-//             </p>
-//           )}
-//         </div>
-
-//         <div className='space-y-2'>
-//           <Label>{et('secondNameAr')}</Label>
-//           <Input
-//             value={employee.secondNameAr ?? ''}
-//             onChange={(e) => updateEmployee('secondNameAr', e.target.value)}
-//             dir='rtl'
-//           />
-//         </div>
-
-//         <div className='space-y-2'>
-//           <Label>{et('thirdNameAr')}</Label>
-//           <Input
-//             value={employee.thirdNameAr ?? ''}
-//             onChange={(e) => updateEmployee('thirdNameAr', e.target.value)}
-//             dir='rtl'
-//           />
-//         </div>
-
-//         <div className='space-y-2'>
-//           <Label
-//             className={`${personalErrors.familyNameAr ? 'text-destructive' : ''}`}
-//           >
-//             {et('familyNameAr')}
-//             <span className='text-destructive'>*</span>
-//           </Label>
-//           <Input
-//             value={employee.familyNameAr ?? ''}
-//             onChange={(e) => updateEmployee('familyNameAr', e.target.value)}
-//             dir='rtl'
-//           />
-//           {personalErrors.familyNameAr && (
-//             <p className='text-sm text-destructive'>
-//               {personalErrors.familyNameAr}
-//             </p>
-//           )}
-//         </div>
-
-//         <div className='space-y-2'>
-//           <Label>
-//             {et('gender')}
-//             <span className='text-destructive'>*</span>
-//           </Label>
-//           <Select
-//             dir={isRtl ? 'rtl' : 'ltr'}
-//             value={employee.gender}
-//             onValueChange={(v) => updateEmployee('gender', v as EmployeeGender)}
-//           >
-//             <SelectTrigger>
-//               <SelectValue placeholder='Select gender' />
-//             </SelectTrigger>
-
-//             <SelectContent>
-//               <SelectItem value='male'>{et('male')}</SelectItem>
-//               <SelectItem value='female'>{et('female')}</SelectItem>
-//             </SelectContent>
-//           </Select>
-//         </div>
-
-//         <div className='space-y-2'>
-//           <label
-//             htmlFor={'dateOfBirth'}
-//             className={`${personalErrors.dateOfBirth ? 'text-destructive' : ''}`}
-//           >
-//             {et('dateOfBirth')}
-//             <span className='text-destructive'>*</span>
-//           </label>
-
-//           <DatePicker
-//             id='dateOfBirth'
-//             value={employee.dateOfBirth ?? null}
-//             onChange={(value) => updateEmployee('dateOfBirth', value)}
-//           />
-//           {personalErrors.dateOfBirth && (
-//             <p className='text-sm text-destructive'>
-//               {personalErrors.dateOfBirth}
-//             </p>
-//           )}
-//         </div>
-//       </div>
-//     </section>
-//   )
-// }

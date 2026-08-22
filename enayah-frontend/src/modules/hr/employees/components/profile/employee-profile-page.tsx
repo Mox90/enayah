@@ -143,10 +143,15 @@ interface StateProps {
 
 function EmployeeProfileError({ title, description }: StateProps) {
   return (
-    <div className='rounded-xl border border-destructive/30 bg-destructive/5 px-5 py-5'>
+    // <div className='rounded-xl border border-destructive/30 bg-destructive/5 px-5 py-5'>
+    <div
+      role='alert'
+      className='rounded-xl border border-destructive/30 bg-destructive/5 px-5 py-5'
+    >
       <div className='flex items-start gap-3'>
         <div className='flex size-10 shrink-0 items-center justify-center rounded-lg bg-destructive/10'>
-          <AlertCircle className='size-5 text-destructive' />
+          {/* <AlertCircle className='size-5 text-destructive' /> */}
+          <AlertCircle aria-hidden='true' className='size-5 text-destructive' />
         </div>
 
         <div className='min-w-0'>

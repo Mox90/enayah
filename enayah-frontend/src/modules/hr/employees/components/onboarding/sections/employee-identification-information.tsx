@@ -190,29 +190,25 @@ export function EmployeeIdentificationInformation({
             className='h-11'
             value={identification?.identificationNumber ?? ''}
             aria-invalid={Boolean(personalErrors.identificationNumber)}
+            aria-describedby={
+              personalErrors.identificationNumber
+                ? 'identification-number-error'
+                : undefined
+            }
             onChange={(event) =>
               updateIdentification('identificationNumber', event.target.value)
             }
           />
 
           {personalErrors.identificationNumber && (
-            <p className='text-xs font-medium text-destructive'>
+            <p
+              id='identification-number-error'
+              className='text-xs font-medium text-destructive'
+            >
               {personalErrors.identificationNumber}
             </p>
           )}
         </div>
-
-        {/* {requiresCommonFields && (
-          <div className='md:col-span-2'>
-            <div className='rounded-lg border bg-muted/20 px-4 py-3'>
-              <p className='text-xs leading-relaxed text-muted-foreground'>
-                {identificationType === 'iqama'
-                  ? t('iqamaRequiredFieldsHint')
-                  : t('identificationRequiredFieldsHint')}
-              </p>
-            </div>
-          </div>
-        )} */}
 
         {/* Issue Date */}
         <div className='space-y-2'>

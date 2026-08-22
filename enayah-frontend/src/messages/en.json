@@ -274,7 +274,9 @@
     "saving": "Saving {item}",
     "sponsor": "Sponsor",
     "issuingAuthority": "Issuing Authority",
-    "optional": "Optional"
+    "optional": "Optional",
+    "englishNameHint": "Enter the name as it appears on official records",
+    "arabicNameHint": "Enter the Arabic name as it appears on official records"
   },
   "departments": {
     "departmentName": "Departments",

@@ -66,15 +66,17 @@ export function EmployeeContactInformation({
       personal: {
         ...value.personal,
 
-        phoneNumbers: [
-          {
-            type: phone?.type ?? 'mobile',
-            countryCode,
-            phoneNumber: currentPhone,
-            isPrimary: phone?.isPrimary ?? true,
-            isWhatsapp: phone?.isWhatsapp ?? false,
-          },
-        ],
+        phoneNumbers: currentPhone
+          ? [
+              {
+                type: phone?.type ?? 'mobile',
+                countryCode,
+                phoneNumber: currentPhone,
+                isPrimary: phone?.isPrimary ?? true,
+                isWhatsapp: phone?.isWhatsapp ?? false,
+              },
+            ]
+          : [],
       },
     })
   }

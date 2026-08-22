@@ -277,7 +277,9 @@
     "saving": "توفير {item}",
     "sponsor": "كفيل",
     "issuingAuthority": "سلطة الإصدار",
-    "optional": "اختياري"
+    "optional": "اختياري",
+    "englishNameHint": "أدخل الاسم كما يظهر في السجلات الرسمية",
+    "arabicNameHint": "أدخل الاسم باللغة العربية كما يظهر في السجلات الرسمية"
   },
   "departments": {
     "departmentName": "الأقسام",
@@ -375,7 +377,7 @@
     "partTime": "دوام جزئى",
     "contractual": "تعاقدي",
     "temporary": "مؤقت",
-    "pcn_alignment": "الم محاذاة موضع رقم العنصر الوظيفة",
+    "pcn_alignment": "مواءمة رقم عنصر الوظيفة",
     "locum": "مكان",
     "staffCategory": "فئة الموظفين",
     "civilian": "مدني",

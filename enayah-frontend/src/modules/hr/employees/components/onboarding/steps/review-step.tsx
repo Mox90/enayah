@@ -333,9 +333,13 @@ export function ReviewStep({ value }: Props) {
         {compensation ? (
           <div className='space-y-6'>
             <div className='grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2 lg:grid-cols-3'>
-              <Field
+              {/* <Field
                 label={t('effectiveDate')}
                 value={formatDate(compensation.effectiveDate, isRtl)}
+              /> */}
+              <Field
+                label={t('effectiveDate')}
+                value={formatDate(contract.startDate, isRtl)}
               />
 
               <Field

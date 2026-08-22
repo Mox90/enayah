@@ -397,7 +397,10 @@ export function OnboardingForm({ onCancel }: Props) {
       nextErrors.baseSalary = et('baseSalaryRequiredError')
     }
 
-    if (compensation.effectiveDate !== onboard.contract.startDate) {
+    // if (compensation.effectiveDate !== onboard.contract.startDate) {
+    //   nextErrors.effectiveDate = et('compensationEffectiveDateError')
+    // }
+    if (!onboard.contract.startDate) {
       nextErrors.effectiveDate = et('compensationEffectiveDateError')
     }
 
@@ -504,6 +507,13 @@ export function OnboardingForm({ onCancel }: Props) {
             actualDepartmentNameAr: undefined,
             actualPositionTitleEn: undefined,
             actualPositionTitleAr: undefined,
+          }
+        : undefined,
+
+      compensation: onboard.compensation
+        ? {
+            ...onboard.compensation,
+            effectiveDate: onboard.contract.startDate,
           }
         : undefined,
 

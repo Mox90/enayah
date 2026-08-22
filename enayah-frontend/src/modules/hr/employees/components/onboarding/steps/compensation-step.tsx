@@ -38,24 +38,16 @@ export function CompensationStep({
   onUpdateErrors,
 }: Props) {
   const t = useTranslations('compensations')
-
   const ct = useTranslations('common')
-
   const locale = useLocale()
-
   const allowanceOptions = useAllowanceOptions()
-
   const compensation = value.compensation
-
   const allowances = value.allowances ?? []
-
   const totalAllowances = allowances.reduce(
     (total, allowance) => total + Number(allowance.amount || 0),
     0,
   )
-
   const baseSalary = Number(compensation?.baseSalary || 0)
-
   const totalMonthlyCompensation = baseSalary + totalAllowances
 
   function enableCompensation() {
@@ -339,9 +331,11 @@ export function CompensationStep({
                 aria-invalid={Boolean(errors.effectiveDate)}
               >
                 <span className='text-sm tabular-nums' dir='ltr'>
-                  {compensation.effectiveDate ??
-                    value.contract.startDate ??
-                    '—'}
+                  {/* {compensation.effectiveDate ??
+                    value.contract.
+                    startDate ??
+                    '—'} */}
+                  {value.contract.startDate ?? '—'}
                 </span>
 
                 <span className='shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary'>
