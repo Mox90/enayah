@@ -1,11 +1,18 @@
 'use client'
 
 import { format } from 'date-fns'
-import { Calendar, Hash, User } from 'lucide-react'
+import {
+  CalendarDays,
+  CircleAlert,
+  Hash,
+  IdCardLanyard,
+  User,
+  UserRound,
+} from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useLocale, useTranslations } from 'next-intl'
-import { toArabic, toPersianDigits } from '@/utils/utilities'
+import { formatDate, toArabic } from '@/utils/utilities'
 import {
   useEmployeePersonal,
   useEmployeePersonalMutations,
@@ -89,9 +96,26 @@ interface Props {
 
 interface FieldProps {
   label: string
-  value: React.ReactNode
+  value?: React.ReactNode
   icon?: React.ReactNode
-  isRtl?: boolean
+}
+
+function Field({ label, value, icon }: FieldProps) {
+  const hasValue = value !== null && value !== undefined && value !== ''
+
+  return (
+    <div className='min-w-0 rounded-lg border bg-muted/10 p-4'>
+      <div className='mb-2 flex items-center gap-2 text-xs text-muted-foreground'>
+        {icon}
+
+        <span className='truncate'>{label}</span>
+      </div>
+
+      <div className='break-words text-sm font-medium text-foreground'>
+        {hasValue ? value : '—'}
+      </div>
+    </div>
+  )
 }
 
 //type IdentificationDeleteTarget = Pick<Identification, 'id' | 'type'>
@@ -127,20 +151,27 @@ type PersonalDetailDeleteTarget =
       id: string
     }
 
-function Field({ label, value, icon, isRtl = false }: FieldProps) {
-  return (
-    <div className='rounded-xl border bg-background p-4 transition-colors hover:bg-muted/30'>
-      <div className='mb-2 flex items-center gap-2 text-xs text-muted-foreground'>
-        {icon}
-        {label}
-      </div>
+// function Field({ label, value, icon, isRtl = false }: FieldProps) {
+//   const hasValue = value !== null && value !== undefined && value !== ''
 
-      <div className={cn('font-medium text-foreground', isRtl && 'text-right')}>
-        {value ?? '-'}
-      </div>
-    </div>
-  )
-}
+//   return (
+//     <div className='min-w-0 rounded-lg border bg-muted/10 p-4'>
+//       <div className='mb-2 flex items-center gap-2 text-xs text-muted-foreground'>
+//         {icon}
+//         <span>{label}</span>
+//       </div>
+
+//       <div
+//         className={cn(
+//           'break-words text-sm font-medium text-foreground',
+//           isRtl && 'text-right',
+//         )}
+//       >
+//         {hasValue ? value : '—'}
+//       </div>
+//     </div>
+//   )
+// }
 
 const PersonalTab = ({ personal }: Props) => {
   const at = useTranslations('auth')
@@ -158,24 +189,39 @@ const PersonalTab = ({ personal }: Props) => {
   } = useEmployeePersonal(personal.id)
   const identification =
     useDialogState<EmployeePersonalDetails['identifications'][number]>()
-
   const phone =
     useDialogState<EmployeePersonalDetails['phoneNumbers'][number]>()
-
   const email = useDialogState<EmployeePersonalDetails['emails'][number]>()
-
   const address = useDialogState<EmployeePersonalDetails['addresses'][number]>()
-
   const dependent =
     useDialogState<EmployeePersonalDetails['dependents'][number]>()
-
   const emergencyContact =
     useDialogState<EmployeePersonalDetails['emergencyContacts'][number]>()
-
   const visa = useDialogState<EmployeePersonalDetails['visas'][number]>()
-
   const employeePersonal = useEmployeePersonalMutations(personal.id)
+  const fullNameEn = [
+    personal.firstNameEn,
+    personal.secondNameEn,
+    personal.thirdNameEn,
+    personal.familyNameEn,
+  ]
+    .filter(Boolean)
+    .join(' ')
 
+  const fullNameAr = [
+    personal.firstNameAr,
+    personal.secondNameAr,
+    personal.thirdNameAr,
+    personal.familyNameAr,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  const nationality = isRtl
+    ? (personal.nationality?.nationalityAr ??
+      personal.nationality?.nationalityEn)
+    : (personal.nationality?.nationalityEn ??
+      personal.nationality?.nationalityAr)
   const getIdentificationLabel = (type: Identification['type']): string => {
     switch (type) {
       case 'national_id':
@@ -321,170 +367,139 @@ const PersonalTab = ({ personal }: Props) => {
 
   return (
     <div className='space-y-6'>
-      {/* ---------------------------- */}
-      {/* Personal Information */}
-      {/* ---------------------------- */}
+      {/* ---------------------------------- */}
+      {/* Employee Identity */}
+      {/* ---------------------------------- */}
 
-      <Card className='transition-all duration-200 hover:shadow-md'>
-        <CardHeader className='flex flex-row items-center justify-between'>
-          <CardTitle className='flex items-center gap-2 text-rose-400'>
-            <div className='flex h-10 w-10 items-center justify-center rounded-xl '>
-              {/* <IdCardLanyard className='h-5 w-5' /> */}
-              <span className='text-3xl'>🪪</span>
+      <Card className='overflow-hidden'>
+        <CardHeader className='border-b bg-muted/20 px-5 py-4'>
+          <div className='flex items-start gap-3'>
+            <div className='flex size-9 shrink-0 items-center justify-center rounded-lg border sm:size-10 sm:rounded-xl bg-violet-500/10'>
+              <IdCardLanyard
+                aria-hidden='true'
+                className='size-4 text-violet-600 sm:size-5 dark:text-violet-400'
+              />
             </div>
-            {et('personalInfo')}
-          </CardTitle>
 
-          {/* <Button size='sm' variant='outline'>
-            <Pencil className='mr-2 h-4 w-4' />
-            Edit
-          </Button> */}
+            <div className='min-w-0'>
+              <CardTitle className='text-sm text-violet-500 dark:text-violet-400 sm:text-base font-semibold tracking-tight'>
+                {et('personalInfo')}
+              </CardTitle>
+
+              <p className='mt-1 text-xs leading-relaxed text-muted-foreground'>
+                {pt('personalInfoDescription')}
+              </p>
+            </div>
+          </div>
         </CardHeader>
 
-        <CardContent>
-          <div className='grid gap-2 md:grid-cols-2 lg:grid-cols-3'>
+        <CardContent className='p-5'>
+          <div className='grid gap-3 md:grid-cols-2 lg:grid-cols-3'>
             <Field
-              icon={<Hash className='h-3.5 w-3.5' />}
+              icon={<Hash className='size-3.5 shrink-0' />}
               label={at('employeeNumber')}
-              value={personal.employeeNumber}
-            />
-
-            <Field
-              icon={<Calendar className='h-3.5 w-3.5' />}
-              label={et('dateOfBirth').replace('*', '')}
               value={
-                personal.dateOfBirth
-                  ? isRtl
-                    ? toArabic(personal.dateOfBirth, 1)
-                    : format(new Date(personal.dateOfBirth), 'dd-MMM-yyyy')
-                  : '-'
+                <span className='font-mono tabular-nums' dir='ltr'>
+                  {personal.employeeNumber}
+                </span>
               }
             />
 
             <Field
-              icon={<User className='h-3.5 w-3.5' />}
+              icon={<CalendarDays className='size-3.5 shrink-0' />}
+              label={et('dateOfBirth').replace('*', '')}
+              value={
+                personal.dateOfBirth
+                  ? formatDate(personal.dateOfBirth, isRtl)
+                  : undefined
+              }
+            />
+
+            <Field
+              icon={<User className='size-3.5 shrink-0' />}
               label={et('gender')}
               value={et(personal.gender)}
             />
 
             <Field
               label={et('englishName')}
-              value={[
-                personal.firstNameEn,
-                personal.secondNameEn,
-                personal.thirdNameEn,
-                personal.familyNameEn,
-              ]
-                .filter(Boolean)
-                .join(' ')}
+              value={
+                <span dir='ltr' className='block text-left'>
+                  {fullNameEn}
+                </span>
+              }
             />
 
             <Field
               label={et('arabicName')}
-              value={[
-                personal.firstNameAr,
-                personal.secondNameAr,
-                personal.thirdNameAr,
-                personal.familyNameAr,
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              isRtl
-            />
-
-            <Field
-              label={et('nationality')}
               value={
-                isRtl
-                  ? (personal.nationality?.nationalityAr ??
-                    personal.nationality?.nationalityEn)
-                  : personal.nationality?.nationalityEn
+                <span dir='rtl' className='block text-right'>
+                  {fullNameAr}
+                </span>
               }
             />
+
+            <Field label={et('nationality')} value={nationality} />
           </div>
         </CardContent>
       </Card>
 
-      {/* ---------------------------- */}
-      {/* Country */}
-      {/* ---------------------------- */}
-
-      {/* <Card className='transition-all duration-200 hover:shadow-md'>
-        <CardHeader className='flex flex-row items-center justify-between'>
-          <CardTitle className='flex items-center gap-2 text-blue-600'>
-            <div className='flex h-10 w-10 items-center justify-center rounded-xl'>
-              <span className='text-3xl'>🌏</span>
-            </div>
-            {et('countryInfo')}
-          </CardTitle>
-        </CardHeader>
-
-        <CardContent>
-          <div className='grid gap-2 md:grid-cols-2 lg:grid-cols-4'>
-            <Field
-              label={et('country')}
-              value={
-                isRtl
-                  ? (personal.nationality?.nameAr ?? personal.nationality?.name)
-                  : personal.nationality?.name
-              }
-            />
-
-            <Field
-              label={et('nationality')}
-              value={
-                isRtl
-                  ? (personal.nationality?.nationalityAr ??
-                    personal.nationality?.nationalityEn)
-                  : personal.nationality?.nationalityEn
-              }
-            />
-
-            <Field label={et('alpha2')} value={personal.nationality?.alpha2} />
-
-            <Field label={et('alpha3')} value={personal.nationality?.alpha3} />
-
-            <Field
-              label={et('numericCode')}
-              value={
-                isRtl
-                  ? toPersianDigits(personal.nationality?.numericCode)
-                  : personal.nationality?.numericCode
-              }
-            />
-          </div>
-        </CardContent>
-      </Card> */}
+      {/* ---------------------------------- */}
+      {/* Personal Detail Records */}
+      {/* ---------------------------------- */}
 
       {isLoading ? (
-        <div className='text-sm text-muted-foreground'>
-          <Card className='transition-all duration-200 hover:shadow-md'>
-            <CardHeader>
-              <Skeleton className='h-6 w-56' />
-            </CardHeader>
+        <Card className='overflow-hidden'>
+          <CardHeader className='border-b bg-muted/20 px-5 py-4'>
+            <div className='flex items-center gap-3'>
+              <Skeleton className='size-10 rounded-lg' />
 
-            <CardContent className='grid gap-4 md:grid-cols-2 xl:grid-cols-3'>
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className='h-20 rounded-xl' />
+              <div className='space-y-2'>
+                <Skeleton className='h-4 w-40' />
+
+                <Skeleton className='h-3 w-64 max-w-full' />
+              </div>
+            </div>
+          </CardHeader>
+
+          <CardContent className='p-5'>
+            <div className='grid gap-3 md:grid-cols-2 xl:grid-cols-3'>
+              {Array.from({
+                length: 6,
+              }).map((_, index) => (
+                <Skeleton key={index} className='h-20 rounded-lg' />
               ))}
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       ) : error ? (
-        <div className='text-sm text-destructive'>
-          Failed to load personal details. Please try again.
+        <div className='rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-4'>
+          <div className='flex items-start gap-3'>
+            <CircleAlert className='mt-0.5 size-5 shrink-0 text-destructive' />
+
+            <div>
+              <p className='text-sm font-medium text-destructive'>
+                {pt('loadError')}
+              </p>
+
+              <p className='mt-1 text-xs leading-relaxed text-muted-foreground'>
+                {pt('loadErrorDescription')}
+              </p>
+            </div>
+          </div>
         </div>
       ) : (
-        // <PersonalDetailsCards personalDetails={personalDetails} />
         <>
           <PersonalDetailsCards
             personalDetails={personalDetails}
             onAddIdentification={identification.add}
             onEditIdentification={(id) => {
               const item = personalDetails?.identifications.find(
-                (x: Identification) => x.id === id,
+                (item: Identification) => item.id === id,
               )
+
               if (!item) return
+
               identification.edit(item)
             }}
             onDeleteIdentification={(id) => {
@@ -505,9 +520,11 @@ const PersonalTab = ({ personal }: Props) => {
             onAddPhone={phone.add}
             onEditPhone={(id) => {
               const item = personalDetails?.phoneNumbers.find(
-                (x: PhoneNumber) => x.id === id,
+                (item: PhoneNumber) => item.id === id,
               )
+
               if (!item) return
+
               phone.edit(item)
             }}
             onDeletePhone={(id) => {
@@ -519,9 +536,11 @@ const PersonalTab = ({ personal }: Props) => {
             onAddEmail={email.add}
             onEditEmail={(id) => {
               const item = personalDetails?.emails.find(
-                (x: Email) => x.id === id,
+                (item: Email) => item.id === id,
               )
+
               if (!item) return
+
               email.edit(item)
             }}
             onDeleteEmail={(id) => {
@@ -533,9 +552,11 @@ const PersonalTab = ({ personal }: Props) => {
             onAddAddress={address.add}
             onEditAddress={(id) => {
               const item = personalDetails?.addresses.find(
-                (x: Address) => x.id === id,
+                (item: Address) => item.id === id,
               )
+
               if (!item) return
+
               address.edit(item)
             }}
             onDeleteAddress={(id) => {
@@ -547,9 +568,11 @@ const PersonalTab = ({ personal }: Props) => {
             onAddDependent={dependent.add}
             onEditDependent={(id) => {
               const item = personalDetails?.dependents.find(
-                (x: Dependent) => x.id === id,
+                (item: Dependent) => item.id === id,
               )
+
               if (!item) return
+
               dependent.edit(item)
             }}
             onDeleteDependent={(id) => {
@@ -561,9 +584,11 @@ const PersonalTab = ({ personal }: Props) => {
             onAddEmergencyContact={emergencyContact.add}
             onEditEmergencyContact={(id) => {
               const item = personalDetails?.emergencyContacts.find(
-                (x: EmergencyContact) => x.id === id,
+                (item: EmergencyContact) => item.id === id,
               )
+
               if (!item) return
+
               emergencyContact.edit(item)
             }}
             onDeleteEmergencyContact={(id) => {
@@ -574,8 +599,12 @@ const PersonalTab = ({ personal }: Props) => {
             }}
             onAddVisa={visa.add}
             onEditVisa={(id) => {
-              const item = personalDetails?.visas.find((x: Visa) => x.id === id)
+              const item = personalDetails?.visas.find(
+                (item: Visa) => item.id === id,
+              )
+
               if (!item) return
+
               visa.edit(item)
             }}
             onDeleteVisa={(id) => {

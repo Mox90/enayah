@@ -1,4 +1,4 @@
-// src/modules/hr/employees/hire/hooks/use-hire-employee.ts
+// enayah-frontend/src/modules/hr/employees/hire/hooks/use-hire-employee.ts
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { HireEmployeePayload } from '../types/onboarding.types'

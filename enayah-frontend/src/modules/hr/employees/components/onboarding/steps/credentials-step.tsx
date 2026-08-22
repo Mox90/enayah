@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/hr/employees/components/onboarding/steps/credentials-step.tsx
+
 'use client'
 
 import {

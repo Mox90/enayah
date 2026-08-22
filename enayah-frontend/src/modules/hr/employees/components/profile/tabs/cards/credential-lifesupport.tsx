@@ -111,20 +111,10 @@ export function CredentialLifeSupport({
           >
             <div className='flex min-w-0 items-center gap-2 sm:gap-3'>
               {/* Section icon */}
-              <div
-                className={cn(
-                  'flex h-9 w-9 shrink-0 items-center justify-center',
-                  'rounded-lg bg-rose-500/10',
-                  'sm:h-10 sm:w-10 sm:rounded-xl',
-                )}
-              >
+              <div className='flex size-9 shrink-0 items-center justify-center rounded-lg bg-rose-500/10 sm:size-10 sm:rounded-xl'>
                 <HeartPulse
                   aria-hidden='true'
-                  className={cn(
-                    'h-4 w-4 text-rose-600',
-                    'sm:h-5 sm:w-5',
-                    'dark:text-rose-400',
-                  )}
+                  className='size-4 text-rose-600 sm:size-5 dark:text-rose-400'
                 />
               </div>
 

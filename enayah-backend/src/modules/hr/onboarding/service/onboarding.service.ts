@@ -97,16 +97,26 @@ export const OnboardingService = {
       // 5. Initial Contract Movement / PCN
       // ----------------------------------
 
+      // ----------------------------------
+      // 5. Initial Contract Movement / Legal Assignment
+      // ----------------------------------
+
+      const staffCategory = dto.employment.staffCategory
+      const positionItemId = dto.movement.positionItemId
+
       const requiresPositionItem =
-        dto.employment.staffCategory === 'civilian' ||
-        dto.employment.staffCategory === 'contractual'
+        staffCategory === 'civilian' || staffCategory === 'contractual'
 
       let positionItem = null
 
-      if (dto.movement.positionItemId) {
+      /*
+       * Civilian / Contractual normally reach here with a PCN.
+       * Military may also optionally have a PCN.
+       */
+      if (positionItemId) {
         positionItem = await PositionItemRepository.assignIfAvailable(
           tx,
-          dto.movement.positionItemId,
+          positionItemId,
         )
 
         if (!positionItem) {
@@ -116,30 +126,59 @@ export const OnboardingService = {
           )
         }
       } else if (requiresPositionItem) {
-        // Defensive service validation.
-        // Zod should already reject this.
+        /*
+         * Defensive validation.
+         * Zod should already reject this case.
+         */
         throw new AppError(
           'Position item is required for civilian and contractual employees',
           400,
         )
       }
 
-      const officialDepartmentId =
-        positionItem?.departmentId ?? dto.movement.officialDepartmentId
+      /*
+       * Resolve the official/legal department and position.
+       *
+       * Priority:
+       *
+       * 1. If a PCN exists, derive department and position from the PCN.
+       * 2. Military without a PCN uses the initial actual appointment
+       *    as its initial official assignment.
+       */
+      let officialDepartmentId: string
+      let officialPositionId: string
 
-      const officialPositionId =
-        positionItem?.positionId ?? dto.movement.officialPositionId
+      if (positionItem) {
+        officialDepartmentId = positionItem.departmentId
+        officialPositionId = positionItem.positionId
+      } else if (staffCategory === 'military') {
+        const actualDepartmentId = dto.appointment?.actualDepartmentId
 
-      if (!officialDepartmentId) {
+        const actualPositionId = dto.appointment?.actualPositionId
+
+        if (!actualDepartmentId) {
+          throw new AppError(
+            'Department is required for military employees without a position item',
+            400,
+          )
+        }
+
+        if (!actualPositionId) {
+          throw new AppError(
+            'Position is required for military employees without a position item',
+            400,
+          )
+        }
+
+        officialDepartmentId = actualDepartmentId
+        officialPositionId = actualPositionId
+      } else {
+        /*
+         * Should not normally be reachable because civilian /
+         * contractual employees require a PCN.
+         */
         throw new AppError(
-          'Official department is required for the legal assignment',
-          400,
-        )
-      }
-
-      if (!officialPositionId) {
-        throw new AppError(
-          'Official position is required for the legal assignment',
+          'Unable to resolve the employee legal assignment',
           400,
         )
       }
@@ -155,6 +194,65 @@ export const OnboardingService = {
         movementType: 'initial',
         remarks: dto.movement.remarks ?? null,
       })
+
+      // const requiresPositionItem =
+      //   dto.employment.staffCategory === 'civilian' ||
+      //   dto.employment.staffCategory === 'contractual'
+
+      // let positionItem = null
+
+      // if (dto.movement.positionItemId) {
+      //   positionItem = await PositionItemRepository.assignIfAvailable(
+      //     tx,
+      //     dto.movement.positionItemId,
+      //   )
+
+      //   if (!positionItem) {
+      //     throw new AppError(
+      //       'Position item not found or is no longer vacant',
+      //       409,
+      //     )
+      //   }
+      // } else if (requiresPositionItem) {
+      //   // Defensive service validation.
+      //   // Zod should already reject this.
+      //   throw new AppError(
+      //     'Position item is required for civilian and contractual employees',
+      //     400,
+      //   )
+      // }
+
+      // const officialDepartmentId =
+      //   positionItem?.departmentId ?? dto.movement.officialDepartmentId
+
+      // const officialPositionId =
+      //   positionItem?.positionId ?? dto.movement.officialPositionId
+
+      // if (!officialDepartmentId) {
+      //   throw new AppError(
+      //     'Official department is required for the legal assignment',
+      //     400,
+      //   )
+      // }
+
+      // if (!officialPositionId) {
+      //   throw new AppError(
+      //     'Official position is required for the legal assignment',
+      //     400,
+      //   )
+      // }
+
+      // const movement = await ContractMovementRepository.create(tx, {
+      //   contractId: contract.id,
+      //   positionItemId: positionItem?.id ?? null,
+      //   officialDepartmentId,
+      //   officialPositionId,
+      //   startDate: contract.startDate,
+      //   endDate: contract.endDate,
+      //   sequenceNumber: 1,
+      //   movementType: 'initial',
+      //   remarks: dto.movement.remarks ?? null,
+      // })
 
       // ----------------------------------
       // 6. Appointment / Actual Assignment

@@ -22,13 +22,10 @@ import { usePositionItemLookup } from '../hooks/use-position-item-lookup'
 import { useLocale, useTranslations } from 'next-intl'
 import { toArabicDigits } from '@/utils/utilities'
 
-//import { PositionItemLookupItem } from '@/modules/hr/onboarding/services/position-item-lookup.service'
-//import { usePositionItemLookup } from '@/modules/hr/onboarding/hooks/use-position-item-lookup'
-
 interface Props {
   value?: string | null
   selectedLabel?: string | null
-  onChange: (item: PositionItemLookupItem) => void
+  onChange: (item: PositionItemLookupItem | null) => void
 }
 
 export function PositionItemCombobox({
@@ -92,6 +89,20 @@ export function PositionItemCombobox({
             <CommandEmpty>{pt('noVacantFound')}</CommandEmpty>
 
             <CommandGroup>
+              {value && (
+                <CommandItem
+                  value='clear-pcn'
+                  onSelect={() => {
+                    onChange(null)
+                    setOpen(false)
+                    setSearch('')
+                  }}
+                  className='text-muted-foreground'
+                >
+                  {pt('clearSelection')}
+                </CommandItem>
+              )}
+
               {items.map((item) => (
                 <CommandItem
                   key={item.id}

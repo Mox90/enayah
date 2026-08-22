@@ -66,7 +66,8 @@
     "from": "من",
     "to": "إلى",
     "add": "أضف {item}",
-    "noRecords": "لم يتم العثور على سجلات {item}"
+    "noRecords": "لم يتم العثور على سجلات {item}",
+    "optional": "اختياري"
   },
 
   "auth": {
@@ -273,7 +274,10 @@
       "suspended": "موقوف",
       "deceased": "متوفى"
     },
-    "saving": "توفير {item}"
+    "saving": "توفير {item}",
+    "sponsor": "كفيل",
+    "issuingAuthority": "سلطة الإصدار",
+    "optional": "اختياري"
   },
   "departments": {
     "departmentName": "الأقسام",
@@ -351,11 +355,12 @@
     "editPositionItemSub": "تحديث تفاصيل رقم الوظيفة",
     "update": "تحديث",
     "updating": "جارٍ التحديث...",
-    "positionItemActions": "إجراءات رقم الوظيفة",
+    "positionItemActions": "إجراءات رقم عنصر الوظيفة",
     "deletePositionItem": "حذف رقم عنصر الوظيفة",
-    "searchPcnCombo": "ابحث عن رقم الوظيفة، القسم، المسمى الوظيفي...",
+    "searchPcnCombo": "ابحث عن رقم عنصر الوظيفة، القسم، المسمى الوظيفي...",
     "selectVacant": "اختر الوظيفة الشاغرة",
-    "noVacantFound": "لم يتم العثور على أي وظيفة شاغرة."
+    "noVacantFound": "لم يتم العثور على أي وظيفة شاغرة.",
+    "clearSelection": "إلغاء اختيار رقم عنصر الوظيفة"
   },
   "contracts": {
     "contract": "العقد",
@@ -370,6 +375,7 @@
     "partTime": "دوام جزئى",
     "contractual": "تعاقدي",
     "temporary": "مؤقت",
+    "pcn_alignment": "الم محاذاة موضع رقم العنصر الوظيفة",
     "locum": "مكان",
     "staffCategory": "فئة الموظفين",
     "civilian": "مدني",
@@ -383,7 +389,7 @@
     "temporary_assignment": "تكليف مؤقت",
     "legalAssignment": "رقم المهمة القانونية / رقم بند العمل",
     "legalAssignmentSub": "حدد بند الوظيفة الشاغرة الذي سيمول هذا الموظف.",
-    "pcnLabel": "معرف عنصر المنصب (PCN)",
+    "pcnLabel": "معرف عنصر الوظيفة (PCN)",
     "movementRemarks": "ملاحظات الحركة",
     "selectVacantPcnLabel": "حدد رقم الوظيفة الشاغرة",
     "actualAppointment": "الموعد الفعلي",
@@ -433,7 +439,48 @@
     "draft": "مسودة",
     "cancelled": "أُلغِيَ",
     "expired": "منتهي الصلاحية",
-    "notes": "ملاحظات العقد"
+    "notes": "ملاحظات العقد",
+    "employmentTerms": "بيانات التوظيف والعقد",
+    "employmentTermsSub": "تحديد بيانات التوظيف والعقد الأولي للموظف.",
+    "hireEffectiveDate": "تاريخ التعيين / السريان",
+    "hireEffectiveDateHint": "يُستخدم كتاريخ بداية التوظيف والعقد والتكليف والتعيين والتعويض المالي.",
+    "systemDefined": "محدد من النظام",
+    "selectedPcn": "رقم الوظيفة المختار:",
+    "appointmentDefaultsFromPcn": "يتم تعيين جهة ومسمى العمل الفعلي افتراضيًا من هذه الوظيفة.",
+    "movementRemarksPlaceholder": "أضف أي ملاحظات حول التكليف الرسمي الأولي...",
+    "actualWorkingAssignment": "التكليف الفعلي للعمل",
+    "optional": "اختياري",
+    "actualAssignmentHint": "يتم تعيين جهة ومسمى العمل الفعلي افتراضيًا وفقًا للتكليف الرسمي. قم بتغييره فقط إذا كان الموظف سيعمل فعليًا في إدارة أو وظيفة مختلفة.",
+    "appointmentRemarksPlaceholder": "أضف أي ملاحظات حول التكليف الفعلي للموظف...",
+    "pcnOptionalForMilitary": "رقم الوظيفة (PCN) اختياري للعسكريين."
+  },
+  "compensations": {
+    "compensationInformation": "التعويضات",
+    "compensationInformationSub": "سجّل الراتب الأساسي وتفاصيل التعويضات للموظف عند انطباقها.",
+    "noCompensation": "لم يتم إضافة تعويضات",
+    "noCompensationSub": "إضافة التعويضات اختيارية أثناء عملية المباشرة (التهيئة). يمكنك إضافتها عندما تتوفر تفاصيل الراتب.",
+    "addCompensation": "إضافة تعويض",
+    "removeCompensation": "إزالة التعويض",
+
+    "baseSalary": "الراتب الأساسي",
+    "effectiveDate": "تاريخ السريان",
+    "compensationEffectiveDateHint": "يتبع تاريخ السريان تاريخ بدء العقد الأولي.",
+    "systemDefined": "محدّد من قِبل النظام",
+    "approved": "مُعتمَد",
+    "reason": "السبب",
+    "reasonPlaceholder": "تعيين أولي",
+
+    "allowances": "البدلات",
+    "allowancesSub": "أضف بدلات التعويض المتكررة عند انطباقها.",
+    "addAllowance": "إضافة بدل",
+    "removeAllowance": "إزالة البدل",
+    "noAllowances": "لم يتم إضافة بدلات",
+    "noAllowancesSub": "أضف البدلات مثل السكن أو النقل عند انطباقها.",
+    "allowanceType": "نوع البدل",
+    "amount": "المبلغ",
+
+    "totalAllowances": "إجمالي البدلات",
+    "totalMonthlyCompensation": "إجمالي التعويض الشهري"
   },
   "credentials": {
     "createSuccess": "تم إنشاء {name}.",
@@ -681,7 +728,23 @@
     "familyNameEnRequiredError": "اسم العائلة باللغة الإنجليزية مطلوب.",
     "firstNameArRequiredError": "الاسم الأول باللغة العربية مطلوب.",
     "familyNameArRequiredError": "اسم العائلة باللغة العربية مطلوب.",
-    "dobRequiredError": "تاريخ الميلاد مطلوب."
+    "dobRequiredError": "تاريخ الميلاد مطلوب.",
+    "identificationIssueDateRequiredError": "تاريخ الإصدار مطلوب عند إدخال رقم الهوية.",
+    "identificationExpiryDateRequiredError": "تاريخ الانتهاء مطلوب عند إدخال رقم الهوية.",
+    "identificationSponsorRequiredError": "الكفيل مطلوب للإقامة.",
+    "identificationIssuingAuthorityRequiredError": "جهة الإصدار مطلوبة عند إدخال رقم الهوية.",
+    "identificationExpiryDateAfterIssueDateError": "يجب أن يكون تاريخ الانتهاء بعد تاريخ الإصدار.",
+    "hireDateRequiredError": "تاريخ التعيين / السريان مطلوب.",
+    "contractEndDateRequiredError": "تاريخ انتهاء العقد مطلوب.",
+    "contractEndDateAfterHireDateError": "يجب أن يكون تاريخ انتهاء العقد بعد تاريخ التعيين / السريان.",
+    "employmentTypeRequiredError": "نوع التوظيف مطلوب.",
+    "staffCategoryRequiredError": "فئة الموظف مطلوبة.",
+    "positionItemRequiredError": "رقم عنصر الوظيفة (PCN) مطلوب.",
+    "baseSalaryRequiredError": "يجب أن يكون الراتب الأساسي أكبر من صفر.",
+    "compensationEffectiveDateError": "يجب أن يتطابق تاريخ سريان التعويض مع تاريخ بداية العقد.",
+    "compensationRequiredForAllowancesError": "بيانات التعويض مطلوبة عند إضافة البدلات.",
+    "allowanceTypeRequiredError": "نوع البدل مطلوب.",
+    "allowanceAmountRequiredError": "يجب أن تكون قيمة البدل أكبر من صفر."
   },
   "allowanceTypes": {
     "housing": "بدل سكن",
@@ -991,6 +1054,90 @@
       "title": "حذف {item}؟",
       "description": "هل أنت متأكد من رغبتك في حذف {item}؟ لا يمكن التراجع عن هذا الإجراء.",
       "deleting": "جارٍ الحذف..."
-    }
+    },
+    "personalInfoDescription": "البيانات الأساسية لهوية الموظف.",
+
+    "loadError": "تعذر تحميل البيانات الشخصية",
+    "loadErrorDescription": "تعذر تحميل السجلات الشخصية للموظف. يرجى المحاولة مرة أخرى.",
+    "notFound": "الموظف غير موجود",
+    "notFoundDescription": "تعذر العثور على ملف الموظف المطلوب أو قد لا يكون متاحًا بعد الآن."
+  },
+  "onboarding": {
+    "optional": "اختياري",
+
+    "reviewPersonalInformation": "المعلومات الشخصية",
+    "reviewPersonalInformationSub": "راجع البيانات الشخصية وبيانات الهوية للموظف قبل الإرسال.",
+
+    "employeeNumber": "الرقم الوظيفي",
+    "englishName": "الاسم باللغة الإنجليزية",
+    "arabicName": "الاسم باللغة العربية",
+    "gender": "الجنس",
+    "dateOfBirth": "تاريخ الميلاد",
+    "nationality": "الجنسية",
+
+    "reviewContactInformation": "بيانات الاتصال والهوية",
+    "reviewContactInformationSub": "راجع بيانات الاتصال الأساسية وبيانات الهوية للموظف.",
+
+    "primaryEmail": "البريد الإلكتروني الأساسي",
+    "primaryMobile": "رقم الجوال الأساسي",
+    "identifications": "الهويات",
+    "identificationType": "نوع الهوية",
+    "identificationNumber": "رقم الهوية",
+    "issueDate": "تاريخ الإصدار",
+    "expiryDate": "تاريخ الانتهاء",
+
+    "reviewEmploymentAssignment": "التوظيف والتكليف",
+    "reviewEmploymentAssignmentSub": "راجع بيانات التوظيف والعقد والتكليف الرسمي ومقر العمل الفعلي للموظف.",
+
+    "employmentTerms": "بيانات التوظيف",
+    "hireDate": "تاريخ التعيين",
+    "startDate": "تاريخ المباشرة",
+    "employmentType": "نوع التوظيف",
+    "staffCategory": "فئة الموظف",
+
+    "contract": "العقد",
+    "contractStart": "بداية العقد",
+    "contractEnd": "نهاية العقد",
+    "contractType": "نوع العقد",
+    "contractStatus": "حالة العقد",
+
+    "legalAssignment": "التكليف الرسمي",
+    "positionItemPcn": "رقم الوظيفة / PCN",
+    "noPcnAssigned": "لا يوجد رقم وظيفة معين",
+    "movementType": "نوع الحركة",
+    "militaryNoPcnReviewHint": "لم يتم تعيين رقم وظيفة. بالنسبة للموظفين العسكريين، سيتم اعتماد الإدارة والمسمى الوظيفي المحددين كتعيين رسمي أولي.",
+
+    "actualWorkingAssignment": "التكليف الفعلي",
+    "actualDepartment": "الإدارة الفعلية",
+    "actualPosition": "المسمى الوظيفي الفعلي",
+    "appointmentType": "نوع التكليف",
+
+    "reviewCompensation": "التعويضات",
+    "reviewCompensationSub": "راجع الراتب الأساسي والبدلات الأولية للموظف.",
+
+    "effectiveDate": "تاريخ السريان",
+    "baseSalary": "الراتب الأساسي",
+    "status": "الحالة",
+    "reason": "السبب",
+
+    "allowances": "البدلات",
+    "reviewAllowancesSub": "البدلات الدورية المدرجة ضمن التعويضات الأولية للموظف.",
+    "noAllowancesAdded": "لم تتم إضافة بدلات.",
+    "totalAllowances": "إجمالي البدلات",
+    "totalMonthlyCompensation": "إجمالي التعويض الشهري",
+
+    "noCompensationDetails": "لم تتم إضافة بيانات التعويضات",
+    "noCompensationReviewSub": "لم يتم تضمين بيانات التعويضات ضمن عملية التعيين هذه.",
+
+    "reviewCredentials": "المؤهلات والاعتمادات",
+    "reviewCredentialsSub": "راجع عدد المؤهلات العلمية والاعتمادات المهنية المدرجة ضمن عملية التعيين.",
+
+    "degrees": "المؤهلات العلمية",
+    "boards": "البوردات",
+    "fellowships": "الزمالات",
+    "memberships": "العضويات",
+    "licenses": "التراخيص",
+    "lifeSupport": "دورات دعم الحياة",
+    "malpractice": "التأمين ضد الأخطاء الطبية"
   }
 }

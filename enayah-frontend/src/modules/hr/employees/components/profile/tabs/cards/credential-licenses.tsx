@@ -82,20 +82,10 @@ export function CredentialLicenses({
           >
             <div className='flex min-w-0 items-center gap-2 sm:gap-3'>
               {/* Section icon */}
-              <div
-                className={cn(
-                  'flex h-9 w-9 shrink-0 items-center justify-center',
-                  'rounded-lg bg-blue-500/10',
-                  'sm:h-10 sm:w-10 sm:rounded-xl',
-                )}
-              >
+              <div className='flex size-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 sm:size-10 sm:rounded-xl'>
                 <FileBadge2
                   aria-hidden='true'
-                  className={cn(
-                    'h-4 w-4 text-blue-600',
-                    'sm:h-5 sm:w-5',
-                    'dark:text-blue-400',
-                  )}
+                  className='size-4 text-blue-600 sm:size-5 dark:text-blue-400'
                 />
               </div>
 
@@ -185,7 +175,7 @@ export function CredentialLicenses({
               <div className='mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-muted'>
                 <FileBadge2
                   aria-hidden='true'
-                  className='h-5 w-5 text-muted-foreground'
+                  className='size-5 text-muted-foreground'
                 />
               </div>
 
@@ -215,11 +205,8 @@ export function CredentialLicenses({
             <div
               className={cn(
                 'grid grid-cols-1 items-start gap-4',
-
                 licenses.length === 2 && 'lg:grid-cols-2',
-
                 licenses.length === 3 && 'lg:grid-cols-2 xl:grid-cols-3',
-
                 licenses.length >= 4 &&
                   'lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4',
               )}
