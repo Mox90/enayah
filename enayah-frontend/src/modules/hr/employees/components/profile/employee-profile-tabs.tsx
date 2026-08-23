@@ -31,6 +31,7 @@ interface Props {
 
 const tabTriggerClass = `
   group
+  after:hidden
   min-w-fit
   gap-2
   rounded-md
