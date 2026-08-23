@@ -9,6 +9,7 @@ import {
   User,
   UserRound,
 } from 'lucide-react'
+import { gsap } from 'gsap'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useLocale, useTranslations } from 'next-intl'
@@ -52,6 +53,7 @@ import {
   VisaDialog,
 } from '@/components/dialogs/personal-detail-dialogs'
 import { useState } from 'react'
+import { useGsapBounceIn } from '@/hooks/use-gsap-bounce-in'
 
 export type Gender = 'male' | 'female'
 
@@ -199,6 +201,12 @@ const PersonalTab = ({ personal }: Props) => {
     useDialogState<EmployeePersonalDetails['emergencyContacts'][number]>()
   const visa = useDialogState<EmployeePersonalDetails['visas'][number]>()
   const employeePersonal = useEmployeePersonalMutations(personal.id)
+  const dialogContentRef = useGsapBounceIn({
+    enabled: deleteTarget !== null,
+    // initialScale: 0.72,
+    // overshootScale: 2.12,
+    // settleScale: 0.95,
+  })
   const fullNameEn = [
     personal.firstNameEn,
     personal.secondNameEn,
@@ -623,7 +631,10 @@ const PersonalTab = ({ personal }: Props) => {
               }
             }}
           >
-            <AlertDialogContent>
+            {/* <AlertDialogContent
+              ref={dialogContentRef}
+              className='data-[state=open]:animate-none'
+            >
               <AlertDialogHeader>
                 <AlertDialogTitle>
                   {pt('deleteConfirmation.title', {
@@ -658,7 +669,98 @@ const PersonalTab = ({ personal }: Props) => {
                     : ct('delete')}
                 </AlertDialogAction>
               </AlertDialogFooter>
-            </AlertDialogContent>
+            </AlertDialogContent> */}
+            {/* <AlertDialogContent className='border-0 bg-transparent p-0 shadow-none data-[state=open]:animate-none'>
+              <div
+                ref={dialogContentRef}
+                className='rounded-lg border bg-background p-6 shadow-lg'
+              >
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                    {pt('deleteConfirmation.title', {
+                      item: deleteTargetLabel,
+                    })}
+                  </AlertDialogTitle>
+
+                  <AlertDialogDescription>
+                    {pt('deleteConfirmation.description', {
+                      item: deleteTargetLabel,
+                    })}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <AlertDialogFooter className='mt-6'>
+                  <AlertDialogCancel disabled={isDeletePending}>
+                    {ct('cancel')}
+                  </AlertDialogCancel>
+
+                  <AlertDialogAction
+                    className={buttonVariants({
+                      variant: 'destructive',
+                    })}
+                    disabled={!deleteTarget || isDeletePending}
+                    onClick={(event) => {
+                      event.preventDefault()
+                      confirmDelete()
+                    }}
+                  >
+                    {isDeletePending
+                      ? pt('deleteConfirmation.deleting')
+                      : ct('delete')}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </div>
+            </AlertDialogContent> */}
+            <AlertDialog
+              open={deleteTarget !== null}
+              onOpenChange={(open) => {
+                if (!open && !isDeletePending) {
+                  setDeleteTarget(null)
+                }
+              }}
+            >
+              <AlertDialogContent className='bg-transparent p-0 ring-0 data-open:animate-none data-closed:animate-none'>
+                <div
+                  ref={dialogContentRef}
+                  className='grid w-full gap-4 rounded-xl bg-popover p-4 text-popover-foreground ring-1 ring-foreground/10'
+                >
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {pt('deleteConfirmation.title', {
+                        item: deleteTargetLabel,
+                      })}
+                    </AlertDialogTitle>
+
+                    <AlertDialogDescription>
+                      {pt('deleteConfirmation.description', {
+                        item: deleteTargetLabel,
+                      })}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+
+                  <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isDeletePending}>
+                      {ct('cancel')}
+                    </AlertDialogCancel>
+
+                    <AlertDialogAction
+                      className={buttonVariants({
+                        variant: 'destructive',
+                      })}
+                      disabled={!deleteTarget || isDeletePending}
+                      onClick={(event) => {
+                        event.preventDefault()
+                        confirmDelete()
+                      }}
+                    >
+                      {isDeletePending
+                        ? pt('deleteConfirmation.deleting')
+                        : ct('delete')}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </div>
+              </AlertDialogContent>
+            </AlertDialog>
           </AlertDialog>
 
           <IdentificationDialog

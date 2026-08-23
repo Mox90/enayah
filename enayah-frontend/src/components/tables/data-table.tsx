@@ -175,42 +175,6 @@ export function DataTable<TData extends { id: string }, TValue>({
                 </TableRow>
               ))
             ) : (
-              // table.getRowModel().rows.map((row) => {
-              //   const original = row.original as EmployeeDirectoryRow
-
-              //   const status = original.employmentStatus as
-              //     | EmploymentStatus
-              //     | null
-              //     | undefined
-
-              //   const statusConfig =
-              //     status && status in employmentStatusStyles
-              //       ? employmentStatusStyles[status]
-              //       : null
-
-              //   return (
-              //     <TableRow
-              //       key={row.id}
-              //       data-state={row.getIsSelected() && 'selected'}
-              //       className={cn(
-              //         'transition-colors duration-150',
-              //         statusConfig?.rowClassName,
-
-              //         row.getIsSelected() &&
-              //           'bg-primary/10 hover:bg-primary/15',
-              //       )}
-              //     >
-              //       {row.getVisibleCells().map((cell) => (
-              //         <TableCell key={cell.id}>
-              //           {flexRender(
-              //             cell.column.columnDef.cell,
-              //             cell.getContext(),
-              //           )}
-              //         </TableCell>
-              //       ))}
-              //     </TableRow>
-              //   )
-              // })
               <DataTableEmpty columns={columns.length} />
             )}
           </TableBody>

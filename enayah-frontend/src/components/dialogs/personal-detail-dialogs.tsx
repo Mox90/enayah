@@ -82,24 +82,6 @@ const emptyIdentification: Identification = {
   fileId: null,
 }
 
-// interface ApiErrorResponse {
-//   message?: string
-
-//   error?: {
-//     message?: string
-
-//     issues?: Array<{
-//       path?: Array<string | number>
-//       message?: string
-//     }>
-//   }
-
-//   issues?: Array<{
-//     path?: Array<string | number>
-//     message?: string
-//   }>
-// }
-
 type ApiErrorFallbacks = {
   validationFailed: string
   requestFailed: string
