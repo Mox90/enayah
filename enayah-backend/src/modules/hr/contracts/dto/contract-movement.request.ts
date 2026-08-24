@@ -74,9 +74,10 @@ export const ApplyContractMovementSchema = z.object({
      */
     officialPositionId: z.uuid().nullable().optional(),
 
-    actions: z
-      .array(ContractMovementActionSchema)
-      .min(1, 'At least one movement action is required'),
+    // actions: z
+    //   .array(ContractMovementActionSchema)
+    //   .min(1, 'At least one movement action is required'),
+    actions: z.array(ContractMovementActionSchema).default([]),
 
     remarks: z.string().trim().max(1000).nullable().optional(),
   }),

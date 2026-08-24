@@ -8,6 +8,7 @@ import { employeeQueryKeys } from '../../employees/hooks/employee-query-keys'
 import { contractService } from '../services/contract.service'
 
 import type { ApplyContractMovementPayload } from '../types/contract-movement.types'
+import { useTranslations } from 'next-intl'
 
 type ApiErrorResponse = {
   message?: string
@@ -15,6 +16,8 @@ type ApiErrorResponse = {
 
 export function useApplyContractMovement(employeeId: string) {
   const queryClient = useQueryClient()
+  const ert = useTranslations('errors')
+  const cnt = useTranslations('contracts')
 
   return useMutation({
     mutationFn: (payload: ApplyContractMovementPayload) =>
@@ -41,13 +44,13 @@ export function useApplyContractMovement(employeeId: string) {
         queryKey: ['contract-renewal-defaults', variables.currentContractId],
       })
 
-      toast.success('Contract amended successfully', {
+      toast.success(cnt('amendSuccess'), {
         duration: 5000,
       })
     },
 
     onError: (error: unknown) => {
-      let message = 'Failed to amend contract'
+      let message = ert('failedAmend')
 
       if (axios.isAxiosError<ApiErrorResponse>(error)) {
         message = error.response?.data?.message ?? message

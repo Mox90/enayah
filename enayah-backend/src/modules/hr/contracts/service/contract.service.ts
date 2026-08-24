@@ -1524,11 +1524,19 @@ export const ContractService = {
       // 18. Create movement actions
       // ----------------------------------
 
-      const movementActions = await ContractMovementActionRepository.createMany(
-        tx,
-        movement.id,
-        actions,
-      )
+      // const movementActions = await ContractMovementActionRepository.createMany(
+      //   tx,
+      //   movement.id,
+      //   actions,
+      // )
+      const movementActions =
+        actions.length > 0
+          ? await ContractMovementActionRepository.createMany(
+              tx,
+              movement.id,
+              actions,
+            )
+          : []
 
       // ----------------------------------
       // 19. Optional compensation

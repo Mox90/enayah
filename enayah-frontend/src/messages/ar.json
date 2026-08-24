@@ -488,7 +488,6 @@
     "renewalMovementRemarksPlaceholder": "ملاحظات اختيارية حول التجديد أو الترقية أو التخفيض الوظيفي أو النقل أو مواءمة البند.",
     "renewalContractNotesPlaceholder": "ملاحظات اختيارية للعقد المجدد.",
 
-    "amendContract": "تعديل العقد",
     "newPositionAfterPromotion": "المسمى الجديد — ترقية",
     "newLegalPositionSub": "حدد المسمى الوظيفي القانوني الجديد الذي سيصبح ساريًا من تاريخ بداية التجديد.",
 
@@ -520,8 +519,6 @@
     "amendContract": "تعديل العقد",
     "amendingContract": "جارٍ تعديل العقد...",
     "amendContractSub": "تسجيل تغيير قانوني يصبح ساريًا خلال مدة العقد الحالي النشط.",
-
-    "amendment": "تعديل",
 
     "currentContractPeriod": "مدة العقد الحالية",
     "amendmentContractPeriodSub": "تبقى مدة العقد دون تغيير. ينشئ هذا التعديل حركة قانونية جديدة ضمن العقد الحالي.",
@@ -558,7 +555,8 @@
     "amendWithoutCompensationPromotionMessage": "يتضمن هذا التعديل ترقية، ولكن لم يتم إدخال أي تعديلات على التعويضات. ستبقى التعويضات الحالية للموظف دون تغيير. هل تريد المتابعة؟",
     "amendWithoutCompensationDemotionMessage": "يتضمن هذا التعديل تخفيضًا وظيفيًا، ولكن لم يتم إدخال أي تعديلات على التعويضات. ستبقى التعويضات الحالية للموظف دون تغيير. هل تريد المتابعة؟",
 
-    "continueAmendment": "متابعة التعديل"
+    "continueAmendment": "متابعة التعديل",
+    "amendSuccess": "تم تعديل العقد بنجاح"
   },
   "compensations": {
     "compensationInformation": "التعويضات",
@@ -854,7 +852,8 @@
     "dobFutureDateError": "لا يمكن أن يكون تاريخ الميلاد في المستقبل.",
     "invalidEmailAddressError": "يرجى إدخال عنوان بريد إلكتروني صالح (مثال: name@domain.com).",
     "identificationIssueDateFutureError": "لا يمكن أن يكون تاريخ الإصدار بعد تاريخ اليوم.",
-    "identificationExpiryDateFutureError": "يجب أن يكون تاريخ الانتهاء بعد تاريخ اليوم."
+    "identificationExpiryDateFutureError": "يجب أن يكون تاريخ الانتهاء بعد تاريخ اليوم.",
+    "failedAmend": "فشل تعديل العقد"
   },
   "allowanceTypes": {
     "housing": "بدل سكن",

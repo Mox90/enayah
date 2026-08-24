@@ -516,11 +516,8 @@
     "transferRequiresDepartmentChange": "Transfer requires a change in the employee's legal department.",
     "pcnAlignmentNoChange": "PCN alignment must change the PCN or align the employee with different department or position data from the selected PCN.",
     "fromPcn": "From PCN",
-    "amendContract": "Amend Contract",
     "amendingContract": "Amending Contract...",
     "amendContractSub": "Record a legal change that takes effect during the current active contract.",
-
-    "amendment": "Amendment",
 
     "currentContractPeriod": "Current Contract Period",
     "amendmentContractPeriodSub": "The contract period remains unchanged. This amendment creates a new legal movement within the current contract.",
@@ -557,7 +554,8 @@
     "amendWithoutCompensationPromotionMessage": "This amendment includes a promotion, but no compensation changes have been entered. The employee's existing compensation will remain unchanged. Continue anyway?",
     "amendWithoutCompensationDemotionMessage": "This amendment includes a demotion, but no compensation changes have been entered. The employee's existing compensation will remain unchanged. Continue anyway?",
 
-    "continueAmendment": "Continue Amendment"
+    "continueAmendment": "Continue Amendment",
+    "amendSuccess": "Contract amended successfully"
   },
   "compensations": {
     "compensationInformation": "Compensation",
@@ -853,7 +851,8 @@
     "dobFutureDateError": "Date of birth cannot be in the future.",
     "invalidEmailAddressError": "Please enter a valid email address (example: name@domain.com).",
     "identificationIssueDateFutureError": "Issue date cannot be later than today.",
-    "identificationExpiryDateFutureError": "Expiry date must be later than today."
+    "identificationExpiryDateFutureError": "Expiry date must be later than today.",
+    "failedAmend": "Failed to amend contract"
   },
   "allowanceTypes": {
     "housing": "Housing Allowance",

@@ -423,7 +423,13 @@ function ContractAmendmentDialogContent({
 
   let actionValidationMessage: string | null = null
 
-  if (actions.length === 0) {
+  const isStandaloneMilitaryPcnRemoval =
+    isMilitary &&
+    removeCurrentPcn &&
+    positionItemChanged &&
+    finalPositionItemId === null
+
+  if (actions.length === 0 && !isStandaloneMilitaryPcnRemoval) {
     actionValidationMessage = ct('amendmentActionRequired')
   } else if (hasPcnAlignment && !alignedPositionItemId) {
     actionValidationMessage = ct('pcnAlignmentTargetRequired')
