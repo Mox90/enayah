@@ -516,7 +516,49 @@
     "promotionDemotionRequiresPositionChange": "تتطلب الترقية أو التخفيض الوظيفي تغيير المسمى الوظيفي القانوني للموظف.",
     "transferRequiresDepartmentChange": "يتطلب النقل تغيير القسم القانوني للموظف.",
     "pcnAlignmentNoChange": "يجب أن تؤدي مواءمة البند الوظيفي إلى تغيير البند أو مواءمة الموظف مع قسم أو مسمى وظيفي مختلف مرتبط بالبند المحدد.",
-    "fromPcn": "من البند الوظيفي"
+    "fromPcn": "من البند الوظيفي",
+    "amendContract": "تعديل العقد",
+    "amendingContract": "جارٍ تعديل العقد...",
+    "amendContractSub": "تسجيل تغيير قانوني يصبح ساريًا خلال مدة العقد الحالي النشط.",
+
+    "amendment": "تعديل",
+
+    "currentContractPeriod": "مدة العقد الحالية",
+    "amendmentContractPeriodSub": "تبقى مدة العقد دون تغيير. ينشئ هذا التعديل حركة قانونية جديدة ضمن العقد الحالي.",
+
+    "amendmentEffectiveDate": "تاريخ سريان التعديل",
+    "amendmentEffectiveDateSub": "حدد التاريخ الذي سيصبح فيه التكليف القانوني الجديد ساريًا.",
+
+    "currentMovementPeriod": "الحركة القانونية الحالية: من {start} إلى {end}",
+
+    "amendmentEffectiveDateRequired": "حدد تاريخ سريان التعديل.",
+    "amendmentEffectiveDateAfterMovementStart": "يجب أن يكون تاريخ سريان التعديل بعد تاريخ بداية الحركة القانونية الحالية.",
+    "amendmentEffectiveDateAfterContractEnd": "لا يمكن أن يكون تاريخ سريان التعديل بعد تاريخ انتهاء العقد.",
+    "amendmentEffectiveDateAfterMovementEnd": "لا يمكن أن يكون تاريخ سريان التعديل بعد تاريخ انتهاء الحركة القانونية الحالية.",
+
+    "amendmentActions": "إجراءات التعديل",
+    "amendmentActionsSub": "حدد التغييرات القانونية التي ستصبح سارية في تاريخ سريان التعديل.",
+    "amendmentActionRequired": "حدد إجراء تعديل واحدًا على الأقل.",
+
+    "amendmentNoChange": "يجب أن يؤدي التعديل إلى تغيير القسم القانوني أو المسمى الوظيفي القانوني أو البند الوظيفي.",
+
+    "amendmentResultingAssignmentSub": "هذا هو التكليف القانوني للموظف الذي سيصبح ساريًا من تاريخ سريان التعديل.",
+
+    "removeMilitaryPcn": "إلغاء البند الوظيفي الحالي",
+    "removeMilitaryPcnSub": "لن يكون للموظف بند وظيفي بعد هذا التعديل. هذا الخيار متاح للموظفين العسكريين فقط.",
+
+    "amendmentCompensationSub": "تعديل التعويضات اختياري. أي تعديلات يتم إدخالها هنا ستصبح سارية في تاريخ سريان التعديل.",
+
+    "amendmentNotes": "ملاحظات التعديل",
+    "amendmentNotesSub": "أضف ملاحظات اختيارية توضح تفاصيل تعديل العقد.",
+
+    "amendmentMovementRemarksPlaceholder": "ملاحظات اختيارية حول الترقية أو التخفيض الوظيفي أو النقل أو مواءمة البند الوظيفي أو تفاصيل التعديل الأخرى.",
+
+    "amendWithoutCompensationTitle": "المتابعة بدون تعديل التعويضات؟",
+    "amendWithoutCompensationPromotionMessage": "يتضمن هذا التعديل ترقية، ولكن لم يتم إدخال أي تعديلات على التعويضات. ستبقى التعويضات الحالية للموظف دون تغيير. هل تريد المتابعة؟",
+    "amendWithoutCompensationDemotionMessage": "يتضمن هذا التعديل تخفيضًا وظيفيًا، ولكن لم يتم إدخال أي تعديلات على التعويضات. ستبقى التعويضات الحالية للموظف دون تغيير. هل تريد المتابعة؟",
+
+    "continueAmendment": "متابعة التعديل"
   },
   "compensations": {
     "compensationInformation": "التعويضات",

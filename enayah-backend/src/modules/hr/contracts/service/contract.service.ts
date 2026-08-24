@@ -1005,6 +1005,10 @@ export const ContractService = {
         dto.currentContractId,
       )
 
+      if (!currentContract) {
+        throw new AppError('Contract not found', 404)
+      }
+
       if (currentContract.status !== 'active') {
         throw new AppError('Only active contracts can receive a movement', 400)
       }
@@ -1022,6 +1026,12 @@ export const ContractService = {
         throw new AppError('Employment not found', 404)
       }
 
+      /*
+       * Civilian and contractual employees
+       * must have a PCN.
+       *
+       * Military employees may have no PCN.
+       */
       const requiresPositionItem =
         employment.staffCategory === 'civilian' ||
         employment.staffCategory === 'contractual'
@@ -1047,6 +1057,21 @@ export const ContractService = {
       const currentMovementEndDate =
         latestMovement.endDate ?? currentContract.endDate
 
+      /*
+       * Example:
+       *
+       * current movement:
+       * 2020-02-20 -> 2021-02-19
+       *
+       * amendment effective:
+       * 2020-06-21
+       *
+       * previous movement:
+       * 2020-02-20 -> 2020-06-20
+       *
+       * new movement:
+       * 2020-06-21 -> 2021-02-19
+       */
       if (dto.effectiveDate <= latestMovement.startDate) {
         throw new AppError(
           'Movement effective date must be after the current movement start date',
@@ -1089,37 +1114,60 @@ export const ContractService = {
         )
       }
 
-      /**
-       * PCN alignment is intentionally a pure action:
+      /*
+       * IMPORTANT:
        *
-       * same department
-       * same position
-       * different PCN
+       * PCN alignment CAN be combined with:
        *
-       * Therefore it should not be combined with transfer,
-       * promotion or demotion.
+       * promotion
+       * demotion
+       * transfer
+       *
+       * Examples:
+       *
+       * ['promotion', 'pcn_alignment']
+       *
+       * ['transfer', 'pcn_alignment']
+       *
+       * ['promotion', 'transfer', 'pcn_alignment']
+       *
+       * Therefore there is intentionally no rule
+       * preventing PCN alignment combinations here.
        */
-      if (hasPcnAlignment && actions.length > 1) {
-        throw new AppError(
-          'PCN alignment cannot be combined with another movement action',
-          400,
-        )
-      }
 
       // ----------------------------------
       // 6. Resolve requested PCN
       // ----------------------------------
 
-      /**
-       * If positionItemId is omitted, keep the employee's
-       * current PCN.
+      /*
+       * We deliberately distinguish:
        *
-       * This makes a simple transfer request possible without
-       * repeatedly sending the existing PCN.
+       * positionItemId omitted
+       *   -> retain current PCN
+       *
+       * positionItemId: UUID
+       *   -> explicitly use that PCN
+       *
+       * positionItemId: null
+       *   -> explicitly have no PCN
+       *
+       * Explicit null is useful for Military staff.
        */
-      const requestedPositionItemId =
-        dto.movement.positionItemId ?? latestMovement.positionItemId ?? null
+      const positionItemWasProvided = Object.prototype.hasOwnProperty.call(
+        dto.movement,
+        'positionItemId',
+      )
 
+      const requestedPositionItemId = positionItemWasProvided
+        ? (dto.movement.positionItemId ?? null)
+        : (latestMovement.positionItemId ?? null)
+
+      /*
+       * Civilian and contractual employees
+       * must retain a PCN after the amendment.
+       *
+       * Military employees may have null.
+       */
       if (requiresPositionItem && !requestedPositionItemId) {
         throw new AppError(
           'Position item is required for civilian and contractual employees',
@@ -1130,16 +1178,66 @@ export const ContractService = {
       const isSamePositionItem =
         latestMovement.positionItemId === requestedPositionItemId
 
-      const pcnChanged = !isSamePositionItem
+      const pcnChanged =
+        latestMovement.positionItemId !== requestedPositionItemId
+
+      /*
+       * Military may explicitly drop the current
+       * PCN without choosing another one.
+       *
+       * Example:
+       *
+       * PCN-100 -> null
+       *
+       * This is not PCN alignment because there
+       * is no target PCN being aligned to.
+       */
+      const isRemovingPositionItem =
+        latestMovement.positionItemId !== null &&
+        requestedPositionItemId === null
+
+      /*
+       * Selecting ANOTHER PCN must be intentional.
+       *
+       * Promotion / demotion / transfer may retain
+       * the same PCN without PCN alignment.
+       *
+       * Military PCN removal is also allowed
+       * without PCN alignment.
+       */
+      if (pcnChanged && !isRemovingPositionItem && !hasPcnAlignment) {
+        throw new AppError(
+          'Changing the position item requires a PCN alignment action',
+          400,
+        )
+      }
+
+      /*
+       * PCN Alignment always requires an actual
+       * target PCN.
+       *
+       * This includes Military employees.
+       */
+      if (hasPcnAlignment && !requestedPositionItemId) {
+        throw new AppError('PCN alignment requires a position item', 400)
+      }
+
+      // ----------------------------------
+      // 7. Resolve target PCN
+      // ----------------------------------
 
       let targetPositionItem = null
 
       if (requestedPositionItemId) {
-        /**
+        /*
          * Same PCN:
          *
-         * The PCN is already filled by this employee.
-         * Do NOT run assignIfAvailable().
+         * Employee already occupies it.
+         * Do not call assignIfAvailable().
+         *
+         * Different PCN:
+         *
+         * It must be vacant/available.
          */
         targetPositionItem = isSamePositionItem
           ? await PositionItemRepository.findById(tx, requestedPositionItemId)
@@ -1159,40 +1257,65 @@ export const ContractService = {
       }
 
       // ----------------------------------
-      // 7. Resolve target legal state
+      // 8. Resolve resulting legal state
       // ----------------------------------
 
-      /**
-       * Explicit movement values have highest priority.
+      /*
+       * CRITICAL BUSINESS RULE:
        *
-       * Same PCN:
-       * inherit the employee's current legal state.
+       * PCN assignment and employee LEGAL
+       * assignment are separate concepts.
        *
-       * New PCN:
-       * default to the new PCN's department/position.
+       * Therefore:
        *
-       * IMPORTANT:
+       * Promotion/Demotion:
+       * legal position may change while PCN stays.
        *
-       * position_items.departmentId represents PCN ownership.
+       * Transfer:
+       * legal department may change while PCN stays.
        *
-       * contract_movements.officialDepartmentId represents
-       * employee legal assignment.
+       * We DO NOT require:
        *
-       * They are allowed to differ.
+       * officialDepartmentId === PCN.departmentId
+       *
+       * or:
+       *
+       * officialPositionId === PCN.positionId
+       *
+       * unless PCN Alignment is explicitly selected.
        */
-      const officialDepartmentId =
-        dto.movement.officialDepartmentId ??
-        (isSamePositionItem
-          ? latestMovement.officialDepartmentId
-          : targetPositionItem?.departmentId) ??
-        latestMovement.officialDepartmentId
 
-      const officialPositionId =
-        dto.movement.officialPositionId ??
-        (isSamePositionItem
-          ? latestMovement.officialPositionId
-          : targetPositionItem?.positionId) ??
-        latestMovement.officialPositionId
+      let officialDepartmentId =
+        dto.movement.officialDepartmentId ?? latestMovement.officialDepartmentId
+
+      let officialPositionId =
+        dto.movement.officialPositionId ?? latestMovement.officialPositionId
+
+      /*
+       * PCN Alignment makes the selected PCN
+       * authoritative for the resulting legal state.
+       *
+       * This also makes combinations meaningful:
+       *
+       * PCN Alignment + Promotion
+       * -> selected PCN position must result
+       *    in a changed legal position.
+       *
+       * PCN Alignment + Transfer
+       * -> selected PCN department must result
+       *    in a changed legal department.
+       */
+      if (hasPcnAlignment) {
+        if (!targetPositionItem) {
+          throw new AppError(
+            'Selected position item could not be resolved for PCN alignment',
+            400,
+          )
+        }
+
+        officialDepartmentId = targetPositionItem.departmentId
+        officialPositionId = targetPositionItem.positionId
+      }
 
       if (!officialDepartmentId) {
         throw new AppError('Official department is required for movement', 400)
@@ -1203,7 +1326,7 @@ export const ContractService = {
       }
 
       // ----------------------------------
-      // 8. Determine actual changes
+      // 9. Determine actual changes
       // ----------------------------------
 
       const departmentChanged =
@@ -1213,134 +1336,99 @@ export const ContractService = {
         officialPositionId !== latestMovement.officialPositionId
 
       // ----------------------------------
-      // 9. Validate transfer
+      // 10. Validate legal change -> action
       // ----------------------------------
 
-      /**
-       * If department changes, the movement MUST
-       * explicitly contain transfer.
+      /*
+       * A department change must be explained by:
+       *
+       * transfer
+       *
+       * OR
+       *
+       * PCN alignment.
+       *
+       * Alignment may itself change the resulting
+       * legal department because the selected PCN
+       * becomes authoritative.
        */
-      if (departmentChanged && !hasTransfer) {
+      if (departmentChanged && !hasTransfer && !hasPcnAlignment) {
         throw new AppError(
-          'Changing the official department requires a transfer action',
+          'Changing the official department requires a transfer or PCN alignment action',
           400,
         )
       }
 
-      /**
-       * Conversely, a transfer should actually change
-       * the official department.
+      /*
+       * A position change must be explained by:
+       *
+       * promotion
+       * demotion
+       * or PCN alignment.
+       */
+      if (
+        positionChanged &&
+        !hasPromotion &&
+        !hasDemotion &&
+        !hasPcnAlignment
+      ) {
+        throw new AppError(
+          'Changing the official position requires a promotion, demotion, or PCN alignment action',
+          400,
+        )
+      }
+
+      // ----------------------------------
+      // 11. Validate action -> actual change
+      // ----------------------------------
+
+      /*
+       * If transfer is explicitly selected,
+       * department must actually change.
        */
       if (hasTransfer && !departmentChanged) {
         throw new AppError(
-          'Transfer requires a change of official department',
+          'Transfer requires a change in official department',
           400,
         )
       }
 
-      // ----------------------------------
-      // 10. Validate promotion / demotion
-      // ----------------------------------
-
-      /**
-       * A position change requires either promotion
-       * or demotion.
-       */
-      if (positionChanged && !hasPromotion && !hasDemotion) {
-        throw new AppError(
-          'Changing the official position requires a promotion or demotion action',
-          400,
-        )
-      }
-
-      /**
-       * Promotion/demotion must actually change
-       * the official position.
+      /*
+       * Promotion/Demotion must actually result
+       * in a different LEGAL position.
+       *
+       * PCN itself may remain unchanged.
        */
       if ((hasPromotion || hasDemotion) && !positionChanged) {
         throw new AppError(
-          'Promotion or demotion requires a change of official position',
-          400,
-        )
-      }
-
-      /**
-       * NAFH business rule:
-       *
-       * promotion/demotion must use another PCN.
-       */
-      if ((hasPromotion || hasDemotion) && !pcnChanged) {
-        throw new AppError(
-          'Promotion or demotion requires a different position item',
+          'Promotion or demotion requires a change in official position',
           400,
         )
       }
 
       // ----------------------------------
-      // 11. Validate PCN alignment
+      // 12. Validate PCN alignment
       // ----------------------------------
 
-      if (hasPcnAlignment) {
-        if (!pcnChanged) {
-          throw new AppError(
-            'PCN alignment requires a different position item',
-            400,
-          )
-        }
-
-        if (departmentChanged) {
-          throw new AppError(
-            'PCN alignment cannot change the official department',
-            400,
-          )
-        }
-
-        if (positionChanged) {
-          throw new AppError(
-            'PCN alignment cannot change the official position',
-            400,
-          )
-        }
-
-        /**
-         * Alignment means we are finally assigning
-         * the employee to a PCN that belongs to the
-         * department where the employee is already
-         * officially assigned.
-         */
-        if (
-          targetPositionItem?.departmentId !==
-          latestMovement.officialDepartmentId
-        ) {
-          throw new AppError(
-            'PCN alignment requires a position item belonging to the current official department',
-            400,
-          )
-        }
-      }
-
-      // ----------------------------------
-      // 12. Validate PCN-position
-      //     compatibility
-      // ----------------------------------
-
-      /**
-       * Department mismatch is allowed.
+      /*
+       * Reject meaningless alignment.
        *
-       * Example:
+       * Different PCN with same legal department
+       * and position is still meaningful because
+       * pcnChanged = true.
        *
-       * ER Staff Nurse PCN
-       * used temporarily by
-       * ICU Staff Nurse.
-       *
-       * But position mismatch is NOT allowed.
+       * Same PCN can also be aligned if its PCN
+       * master-data department/position has changed
+       * and therefore resulting legal state changes.
        */
       if (
-        targetPositionItem?.positionId &&
-        targetPositionItem.positionId !== officialPositionId
+        hasPcnAlignment &&
+        !pcnChanged &&
+        !departmentChanged &&
+        !positionChanged
       ) {
         throw new AppError(
-          'The official position must match the selected position item',
+          'PCN alignment requires a change in position item or legal assignment',
           400,
         )
       }
@@ -1357,23 +1445,27 @@ export const ContractService = {
       }
 
       // ----------------------------------
-      // 14. Preserve original end date
+      // 14. Preserve original movement end
       // ----------------------------------
 
-      /**
+      /*
        * Example:
        *
-       * latest:
-       * 2022-08-20 -> 2023-08-19
+       * latest movement:
+       *
+       * 2020-02-20 -> 2021-02-19
        *
        * effective:
-       * 2023-02-22
+       *
+       * 2020-06-21
        *
        * previous becomes:
-       * 2022-08-20 -> 2023-02-21
+       *
+       * 2020-02-20 -> 2020-06-20
        *
        * new becomes:
-       * 2023-02-22 -> 2023-08-19
+       *
+       * 2020-06-21 -> 2021-02-19
        */
       const originalEndDate = latestMovement.endDate ?? currentContract.endDate
 
@@ -1393,11 +1485,10 @@ export const ContractService = {
       // 16. Create next sequence
       // ----------------------------------
 
-      /**
-       * The current contract row is locked FOR UPDATE.
-       *
-       * Therefore movements for this contract are serialized
-       * through this transaction, making latest + 1 safe.
+      /*
+       * The contract row is locked FOR UPDATE,
+       * so movement creation for this contract
+       * is serialized inside this transaction.
        */
       const sequenceNumber = latestMovement.sequenceNumber + 1
 
@@ -1407,6 +1498,11 @@ export const ContractService = {
 
       const movement = await ContractMovementRepository.create(tx, {
         contractId: currentContract.id,
+
+        /*
+         * Existing / selected PCN,
+         * or null for Military.
+         */
         positionItemId: targetPositionItem?.id ?? null,
         officialDepartmentId,
         officialPositionId,
@@ -1414,18 +1510,11 @@ export const ContractService = {
         endDate: originalEndDate,
         sequenceNumber,
 
-        /**
-         * The movement itself represents an amendment
-         * to the current contractual legal state.
+        /*
+         * SYSTEM CONTROLLED.
          *
-         * contract_movement_actions tells us what
-         * actually occurred:
-         *
-         * transfer
-         * promotion
-         * demotion
-         * pcn_alignment
-         * etc.
+         * applyMovement always represents
+         * a mid-contract amendment.
          */
         movementType: 'amendment',
         remarks: dto.movement.remarks ?? null,
@@ -1464,10 +1553,11 @@ export const ContractService = {
       const compensation = dto.compensation
         ? await CompensationRepository.create(tx, {
             contractMovementId: movement.id,
-
-            /**
-             * Compensation takes effect on exactly
-             * the same day as the movement.
+            /*
+             * SYSTEM CONTROLLED.
+             *
+             * Compensation becomes effective
+             * on the amendment effective date.
              */
             effectiveDate: dto.effectiveDate,
             baseSalary: dto.compensation.baseSalary,
@@ -1492,11 +1582,18 @@ export const ContractService = {
 
       // ----------------------------------
       // 21. Release previous PCN
-      //
-      // Only when the employee actually
-      // changes position items.
       // ----------------------------------
 
+      /*
+       * Only release the previous PCN when
+       * the PCN actually changes.
+       *
+       * Same-PCN promotion, demotion, or
+       * transfer leaves the PCN filled.
+       *
+       * Military PCN removal also comes
+       * through this branch.
+       */
       let releasedPositionItem = null
 
       if (pcnChanged && latestMovement.positionItemId) {
@@ -1529,7 +1626,7 @@ export const ContractService = {
       }
 
       // ----------------------------------
-      // 22. Return completed movement
+      // 22. Return completed amendment
       // ----------------------------------
 
       return {

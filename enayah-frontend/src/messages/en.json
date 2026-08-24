@@ -515,7 +515,49 @@
     "promotionDemotionRequiresPositionChange": "Promotion or demotion requires a change in the employee's legal position.",
     "transferRequiresDepartmentChange": "Transfer requires a change in the employee's legal department.",
     "pcnAlignmentNoChange": "PCN alignment must change the PCN or align the employee with different department or position data from the selected PCN.",
-    "fromPcn": "From PCN"
+    "fromPcn": "From PCN",
+    "amendContract": "Amend Contract",
+    "amendingContract": "Amending Contract...",
+    "amendContractSub": "Record a legal change that takes effect during the current active contract.",
+
+    "amendment": "Amendment",
+
+    "currentContractPeriod": "Current Contract Period",
+    "amendmentContractPeriodSub": "The contract period remains unchanged. This amendment creates a new legal movement within the current contract.",
+
+    "amendmentEffectiveDate": "Amendment Effective Date",
+    "amendmentEffectiveDateSub": "Select the date on which the new legal assignment becomes effective.",
+
+    "currentMovementPeriod": "Current legal movement: {start} to {end}",
+
+    "amendmentEffectiveDateRequired": "Select the amendment effective date.",
+    "amendmentEffectiveDateAfterMovementStart": "The amendment effective date must be after the current legal movement start date.",
+    "amendmentEffectiveDateAfterContractEnd": "The amendment effective date cannot be after the contract end date.",
+    "amendmentEffectiveDateAfterMovementEnd": "The amendment effective date cannot be after the current legal movement end date.",
+
+    "amendmentActions": "Amendment Actions",
+    "amendmentActionsSub": "Select the legal changes that will take effect on the amendment effective date.",
+    "amendmentActionRequired": "Select at least one amendment action.",
+
+    "amendmentNoChange": "The amendment must change the legal department, legal position, or PCN.",
+
+    "amendmentResultingAssignmentSub": "This is the employee's legal assignment that will take effect from the amendment effective date.",
+
+    "removeMilitaryPcn": "Remove Current PCN",
+    "removeMilitaryPcnSub": "The employee will have no PCN after this amendment. This option is available only for military staff.",
+
+    "amendmentCompensationSub": "Compensation changes are optional. Any changes entered here will take effect on the amendment effective date.",
+
+    "amendmentNotes": "Amendment Notes",
+    "amendmentNotesSub": "Add optional remarks describing this contract amendment.",
+
+    "amendmentMovementRemarksPlaceholder": "Optional remarks about the promotion, demotion, transfer, PCN alignment, or other amendment details.",
+
+    "amendWithoutCompensationTitle": "Continue without compensation changes?",
+    "amendWithoutCompensationPromotionMessage": "This amendment includes a promotion, but no compensation changes have been entered. The employee's existing compensation will remain unchanged. Continue anyway?",
+    "amendWithoutCompensationDemotionMessage": "This amendment includes a demotion, but no compensation changes have been entered. The employee's existing compensation will remain unchanged. Continue anyway?",
+
+    "continueAmendment": "Continue Amendment"
   },
   "compensations": {
     "compensationInformation": "Compensation",
