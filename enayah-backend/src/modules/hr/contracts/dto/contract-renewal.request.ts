@@ -2,7 +2,12 @@
 
 import { z } from 'zod'
 
-const movementActionSchema = z.enum(['promotion', 'demotion', 'transfer'])
+const movementActionSchema = z.enum([
+  'promotion',
+  'demotion',
+  'transfer',
+  'pcn_alignment',
+])
 
 export const RenewContractSchema = z.object({
   currentContractId: z.uuid(),

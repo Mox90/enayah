@@ -1,3 +1,5 @@
+// enayah-frontend/src/components/layouts/app-shell.tsx
+
 import { ReactNode } from 'react'
 import Sidebar from './sidebar'
 import Topbar from './topbar'

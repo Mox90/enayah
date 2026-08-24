@@ -56,7 +56,7 @@ export function PositionItemCombobox({
         <Button
           variant='outline'
           role='combobox'
-          className='w-full justify-between'
+          className='w-full h-11 justify-between'
         >
           {/* {selected
             ? `${selected.itemNumber} — ${selected.positionTitleEn ?? ''}`

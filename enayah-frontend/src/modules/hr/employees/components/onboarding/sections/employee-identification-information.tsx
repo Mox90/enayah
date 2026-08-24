@@ -19,6 +19,8 @@ import {
 } from '@/modules/hr/onboarding/types/onboarding.types'
 import { useLocale, useTranslations } from 'next-intl'
 import { OnboardingFormSection } from './onboarding-form-section'
+import { hasIdentificationData as hasIdentificationDataValue } from '@/modules/hr/onboarding/utils/has-identification-data'
+import { getTodayDateString } from '@/utils/utilities'
 
 interface Props {
   value: HireEmployeePayload
@@ -42,13 +44,14 @@ export function EmployeeIdentificationInformation({
 
   const identificationType = identification?.type ?? 'iqama'
 
-  const hasIdentificationData = Boolean(
-    identification?.identificationNumber?.trim() ||
-    identification?.issueDate ||
-    identification?.expiryDate ||
-    identification?.sponsor?.trim() ||
-    identification?.issuingAuthority?.trim(),
-  )
+  // const hasIdentificationData = Boolean(
+  //   identification?.identificationNumber?.trim() ||
+  //   identification?.issueDate ||
+  //   identification?.expiryDate ||
+  //   identification?.sponsor?.trim() ||
+  //   identification?.issuingAuthority?.trim(),
+  // )
+  const hasIdentificationData = hasIdentificationDataValue(identification)
 
   const requiresCommonFields = hasIdentificationData
 
@@ -104,16 +107,6 @@ export function EmployeeIdentificationInformation({
       onClearError('identificationSponsor')
     }
 
-    // if (
-    //   field === 'type' &&
-    //   (fieldValue === 'national_id' || fieldValue === 'gcc_id')
-    // ) {
-    //   onClearError('identificationIssueDate')
-    //   onClearError('identificationExpiryDate')
-    //   onClearError('identificationSponsor')
-    //   onClearError('identificationIssuingAuthority')
-    // }
-
     const nextIdentification = {
       type: identification?.type ?? 'iqama',
       identificationNumber: identification?.identificationNumber ?? '',
@@ -126,9 +119,26 @@ export function EmployeeIdentificationInformation({
       [field]: fieldValue,
     }
 
+    // if (
+    //   (field === 'issueDate' || field === 'expiryDate') &&
+    //   nextIdentification.issueDate &&
+    //   nextIdentification.expiryDate &&
+    //   nextIdentification.expiryDate > nextIdentification.issueDate
+    // ) {
+    //   onClearError('identificationExpiryDate')
+    // }
+    if (
+      (field === 'issueDate' || field === 'expiryDate') &&
+      nextIdentification.issueDate &&
+      nextIdentification.expiryDate &&
+      nextIdentification.expiryDate > nextIdentification.issueDate &&
+      nextIdentification.expiryDate > getTodayDateString()
+    ) {
+      onClearError('identificationExpiryDate')
+    }
+
     onChange({
       ...value,
-
       personal: {
         ...value.personal,
         identifications: [nextIdentification],
@@ -147,25 +157,33 @@ export function EmployeeIdentificationInformation({
         <div className='space-y-2'>
           <Label htmlFor='identification-type'>{t('idType')}</Label>
 
-          <Select
-            dir={isRtl ? 'rtl' : 'ltr'}
-            value={identificationType}
-            onValueChange={(value) =>
-              updateIdentification('type', value as IdentificationInput['type'])
-            }
-          >
-            <SelectTrigger id='identification-type' className='h-11'>
-              <SelectValue placeholder={t('idType')} />
-            </SelectTrigger>
+          <div className='h-11'>
+            <Select
+              dir={isRtl ? 'rtl' : 'ltr'}
+              value={identificationType}
+              onValueChange={(value) =>
+                updateIdentification(
+                  'type',
+                  value as IdentificationInput['type'],
+                )
+              }
+            >
+              <SelectTrigger
+                id='identification-type'
+                className='w-full data-[size=default]:h-11'
+              >
+                <SelectValue placeholder={t('idType')} />
+              </SelectTrigger>
 
-            <SelectContent>
-              <SelectItem value='national_id'>{t('national_id')}</SelectItem>
-              <SelectItem value='iqama'>{t('iqama')}</SelectItem>
-              <SelectItem value='gcc_id'>{t('gcc_id')}</SelectItem>
-              <SelectItem value='passport'>{t('passport')}</SelectItem>
-              <SelectItem value='other'>{t('other')}</SelectItem>
-            </SelectContent>
-          </Select>
+              <SelectContent>
+                <SelectItem value='national_id'>{t('national_id')}</SelectItem>
+                <SelectItem value='iqama'>{t('iqama')}</SelectItem>
+                <SelectItem value='gcc_id'>{t('gcc_id')}</SelectItem>
+                <SelectItem value='passport'>{t('passport')}</SelectItem>
+                <SelectItem value='other'>{t('other')}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Identification Number */}

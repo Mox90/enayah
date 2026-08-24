@@ -215,7 +215,7 @@ function LifeSupportDialogContent({
                 value={form.type}
                 onValueChange={(v) => update('type', v as LifeSupportType)}
               >
-                <SelectTrigger className='h-11'>
+                <SelectTrigger className='w-full data-[size=default]:h-11'>
                   <SelectValue />
                 </SelectTrigger>
 

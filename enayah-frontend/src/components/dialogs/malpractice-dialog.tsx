@@ -13,6 +13,7 @@ import { malpracticeDocumentService } from '@/modules/hr/credentials/services/cr
 import { cn } from '@/lib/utils'
 import { CredentialDocumentDropzone } from '../forms/credential-document-dropzone'
 import { DatePicker } from './date-picker'
+import { SaudiRiyalSymbol } from '../icons/saudi-riyal-symbol'
 
 export type MalpracticeFormValue = {
   id?: string
@@ -206,22 +207,32 @@ function MalpracticeDialogContent({
             </div>
 
             <div className='space-y-2 xl:col-span-2'>
-              <Label>Coverage Amount</Label>
-              <Input
-                type='number'
-                min='0' // Prevents browser arrow button decrements below 0
-                className='h-11'
-                value={form.coverageAmount ?? ''}
-                onChange={(e) => {
-                  const val = e.target.value
+              <Label htmlFor={`coverage-amount`}>Coverage Amount</Label>
 
-                  // Prevent manual typing of negative numbers
-                  if (val !== '' && Number(val) < 0) return
+              <div className='relative'>
+                <span className='pointer-events-none absolute inset-y-0 start-3 z-10 flex items-center text-muted-foreground'>
+                  <SaudiRiyalSymbol
+                    showAccessibleText={false}
+                    className='text-base'
+                  />
+                </span>
 
-                  update('coverageAmount', val || null)
-                }}
-                placeholder='0.00'
-              />
+                <Input
+                  id={`coverage-amount`}
+                  type='number'
+                  min='0'
+                  className='h-11 ps-9'
+                  value={form.coverageAmount ?? ''}
+                  onChange={(e) => {
+                    const val = e.target.value
+
+                    if (val !== '' && Number(val) < 0) return
+
+                    update('coverageAmount', val || null)
+                  }}
+                  placeholder='0.00'
+                />
+              </div>
             </div>
           </div>
         </section>

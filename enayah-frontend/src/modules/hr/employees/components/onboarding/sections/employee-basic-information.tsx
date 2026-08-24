@@ -123,7 +123,7 @@ export function EmployeeBasicInformation({
           <div className='space-y-2'>
             <Label>{et('nationality')}</Label>
 
-            <CountryCombobox
+            {/* <CountryCombobox
               value={employee.countryId}
               onChange={(country) => {
                 onClearError('countryId')
@@ -136,6 +136,27 @@ export function EmployeeBasicInformation({
                     countryNameAr: country.nameAr,
                   },
                 })
+              }}
+            /> */}
+            <CountryCombobox
+              value={employee.countryId}
+              selectedLabel={
+                isRtl
+                  ? employee.countryNameAr || employee.countryNameEn
+                  : employee.countryNameEn || employee.countryNameAr
+              }
+              onChange={(country) => {
+                onChange({
+                  ...value,
+                  employee: {
+                    ...employee,
+                    countryId: country.id,
+                    countryNameEn: country.name,
+                    countryNameAr: country.nameAr,
+                  },
+                })
+
+                onClearError?.('countryId')
               }}
             />
           </div>
@@ -327,22 +348,27 @@ export function EmployeeBasicInformation({
               <span className='ms-1 text-destructive'>*</span>
             </Label>
 
-            <Select
-              dir={isRtl ? 'rtl' : 'ltr'}
-              value={employee.gender}
-              onValueChange={(gender) =>
-                updateEmployee('gender', gender as EmployeeGender)
-              }
-            >
-              <SelectTrigger id='employee-gender' className='h-11'>
-                <SelectValue placeholder={et('gender')} />
-              </SelectTrigger>
+            <div className='h-11'>
+              <Select
+                dir={isRtl ? 'rtl' : 'ltr'}
+                value={employee.gender}
+                onValueChange={(gender) =>
+                  updateEmployee('gender', gender as EmployeeGender)
+                }
+              >
+                <SelectTrigger
+                  id='employee-gender'
+                  className='w-full data-[size=default]:h-11'
+                >
+                  <SelectValue placeholder={et('gender')} />
+                </SelectTrigger>
 
-              <SelectContent>
-                <SelectItem value='male'>{et('male')}</SelectItem>
-                <SelectItem value='female'>{et('female')}</SelectItem>
-              </SelectContent>
-            </Select>
+                <SelectContent>
+                  <SelectItem value='male'>{et('male')}</SelectItem>
+                  <SelectItem value='female'>{et('female')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className='space-y-2'>

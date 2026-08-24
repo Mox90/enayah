@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/employees/components/employee-page.tsx
+
 'use client'
 
 import { EmployeeWorkspace } from './employee-workspace'

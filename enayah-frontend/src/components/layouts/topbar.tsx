@@ -1,3 +1,5 @@
+// enayah-frontend/src/components/layouts/topbar.tsx
+
 'use client'
 
 import { useTheme } from 'next-themes'
@@ -23,6 +25,7 @@ import { Link, useRouter } from '../../../i18n/navigation'
 import { NotificationBell } from '@/modules/notifications/components/notification-bell'
 import { useMyEmployeeProfile } from '@/modules/hr/employees/hooks/use-my-employee-profile'
 import { useQueryClient } from '@tanstack/react-query'
+import TopbarBreadcrumb from './topbar-breadcrumb'
 //import { router } from 'next/client'
 
 const Topbar = () => {
@@ -73,7 +76,8 @@ const Topbar = () => {
   return (
     <header className='flex h-16 items-center justify-between border-b bg-background px-6'>
       {/* LEFT */}
-      <div className='flex items-center gap-3'>
+      {/* <div className='flex items-center gap-3'> */}
+      <div className='flex min-w-0 items-center gap-3'>
         {/* MOBILE SIDEBAR */}
 
         <MobileSidebar />
@@ -100,7 +104,8 @@ const Topbar = () => {
         </Link>
 
         {/* DESKTOP PAGE TITLE */}
-        <h1 className='hidden text-lg font-semibold lg:block'>Dashboard</h1>
+        {/* <h1 className='hidden text-lg font-semibold lg:block'>Dashboard</h1> */}
+        <TopbarBreadcrumb />
       </div>
 
       {/* RIGHT */}

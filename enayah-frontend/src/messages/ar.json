@@ -67,7 +67,8 @@
     "to": "إلى",
     "add": "أضف {item}",
     "noRecords": "لم يتم العثور على سجلات {item}",
-    "optional": "اختياري"
+    "optional": "اختياري",
+    "status": "حالة"
   },
 
   "auth": {
@@ -395,7 +396,8 @@
     "movementRemarks": "ملاحظات الحركة",
     "selectVacantPcnLabel": "حدد رقم الوظيفة الشاغرة",
     "actualAppointment": "الموعد الفعلي",
-    "actualAppointmentSub": "اختياري. في حال تركه فارغاً، سيقوم النظام الخلفي بتحديد القسم والوظيفة الفعليين تلقائياً من رقم عنصر الوظيفة المحدد.",
+    "actualAppointmentSub": "اختياري. في حال تركه فارغاً، سيقوم النظام تلقائياً بتحديد القسم والمنصب الفعليين استناداً إلى رقم المنصب المعتمد (PCN) المُختار.",
+    "actualMilitaryAppointmentSub": "مطلوب للموظفين العسكريين. يرجى تحديد القسم والمنصب الفعليين، نظراً لأن رقم المنصب المعتمد (PCN) يُعد اختيارياً للموظفين العسكريين.",
     "actualDepartmentLabel": "القسم الفعلي",
     "selectDepartment": "اختر القسم",
     "actualPositionLabel": "الموقف الفعلي",
@@ -452,9 +454,69 @@
     "movementRemarksPlaceholder": "أضف أي ملاحظات حول التكليف الرسمي الأولي...",
     "actualWorkingAssignment": "التكليف الفعلي للعمل",
     "optional": "اختياري",
+    "required": "مطلوب",
     "actualAssignmentHint": "يتم تعيين جهة ومسمى العمل الفعلي افتراضيًا وفقًا للتكليف الرسمي. قم بتغييره فقط إذا كان الموظف سيعمل فعليًا في إدارة أو وظيفة مختلفة.",
     "appointmentRemarksPlaceholder": "أضف أي ملاحظات حول التكليف الفعلي للموظف...",
-    "pcnOptionalForMilitary": "رقم الوظيفة (PCN) اختياري للعسكريين."
+    "pcnOptionalForMilitary": "رقم الوظيفة (PCN) اختياري للعسكريين.",
+    "renewalContractPeriodSub": "حدد فترة العقد الجديدة. يتم تحديد تاريخ بداية التجديد تلقائيًا بناءً على العقد الحالي.",
+
+    "currentLegalAssignment": "التكليف القانوني الحالي",
+    "currentLegalAssignmentSub": "القسم والمسمى الوظيفي والبند الحالي للموظف. سيتم ترحيل هذه البيانات ما لم يتم تغييرها من خلال أحد إجراءات التجديد.",
+    "current": "الحالي",
+
+    "legalDepartment": "القسم القانوني",
+    "legalPosition": "المسمى الوظيفي القانوني",
+
+    "renewalActions": "إجراءات التجديد",
+    "renewalActionsSub": "حدد أي تغييرات قانونية ستصبح سارية مع هذا التجديد. اترك جميع الخيارات غير محددة للتجديد العادي.",
+
+    "normalRenewal": "تجديد عادي",
+    "normalRenewalSub": "لم يتم تحديد أي تغييرات قانونية. سيتم ترحيل القسم والمسمى الوظيفي والبند الحالي للموظف كما هي.",
+
+    "promotionActionSub": "تغيير المسمى الوظيفي القانوني للموظف كجزء من الترقية.",
+    "demotionActionSub": "تغيير المسمى الوظيفي القانوني للموظف كجزء من التخفيض الوظيفي.",
+    "transferActionSub": "تغيير القسم القانوني للموظف كجزء من عملية النقل.",
+    "pcnAlignmentActionSub": "مواءمة التكليف القانوني للموظف مع البند الوظيفي المحدد.",
+
+    "renewalCompensationSub": "تعديل التعويضات اختياري. يتم عرض التعويض الحالي للرجوع إليه وسيبقى دون تغيير ما لم يتم تعديله.",
+    "reviewChangeCompensation": "مراجعة / تعديل التعويض",
+    "cancelCompensationChange": "إلغاء تعديل التعويض",
+
+    "renewalNotes": "ملاحظات التجديد",
+    "renewalNotesSub": "أضف ملاحظات اختيارية حول حركة التجديد والعقد المجدد.",
+
+    "renewalMovementRemarksPlaceholder": "ملاحظات اختيارية حول التجديد أو الترقية أو التخفيض الوظيفي أو النقل أو مواءمة البند.",
+    "renewalContractNotesPlaceholder": "ملاحظات اختيارية للعقد المجدد.",
+
+    "amendContract": "تعديل العقد",
+    "newPositionAfterPromotion": "المسمى الجديد — ترقية",
+    "newLegalPositionSub": "حدد المسمى الوظيفي القانوني الجديد الذي سيصبح ساريًا من تاريخ بداية التجديد.",
+
+    "newLegalAssignment": "التكليف القانوني الناتج",
+    "newLegalAssignmentSub": "هذا هو التكليف القانوني الذي سيتم تسجيله للعقد المجدد.",
+
+    "newPositionRequired": "حدد المسمى الوظيفي القانوني الجديد.",
+    "newDepartmentRequired": "حدد قسم القانوني الجديد.",
+
+    "newPositionAfterDemotion": "المسمى الجديد — تخفيض وظيفي",
+
+    "newDepartmentAfterTransfer": "القسم الجديد — نقل",
+    "newLegalDepartmentSub": "حدد القسم القانوني الجديد الذي سيصبح ساريًا من تاريخ بداية التجديد.",
+    "noPcnAssignedMilitary": "لا يوجد بند وظيفي معين — اختياري للعسكريين",
+    "newPcnAlignment": "مواءمة البند الوظيفي",
+    "newPcnAlignmentSub": "حدد البند الوظيفي الذي سيتم تعيينه لهذا التجديد. عند اختيار مواءمة البند الوظيفي، يصبح القسم والمسمى الوظيفي المرتبطان بالبند المحدد هما التكليف القانوني الناتج.",
+
+    "positionItemRequired": "البند الوظيفي مطلوب للموظفين المدنيين والمتعاقدين.",
+    "renewWithoutCompensationTitle": "تجديد العقد بدون تعديل التعويضات؟",
+    "renewWithoutCompensationMessage": "لم يتم إدخال أي تعديلات على التعويضات لهذا التجديد. ستبقى التعويضات الحالية للموظف دون تغيير. هل تريد متابعة التجديد؟",
+    "continueRenewal": "متابعة التجديد",
+    "renewWithoutCompensationPromotionMessage": "يتضمن هذا التجديد ترقية، ولكن لم يتم إدخال أي تعديلات على التعويضات. ستبقى التعويضات الحالية للموظف دون تغيير. هل تريد المتابعة؟",
+    "renewWithoutCompensationDemotionMessage": "يتضمن هذا التجديد تخفيضًا وظيفيًا، ولكن لم يتم إدخال أي تعديلات على التعويضات. ستبقى التعويضات الحالية للموظف دون تغيير. هل تريد المتابعة؟",
+    "pcnAlignmentTargetRequired": "حدد البند الوظيفي المستهدف لإجراء مواءمة البند الوظيفي.",
+    "promotionDemotionRequiresPositionChange": "تتطلب الترقية أو التخفيض الوظيفي تغيير المسمى الوظيفي القانوني للموظف.",
+    "transferRequiresDepartmentChange": "يتطلب النقل تغيير القسم القانوني للموظف.",
+    "pcnAlignmentNoChange": "يجب أن تؤدي مواءمة البند الوظيفي إلى تغيير البند أو مواءمة الموظف مع قسم أو مسمى وظيفي مختلف مرتبط بالبند المحدد.",
+    "fromPcn": "من البند الوظيفي"
   },
   "compensations": {
     "compensationInformation": "التعويضات",
@@ -731,10 +793,10 @@
     "firstNameArRequiredError": "الاسم الأول باللغة العربية مطلوب.",
     "familyNameArRequiredError": "اسم العائلة باللغة العربية مطلوب.",
     "dobRequiredError": "تاريخ الميلاد مطلوب.",
-    "identificationIssueDateRequiredError": "تاريخ الإصدار مطلوب عند إدخال رقم الهوية.",
-    "identificationExpiryDateRequiredError": "تاريخ الانتهاء مطلوب عند إدخال رقم الهوية.",
+    "identificationIssueDateRequiredError": "يرجى إدخال تاريخ إصدار رقم التعريف المُقدَّم.",
+    "identificationExpiryDateRequiredError": "يرجى إدخال تاريخ انتهاء صلاحية رقم التعريف المُقدَّم.",
     "identificationSponsorRequiredError": "الكفيل مطلوب للإقامة.",
-    "identificationIssuingAuthorityRequiredError": "جهة الإصدار مطلوبة عند إدخال رقم الهوية.",
+    "identificationIssuingAuthorityRequiredError": "يرجى إدخال الجهة المُصدِرة لرقم التعريف المُقدَّم.",
     "identificationExpiryDateAfterIssueDateError": "يجب أن يكون تاريخ الانتهاء بعد تاريخ الإصدار.",
     "hireDateRequiredError": "تاريخ التعيين / السريان مطلوب.",
     "contractEndDateRequiredError": "تاريخ انتهاء العقد مطلوب.",
@@ -746,7 +808,11 @@
     "compensationEffectiveDateError": "يجب أن يتطابق تاريخ سريان التعويض مع تاريخ بداية العقد.",
     "compensationRequiredForAllowancesError": "بيانات التعويض مطلوبة عند إضافة البدلات.",
     "allowanceTypeRequiredError": "نوع البدل مطلوب.",
-    "allowanceAmountRequiredError": "يجب أن تكون قيمة البدل أكبر من صفر."
+    "allowanceAmountRequiredError": "يجب أن تكون قيمة البدل أكبر من صفر.",
+    "dobFutureDateError": "لا يمكن أن يكون تاريخ الميلاد في المستقبل.",
+    "invalidEmailAddressError": "يرجى إدخال عنوان بريد إلكتروني صالح (مثال: name@domain.com).",
+    "identificationIssueDateFutureError": "لا يمكن أن يكون تاريخ الإصدار بعد تاريخ اليوم.",
+    "identificationExpiryDateFutureError": "يجب أن يكون تاريخ الانتهاء بعد تاريخ اليوم."
   },
   "allowanceTypes": {
     "housing": "بدل سكن",
@@ -1141,5 +1207,26 @@
     "licenses": "التراخيص",
     "lifeSupport": "دورات دعم الحياة",
     "malpractice": "التأمين ضد الأخطاء الطبية"
+  },
+  "breadcrumbs": {
+    "breadcrumb": "مسار التنقل",
+    "home": "الرئيسية",
+    "onboarding": "إعداد الموظف",
+    "employmentContractAssignment": "التوظيف والتكليف",
+    "review": "المراجعة",
+
+    "profile": "الملف الشخصي",
+    "personal": "المعلومات الشخصية",
+    "employment": "التوظيف",
+    "contract": "العقد",
+    "contracts": "العقود",
+    "compensation": "التعويضات",
+    "credentials": "المؤهلات",
+    "documents": "المستندات",
+    "history": "السجل",
+    "edit": "تعديل",
+    "renewal": "التجديد",
+    "details": "التفاصيل",
+    "settings": "الإعدادات"
   }
 }

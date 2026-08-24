@@ -41,6 +41,7 @@ interface FormSectionProps {
   title: string
   description?: string
   badge?: string
+  badgeVariant?: 'neutral' | 'required'
   children: ReactNode
 }
 
@@ -48,6 +49,7 @@ function FormSection({
   title,
   description,
   badge,
+  badgeVariant = 'neutral',
   children,
 }: FormSectionProps) {
   return (
@@ -65,7 +67,16 @@ function FormSection({
           </div>
 
           {badge && (
-            <span className='shrink-0 rounded-full border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground'>
+            <span
+              className={[
+                'shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium',
+                badgeVariant === 'required'
+                  ? 'border-destructive/30 bg-destructive/10 text-destructive'
+                  : 'border-border bg-background text-muted-foreground',
+              ]
+                .filter(Boolean)
+                .join(' ')}
+            >
               {badge}
             </span>
           )}
@@ -326,7 +337,7 @@ export function EmploymentContractAssignmentInformation({
             >
               <SelectTrigger
                 id='employment-type'
-                className='h-11'
+                className='w-full data-[size=default]:h-11'
                 aria-invalid={Boolean(employmentContractErrors.employmentType)}
               >
                 <SelectValue />
@@ -380,7 +391,7 @@ export function EmploymentContractAssignmentInformation({
             >
               <SelectTrigger
                 id='staff-category'
-                className='h-11'
+                className='w-full data-[size=default]:h-11'
                 aria-invalid={Boolean(employmentContractErrors.staffCategory)}
               >
                 <SelectValue />
@@ -541,8 +552,13 @@ export function EmploymentContractAssignmentInformation({
 
       <FormSection
         title={t('actualWorkingAssignment')}
-        description={t('actualAppointmentSub')}
-        badge={t('optional')}
+        description={
+          isMilitary
+            ? t('actualMilitaryAppointmentSub')
+            : t('actualAppointmentSub')
+        }
+        badge={isMilitary ? t('required') : t('optional')}
+        badgeVariant={isMilitary ? 'required' : 'neutral'}
       >
         <div className='space-y-5'>
           <div className='rounded-lg border bg-muted/20 px-4 py-3'>
@@ -668,7 +684,10 @@ export function EmploymentContractAssignmentInformation({
                   )
                 }
               >
-                <SelectTrigger id='appointment-type' className='h-11'>
+                <SelectTrigger
+                  id='appointment-type'
+                  className='w-full data-[size=default]:h-11'
+                >
                   <SelectValue />
                 </SelectTrigger>
 

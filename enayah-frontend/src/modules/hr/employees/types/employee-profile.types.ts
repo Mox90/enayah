@@ -1,3 +1,5 @@
+import { StaffCategory } from '../../employments/types/employment.types'
+
 export interface EmployeeProfile {
   personal: {
     id: string
@@ -42,7 +44,7 @@ export interface EmployeeProfile {
     startDate: string
     endDate: string | null
     employmentType: string | null
-    staffCategory: string
+    staffCategory: StaffCategory
     status: string
     contract: {
       id: string

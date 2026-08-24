@@ -1,3 +1,5 @@
+// enayah-frontend/src/modules/countries/components/country-combobox.tsx
+
 'use client'
 
 import { useState } from 'react'
@@ -26,14 +28,29 @@ import { CountryLookupItem } from '../services/countries.service'
 
 interface Props {
   value?: string | null
+
+  /**
+   * Fallback label for an already-selected country.
+   *
+   * This is important when the selected country is not included
+   * in the currently loaded search result.
+   */
+  selectedLabel?: string | null
+
   onChange: (country: CountryLookupItem) => void
   placeholder?: string
 }
 
-export function CountryCombobox({ value, onChange, placeholder }: Props) {
+export function CountryCombobox({
+  value,
+  selectedLabel,
+  onChange,
+  placeholder,
+}: Props) {
   const t = useTranslations('employees')
   const locale = useLocale()
   const isRtl = locale === 'ar'
+
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
@@ -41,9 +58,29 @@ export function CountryCombobox({ value, onChange, placeholder }: Props) {
     search,
     limit: 20,
   })
-  //console.log({ data, isLoading, error })
 
-  const selected = data?.items.find((x) => x.id === value)
+  /*
+   * The selected country may not exist in data.items.
+   *
+   * Example:
+   * 1. User searches for Armenia.
+   * 2. Selects Armenia.
+   * 3. Goes to Next step.
+   * 4. Comes Back.
+   * 5. search resets to ''.
+   * 6. Armenia may not be in the first 20 results.
+   *
+   * countryId is still valid, so fall back to selectedLabel.
+   */
+  const selected = data?.items.find((country) => country.id === value)
+
+  const displayLabel = selected
+    ? isRtl
+      ? selected.nameAr || selected.name
+      : selected.name
+    : value
+      ? selectedLabel
+      : null
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -51,15 +88,14 @@ export function CountryCombobox({ value, onChange, placeholder }: Props) {
         <Button
           variant='outline'
           role='combobox'
-          className='w-full justify-between'
+          aria-expanded={open}
+          className='w-full h-11 justify-between'
         >
-          {selected
-            ? isRtl
-              ? selected.nameAr
-              : selected.name
-            : placeholder || t('selectNationality')}
+          <span className='truncate'>
+            {displayLabel || placeholder || t('selectNationality')}
+          </span>
 
-          <ChevronsUpDown className='ml-2 h-4 w-4 opacity-50' />
+          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
 
@@ -75,40 +111,47 @@ export function CountryCombobox({ value, onChange, placeholder }: Props) {
             <CommandEmpty>{t('noCountryFound')}</CommandEmpty>
 
             <CommandGroup>
-              {data?.items.map((country) => (
-                <CommandItem
-                  key={country.id}
-                  value={
-                    isRtl
-                      ? `${country.nameAr} ${country.nationalityAr}`
-                      : `${country.name} ${country.nationalityEn}`
-                  }
-                  onSelect={() => {
-                    onChange(country)
-                    setOpen(false)
-                  }}
-                >
-                  <Check
-                    className={`mr-2 h-4 w-4 ${
-                      value === country.id ? 'opacity-100' : 'opacity-0'
-                    }`}
-                  />
+              {data?.items.map((country) => {
+                const resolvedName = isRtl
+                  ? country.nameAr || country.name
+                  : country.name
+                const resolvedNationality = !placeholder
+                  ? isRtl
+                    ? country.nationalityAr || country.nationalityEn
+                    : country.nationalityEn
+                  : ''
+                return (
+                  <CommandItem
+                    key={country.id}
+                    // value={
+                    //   isRtl
+                    //     ? `${country.nameAr} ${country.nationalityAr}`
+                    //     : `${country.name} ${country.nationalityEn}`
+                    // }
+                    value={`${resolvedName} ${resolvedNationality}`}
+                    onSelect={() => {
+                      onChange(country)
+                      setOpen(false)
+                    }}
+                  >
+                    <Check
+                      className={`mr-2 h-4 w-4 ${
+                        value === country.id ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    />
 
-                  <div className='flex flex-col'>
-                    <span>
-                      {isRtl ? (country.nameAr ?? country.name) : country.name}
-                    </span>
+                    <div className='flex flex-col'>
+                      <span>{resolvedName}</span>
 
-                    {!placeholder && (
-                      <span className='text-xs text-muted-foreground'>
-                        {isRtl
-                          ? (country.nationalityAr ?? country.nationalityEn)
-                          : country.nationalityEn}
-                      </span>
-                    )}
-                  </div>
-                </CommandItem>
-              ))}
+                      {!placeholder && resolvedNationality && (
+                        <span className='text-xs text-muted-foreground'>
+                          {resolvedNationality}
+                        </span>
+                      )}
+                    </div>
+                  </CommandItem>
+                )
+              })}
             </CommandGroup>
           </CommandList>
         </Command>

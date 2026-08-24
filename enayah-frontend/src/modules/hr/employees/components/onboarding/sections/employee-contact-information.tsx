@@ -62,10 +62,8 @@ export function EmployeeContactInformation({
 
     onChange({
       ...value,
-
       personal: {
         ...value.personal,
-
         phoneNumbers: currentPhone
           ? [
               {
@@ -88,10 +86,8 @@ export function EmployeeContactInformation({
 
     onChange({
       ...value,
-
       personal: {
         ...value.personal,
-
         phoneNumbers: normalized
           ? [
               {
