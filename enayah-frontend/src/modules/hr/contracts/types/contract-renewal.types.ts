@@ -1,10 +1,14 @@
 // enayah-backend/src/modules/hr/contracts/types/contract-renewal.types.ts
 
-export type ContractMovementActionType =
-  | 'promotion'
-  | 'demotion'
-  | 'transfer'
-  | 'pcn_alignment'
+import { ContractMovementActionType } from './contract-movement.types'
+
+// export type ContractMovementActionType =
+//   | 'promotion'
+//   | 'demotion'
+//   | 'transfer'
+//   | 'pcn_alignment'
+
+export type { ContractMovementActionType } from './contract-movement.types'
 
 export type RenewContractPayload = {
   currentContractId: string

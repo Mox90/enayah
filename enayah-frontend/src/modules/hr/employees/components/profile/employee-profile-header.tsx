@@ -45,6 +45,8 @@ import { useRenewContract } from '@/modules/hr/contracts/hooks/use-renew-contrac
 import { useContractRenewalDefaults } from '@/modules/hr/contracts/hooks/use-contract-renewal-defaults'
 import { EmployeeAvatarUploader } from './employee-avatar-uploader'
 import { usePermission } from '@/hooks/usePermission'
+import { useApplyContractMovement } from '@/modules/hr/contracts/hooks/use-apply-contract-movement'
+import { ContractAmendmentDialog } from '@/components/dialogs/contract-amendment-dialog'
 
 type EmploymentStatus =
   | 'active'
@@ -155,22 +157,18 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
   const canGoBack = usePermission('employee.view')
   const canRenewContract = usePermission('contract.renew')
   const canAmendContract = usePermission('contract.update')
-
   const [editOpen, setEditOpen] = useState(false)
   const [renewOpen, setRenewOpen] = useState(false)
   const [amendOpen, setAmendOpen] = useState(false)
 
   const updatePersonalMutation = useUpdatePersonalMutation()
-
   const renewMutation = useRenewContract(profile.personal.id)
-
+  const amendmentMutation = useApplyContractMovement(profile.personal.id)
   const personal = profile.personal
   const employment = profile.employment
   const movement = employment?.movement
   const currentContract = employment?.contract
-
   const avatar = personal.avatar
-
   const nameParts = isRtl
     ? [
         personal.firstNameAr,
@@ -184,26 +182,21 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
         personal.thirdNameEn,
         personal.familyNameEn,
       ]
-
   const fullName =
     nameParts.filter(Boolean).join(' ') ||
     (isRtl ? 'ملف الموظف' : 'Employee profile')
-
   const positionTitle = isRtl
     ? (movement?.officialPosition?.titleAr ??
       movement?.officialPosition?.titleEn)
     : movement?.officialPosition?.titleEn
-
   const departmentName = isRtl
     ? (movement?.officialDepartment?.nameAr ??
       movement?.officialDepartment?.nameEn)
     : movement?.officialDepartment?.nameEn
-
   const employmentStatus = employment?.status as
     | EmploymentStatus
     | null
     | undefined
-
   const employmentStatusLabels: Record<EmploymentStatus, string> = {
     active: et('employmentStatuses.active'),
     terminated: et('employmentStatuses.terminated'),
@@ -215,24 +208,19 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
     suspended: et('employmentStatuses.suspended'),
     deceased: et('employmentStatuses.deceased'),
   }
-
   const employmentStatusLabel =
     employmentStatus && employmentStatus in employmentStatusLabels
       ? employmentStatusLabels[employmentStatus]
       : undefined
-
   const positionItemLabel = isRtl ? 'رقم البند' : 'Position item'
-
   const categoryLabel = isRtl ? 'الفئة' : 'Category'
-
   const employeeActionsLabel = isRtl ? 'إجراءات الموظف' : 'Employee actions'
-
   const loadingRenewalLabel = isRtl
     ? 'جارٍ تحميل بيانات تجديد العقد...'
     : 'Loading contract renewal details...'
 
-  const { data: renewalDefaults, isLoading: isRenewalDefaultsLoading } =
-    useContractRenewalDefaults(currentContract?.id, renewOpen)
+  const { data: contractDefaults, isLoading: isContractDefaultsLoading } =
+    useContractRenewalDefaults(currentContract?.id, renewOpen || amendOpen)
 
   return (
     <section
@@ -301,7 +289,7 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
 
                   {canAmendContract && (
                     <DropdownMenuItem
-                      disabled={!currentContract}
+                      disabled={!currentContract || amendmentMutation.isPending}
                       onSelect={() => {
                         if (!currentContract) {
                           return
@@ -445,7 +433,7 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
 
       {renewOpen && currentContract && (
         <>
-          {isRenewalDefaultsLoading || !renewalDefaults ? (
+          {isContractDefaultsLoading || !contractDefaults ? (
             <div
               role='status'
               aria-live='polite'
@@ -466,31 +454,97 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
             <ContractRenewalDialog
               open={renewOpen}
               onOpenChange={setRenewOpen}
-              currentContractId={renewalDefaults.contract.id}
+              currentContractId={contractDefaults.contract.id}
               staffCategory={employment!.staffCategory}
-              currentPositionItemId={renewalDefaults.movement.positionItemId}
-              currentItemNumber={renewalDefaults.movement.itemNumber}
+              currentPositionItemId={contractDefaults.movement.positionItemId}
+              currentItemNumber={contractDefaults.movement.itemNumber}
               currentDepartmentId={
-                renewalDefaults.movement.officialDepartmentId
+                contractDefaults.movement.officialDepartmentId
               }
-              currentPositionId={renewalDefaults.movement.officialPositionId}
-              currentBaseSalary={renewalDefaults.compensation?.baseSalary}
-              currentAllowances={renewalDefaults.compensation?.allowances ?? []}
-              defaultStartDate={getNextDay(renewalDefaults.contract.endDate)}
+              currentPositionId={contractDefaults.movement.officialPositionId}
+              currentBaseSalary={contractDefaults.compensation?.baseSalary}
+              currentAllowances={
+                contractDefaults.compensation?.allowances ?? []
+              }
+              defaultStartDate={getNextDay(contractDefaults.contract.endDate)}
               currentDepartmentName={
                 isRtl
-                  ? (renewalDefaults.movement.officialDepartmentNameAr ??
-                    renewalDefaults.movement.officialDepartmentNameEn)
-                  : renewalDefaults.movement.officialDepartmentNameEn
+                  ? (contractDefaults.movement.officialDepartmentNameAr ??
+                    contractDefaults.movement.officialDepartmentNameEn)
+                  : contractDefaults.movement.officialDepartmentNameEn
               }
               currentPositionTitle={
                 isRtl
-                  ? (renewalDefaults.movement.officialPositionTitleAr ??
-                    renewalDefaults.movement.officialPositionTitleEn)
-                  : renewalDefaults.movement.officialPositionTitleEn
+                  ? (contractDefaults.movement.officialPositionTitleAr ??
+                    contractDefaults.movement.officialPositionTitleEn)
+                  : contractDefaults.movement.officialPositionTitleEn
               }
               onSubmit={async (payload) => {
                 await renewMutation.mutateAsync(payload)
+              }}
+            />
+          )}
+        </>
+      )}
+
+      {amendOpen && currentContract && (
+        <>
+          {isContractDefaultsLoading || !contractDefaults ? (
+            <div
+              role='status'
+              aria-live='polite'
+              className='fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm'
+            >
+              <div className='flex items-center gap-3 rounded-xl border bg-background/95 px-6 py-4 shadow-xl'>
+                <LoaderCircle
+                  aria-hidden='true'
+                  className='h-5 w-5 animate-spin text-primary'
+                />
+
+                <span className='text-sm font-medium'>
+                  {isRtl
+                    ? 'جارٍ تحميل بيانات تعديل العقد...'
+                    : 'Loading contract amendment details...'}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <ContractAmendmentDialog
+              open={amendOpen}
+              onOpenChange={setAmendOpen}
+              currentContractId={contractDefaults.contract.id}
+              staffCategory={employment!.staffCategory}
+              contractStartDate={contractDefaults.contract.startDate}
+              contractEndDate={contractDefaults.contract.endDate}
+              currentMovementStartDate={contractDefaults.movement.startDate}
+              currentMovementEndDate={
+                contractDefaults.movement.endDate ??
+                contractDefaults.contract.endDate
+              }
+              currentPositionItemId={contractDefaults.movement.positionItemId}
+              currentItemNumber={contractDefaults.movement.itemNumber}
+              currentDepartmentId={
+                contractDefaults.movement.officialDepartmentId
+              }
+              currentPositionId={contractDefaults.movement.officialPositionId}
+              currentDepartmentName={
+                isRtl
+                  ? (contractDefaults.movement.officialDepartmentNameAr ??
+                    contractDefaults.movement.officialDepartmentNameEn)
+                  : contractDefaults.movement.officialDepartmentNameEn
+              }
+              currentPositionTitle={
+                isRtl
+                  ? (contractDefaults.movement.officialPositionTitleAr ??
+                    contractDefaults.movement.officialPositionTitleEn)
+                  : contractDefaults.movement.officialPositionTitleEn
+              }
+              currentBaseSalary={contractDefaults.compensation?.baseSalary}
+              currentAllowances={
+                contractDefaults.compensation?.allowances ?? []
+              }
+              onSubmit={async (payload) => {
+                await amendmentMutation.mutateAsync(payload)
               }}
             />
           )}
