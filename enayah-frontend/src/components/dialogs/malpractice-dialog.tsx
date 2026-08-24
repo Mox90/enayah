@@ -207,14 +207,18 @@ function MalpracticeDialogContent({
             </div>
 
             <div className='space-y-2 xl:col-span-2'>
-              <Label>Coverage Amount</Label>
+              <Label htmlFor={`coverage-amount`}>Coverage Amount</Label>
 
               <div className='relative'>
                 <span className='pointer-events-none absolute inset-y-0 start-3 z-10 flex items-center text-muted-foreground'>
-                  <SaudiRiyalSymbol className='text-base' />
+                  <SaudiRiyalSymbol
+                    showAccessibleText={false}
+                    className='text-base'
+                  />
                 </span>
 
                 <Input
+                  id={`coverage-amount`}
                   type='number'
                   min='0'
                   className='h-11 ps-9'

@@ -613,9 +613,12 @@ function ContractRenewalDialogContent({
       <span
         className='inline-flex items-baseline gap-1.5 tabular-nums'
         dir='ltr'
+        aria-label={`${amount} Saudi Riyal`}
       >
-        <SaudiRiyalSymbol className='text-[0.95em]' />
-
+        <SaudiRiyalSymbol
+          showAccessibleText={false}
+          className='text-[0.95em] text-base'
+        />
         <span>
           {Number(amount).toLocaleString(locale, {
             minimumFractionDigits: 2,
@@ -857,9 +860,7 @@ function ContractRenewalDialogContent({
 
                 <SelectContent>
                   <SelectItem value='3'>{ct('threeMonths')}</SelectItem>
-
                   <SelectItem value='6'>{ct('sixMonths')}</SelectItem>
-
                   <SelectItem value='12'>{ct('twelveMonths')}</SelectItem>
                 </SelectContent>
               </Select>
@@ -1062,7 +1063,6 @@ function ContractRenewalDialogContent({
                 selectedLabel={newDepartmentName}
                 onChange={(department) => {
                   setNewDepartmentId(department.id)
-
                   setNewDepartmentName(
                     isRtl
                       ? (department.nameAr ?? department.nameEn)
@@ -1097,26 +1097,18 @@ function ContractRenewalDialogContent({
                   onChange={(item) => {
                     if (!item) {
                       setAlignedPositionItemId(null)
-
                       setAlignedItemNumber(null)
-
                       setAlignedDepartmentId(null)
-
                       setAlignedDepartmentName(null)
-
                       setAlignedPositionId(null)
-
                       setAlignedPositionTitle(null)
 
                       return
                     }
 
                     setAlignedPositionItemId(item.id)
-
                     setAlignedItemNumber(item.itemNumber)
-
                     setAlignedDepartmentId(item.departmentId)
-
                     setAlignedDepartmentName(
                       isRtl
                         ? (item.departmentNameAr ??
@@ -1364,19 +1356,26 @@ function ContractRenewalDialogContent({
                       </div>
 
                       <div className='space-y-2'>
-                        <Label>{ct('amount')}</Label>
+                        <Label htmlFor={`allowance-amount-${index}`}>
+                          {cmt('amount')}
+                        </Label>
 
                         <div className='relative'>
                           <span className='pointer-events-none absolute inset-y-0 start-3 z-10 flex items-center text-muted-foreground'>
-                            <SaudiRiyalSymbol className='text-base' />
+                            <SaudiRiyalSymbol
+                              showAccessibleText={false}
+                              className='text-base'
+                            />
                           </span>
 
                           <Input
+                            id={`allowance-amount-${index}`}
                             type='number'
                             min='0'
                             step='0.01'
                             inputMode='decimal'
                             className='h-11 ps-9'
+                            // aria-label={`${ct('amount')} in Saudi Riyals`}
                             value={allowance.amount || ''}
                             onChange={(event) =>
                               updateAllowance(

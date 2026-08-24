@@ -111,40 +111,47 @@ export function CountryCombobox({
             <CommandEmpty>{t('noCountryFound')}</CommandEmpty>
 
             <CommandGroup>
-              {data?.items.map((country) => (
-                <CommandItem
-                  key={country.id}
-                  value={
-                    isRtl
-                      ? `${country.nameAr} ${country.nationalityAr}`
-                      : `${country.name} ${country.nationalityEn}`
-                  }
-                  onSelect={() => {
-                    onChange(country)
-                    setOpen(false)
-                  }}
-                >
-                  <Check
-                    className={`mr-2 h-4 w-4 ${
-                      value === country.id ? 'opacity-100' : 'opacity-0'
-                    }`}
-                  />
+              {data?.items.map((country) => {
+                const resolvedName = isRtl
+                  ? country.nameAr || country.name
+                  : country.name
+                const resolvedNationality = !placeholder
+                  ? isRtl
+                    ? country.nationalityAr || country.nationalityEn
+                    : country.nationalityEn
+                  : ''
+                return (
+                  <CommandItem
+                    key={country.id}
+                    // value={
+                    //   isRtl
+                    //     ? `${country.nameAr} ${country.nationalityAr}`
+                    //     : `${country.name} ${country.nationalityEn}`
+                    // }
+                    value={`${resolvedName} ${resolvedNationality}`}
+                    onSelect={() => {
+                      onChange(country)
+                      setOpen(false)
+                    }}
+                  >
+                    <Check
+                      className={`mr-2 h-4 w-4 ${
+                        value === country.id ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    />
 
-                  <div className='flex flex-col'>
-                    <span>
-                      {isRtl ? country.nameAr || country.name : country.name}
-                    </span>
+                    <div className='flex flex-col'>
+                      <span>{resolvedName}</span>
 
-                    {!placeholder && (
-                      <span className='text-xs text-muted-foreground'>
-                        {isRtl
-                          ? country.nationalityAr || country.nationalityEn
-                          : country.nationalityEn}
-                      </span>
-                    )}
-                  </div>
-                </CommandItem>
-              ))}
+                      {!placeholder && resolvedNationality && (
+                        <span className='text-xs text-muted-foreground'>
+                          {resolvedNationality}
+                        </span>
+                      )}
+                    </div>
+                  </CommandItem>
+                )
+              })}
             </CommandGroup>
           </CommandList>
         </Command>

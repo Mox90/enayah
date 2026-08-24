@@ -101,8 +101,12 @@ export function ReviewStep({ value }: Props) {
   const totalMonthlyCompensation = baseSalary + totalAllowances
 
   const formatMoney = (amount: number) => (
-    <span className='inline-flex items-baseline gap-1.5 tabular-nums' dir='ltr'>
-      <SaudiRiyalSymbol className='text-[0.95em]' />
+    <span
+      className='inline-flex items-baseline gap-1.5 tabular-nums'
+      dir='ltr'
+      aria-label={`${amount} Saudi Riyal`}
+    >
+      <SaudiRiyalSymbol showAccessibleText={false} className='text-[0.95em]' />
       <span>
         {amount.toLocaleString(locale, {
           minimumFractionDigits: 2,

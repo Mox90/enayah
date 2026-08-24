@@ -14,6 +14,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { OnboardingFormSection } from '../sections/onboarding-form-section'
 import { CompensationErrors } from '@/modules/hr/onboarding/types/onboarding-errors.types'
 import { SaudiRiyalSymbol } from '@/components/icons/saudi-riyal-symbol'
+import { base } from 'next/dist/build/webpack/config/blocks/base'
 
 interface Props {
   value: HireEmployeePayload
@@ -288,11 +289,11 @@ export function CompensationStep({
               </Label>
 
               <div className='relative'>
-                <span
-                  className='pointer-events-none absolute inset-y-0 start-3 z-10 flex items-center text-base font-medium text-muted-foreground'
-                  aria-label='Saudi Riyal'
-                >
-                  <SaudiRiyalSymbol className='text-base' />
+                <span className='pointer-events-none absolute inset-y-0 start-3 z-10 flex items-center text-base font-medium text-muted-foreground'>
+                  <SaudiRiyalSymbol
+                    showAccessibleText={false}
+                    className='text-base'
+                  />
                 </span>
 
                 <Input
@@ -452,16 +453,15 @@ export function CompensationStep({
                     <div className='space-y-2'>
                       <Label htmlFor={`allowance-amount-${index}`}>
                         {t('amount')}
-
                         <span className='ms-1 text-destructive'>*</span>
                       </Label>
 
                       <div className='relative'>
-                        <span
-                          className='pointer-events-none absolute inset-y-0 start-3 z-10 flex items-center text-base font-medium text-muted-foreground'
-                          aria-label='Saudi Riyal'
-                        >
-                          <SaudiRiyalSymbol className='text-base' />
+                        <span className='pointer-events-none absolute inset-y-0 start-3 z-10 flex items-center text-base font-medium text-muted-foreground'>
+                          <SaudiRiyalSymbol
+                            showAccessibleText={false}
+                            className='text-base'
+                          />
                         </span>
 
                         <Input
@@ -511,13 +511,19 @@ export function CompensationStep({
                     {t('baseSalary')}
                   </span>
 
-                  <span className='font-medium tabular-nums' dir='ltr'>
-                    <SaudiRiyalSymbol className='text-base' />{' '}
-                    {baseSalary.toLocaleString(locale, {
+                  <span
+                    className='font-medium tabular-nums'
+                    dir='ltr'
+                    aria-label={`${baseSalary} Saudi Riyal`}
+                  >
+                    <SaudiRiyalSymbol
+                      showAccessibleText={false}
+                      className='text-base'
+                    />{' '}
+                    {Number(baseSalary).toLocaleString(locale, {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
-                    {/* SAR */}
                   </span>
                 </div>
 
@@ -526,9 +532,16 @@ export function CompensationStep({
                     {t('totalAllowances')}
                   </span>
 
-                  <span className='font-medium tabular-nums' dir='ltr'>
-                    <SaudiRiyalSymbol className='text-base' />{' '}
-                    {totalAllowances.toLocaleString(locale, {
+                  <span
+                    className='font-medium tabular-nums'
+                    dir='ltr'
+                    aria-label={`${totalAllowances} Saudi Riyal`}
+                  >
+                    <SaudiRiyalSymbol
+                      showAccessibleText={false}
+                      className='text-base'
+                    />{' '}
+                    {Number(totalAllowances).toLocaleString(locale, {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
@@ -544,8 +557,12 @@ export function CompensationStep({
                   <span
                     className='text-base font-semibold tabular-nums'
                     dir='ltr'
+                    aria-label={`${totalMonthlyCompensation} Saudi Riyal`}
                   >
-                    <SaudiRiyalSymbol className='text-base' />{' '}
+                    <SaudiRiyalSymbol
+                      showAccessibleText={false}
+                      className='text-base'
+                    />{' '}
                     {totalMonthlyCompensation.toLocaleString(locale, {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,

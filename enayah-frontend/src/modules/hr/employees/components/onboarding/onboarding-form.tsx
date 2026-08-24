@@ -21,7 +21,7 @@ import { useRouter } from '../../../../../../i18n/navigation'
 import { useOnboardEmployee } from '@/modules/hr/onboarding/hooks/use-onboarding'
 import { toast } from 'sonner'
 import { AxiosError } from 'axios'
-import { toPersianDigits } from '@/utils/utilities'
+import { getTodayDateString, toPersianDigits } from '@/utils/utilities'
 import { clearFieldError } from '@/modules/hr/onboarding/utils/clear-field-error'
 import { useFormErrors } from '../../hooks/use-form-errors'
 import { useOnboardingDraftStore } from '@/modules/hr/onboarding/stores/onboarding-draft.store'
@@ -98,16 +98,6 @@ export function OnboardingForm({ onCancel }: Props) {
     clearError: clearCompensationError,
   } = useFormErrors<CompensationErrors>()
 
-  function getTodayDateString() {
-    const today = new Date()
-
-    const year = today.getFullYear()
-    const month = String(today.getMonth() + 1).padStart(2, '0')
-    const day = String(today.getDate()).padStart(2, '0')
-
-    return `${year}-${month}-${day}`
-  }
-
   function validatePersonalStep() {
     const e = onboard.employee
     const identification = onboard.personal?.identifications?.[0]
@@ -144,10 +134,19 @@ export function OnboardingForm({ onCancel }: Props) {
     // if (!e.dateOfBirth?.trim()) {
     //   nextErrors.dateOfBirth = et('dobRequiredError')
     // }
+    // if (!e.dateOfBirth?.trim()) {
+    //   nextErrors.dateOfBirth = et('dobRequiredError')
+    // } else {
+    //   const today = new Date().toISOString().slice(0, 10)
+
+    //   if (e.dateOfBirth > today) {
+    //     nextErrors.dateOfBirth = et('dobFutureDateError')
+    //   }
+    // }
     if (!e.dateOfBirth?.trim()) {
       nextErrors.dateOfBirth = et('dobRequiredError')
     } else {
-      const today = new Date().toISOString().slice(0, 10)
+      const today = getTodayDateString()
 
       if (e.dateOfBirth > today) {
         nextErrors.dateOfBirth = et('dobFutureDateError')
@@ -451,12 +450,31 @@ export function OnboardingForm({ onCancel }: Props) {
   }
 
   async function handleSubmit() {
-    // TODO: Call onboarding mutation with hire payload
+    // TODO: Call onboarding mutation with hire payload here
+    const personalValid = validatePersonalStep()
+    const employmentContractValid = validateEmploymentContractAssignmentStep()
+    const compensationValid = validateCompensationStep()
+
+    if (!personalValid) {
+      setCurrentStep('personal')
+      return
+    }
+
+    if (!employmentContractValid) {
+      setCurrentStep('employmentContractAssignment')
+      return
+    }
+
+    if (!compensationValid) {
+      setCurrentStep('compensation')
+      return
+    }
+
     const { contractNumber, ...contractWithoutNumber } = onboard.contract
 
     const payload: HireEmployeePayload = {
       ...onboard,
-
+      contract: contractNumber ? onboard.contract : contractWithoutNumber,
       personal: onboard.personal
         ? {
             ...onboard.personal,
@@ -465,9 +483,6 @@ export function OnboardingForm({ onCancel }: Props) {
               [],
           }
         : undefined,
-
-      contract: contractNumber ? onboard.contract : contractWithoutNumber,
-
       employee: {
         ...onboard.employee,
         //dateOfBirth: emptyToUndefined(onboard.employee.dateOfBirth),
@@ -475,7 +490,6 @@ export function OnboardingForm({ onCancel }: Props) {
         countryNameAr: undefined,
         //endDate: emptyToUndefined(onboard.employment.endDate),
       },
-
       movement: {
         ...onboard.movement,
         positionItemId: onboard.movement.positionItemId || undefined,
@@ -485,7 +499,6 @@ export function OnboardingForm({ onCancel }: Props) {
         //endDate: emptyToUndefined(onboard.movement.endDate || ''),
         //sequenceNumber: onboard.movement.sequenceNumber,
       },
-
       appointment: onboard.appointment
         ? {
             ...onboard.appointment,
@@ -495,41 +508,33 @@ export function OnboardingForm({ onCancel }: Props) {
             actualPositionTitleAr: undefined,
           }
         : undefined,
-
       compensation: onboard.compensation
         ? {
             ...onboard.compensation,
             effectiveDate: onboard.contract.startDate,
           }
         : undefined,
-
       credentials: {
         degrees:
           onboard.credentials?.degrees?.map(({ id, ...degree }) => degree) ??
           [],
-
         boards:
           onboard.credentials?.boards?.map(({ id, ...board }) => board) ?? [],
-
         fellowships:
           onboard.credentials?.fellowships?.map(
             ({ id, ...fellowship }) => fellowship,
           ) ?? [],
-
         memberships:
           onboard.credentials?.memberships?.map(
             ({ id, ...membership }) => membership,
           ) ?? [],
-
         licenses:
           onboard.credentials?.licenses?.map(({ id, ...license }) => license) ??
           [],
-
         lifeSupport:
           onboard.credentials?.lifeSupport?.map(
             ({ id, ...lifeSupport }) => lifeSupport,
           ) ?? [],
-
         malpractice:
           onboard.credentials?.malpractice?.map(
             ({ id, ...malpractice }) => malpractice,

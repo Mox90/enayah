@@ -20,6 +20,7 @@ import {
 import { useLocale, useTranslations } from 'next-intl'
 import { OnboardingFormSection } from './onboarding-form-section'
 import { hasIdentificationData as hasIdentificationDataValue } from '@/modules/hr/onboarding/utils/has-identification-data'
+import { getTodayDateString } from '@/utils/utilities'
 
 interface Props {
   value: HireEmployeePayload
@@ -118,11 +119,20 @@ export function EmployeeIdentificationInformation({
       [field]: fieldValue,
     }
 
+    // if (
+    //   (field === 'issueDate' || field === 'expiryDate') &&
+    //   nextIdentification.issueDate &&
+    //   nextIdentification.expiryDate &&
+    //   nextIdentification.expiryDate > nextIdentification.issueDate
+    // ) {
+    //   onClearError('identificationExpiryDate')
+    // }
     if (
       (field === 'issueDate' || field === 'expiryDate') &&
       nextIdentification.issueDate &&
       nextIdentification.expiryDate &&
-      nextIdentification.expiryDate > nextIdentification.issueDate
+      nextIdentification.expiryDate > nextIdentification.issueDate &&
+      nextIdentification.expiryDate > getTodayDateString()
     ) {
       onClearError('identificationExpiryDate')
     }

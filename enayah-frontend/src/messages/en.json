@@ -510,7 +510,12 @@
     "renewWithoutCompensationMessage": "No compensation changes have been entered for this renewal. The employee's existing compensation will remain unchanged. Continue with the renewal?",
     "continueRenewal": "Continue Renewal",
     "renewWithoutCompensationPromotionMessage": "This renewal includes a promotion, but no compensation changes have been entered. The employee's existing compensation will remain unchanged. Continue anyway?",
-    "renewWithoutCompensationDemotionMessage": "This renewal includes a demotion, but no compensation changes have been entered. The employee's existing compensation will remain unchanged. Continue anyway?"
+    "renewWithoutCompensationDemotionMessage": "This renewal includes a demotion, but no compensation changes have been entered. The employee's existing compensation will remain unchanged. Continue anyway?",
+    "pcnAlignmentTargetRequired": "Select a target PCN for PCN alignment.",
+    "promotionDemotionRequiresPositionChange": "Promotion or demotion requires a change in the employee's legal position.",
+    "transferRequiresDepartmentChange": "Transfer requires a change in the employee's legal department.",
+    "pcnAlignmentNoChange": "PCN alignment must change the PCN or align the employee with different department or position data from the selected PCN.",
+    "fromPcn": "From PCN"
   },
   "compensations": {
     "compensationInformation": "Compensation",
