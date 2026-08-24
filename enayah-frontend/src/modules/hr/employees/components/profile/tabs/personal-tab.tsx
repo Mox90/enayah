@@ -623,6 +623,14 @@ const PersonalTab = ({ personal }: Props) => {
             }}
           />
 
+          {/* <AlertDialog
+            open={deleteTarget !== null}
+            onOpenChange={(open) => {
+              if (!open && !isDeletePending) {
+                setDeleteTarget(null)
+              }
+            }}
+          > */}
           <AlertDialog
             open={deleteTarget !== null}
             onOpenChange={(open) => {
@@ -631,49 +639,10 @@ const PersonalTab = ({ personal }: Props) => {
               }
             }}
           >
-            {/* <AlertDialogContent
-              ref={dialogContentRef}
-              className='data-[state=open]:animate-none'
-            >
-              <AlertDialogHeader>
-                <AlertDialogTitle>
-                  {pt('deleteConfirmation.title', {
-                    item: deleteTargetLabel,
-                  })}
-                </AlertDialogTitle>
-
-                <AlertDialogDescription>
-                  {pt('deleteConfirmation.description', {
-                    item: deleteTargetLabel,
-                  })}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-
-              <AlertDialogFooter>
-                <AlertDialogCancel disabled={isDeletePending}>
-                  {ct('cancel')}
-                </AlertDialogCancel>
-
-                <AlertDialogAction
-                  className={buttonVariants({
-                    variant: 'destructive',
-                  })}
-                  disabled={!deleteTarget || isDeletePending}
-                  onClick={(event) => {
-                    event.preventDefault()
-                    confirmDelete()
-                  }}
-                >
-                  {isDeletePending
-                    ? pt('deleteConfirmation.deleting')
-                    : ct('delete')}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent> */}
-            {/* <AlertDialogContent className='border-0 bg-transparent p-0 shadow-none data-[state=open]:animate-none'>
+            <AlertDialogContent className='bg-transparent p-0 ring-0 data-open:animate-none data-closed:animate-none'>
               <div
                 ref={dialogContentRef}
-                className='rounded-lg border bg-background p-6 shadow-lg'
+                className='grid w-full gap-4 rounded-xl bg-popover p-4 text-popover-foreground ring-1 ring-foreground/10'
               >
                 <AlertDialogHeader>
                   <AlertDialogTitle>
@@ -689,7 +658,7 @@ const PersonalTab = ({ personal }: Props) => {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
 
-                <AlertDialogFooter className='mt-6'>
+                <AlertDialogFooter>
                   <AlertDialogCancel disabled={isDeletePending}>
                     {ct('cancel')}
                   </AlertDialogCancel>
@@ -710,58 +679,9 @@ const PersonalTab = ({ personal }: Props) => {
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </div>
-            </AlertDialogContent> */}
-            <AlertDialog
-              open={deleteTarget !== null}
-              onOpenChange={(open) => {
-                if (!open && !isDeletePending) {
-                  setDeleteTarget(null)
-                }
-              }}
-            >
-              <AlertDialogContent className='bg-transparent p-0 ring-0 data-open:animate-none data-closed:animate-none'>
-                <div
-                  ref={dialogContentRef}
-                  className='grid w-full gap-4 rounded-xl bg-popover p-4 text-popover-foreground ring-1 ring-foreground/10'
-                >
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      {pt('deleteConfirmation.title', {
-                        item: deleteTargetLabel,
-                      })}
-                    </AlertDialogTitle>
-
-                    <AlertDialogDescription>
-                      {pt('deleteConfirmation.description', {
-                        item: deleteTargetLabel,
-                      })}
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-
-                  <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isDeletePending}>
-                      {ct('cancel')}
-                    </AlertDialogCancel>
-
-                    <AlertDialogAction
-                      className={buttonVariants({
-                        variant: 'destructive',
-                      })}
-                      disabled={!deleteTarget || isDeletePending}
-                      onClick={(event) => {
-                        event.preventDefault()
-                        confirmDelete()
-                      }}
-                    >
-                      {isDeletePending
-                        ? pt('deleteConfirmation.deleting')
-                        : ct('delete')}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </div>
-              </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialogContent>
           </AlertDialog>
+          {/* </AlertDialog> */}
 
           <IdentificationDialog
             open={identification.open}

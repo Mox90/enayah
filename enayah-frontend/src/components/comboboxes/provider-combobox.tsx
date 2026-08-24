@@ -64,7 +64,7 @@ export function ProviderCombobox({ value, options, onChange }: Props) {
           type='button'
           variant='outline'
           role='combobox'
-          className='w-full justify-between'
+          className='w-full h-11 justify-between'
         >
           {selected?.label || value || 'Select provider type'}
 

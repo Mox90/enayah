@@ -56,7 +56,7 @@ export function PositionCombobox({ value, onChange, selectedLabel }: Props) {
           type='button'
           variant='outline'
           role='combobox'
-          className='w-full justify-between'
+          className='w-full h-11 justify-between'
         >
           {selected ? selected.titleEn : (selectedLabel ?? 'Select position')}
 

@@ -1,3 +1,5 @@
+// enayah-frontend/src/components/layouts/sidebar.tsx
+
 'use client'
 
 import { useLocale, useTranslations } from 'next-intl'

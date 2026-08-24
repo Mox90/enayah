@@ -67,7 +67,8 @@
     "to": "To",
     "add": "Add {item}",
     "noRecords": "No {item} records found",
-    "optional": "Optional"
+    "optional": "Optional",
+    "status": "Status"
   },
   "auth": {
     "loginTitle": "Login to Your Account",
@@ -393,7 +394,8 @@
     "movementRemarks": "Movement Remarks",
     "selectVacantPcnLabel": "Select vacant PCN",
     "actualAppointment": "Actual Appointment",
-    "actualAppointmentSub": "Optional. If left blank, backend will default actual department and position from the selected PCN.",
+    "actualAppointmentSub": "Optional. If left blank, the backend will default the actual department and position from the selected PCN.",
+    "actualMilitaryAppointmentSub": "Required for military staff. Select the actual department and position because a PCN is optional for military employees.",
     "actualDepartmentLabel": "Actual Department",
     "selectDepartment": "Select Department",
     "actualPositionLabel": "Actual Position",
@@ -452,9 +454,63 @@
     "movementRemarksPlaceholder": "Add any remarks about the initial legal assignment...",
     "actualWorkingAssignment": "Actual Working Assignment",
     "optional": "Optional",
+    "required": "Required",
     "actualAssignmentHint": "The actual working assignment defaults to the legal PCN assignment. Change it only when the employee will operationally work in a different department or position.",
     "appointmentRemarksPlaceholder": "Add any remarks about the employee's operational assignment...",
-    "pcnOptionalForMilitary": "PCN is optional for military personnel."
+    "pcnOptionalForMilitary": "PCN is optional for military personnel.",
+    "renewalContractPeriodSub": "Define the new contract period. The renewal start date is determined automatically from the current contract.",
+
+    "currentLegalAssignment": "Current Legal Assignment",
+    "currentLegalAssignmentSub": "The employee's current legal department, position, and PCN. These values are carried forward unless a renewal action changes them.",
+    "current": "Current",
+
+    "legalDepartment": "Legal Department",
+    "legalPosition": "Legal Position",
+
+    "renewalActions": "Renewal Actions",
+    "renewalActionsSub": "Select any legal changes that will take effect with this renewal. Leave all options unchecked for a normal renewal.",
+
+    "normalRenewal": "Normal Renewal",
+    "normalRenewalSub": "No legal changes are selected. The employee's current legal department, position, and PCN will be carried forward.",
+
+    "promotionActionSub": "Change the employee's legal position as part of a promotion.",
+    "demotionActionSub": "Change the employee's legal position as part of a demotion.",
+    "transferActionSub": "Change the employee's legal department as part of a transfer.",
+    "pcnAlignmentActionSub": "Align the employee's legal assignment with a selected PCN.",
+
+    "renewalCompensationSub": "Compensation changes are optional. Current compensation is shown for reference and will remain unchanged unless modified.",
+    "reviewChangeCompensation": "Review / Change Compensation",
+    "cancelCompensationChange": "Cancel Compensation Change",
+
+    "renewalNotes": "Renewal Notes",
+    "renewalNotesSub": "Add optional remarks about the renewal movement and the renewed contract.",
+
+    "renewalMovementRemarksPlaceholder": "Optional remarks about the renewal, promotion, demotion, transfer, or PCN alignment.",
+    "renewalContractNotesPlaceholder": "Optional notes for the renewed contract.",
+    "amendContract": "Amend Contract",
+    "newPositionAfterPromotion": "New Position — Promotion",
+    "newLegalPositionSub": "Select the new legal position that will take effect from the renewal start date.",
+
+    "newLegalAssignment": "Resulting Legal Assignment",
+    "newLegalAssignmentSub": "This is the legal assignment that will be recorded for the renewed contract.",
+
+    "newPositionRequired": "Select the new legal position.",
+    "newDepartmentRequired": "Select the new legal department.",
+
+    "newPositionAfterDemotion": "New Position — Demotion",
+
+    "newDepartmentAfterTransfer": "New Department — Transfer",
+    "newLegalDepartmentSub": "Select the new legal department that will take effect from the renewal start date.",
+    "noPcnAssignedMilitary": "No PCN assigned — optional for military staff",
+    "newPcnAlignment": "PCN Alignment",
+    "newPcnAlignmentSub": "Select the PCN that should be assigned for this renewal. When PCN Alignment is selected, the selected PCN's department and position become the resulting legal assignment.",
+
+    "positionItemRequired": "A PCN is required for civilian and contractual employees.",
+    "renewWithoutCompensationTitle": "Renew without compensation changes?",
+    "renewWithoutCompensationMessage": "No compensation changes have been entered for this renewal. The employee's existing compensation will remain unchanged. Continue with the renewal?",
+    "continueRenewal": "Continue Renewal",
+    "renewWithoutCompensationPromotionMessage": "This renewal includes a promotion, but no compensation changes have been entered. The employee's existing compensation will remain unchanged. Continue anyway?",
+    "renewWithoutCompensationDemotionMessage": "This renewal includes a demotion, but no compensation changes have been entered. The employee's existing compensation will remain unchanged. Continue anyway?"
   },
   "compensations": {
     "compensationInformation": "Compensation",
@@ -731,10 +787,10 @@
     "firstNameArRequiredError": "First Name (AR) is required.",
     "familyNameArRequiredError": "Family Name (AR) is required.",
     "dobRequiredError": "Date of Birth is required.",
-    "identificationIssueDateRequiredError": "Issue date is required when an identification number is provided.",
-    "identificationExpiryDateRequiredError": "Expiry date is required when an identification number is provided.",
+    "identificationIssueDateRequiredError": "Please enter the issue date for the identification number provided.",
+    "identificationExpiryDateRequiredError": "Please enter the expiry date for the identification number provided.",
     "identificationSponsorRequiredError": "Sponsor is required for an Iqama.",
-    "identificationIssuingAuthorityRequiredError": "Issuing authority is required when an identification number is provided.",
+    "identificationIssuingAuthorityRequiredError": "Please enter the issuing authority for the identification number provided.",
     "identificationExpiryDateAfterIssueDateError": "Expiry date must be after the issue date.",
     "hireDateRequiredError": "Hire / effective date is required.",
     "contractEndDateRequiredError": "Contract end date is required.",
@@ -746,7 +802,11 @@
     "compensationEffectiveDateError": "The compensation effective date must match the contract start date.",
     "compensationRequiredForAllowancesError": "Compensation is required when allowances are provided.",
     "allowanceTypeRequiredError": "Allowance type is required.",
-    "allowanceAmountRequiredError": "Allowance amount must be greater than zero."
+    "allowanceAmountRequiredError": "Allowance amount must be greater than zero.",
+    "dobFutureDateError": "Date of birth cannot be in the future.",
+    "invalidEmailAddressError": "Please enter a valid email address (example: name@domain.com).",
+    "identificationIssueDateFutureError": "Issue date cannot be later than today.",
+    "identificationExpiryDateFutureError": "Expiry date must be later than today."
   },
   "allowanceTypes": {
     "housing": "Housing Allowance",
@@ -1140,5 +1200,26 @@
     "licenses": "Licenses",
     "lifeSupport": "Life Support",
     "malpractice": "Malpractice"
+  },
+  "breadcrumbs": {
+    "breadcrumb": "Breadcrumb",
+    "home": "Home",
+    "onboarding": "Onboarding",
+    "employmentContractAssignment": "Employment & Assignment",
+    "review": "Review",
+
+    "profile": "Profile",
+    "personal": "Personal",
+    "employment": "Employment",
+    "contract": "Contract",
+    "contracts": "Contracts",
+    "compensation": "Compensation",
+    "credentials": "Credentials",
+    "documents": "Documents",
+    "history": "History",
+    "edit": "Edit",
+    "renewal": "Renewal",
+    "details": "Details",
+    "settings": "Settings"
   }
 }

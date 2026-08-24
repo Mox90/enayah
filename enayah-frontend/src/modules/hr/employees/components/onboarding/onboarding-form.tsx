@@ -24,23 +24,35 @@ import { AxiosError } from 'axios'
 import { toPersianDigits } from '@/utils/utilities'
 import { clearFieldError } from '@/modules/hr/onboarding/utils/clear-field-error'
 import { useFormErrors } from '../../hooks/use-form-errors'
+import { useOnboardingDraftStore } from '@/modules/hr/onboarding/stores/onboarding-draft.store'
+import { useEmployeeWorkspaceNavigation } from '@/modules/hr/onboarding/hooks/use-employee-workspace-navigation'
+import { OnboardingStep } from '@/modules/hr/onboarding/constants/onboarding-steps'
+import { hasIdentificationData } from '@/modules/hr/onboarding/utils/has-identification-data'
 //import { emptyToUndefined } from '@/utils/utilities'
 
-type Step =
-  | 'personal'
-  | 'employmentContractAssignment'
-  // | 'contract'
-  // | 'assignment'
-  | 'compensation'
-  | 'credentials'
-  | 'review'
+// type Step =
+//   | 'personal'
+//   | 'employmentContractAssignment'
+//   | 'compensation'
+//   | 'credentials'
+//   | 'review'
 
 interface Props {
   onCancel: () => void
 }
 
 export function OnboardingForm({ onCancel }: Props) {
-  const [currentStep, setCurrentStep] = useState<Step>('personal')
+  //const [currentStep, setCurrentStep] = useState<Step>('personal')
+  const onboard = useOnboardingDraftStore((state) => state.draft)
+  const setOnboard = useOnboardingDraftStore((state) => state.setDraft)
+
+  const resetOnboardingDraft = useOnboardingDraftStore(
+    (state) => state.resetDraft,
+  )
+
+  const { step: currentStep, setStep: setCurrentStep } =
+    useEmployeeWorkspaceNavigation()
+
   const t = useTranslations('employees')
   const ct = useTranslations('common')
   const et = useTranslations('errors')
@@ -49,7 +61,11 @@ export function OnboardingForm({ onCancel }: Props) {
   const isRtl = locale === 'ar'
   const onboardMutation = useOnboardEmployee()
 
-  const steps: { key: Step; label: string }[] = [
+  //const steps: { key: Step; label: string }[] = [
+  const steps: {
+    key: OnboardingStep
+    label: string
+  }[] = [
     { key: 'personal', label: t('personal') },
     { key: 'employmentContractAssignment', label: t('employmentAssignment') },
     // { key: 'contract', label: 'Contract' },
@@ -59,98 +75,10 @@ export function OnboardingForm({ onCancel }: Props) {
     { key: 'review', label: t('review') },
   ]
 
-  const [onboard, setOnboard] = useState<HireEmployeePayload>({
-    employee: {
-      employeeNumber: '',
-      firstNameEn: '',
-      secondNameEn: null,
-      thirdNameEn: null,
-      familyNameEn: '',
-      firstNameAr: '',
-      secondNameAr: null,
-      thirdNameAr: null,
-      familyNameAr: '',
-      gender: 'male',
-      dateOfBirth: null,
-      countryId: null,
-      countryNameEn: '',
-      countryNameAr: '',
-    },
-
-    personal: {
-      identifications: [],
-      emails: [],
-      phoneNumbers: [],
-      dependents: [],
-      addresses: [],
-      emergencyContacts: [],
-      visas: [],
-    },
-
-    employment: {
-      hireDate: '',
-      startDate: '',
-      endDate: null,
-      employmentType: 'full_time',
-      staffCategory: 'contractual',
-    },
-
-    contract: {
-      contractNumber: null,
-      startDate: '',
-      endDate: '',
-      contractType: 'initial',
-      status: 'active',
-      signedDate: null,
-      documentPath: null,
-      notes: null,
-    },
-
-    movement: {
-      positionItemId: null,
-      itemNumber: null,
-      startDate: '',
-      remarks: '',
-      // officialDepartmentId: '',
-      // officialPositionId: '',
-      endDate: '',
-      sequenceNumber: 1,
-      movementType: 'initial', //'' as HireEmployeePayload['movement']['movementType'],
-    },
-
-    appointment: {
-      actualDepartmentId: null,
-      actualPositionId: null,
-      managerId: null,
-      startDate: '',
-      endDate: null,
-      appointmentType: 'primary',
-      assignmentReason: 'management_decision',
-      remarks: null,
-      approvedBy: null,
-      approvedAt: null,
-    },
-    compensation: undefined,
-    allowances: [],
-    credentials: {
-      degrees: [],
-      boards: [],
-      fellowships: [],
-      memberships: [],
-      licenses: [],
-      lifeSupport: [],
-      malpractice: [],
-    },
-  })
-
-  //const [errors, setErrors] = useState<Record<string, string>>({})
   const currentIndex = steps.findIndex((step) => step.key === currentStep)
   const isFirst = currentIndex === 0
   const isLast = currentIndex === steps.length - 1
 
-  // const [personalErrors, setPersonalErrors] = useState<PersonalErrors>({})
-  // const [employmentContractErrors, setEmploymentContractErrors] =
-  //   useState<EmploymentContractErrors>({})
   const {
     errors: personalErrors,
     setErrors: setPersonalErrors,
@@ -169,6 +97,16 @@ export function OnboardingForm({ onCancel }: Props) {
     updateErrors: updateCompensationErrors,
     clearError: clearCompensationError,
   } = useFormErrors<CompensationErrors>()
+
+  function getTodayDateString() {
+    const today = new Date()
+
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+
+    return `${year}-${month}-${day}`
+  }
 
   function validatePersonalStep() {
     const e = onboard.employee
@@ -203,8 +141,17 @@ export function OnboardingForm({ onCancel }: Props) {
       nextErrors.familyNameAr = et('familyNameArRequiredError')
     }
 
+    // if (!e.dateOfBirth?.trim()) {
+    //   nextErrors.dateOfBirth = et('dobRequiredError')
+    // }
     if (!e.dateOfBirth?.trim()) {
       nextErrors.dateOfBirth = et('dobRequiredError')
+    } else {
+      const today = new Date().toISOString().slice(0, 10)
+
+      if (e.dateOfBirth > today) {
+        nextErrors.dateOfBirth = et('dobFutureDateError')
+      }
     }
 
     // --------------------------------------------------
@@ -214,15 +161,15 @@ export function OnboardingForm({ onCancel }: Props) {
     //const identification = onboard.personal?.identifications?.[0]
 
     if (identification) {
-      const hasIdentificationData = Boolean(
-        identification.identificationNumber?.trim() ||
-        identification.issueDate ||
-        identification.expiryDate ||
-        identification.sponsor?.trim() ||
-        identification.issuingAuthority?.trim(),
-      )
+      // const hasIdentificationData = Boolean(
+      //   identification.identificationNumber?.trim() ||
+      //   identification.issueDate ||
+      //   identification.expiryDate ||
+      //   identification.sponsor?.trim() ||
+      //   identification.issuingAuthority?.trim(),
+      // )
 
-      if (hasIdentificationData) {
+      if (hasIdentificationData(identification)) {
         // All identification types require a number
         if (!identification.identificationNumber?.trim()) {
           nextErrors.identificationNumber = et(
@@ -262,7 +209,37 @@ export function OnboardingForm({ onCancel }: Props) {
         }
 
         // Date relationship
+        // if (
+        //   identification.issueDate &&
+        //   identification.expiryDate &&
+        //   identification.expiryDate <= identification.issueDate
+        // ) {
+        //   nextErrors.identificationExpiryDate = et(
+        //     'identificationExpiryDateAfterIssueDateError',
+        //   )
+        // }
+        const today = getTodayDateString()
+
+        // Issue date cannot be later than today
+        if (identification.issueDate && identification.issueDate > today) {
+          nextErrors.identificationIssueDate = et(
+            'identificationIssueDateFutureError',
+          )
+        }
+
+        // Expiry date must always be after today
+        if (identification.expiryDate && identification.expiryDate <= today) {
+          nextErrors.identificationExpiryDate = et(
+            'identificationExpiryDateFutureError',
+          )
+        }
+
+        // Expiry date must also be after issue date.
+        //
+        // Only run this when there is not already a more specific
+        // expiry-date error.
         if (
+          !nextErrors.identificationExpiryDate &&
           identification.issueDate &&
           identification.expiryDate &&
           identification.expiryDate <= identification.issueDate
@@ -480,6 +457,15 @@ export function OnboardingForm({ onCancel }: Props) {
     const payload: HireEmployeePayload = {
       ...onboard,
 
+      personal: onboard.personal
+        ? {
+            ...onboard.personal,
+            identifications:
+              onboard.personal.identifications?.filter(hasIdentificationData) ??
+              [],
+          }
+        : undefined,
+
       contract: contractNumber ? onboard.contract : contractWithoutNumber,
 
       employee: {
@@ -552,6 +538,8 @@ export function OnboardingForm({ onCancel }: Props) {
     }
     onboardMutation.mutate(payload, {
       onSuccess: (result) => {
+        resetOnboardingDraft()
+
         toast.success('Employee onboarded successfully')
 
         router.push(`/employees/${result.employee.id}/profile`)

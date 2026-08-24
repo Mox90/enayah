@@ -11,6 +11,7 @@ import { formatDate, humanize } from '@/utils/utilities'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { OnboardingFormSection } from '../sections/onboarding-form-section'
+import { SaudiRiyalSymbol } from '@/components/icons/saudi-riyal-symbol'
 
 interface Props {
   value: HireEmployeePayload
@@ -99,11 +100,17 @@ export function ReviewStep({ value }: Props) {
 
   const totalMonthlyCompensation = baseSalary + totalAllowances
 
-  const formatMoney = (amount: number) =>
-    `${amount.toLocaleString(locale, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })} SAR`
+  const formatMoney = (amount: number) => (
+    <span className='inline-flex items-baseline gap-1.5 tabular-nums' dir='ltr'>
+      <SaudiRiyalSymbol className='text-[0.95em]' />
+      <span>
+        {amount.toLocaleString(locale, {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
+      </span>
+    </span>
+  )
 
   const primaryEmail = emails.find((email) => email.isPrimary) ?? emails[0]
 

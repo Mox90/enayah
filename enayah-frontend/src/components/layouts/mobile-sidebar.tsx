@@ -1,3 +1,5 @@
+// enayah-frontend/src/components/layouts/mobile-sidebar.tsx
+
 'use client'
 
 import Image from 'next/image'

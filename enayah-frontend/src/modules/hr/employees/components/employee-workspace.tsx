@@ -15,6 +15,9 @@ import { EmployeeTreeView } from './tree/employee-tree-view'
 //import { EmployeeHierarchyView } from './hierarchy/employee-hierarchy-view'
 import { EmployeeFilterSheet } from './filter/employee-filter-sheet'
 import { OnboardingForm } from './onboarding/onboarding-form'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useEmployeeWorkspaceNavigation } from '../../onboarding/hooks/use-employee-workspace-navigation'
+import { useOnboardingDraftStore } from '../../onboarding/stores/onboarding-draft.store'
 
 type EmployeeFilters = {
   departmentIds: string[]
@@ -32,7 +35,44 @@ type EmployeeFilters = {
 }
 
 export function EmployeeWorkspace() {
-  const [view, setView] = useState<EmployeeView>('list')
+  //const [view, setView] = useState<EmployeeView>('list')
+  //const [mode, setMode] = useState<'directory' | 'onboarding'>('directory')
+  // const router = useRouter()
+  // const pathname = usePathname()
+  // const searchParams = useSearchParams()
+
+  // const mode =
+  //   searchParams.get('mode') === 'onboarding' ? 'onboarding' : 'directory'
+  // const viewParam = searchParams.get('view')
+  // const view: EmployeeView =
+  //   viewParam === 'kanban' || viewParam === 'tree' ? viewParam : 'list'
+  // const updateWorkspaceQuery = (
+  //   updates: Record<string, string | null | undefined>,
+  // ) => {
+  //   const params = new URLSearchParams(searchParams.toString())
+
+  //   Object.entries(updates).forEach(([key, value]) => {
+  //     if (value === null || value === undefined || value === '') {
+  //       params.delete(key)
+  //     } else {
+  //       params.set(key, value)
+  //     }
+  //   })
+
+  //   const query = params.toString()
+
+  //   router.replace(query ? `${pathname}?${query}` : pathname, {
+  //     scroll: false,
+  //   })
+  // }
+
+  const { mode, view, setView, openOnboarding, closeOnboarding } =
+    useEmployeeWorkspaceNavigation()
+
+  const resetOnboardingDraft = useOnboardingDraftStore(
+    (state) => state.resetDraft,
+  )
+
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(25)
 
@@ -67,8 +107,6 @@ export function EmployeeWorkspace() {
 
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
 
-  const [mode, setMode] = useState<'directory' | 'onboarding'>('directory')
-
   /*
    * Wait 400 milliseconds after the user stops typing
    * before applying the search to the API request.
@@ -100,7 +138,8 @@ export function EmployeeWorkspace() {
     return (
       <OnboardingForm
         onCancel={() => {
-          setMode('directory')
+          resetOnboardingDraft()
+          closeOnboarding()
         }}
       />
     )
@@ -112,7 +151,10 @@ export function EmployeeWorkspace() {
         view={view}
         selectedIds={Object.keys(rowSelection)}
         onViewChange={setView}
-        onBoard={() => setMode('onboarding')}
+        onBoard={() => {
+          resetOnboardingDraft()
+          openOnboarding()
+        }}
         onFilter={() => setFilterOpen(true)}
       />
 
