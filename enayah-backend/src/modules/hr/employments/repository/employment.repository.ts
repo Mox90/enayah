@@ -1,6 +1,6 @@
 // enayah-backend/src/modules/hr/employments/repository/employment.repository.ts
 
-import { and, eq, isNull, sql } from 'drizzle-orm'
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
 import {
   appointments,
@@ -132,36 +132,66 @@ export const EmploymentRepository = {
   //   return findByIdOrThrow(tx, updated.id)
   // },
 
-  endEmployment: async (tx: DB, id: string, endDate: string) => {
-    const existing = await findByIdOrThrow(tx, id)
+  // endEmployment: async (tx: DB, id: string, endDate: string) => {
+  //   const existing = await findByIdOrThrow(tx, id)
 
-    if (existing.status === 'ended') {
-      throw new AppError('Employment has already ended', 400)
-    }
+  //   if (existing.status === 'ended') {
+  //     throw new AppError('Employment has already ended', 400)
+  //   }
 
-    if (endDate < existing.startDate) {
-      throw new AppError(
-        'Employment end date cannot be before employment start date',
-        400,
-      )
-    }
+  //   if (endDate < existing.startDate) {
+  //     throw new AppError(
+  //       'Employment end date cannot be before employment start date',
+  //       400,
+  //     )
+  //   }
 
-    const [updatedRaw] = await tx
+  //   const [updatedRaw] = await tx
+  //     .update(employments)
+  //     .set({
+  //       status: 'ended',
+  //       endDate,
+  //       updatedAt: new Date(),
+  //       version: sql`${employments.version} + 1`,
+  //     })
+  //     .where(and(eq(employments.id, id), isActive))
+  //     .returning({
+  //       id: employments.id,
+  //     })
+
+  //   const updated = assertExists(updatedRaw, 'Failed to end employment')
+
+  //   return findByIdOrThrow(tx, updated.id)
+  // },
+  endEmployment: async (
+    tx: DB,
+    employmentId: string,
+    effectiveDate: string,
+    userId?: string,
+  ) => {
+    const [updated] = await tx
       .update(employments)
       .set({
+        endDate: effectiveDate,
         status: 'ended',
-        endDate,
         updatedAt: new Date(),
-        version: sql`${employments.version} + 1`,
+        ...(userId && {
+          updatedBy: userId,
+        }),
+        version: sql`
+          ${employments.version} + 1
+        `,
       })
-      .where(and(eq(employments.id, id), isActive))
-      .returning({
-        id: employments.id,
-      })
+      .where(
+        and(
+          eq(employments.id, employmentId),
+          inArray(employments.status, ['active', 'on_leave', 'suspended']),
+          eq(employments.isDeleted, false),
+        ),
+      )
+      .returning()
 
-    const updated = assertExists(updatedRaw, 'Failed to end employment')
-
-    return findByIdOrThrow(tx, updated.id)
+    return updated ?? null
   },
 
   softDelete: async (tx: DB, id: string, userId?: string) => {

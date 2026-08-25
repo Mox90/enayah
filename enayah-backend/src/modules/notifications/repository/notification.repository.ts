@@ -16,7 +16,9 @@ export const NotificationRepository = {
       employeeId?: string | null
       type: string
       title: string
+      titleAr: string
       message: string
+      messageAr: string
       sourceType: string
       sourceId: string
       dueDate?: string | null
@@ -30,7 +32,9 @@ export const NotificationRepository = {
         employeeId: data.employeeId ?? null,
         type: data.type,
         title: data.title,
+        titleAr: data.titleAr,
         message: data.message,
+        messageAr: data.messageAr,
         sourceType: data.sourceType,
         sourceId: data.sourceId,
         dueDate: data.dueDate ?? null,
