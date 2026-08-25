@@ -1,105 +1,83 @@
 // enayah-backend/src/modules/hr/offboarding/repository/employment-separation.repository.ts
 
+import { and, desc, eq, inArray, lte, sql } from 'drizzle-orm'
+
 import { DB, employmentSeparations } from '../../../../db'
-import { AppError } from '../../../../core/errors/AppError'
-import { and, eq, inArray, isNull, lte, sql } from 'drizzle-orm'
 
-type SeparationType =
-  (typeof employmentSeparations.$inferInsert)['separationType']
+import type { EmploymentSeparationType } from '../types/offboarding.types'
 
-type CreateApprovedSeparationInput = {
+type CreateValues = {
   employmentId: string
-  separationType: SeparationType
-  effectiveDate: string
+  separationType: EmploymentSeparationType
   noticeDate?: string | null
+  effectiveDate: string
   reason?: string | null
   remarks?: string | null
-  userId?: string
+  createdBy?: string | null
 }
 
-function isOpenSeparationUniqueViolation(error: unknown): boolean {
-  if (typeof error !== 'object' || error === null) {
-    return false
-  }
-
-  const cause =
-    'cause' in error ? (error as { cause?: unknown }).cause : undefined
-
-  if (typeof cause !== 'object' || cause === null) {
-    return false
-  }
-
-  const postgresError = cause as {
-    code?: string
-    constraint?: string
-  }
-
-  return (
-    postgresError.code === '23505' &&
-    postgresError.constraint === 'uq_employment_separation_open'
-  )
+type UpdateDraftValues = {
+  separationType?: EmploymentSeparationType | undefined
+  noticeDate?: string | null | undefined
+  effectiveDate?: string | undefined
+  reason?: string | null | undefined
+  remarks?: string | null | undefined
+  updatedBy?: string | null | undefined
 }
+
+const openStatuses = ['draft', 'pending_approval', 'approved'] as const
 
 export const EmploymentSeparationRepository = {
-  createApproved: async (tx: DB, data: CreateApprovedSeparationInput) => {
-    const existing =
-      await EmploymentSeparationRepository.findOpenByEmploymentId(
-        tx,
-        data.employmentId,
-      )
+  // ----------------------------------
+  // Create
+  // ----------------------------------
 
-    if (existing) {
-      throw new AppError(
-        'Employment already has an open separation process',
-        409,
-      )
-    }
+  create: async (tx: DB, values: CreateValues) => {
+    const [created] = await tx
+      .insert(employmentSeparations)
+      .values({
+        employmentId: values.employmentId,
+        separationType: values.separationType,
+        status: 'draft',
+        noticeDate: values.noticeDate ?? null,
+        effectiveDate: values.effectiveDate,
+        reason: values.reason ?? null,
+        remarks: values.remarks ?? null,
+        createdBy: values.createdBy ?? null,
+        updatedBy: values.createdBy ?? null,
+      })
+      .returning()
 
-    try {
-      const [row] = await tx
-        .insert(employmentSeparations)
-        .values({
-          employmentId: data.employmentId,
-          separationType: data.separationType,
-          status: 'approved',
-          effectiveDate: data.effectiveDate,
-          noticeDate: data.noticeDate ?? null,
-          reason: data.reason ?? null,
-          remarks: data.remarks ?? null,
-          approvedAt: new Date(),
-          ...(data.userId !== undefined && {
-            createdBy: data.userId,
-            approvedBy: data.userId,
-          }),
-        })
-        .returning()
-
-      if (!row) {
-        throw new AppError('Failed to create employment separation', 500)
-      }
-
-      return row
-    } catch (error) {
-      if (isOpenSeparationUniqueViolation(error)) {
-        throw new AppError(
-          'Employment already has an open separation process',
-          409,
-        )
-      }
-
-      throw error
-    }
+    return created ?? null
   },
 
-  findByIdForUpdate: async (tx: DB, id: string) => {
+  // ----------------------------------
+  // Find
+  // ----------------------------------
+
+  findById: async (tx: DB, separationId: string) => {
     const [row] = await tx
       .select()
       .from(employmentSeparations)
       .where(
         and(
-          eq(employmentSeparations.id, id),
+          eq(employmentSeparations.id, separationId),
           eq(employmentSeparations.isDeleted, false),
-          isNull(employmentSeparations.deletedAt),
+        ),
+      )
+      .limit(1)
+
+    return row ?? null
+  },
+
+  findByIdForUpdate: async (tx: DB, separationId: string) => {
+    const [row] = await tx
+      .select()
+      .from(employmentSeparations)
+      .where(
+        and(
+          eq(employmentSeparations.id, separationId),
+          eq(employmentSeparations.isDeleted, false),
         ),
       )
       .for('update')
@@ -108,6 +86,24 @@ export const EmploymentSeparationRepository = {
     return row ?? null
   },
 
+  findByEmploymentId: async (tx: DB, employmentId: string) => {
+    return tx
+      .select()
+      .from(employmentSeparations)
+      .where(
+        and(
+          eq(employmentSeparations.employmentId, employmentId),
+          eq(employmentSeparations.isDeleted, false),
+        ),
+      )
+      .orderBy(desc(employmentSeparations.createdAt))
+  },
+
+  /**
+   * Used both by offboarding creation
+   * and by renew()/applyMovement()
+   * lifecycle guards.
+   */
   findOpenByEmploymentId: async (tx: DB, employmentId: string) => {
     const [row] = await tx
       .select()
@@ -115,80 +111,183 @@ export const EmploymentSeparationRepository = {
       .where(
         and(
           eq(employmentSeparations.employmentId, employmentId),
-          inArray(employmentSeparations.status, [
-            'draft',
-            'pending_approval',
-            'approved',
-          ]),
           eq(employmentSeparations.isDeleted, false),
-          isNull(employmentSeparations.deletedAt),
+          inArray(employmentSeparations.status, [...openStatuses]),
         ),
       )
+      .orderBy(desc(employmentSeparations.createdAt))
       .limit(1)
 
     return row ?? null
   },
 
-  markCompleted: async (tx: DB, id: string) => {
-    const [row] = await tx
+  // ----------------------------------
+  // Draft
+  // ----------------------------------
+
+  updateDraft: async (
+    tx: DB,
+    separationId: string,
+    values: UpdateDraftValues,
+  ) => {
+    const [updated] = await tx
       .update(employmentSeparations)
       .set({
-        status: 'completed',
+        ...(values.separationType !== undefined && {
+          separationType: values.separationType,
+        }),
+        ...(values.noticeDate !== undefined && {
+          noticeDate: values.noticeDate,
+        }),
+        ...(values.effectiveDate !== undefined && {
+          effectiveDate: values.effectiveDate,
+        }),
+        ...(values.reason !== undefined && {
+          reason: values.reason,
+        }),
+        ...(values.remarks !== undefined && {
+          remarks: values.remarks,
+        }),
         updatedAt: new Date(),
-        version: sql`${employmentSeparations.version} + 1`,
+        updatedBy: values.updatedBy ?? null,
+        version: sql`
+              ${employmentSeparations.version} + 1
+            `,
       })
       .where(
         and(
-          eq(employmentSeparations.id, id),
-          eq(employmentSeparations.status, 'approved'),
+          eq(employmentSeparations.id, separationId),
+          eq(employmentSeparations.status, 'draft'),
           eq(employmentSeparations.isDeleted, false),
-          isNull(employmentSeparations.deletedAt),
         ),
       )
       .returning()
 
-    if (!row) {
-      throw new AppError('Failed to complete employment separation', 400)
-    }
-
-    return row
+    return updated ?? null
   },
 
-  findDueApproved: async (tx: DB, date: string) => {
+  // ----------------------------------
+  // Workflow transitions
+  // ----------------------------------
+
+  markPendingApproval: async (tx: DB, separationId: string, userId: string) => {
+    const [updated] = await tx
+      .update(employmentSeparations)
+      .set({
+        status: 'pending_approval',
+        updatedAt: new Date(),
+        updatedBy: userId,
+        version: sql`
+                ${employmentSeparations.version} + 1
+              `,
+      })
+      .where(
+        and(
+          eq(employmentSeparations.id, separationId),
+          eq(employmentSeparations.status, 'draft'),
+          eq(employmentSeparations.isDeleted, false),
+        ),
+      )
+      .returning()
+
+    return updated ?? null
+  },
+
+  markApproved: async (tx: DB, separationId: string, userId: string) => {
+    const now = new Date()
+
+    const [updated] = await tx
+      .update(employmentSeparations)
+      .set({
+        status: 'approved',
+        approvedBy: userId,
+        approvedAt: now,
+        updatedBy: userId,
+        updatedAt: now,
+        version: sql`
+              ${employmentSeparations.version} + 1
+            `,
+      })
+      .where(
+        and(
+          eq(employmentSeparations.id, separationId),
+          eq(employmentSeparations.status, 'pending_approval'),
+          eq(employmentSeparations.isDeleted, false),
+        ),
+      )
+      .returning()
+
+    return updated ?? null
+  },
+
+  markCompleted: async (tx: DB, separationId: string, userId?: string) => {
+    const [updated] = await tx
+      .update(employmentSeparations)
+      .set({
+        status: 'completed',
+        updatedAt: new Date(),
+        ...(userId && {
+          updatedBy: userId,
+        }),
+        version: sql`
+              ${employmentSeparations.version} + 1
+            `,
+      })
+      .where(
+        and(
+          eq(employmentSeparations.id, separationId),
+          eq(employmentSeparations.status, 'approved'),
+          eq(employmentSeparations.isDeleted, false),
+        ),
+      )
+      .returning()
+
+    return updated ?? null
+  },
+
+  markCancelled: async (tx: DB, separationId: string, userId: string) => {
+    const [updated] = await tx
+      .update(employmentSeparations)
+      .set({
+        status: 'cancelled',
+        updatedBy: userId,
+        updatedAt: new Date(),
+        version: sql`
+              ${employmentSeparations.version} + 1
+            `,
+      })
+      .where(
+        and(
+          eq(employmentSeparations.id, separationId),
+          inArray(employmentSeparations.status, [
+            'draft',
+            'pending_approval',
+            'approved',
+          ]),
+
+          eq(employmentSeparations.isDeleted, false),
+        ),
+      )
+      .returning()
+
+    return updated ?? null
+  },
+
+  // ----------------------------------
+  // Scheduler support
+  // ----------------------------------
+
+  findDueApproved: async (tx: DB, today: string) => {
     return tx
       .select()
       .from(employmentSeparations)
       .where(
         and(
           eq(employmentSeparations.status, 'approved'),
-          lte(employmentSeparations.effectiveDate, date),
+          lte(employmentSeparations.effectiveDate, today),
           eq(employmentSeparations.isDeleted, false),
-          isNull(employmentSeparations.deletedAt),
         ),
       )
+      .orderBy(employmentSeparations.effectiveDate)
   },
-
-  // createCompleted: async (tx: DB, data: CreateCompletedSeparationInput) => {
-  //   const [row] = await tx
-  //     .insert(employmentSeparations)
-  //     .values({
-  //       employmentId: data.employmentId,
-  //       separationType: data.separationType,
-  //       status: 'completed',
-  //       effectiveDate: data.effectiveDate,
-  //       noticeDate: data.noticeDate ?? null,
-  //       reason: data.reason ?? null,
-  //       remarks: data.remarks ?? null,
-  //       ...(data.userId && {
-  //         createdBy: data.userId,
-  //       }),
-  //     })
-  //     .returning()
-
-  //   if (!row) {
-  //     throw new AppError('Failed to create employment separation', 500)
-  //   }
-
-  //   return row
-  // },
 }

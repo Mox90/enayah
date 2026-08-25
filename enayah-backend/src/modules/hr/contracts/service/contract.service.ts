@@ -11,6 +11,7 @@ import { CompensationRepository } from '../../compensations/repository/compensat
 import { ContractMovementActionRepository } from '../../contract-movements/repository/contract-movement-action.repository'
 import { ContractMovementRepository } from '../../contract-movements/repository/contract-movement.repository'
 import { EmploymentRepository } from '../../employments/repository/employment.repository'
+import { EmploymentSeparationRepository } from '../../offboarding/repository/employment-separation.repository'
 import { PositionItemRepository } from '../../position-items/repository/positionItem.repository'
 import { ApplyContractMovementDto } from '../dto/contract-movement.request'
 
@@ -490,6 +491,32 @@ export const ContractService = {
 
       if (!employment) {
         throw new AppError('Employment not found', 404)
+      }
+
+      /*
+       * Only active employment must have renew
+       * otherwise reject the request
+       */
+
+      if (employment.status !== 'active') {
+        throw new AppError('Only active employment can be renewed', 400)
+      }
+
+      const openSeparation =
+        await EmploymentSeparationRepository.findOpenByEmploymentId(
+          tx,
+          currentContract.employmentId,
+        )
+
+      if (
+        openSeparation &&
+        (openSeparation.status === 'pending_approval' ||
+          openSeparation.status === 'approved')
+      ) {
+        throw new AppError(
+          'Contract renewal is not allowed while an employment separation is pending or approved',
+          409,
+        )
       }
 
       const requiresPositionItem =
@@ -1024,6 +1051,35 @@ export const ContractService = {
 
       if (!employment) {
         throw new AppError('Employment not found', 404)
+      }
+
+      /*
+       * Only atcive employment must have movement
+       * other wise reject the reequest
+       */
+
+      if (employment.status !== 'active') {
+        throw new AppError(
+          'Only active employment can receive a contract movement',
+          400,
+        )
+      }
+
+      const openSeparation =
+        await EmploymentSeparationRepository.findOpenByEmploymentId(
+          tx,
+          currentContract.employmentId,
+        )
+
+      if (
+        openSeparation &&
+        (openSeparation.status === 'pending_approval' ||
+          openSeparation.status === 'approved')
+      ) {
+        throw new AppError(
+          'Contract movement is not allowed while an employment separation is pending or approved',
+          409,
+        )
       }
 
       /*

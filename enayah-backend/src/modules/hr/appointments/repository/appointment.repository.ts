@@ -1,6 +1,6 @@
 // enayah-backend/src/modules/hr/appointments/repository/appointment.repository.ts
 
-import { and, eq, isNull } from 'drizzle-orm'
+import { and, eq, gt, isNull, lte, or, sql } from 'drizzle-orm'
 import { AppError } from '../../../../core/errors/AppError'
 import { appointments, DB } from '../../../../db'
 import {
@@ -120,9 +120,87 @@ export const AppointmentRepository = {
     return findByIdOrThrow(tx, updated.id)
   },
 
+  endOpenByEmploymentId: async (
+    tx: DB,
+    employmentId: string,
+    effectiveDate: string,
+    userId?: string,
+  ) => {
+    return tx
+      .update(appointments)
+      .set({
+        endDate: effectiveDate,
+        updatedAt: new Date(),
+        ...(userId && {
+          updatedBy: userId,
+        }),
+        version: sql`
+        ${appointments.version} + 1
+      `,
+      })
+      .where(
+        and(
+          eq(appointments.employmentId, employmentId),
+          eq(appointments.isDeleted, false),
+
+          /*
+           * Appointment has already begun.
+           */
+          lte(appointments.startDate, effectiveDate),
+
+          /*
+           * Appointment would otherwise
+           * remain active after separation.
+           */
+          or(
+            isNull(appointments.endDate),
+            gt(appointments.endDate, effectiveDate),
+          ),
+        ),
+      )
+      .returning()
+  },
+
+  cancelFutureByEmploymentId: async (
+    tx: DB,
+    employmentId: string,
+    effectiveDate: string,
+    userId?: string,
+  ) => {
+    const now = new Date()
+
+    return tx
+      .update(appointments)
+      .set({
+        isDeleted: true,
+        deletedAt: now,
+        ...(userId && {
+          deletedBy: userId,
+        }),
+        updatedAt: now,
+        ...(userId && {
+          updatedBy: userId,
+        }),
+        version: sql`
+        ${appointments.version} + 1
+      `,
+      })
+      .where(
+        and(
+          eq(appointments.employmentId, employmentId),
+          eq(appointments.isDeleted, false),
+          /*
+           * Planned appointment beginning
+           * after employment has ended.
+           */
+          gt(appointments.startDate, effectiveDate),
+        ),
+      )
+      .returning()
+  },
+
   softDelete: async (tx: DB, id: string, userId?: string) => {
     const existing = await findByIdOrThrow(tx, id)
-
     await tx
       .update(appointments)
       .set({
@@ -130,7 +208,6 @@ export const AppointmentRepository = {
         deletedAt: new Date(),
         ...(userId && { deletedBy: userId }),
       })
-
       .where(and(eq(appointments.id, id), isActive))
 
     return existing

@@ -1,4 +1,4 @@
-// src/modules/notifications/notification.routes.ts
+// enayah-backend/src/modules/notifications/notification.routes.ts
 
 import { Router } from 'express'
 import { requireAuth } from '../../../core/middleware/auth.middleware'
@@ -14,15 +14,19 @@ router.use(requireAuth)
 router.use(attachPermissions)
 
 router.get('/', NotificationController.mine)
-
 router.patch('/:id/read', NotificationController.markAsRead)
-
 router.patch('/:id/archive', NotificationController.archive)
 
 router.post(
   '/generate-iqama-expiry-alerts',
   requirePermission('notifications.generate'),
   NotificationController.generateIqamaExpiryAlerts,
+)
+
+router.post(
+  '/generate-all-expiry-alerts',
+  requirePermission('notifications.generate'),
+  NotificationController.generateAllExpiryAlerts,
 )
 
 export default router
