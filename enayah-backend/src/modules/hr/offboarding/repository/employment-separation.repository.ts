@@ -121,6 +121,25 @@ export const EmploymentSeparationRepository = {
     return row ?? null
   },
 
+  findBlockingByEmploymentId: async (tx: DB, employmentId: string) => {
+    const [row] = await tx
+      .select()
+      .from(employmentSeparations)
+      .where(
+        and(
+          eq(employmentSeparations.employmentId, employmentId),
+          eq(employmentSeparations.isDeleted, false),
+          inArray(employmentSeparations.status, [
+            'pending_approval',
+            'approved',
+          ]),
+        ),
+      )
+      .limit(1)
+
+    return row ?? null
+  },
+
   // ----------------------------------
   // Draft
   // ----------------------------------

@@ -1,6 +1,6 @@
 // src/modules/notifications/generators/license-expiry.generator.ts
 
-import { and, eq, isNotNull } from 'drizzle-orm'
+import { and, eq, isNotNull, ne } from 'drizzle-orm'
 
 import {
   db,
@@ -69,6 +69,8 @@ export const LicenseExpiryGenerator = {
           and(
             eq(employeeLicenses.isDeleted, false),
             eq(employees.isDeleted, false),
+            ne(employeeLicenses.status, 'revoked'),
+            ne(employeeLicenses.status, 'suspended'),
             eq(roles.name, 'EMPLOYEE'),
             isNotNull(employeeLicenses.expiryDate),
             hasActiveEmployment(tx),

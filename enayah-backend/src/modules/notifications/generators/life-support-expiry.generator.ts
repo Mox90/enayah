@@ -59,13 +59,37 @@ export const lifeSupportTypeEnum = pgEnum('life_support_type', [
 const formatLifeSupportType = (type: string) => {
   switch (type) {
     case 'bls':
-      return 'BLS'
+      return 'Basic Life Support' // Basic Life Support
     case 'acls':
-      return 'ACLS'
+      return 'Advanced Cardiovascular Life Support' // Advanced Cardiovascular Life Support
     case 'pals':
-      return 'PALS'
+      return 'Pediatric Advanced Life Support' // Pediatric Advanced Life Support
+    case 'atls':
+      return 'Advanced Trauma Life Support' // Advanced Trauma Life Support
+    case 'stls':
+      return 'Saudi Trauma Life Support' // Saudi Trauma Life Support
     case 'nrp':
-      return 'NRP'
+      return 'Neonatal Resuscitation Program' // Neonatal Resuscitation Program
+    case 'itls':
+      return 'International Trauma Life Support' // International Trauma Life Support
+    case 'blso':
+      return 'Basic Life Support in Obstetrics' // Basic Life Support in Obstetrics
+    case 'atcn':
+      return 'Advanced Trauma Care for Nurses' // Advanced Trauma Care for Nurses
+    case 'also':
+      return 'Advanced Life Support in Obstetrics' // Advanced Life Support in Obstetrics
+    case 'tncc':
+      return 'Trauma Nursing Core Course' // Trauma Nursing Core Course
+    case 'enpc':
+      return 'Emergency Nursing Pediatric Course' // Emergency Nursing Pediatric Course
+    case 'asls':
+      return 'Advanced Stroke Life Support' // Advanced Stroke Life Support
+    case 'esls':
+      return 'Essential Stroke Life Support' // Essential Stroke Life Support
+    case 'pfccs':
+      return 'Pediatric Fundamental Critical Care Support' // Pediatric Fundamental Critical Care Support
+    case 'other':
+      return 'Other'
     default:
       return type
   }
@@ -161,14 +185,11 @@ export const LifeSupportExpiryGenerator = {
         }
 
         const isExpired = milestone.key === 'expired'
-
         const certificateType = formatLifeSupportType(lifeSupport.type)
-
         const notification = await NotificationRepository.createNotification(
           tx,
           {
             employeeId: lifeSupport.employeeId,
-
             type: 'life_support_expiry',
 
             /*

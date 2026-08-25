@@ -502,17 +502,29 @@ export const ContractService = {
         throw new AppError('Only active employment can be renewed', 400)
       }
 
-      const openSeparation =
-        await EmploymentSeparationRepository.findOpenByEmploymentId(
+      // const openSeparation =
+      //   await EmploymentSeparationRepository.findOpenByEmploymentId(
+      //     tx,
+      //     currentContract.employmentId,
+      //   )
+
+      // if (
+      //   openSeparation &&
+      //   (openSeparation.status === 'pending_approval' ||
+      //     openSeparation.status === 'approved')
+      // ) {
+      //   throw new AppError(
+      //     'Contract renewal is not allowed while an employment separation is pending or approved',
+      //     409,
+      //   )
+      // }
+      const blockingSeparation =
+        await EmploymentSeparationRepository.findBlockingByEmploymentId(
           tx,
           currentContract.employmentId,
         )
 
-      if (
-        openSeparation &&
-        (openSeparation.status === 'pending_approval' ||
-          openSeparation.status === 'approved')
-      ) {
+      if (blockingSeparation) {
         throw new AppError(
           'Contract renewal is not allowed while an employment separation is pending or approved',
           409,
@@ -1065,17 +1077,29 @@ export const ContractService = {
         )
       }
 
-      const openSeparation =
-        await EmploymentSeparationRepository.findOpenByEmploymentId(
+      // const openSeparation =
+      //   await EmploymentSeparationRepository.findOpenByEmploymentId(
+      //     tx,
+      //     currentContract.employmentId,
+      //   )
+
+      // if (
+      //   openSeparation &&
+      //   (openSeparation.status === 'pending_approval' ||
+      //     openSeparation.status === 'approved')
+      // ) {
+      //   throw new AppError(
+      //     'Contract movement is not allowed while an employment separation is pending or approved',
+      //     409,
+      //   )
+      // }
+      const blockingSeparation =
+        await EmploymentSeparationRepository.findBlockingByEmploymentId(
           tx,
           currentContract.employmentId,
         )
 
-      if (
-        openSeparation &&
-        (openSeparation.status === 'pending_approval' ||
-          openSeparation.status === 'approved')
-      ) {
+      if (blockingSeparation) {
         throw new AppError(
           'Contract movement is not allowed while an employment separation is pending or approved',
           409,
