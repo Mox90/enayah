@@ -1,4 +1,4 @@
-// enayah-frontend/src/api/client.tsx
+// enayah-frontend/src/lib/api/client.tsx
 
 'use client'
 

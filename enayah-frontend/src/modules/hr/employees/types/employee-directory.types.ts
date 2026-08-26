@@ -1,3 +1,7 @@
+// enayah-frontend/src/modules/hr/employees/types/employee-directory.types.ts
+
+import { EmployeeStaffCategory } from './employee-filter.types'
+
 export interface EmployeeDirectoryParams {
   offset?: number
   limit?: number
@@ -7,6 +11,7 @@ export interface EmployeeDirectoryParams {
   categoryCodes?: number[]
   genders?: string[]
   nationalities?: string[]
+  staffCategory?: EmployeeStaffCategory[]
   employmentStatuses?: string[]
   hireDateFrom?: string | null
   hireDateTo?: string | null

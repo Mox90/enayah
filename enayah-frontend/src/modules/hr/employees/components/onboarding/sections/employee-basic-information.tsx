@@ -122,22 +122,6 @@ export function EmployeeBasicInformation({
 
           <div className='space-y-2'>
             <Label>{et('nationality')}</Label>
-
-            {/* <CountryCombobox
-              value={employee.countryId}
-              onChange={(country) => {
-                onClearError('countryId')
-                onChange({
-                  ...value,
-                  employee: {
-                    ...employee,
-                    countryId: country.id,
-                    countryNameEn: country.name,
-                    countryNameAr: country.nameAr,
-                  },
-                })
-              }}
-            /> */}
             <CountryCombobox
               value={employee.countryId}
               selectedLabel={

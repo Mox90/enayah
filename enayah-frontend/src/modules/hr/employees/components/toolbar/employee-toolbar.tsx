@@ -10,10 +10,12 @@ import { EmployeeSelectionActions } from './employee-selection-actions'
 import { EmployeeViewSwitcher } from './employee-view-switcher'
 import { useTranslations } from 'next-intl'
 import { Filter, UserPlus } from 'lucide-react'
+import { EmployeeDirectoryRow } from '../../types/employee-directory.types'
 
 interface Props {
   view: EmployeeView
   selectedIds: string[]
+  selectedEmployees: EmployeeDirectoryRow[]
   onViewChange: (view: EmployeeView) => void
   onBoard?: () => void
   onFilter?: () => void
@@ -22,6 +24,7 @@ interface Props {
 export function EmployeeToolbar({
   view,
   selectedIds,
+  selectedEmployees,
   onViewChange,
   onBoard,
   onFilter,
@@ -74,7 +77,11 @@ export function EmployeeToolbar({
 
         {/* Selection actions */}
 
-        <EmployeeSelectionActions selectedIds={selectedIds} />
+        {/* <EmployeeSelectionActions selectedIds={selectedIds} /> */}
+        <EmployeeSelectionActions
+          selectedIds={selectedIds}
+          selectedEmployees={selectedEmployees}
+        />
       </div>
 
       {/* View switcher */}

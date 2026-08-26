@@ -31,6 +31,8 @@ import {
 } from '@/modules/hr/positions/components/position-combobox'
 
 import type { EmployeeFilters } from '../../types/employee-filter.types'
+import { CountryLookupItem } from '@/modules/countries/services/countries.service'
+import { CountryCombobox } from '@/modules/countries/components/country-combobox'
 
 interface Props {
   open: boolean
@@ -89,11 +91,16 @@ export function EmployeeFilterSheet({
     PositionLookupItem[]
   >([])
 
+  const [selectedNationalities, setSelectedNationalities] = useState<
+    CountryLookupItem[]
+  >([])
+
   const locale = useLocale()
   const isRtl = locale === 'ar'
 
   const et = useTranslations('employees')
   const ct = useTranslations('common')
+  const contractT = useTranslations('contracts')
 
   /*
    * Count each selected filter value.
@@ -112,6 +119,7 @@ export function EmployeeFilterSheet({
     local.categoryCodes.length +
     local.genders.length +
     local.nationalities.length +
+    local.staffCategory.length +
     local.employmentStatuses.length +
     [
       local.hireDateFrom,
@@ -198,6 +206,43 @@ export function EmployeeFilterSheet({
     )
   }
 
+  function addNationality(country: CountryLookupItem) {
+    if (!country.alpha2) {
+      return
+    }
+
+    setLocal((current) => {
+      if (current.nationalities.includes(country.alpha2)) {
+        return current
+      }
+
+      return {
+        ...current,
+        nationalities: [...current.nationalities, country.alpha2],
+      }
+    })
+
+    setSelectedNationalities((current) => {
+      if (current.some((item) => item.alpha2 === country.alpha2)) {
+        return current
+      }
+
+      return [...current, country]
+    })
+  }
+
+  function removeNationality(alpha2: string) {
+    setLocal((current) => ({
+      ...current,
+
+      nationalities: current.nationalities.filter((code) => code !== alpha2),
+    }))
+
+    setSelectedNationalities((current) =>
+      current.filter((country) => country.alpha2 !== alpha2),
+    )
+  }
+
   /*
    * --------------------------------------------
    * Reset
@@ -211,6 +256,7 @@ export function EmployeeFilterSheet({
       categoryCodes: [],
       genders: [],
       nationalities: [],
+      staffCategory: [],
       employmentStatuses: [],
 
       hireDateFrom: undefined,
@@ -224,6 +270,7 @@ export function EmployeeFilterSheet({
 
     setSelectedDepartments([])
     setSelectedPositions([])
+    setSelectedNationalities([])
 
     onReset()
   }
@@ -252,6 +299,13 @@ export function EmployeeFilterSheet({
           setSelectedPositions((current) =>
             current.filter((position) =>
               values.positionIds.includes(position.id),
+            ),
+          )
+
+          setSelectedNationalities((current) =>
+            current.filter(
+              (country) =>
+                country.alpha2 && values.nationalities.includes(country.alpha2),
             ),
           )
         }
@@ -509,6 +563,67 @@ export function EmployeeFilterSheet({
              */}
 
             {/* -------------------------------------------- */}
+            {/* Nationality */}
+            {/* -------------------------------------------- */}
+
+            <FilterSection
+              title={et('nationality')}
+              count={local.nationalities.length}
+            >
+              <CountryCombobox
+                value={null}
+                excludeAlpha2={local.nationalities}
+                onChange={addNationality}
+              />
+
+              {selectedNationalities.length > 0 && (
+                <div className='flex flex-wrap gap-1.5'>
+                  {selectedNationalities.map((country) => {
+                    const label = isRtl
+                      ? country.nationalityAr ||
+                        country.nameAr ||
+                        country.nationalityEn ||
+                        country.name
+                      : country.nationalityEn ||
+                        country.name ||
+                        country.nationalityAr ||
+                        country.nameAr
+
+                    if (!country.alpha2) {
+                      return null
+                    }
+
+                    return (
+                      <div
+                        key={country.alpha2}
+                        className='inline-flex max-w-full items-center rounded-md border bg-muted/40 text-xs transition-colors hover:bg-muted/60'
+                      >
+                        <span className='max-w-[320px] truncate py-1.5 ps-2.5 pe-1'>
+                          <span className='me-1.5 font-medium text-muted-foreground'>
+                            {country.alpha2}
+                          </span>
+
+                          {label}
+                        </span>
+
+                        <Button
+                          type='button'
+                          variant='ghost'
+                          size='icon'
+                          className='me-0.5 h-6 w-6 shrink-0 rounded-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive'
+                          onClick={() => removeNationality(country.alpha2!)}
+                          aria-label={`Remove ${label}`}
+                        >
+                          <X className='h-3.5 w-3.5' />
+                        </Button>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </FilterSection>
+
+            {/* -------------------------------------------- */}
             {/* Gender */}
             {/* -------------------------------------------- */}
 
@@ -571,6 +686,40 @@ export function EmployeeFilterSheet({
                     ...current,
 
                     categoryCodes: values.map(Number),
+                  }))
+                }
+              />
+            </FilterSection>
+
+            {/* -------------------------------------------- */}
+            {/* Staff Category */}
+            {/* -------------------------------------------- */}
+
+            <FilterSection
+              title={contractT('staffCategory')}
+              count={local.staffCategory.length}
+            >
+              <EnterpriseFilterCheckboxGroup
+                values={local.staffCategory}
+                options={[
+                  {
+                    value: 'civilian',
+                    label: contractT('civilian'),
+                  },
+                  {
+                    value: 'military',
+                    label: contractT('military'),
+                  },
+                  {
+                    value: 'contractual',
+                    label: contractT('contractual'),
+                  },
+                ]}
+                onChange={(staffCategory) =>
+                  setLocal((current) => ({
+                    ...current,
+                    staffCategory:
+                      staffCategory as EmployeeFilters['staffCategory'],
                   }))
                 }
               />

@@ -13,16 +13,7 @@ import { toArabic, toPersianDigits } from '@/utils/utilities'
 import { cn } from '@/lib/utils'
 import { StatusBadge } from '@/components/badges/status-badge'
 
-export type EmploymentStatus =
-  | 'active'
-  | 'terminated'
-  | 'resigned'
-  | 'eoc'
-  | 'transferred'
-  | 'retired'
-  | 'on_leave'
-  | 'suspended'
-  | 'deceased'
+export type EmploymentStatus = 'active' | 'on_leave' | 'suspended' | 'ended'
 
 export type EmploymentStatusStyle = {
   //badgeClassName: string
@@ -36,34 +27,40 @@ export const employmentStatusStyles = {
     rowClassName: '',
   },
 
-  terminated: {
-    dotClassName: 'bg-rose-500 dark:bg-rose-400',
-    rowClassName:
-      'bg-rose-50/35 hover:bg-rose-50/60 dark:bg-rose-950/10 dark:hover:bg-rose-950/20',
-  },
+  // terminated: {
+  //   dotClassName: 'bg-rose-500 dark:bg-rose-400',
+  //   rowClassName:
+  //     'bg-rose-50/35 hover:bg-rose-50/60 dark:bg-rose-950/10 dark:hover:bg-rose-950/20',
+  // },
 
-  resigned: {
+  // resigned: {
+  //   dotClassName: 'bg-orange-500 dark:bg-orange-400',
+  //   rowClassName:
+  //     'bg-orange-50/30 hover:bg-orange-50/55 dark:bg-orange-950/10 dark:hover:bg-orange-950/20',
+  // },
+
+  // eoc: {
+  //   dotClassName: 'bg-amber-500 dark:bg-amber-400',
+  //   rowClassName:
+  //     'bg-amber-50/30 hover:bg-amber-50/55 dark:bg-amber-950/10 dark:hover:bg-amber-950/20',
+  // },
+
+  // transferred: {
+  //   dotClassName: 'bg-cyan-500 dark:bg-cyan-400',
+  //   rowClassName:
+  //     'bg-cyan-50/25 hover:bg-cyan-50/50 dark:bg-cyan-950/10 dark:hover:bg-cyan-950/20',
+  // },
+
+  // retired: {
+  //   dotClassName: 'bg-violet-500 dark:bg-violet-400',
+  //   rowClassName:
+  //     'bg-violet-50/25 hover:bg-violet-50/50 dark:bg-violet-950/10 dark:hover:bg-violet-950/20',
+  // },
+
+  ended: {
     dotClassName: 'bg-orange-500 dark:bg-orange-400',
     rowClassName:
       'bg-orange-50/30 hover:bg-orange-50/55 dark:bg-orange-950/10 dark:hover:bg-orange-950/20',
-  },
-
-  eoc: {
-    dotClassName: 'bg-amber-500 dark:bg-amber-400',
-    rowClassName:
-      'bg-amber-50/30 hover:bg-amber-50/55 dark:bg-amber-950/10 dark:hover:bg-amber-950/20',
-  },
-
-  transferred: {
-    dotClassName: 'bg-cyan-500 dark:bg-cyan-400',
-    rowClassName:
-      'bg-cyan-50/25 hover:bg-cyan-50/50 dark:bg-cyan-950/10 dark:hover:bg-cyan-950/20',
-  },
-
-  retired: {
-    dotClassName: 'bg-violet-500 dark:bg-violet-400',
-    rowClassName:
-      'bg-violet-50/25 hover:bg-violet-50/50 dark:bg-violet-950/10 dark:hover:bg-violet-950/20',
   },
 
   on_leave: {
@@ -78,11 +75,11 @@ export const employmentStatusStyles = {
       'bg-yellow-50/45 hover:bg-yellow-50/70 dark:bg-yellow-950/15 dark:hover:bg-yellow-950/25',
   },
 
-  deceased: {
-    dotClassName: 'bg-slate-500 dark:bg-slate-400',
-    rowClassName:
-      'bg-slate-100/50 hover:bg-slate-100/75 dark:bg-slate-900/25 dark:hover:bg-slate-900/40',
-  },
+  // deceased: {
+  //   dotClassName: 'bg-slate-500 dark:bg-slate-400',
+  //   rowClassName:
+  //     'bg-slate-100/50 hover:bg-slate-100/75 dark:bg-slate-900/25 dark:hover:bg-slate-900/40',
+  // },
 } satisfies Record<EmploymentStatus, EmploymentStatusStyle>
 
 export function useEmployeeColumns(
@@ -95,14 +92,15 @@ export function useEmployeeColumns(
 
   const employmentStatusLabels: Record<EmploymentStatus, string> = {
     active: t('employmentStatuses.active'),
-    terminated: t('employmentStatuses.terminated'),
-    resigned: t('employmentStatuses.resigned'),
-    eoc: t('employmentStatuses.eoc'),
-    transferred: t('employmentStatuses.transferred'),
-    retired: t('employmentStatuses.retired'),
+    //terminated: t('employmentStatuses.terminated'),
+    //resigned: t('employmentStatuses.resigned'),
+    //eoc: t('employmentStatuses.eoc'),
+    //transferred: t('employmentStatuses.transferred'),
+    //retired: t('employmentStatuses.retired'),
     on_leave: t('employmentStatuses.onLeave'),
     suspended: t('employmentStatuses.suspended'),
-    deceased: t('employmentStatuses.deceased'),
+    //deceased: t('employmentStatuses.deceased'),
+    ended: t('employmentStatuses.ended'),
   }
 
   return [
