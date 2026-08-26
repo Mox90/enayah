@@ -189,7 +189,7 @@
     "identification": "Identification",
     "identificationInfo": "National ID, Iqama, Passport, GCC ID, or other identification.",
     "national_id": "National ID",
-    "iqamaNumber": "Iqama Number",
+    "iqamaNumber": "National/Iqama Number",
     "iqama": "Iqama",
     "gcc_id": "GCC ID",
     "passport": "Passport",
@@ -270,14 +270,22 @@
       "retired": "Retired",
       "onLeave": "On Leave",
       "suspended": "Suspended",
-      "deceased": "Deceased"
+      "deceased": "Deceased",
+      "ended": "Ended"
     },
     "saving": "Saving {item}",
     "sponsor": "Sponsor",
     "issuingAuthority": "Issuing Authority",
     "optional": "Optional",
     "englishNameHint": "Enter the name as it appears on official records",
-    "arabicNameHint": "Enter the Arabic name as it appears on official records"
+    "arabicNameHint": "Enter the Arabic name as it appears on official records",
+    "staffCategories": {
+      "staffCategory": "Staff Category",
+      "civilian": "Civilian",
+      "military": "Military",
+      "contractual": "Contractual"
+    },
+    "filterEmployeesDescription": "Quickly narrow the employee directory to the results you need."
   },
   "departments": {
     "departmentName": "Departments",
@@ -1122,7 +1130,8 @@
       "reuploadToMhrsd": "Re-upload to MHRSD",
       "markEocRequired": "Mark EOC as Required",
       "completeProcess": "Complete Process"
-    }
+    },
+    "filterCasesDescription": "Refine renewal cases using status and key dates."
   },
   "tooltip": {
     "list": "List View",

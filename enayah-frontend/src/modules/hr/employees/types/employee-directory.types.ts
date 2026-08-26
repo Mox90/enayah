@@ -8,11 +8,11 @@ export interface EmployeeDirectoryParams {
   genders?: string[]
   nationalities?: string[]
   employmentStatuses?: string[]
-  hireDateFrom?: string
-  hireDateTo?: string
+  hireDateFrom?: string | null
+  hireDateTo?: string | null
 
-  contractEndDateFrom?: string
-  contractEndDateTo?: string
+  contractEndDateFrom?: string | null
+  contractEndDateTo?: string | null
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
 }
@@ -55,6 +55,7 @@ export interface EmployeeDirectoryRow {
   positionTitleAr: string | null
 
   iqamaNumber: string | null
+  staffCategory: string | null
 }
 
 export interface EmployeeDirectoryResponse {

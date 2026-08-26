@@ -18,21 +18,22 @@ import { OnboardingForm } from './onboarding/onboarding-form'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEmployeeWorkspaceNavigation } from '../../onboarding/hooks/use-employee-workspace-navigation'
 import { useOnboardingDraftStore } from '../../onboarding/stores/onboarding-draft.store'
+import { EmployeeFilters } from '../types/employee-filter.types'
 
-type EmployeeFilters = {
-  departmentIds: string[]
-  positionIds: string[]
-  categoryCodes: number[]
-  genders: string[]
-  nationalities: string[]
-  employmentStatuses: string[]
+// type EmployeeFilters = {
+//   departmentIds: string[]
+//   positionIds: string[]
+//   categoryCodes: number[]
+//   genders: string[]
+//   nationalities: string[]
+//   employmentStatuses: string[]
 
-  hireDateFrom?: string
-  hireDateTo?: string
+//   hireDateFrom?: string
+//   hireDateTo?: string
 
-  contractEndDateFrom?: string
-  contractEndDateTo?: string
-}
+//   contractEndDateFrom?: string
+//   contractEndDateTo?: string
+// }
 
 export function EmployeeWorkspace() {
   //const [view, setView] = useState<EmployeeView>('list')

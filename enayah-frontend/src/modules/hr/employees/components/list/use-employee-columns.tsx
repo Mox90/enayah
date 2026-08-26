@@ -178,7 +178,18 @@ export function useEmployeeColumns(
               </span>
             )}
 
-            <span className='font-medium tabular-nums text-foreground'>
+            {/* <span className='font-medium tabular-nums text-foreground'>
+              {isRtl ? toPersianDigits(employeeNumber) : employeeNumber}
+            </span> */}
+            {/* <span className='inline-block font-bold tabular-nums tracking-[0.04em] text-foreground'>
+              {isRtl ? toPersianDigits(employeeNumber) : employeeNumber}
+            </span> */}
+            <span
+              className={cn(
+                'text-foreground',
+                isRtl && 'inline-block font-mono font-bold tracking-[0.04em]',
+              )}
+            >
               {isRtl ? toPersianDigits(employeeNumber) : employeeNumber}
             </span>
           </div>
@@ -239,18 +250,23 @@ export function useEmployeeColumns(
         label: t('category'),
       },
       header: t('category'),
-      cell: ({ row }) => (
-        <Badge variant='secondary'>
-          {/* {row.original.categoryCode !== null
-            ? row.original.categoryCode
-            : 'N/A'} */}
-          {row.original.categoryCode !== null
-            ? isRtl
-              ? toPersianDigits(row.original.categoryCode)
-              : row.original.categoryCode
-            : '-'}
-        </Badge>
-      ),
+
+      cell: ({ row }) => {
+        const categoryCode = row.original.categoryCode
+
+        return (
+          <Badge
+            variant='secondary'
+            className='min-w-8 justify-center font-medium tabular-nums'
+          >
+            {categoryCode !== null
+              ? isRtl
+                ? toPersianDigits(categoryCode)
+                : categoryCode
+              : '—'}
+          </Badge>
+        )
+      },
     },
 
     {
@@ -307,14 +323,74 @@ export function useEmployeeColumns(
     },
 
     {
+      id: 'staffCategory',
+      accessorFn: (row) => row.staffCategory ?? '',
+
+      meta: {
+        label: t('staffCategories.staffCategory'),
+      },
+
+      header: () => t('staffCategories.staffCategory'),
+
+      cell: ({ row }) => {
+        const staffCategory = row.original.staffCategory
+
+        if (!staffCategory) {
+          return '—'
+        }
+
+        const staffCategoryConfig: Record<
+          string,
+          {
+            label: string
+            className: string
+          }
+        > = {
+          civilian: {
+            label: t('staffCategories.civilian'),
+            className:
+              'border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-300',
+          },
+
+          military: {
+            label: t('staffCategories.military'),
+            className:
+              'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300',
+          },
+
+          contractual: {
+            label: t('staffCategories.contractual'),
+            className:
+              'border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-800 dark:bg-violet-950/40 dark:text-violet-300',
+          },
+        }
+
+        const config = staffCategoryConfig[staffCategory]
+
+        return (
+          <Badge
+            variant='outline'
+            className={cn('whitespace-nowrap font-medium', config?.className)}
+          >
+            {config?.label ?? staffCategory}
+          </Badge>
+        )
+      },
+    },
+
+    {
       id: 'iqamaNumber',
-      accessorFn: (row) => row.iqamaNumber ?? '',
+      accessorFn: (row) => row.iqamaNumber ?? '-',
 
       header: () => t('iqamaNumber'),
 
       cell: ({ row }) => {
         return (
-          <span className='font-mono'>{row.original.iqamaNumber ?? '—'}</span>
+          <span className={cn('tabular-nums', isRtl && 'font-mono font-bold')}>
+            {isRtl
+              ? toPersianDigits(row.original.iqamaNumber ?? '-')
+              : (row.original.iqamaNumber ?? '—')}
+          </span>
         )
       },
 

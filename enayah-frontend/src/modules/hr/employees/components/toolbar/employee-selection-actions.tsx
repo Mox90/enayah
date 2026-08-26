@@ -172,6 +172,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
             className={cn(
               'size-10 shrink-0 rounded-xl p-0',
               'sm:h-10 sm:w-auto sm:px-4',
+              'hover:text-green-400',
             )}
           >
             <Download className='size-4 shrink-0' />
@@ -185,6 +186,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
         <DropdownMenuContent align='start' className='w-44'>
           <DropdownMenuItem
             onClick={() => console.log('Export Excel', selectedIds)}
+            className='hover:text-emerald-400'
           >
             <FileSpreadsheet className='me-2 size-4' />
 
@@ -220,6 +222,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
         className={cn(
           'size-10 shrink-0 rounded-xl p-0',
           'sm:h-10 sm:w-auto sm:px-4',
+          'hover:text-green-400',
         )}
         onClick={() => console.log('Print', selectedIds)}
       >
@@ -241,6 +244,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
             className={cn(
               'size-10 shrink-0 rounded-xl p-0',
               'sm:h-10 sm:w-auto sm:px-4',
+              'hover:text-green-400',
             )}
           >
             <MoreHorizontal className='size-4 shrink-0' />

@@ -34,7 +34,7 @@ export type IqamaRenewalCase = {
   iqamaNumber: string | null
   expiryDate: string | null
 
-  status: IqamaRenewalStatus
+  status: IqamaRenewalStatus | null
 
   assignedToUserId: string | null
   assignedToName: string | null
@@ -50,8 +50,8 @@ export type IqamaRenewalCase = {
 
   version: number
 
-  createdAt: string
-  updatedAt: string
+  createdAt: string | null
+  updatedAt: string | null
 
   identification: Identification
 }
@@ -59,20 +59,20 @@ export type IqamaRenewalCase = {
 export interface IqamaRenewalFilters {
   statuses: IqamaRenewalStatus[]
 
-  expiryDateFrom?: string
-  expiryDateTo?: string
+  expiryDateFrom?: string | null
+  expiryDateTo?: string | null
 
-  mhrsdUploadedFrom?: string
-  mhrsdUploadedTo?: string
+  mhrsdUploadedFrom?: string | null
+  mhrsdUploadedTo?: string | null
 
-  mhrsdApprovedFrom?: string
-  mhrsdApprovedTo?: string
+  mhrsdApprovedFrom?: string | null
+  mhrsdApprovedTo?: string | null
 
-  mhrsdDeniedFrom?: string
-  mhrsdDeniedTo?: string
+  mhrsdDeniedFrom?: string | null
+  mhrsdDeniedTo?: string | null
 
-  governmentRelationsDueFrom?: string
-  governmentRelationsDueTo?: string
+  governmentRelationsDueFrom?: string | null
+  governmentRelationsDueTo?: string | null
 }
 
 export interface IqamaRenewalCaseListResponse {

@@ -21,24 +21,6 @@ import { IqamaRenewalToolbar } from './toolbar/iqama-renewal-toolbar'
 import { IqamaRenewalFilterSheet } from './filter/iqama-renewal-filter-sheet'
 import { IqamaRenewalTable } from './list/iqama-renewal-table'
 
-// import {
-//   createEmptyIqamaRenewalFilters,
-//   type IqamaRenewalFilters,
-//   type IqamaRenewalView,
-// } from '../../types/iqama-renewal.types'
-
-// import { useIqamaRenewalProcesses } from '../../hooks/use-iqama-renewal-processes'
-
-// import type { IqamaRenewalSortBy } from '../../services/iqama-renewal.service'
-
-// import { IqamaRenewalTable } from './iqama-renewal-table'
-
-// import { IqamaRenewalToolbar } from '../toolbar/iqama-renewal-toolbar'
-
-// import { IqamaRenewalFilterSheet } from '../filter/iqama-renewal-filter-sheet'
-
-// import { IqamaRenewalForm } from '../iqama-renewal-form'
-
 export function IqamaRenewalWorkspace() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -135,16 +117,16 @@ export function IqamaRenewalWorkspace() {
     // Filters
     //--------------------------------
     status: filters.statuses.length > 0 ? filters.statuses : undefined,
-    expiryDateFrom: filters.expiryDateFrom,
-    expiryDateTo: filters.expiryDateTo,
-    mhrsdUploadedFrom: filters.mhrsdUploadedFrom,
-    mhrsdUploadedTo: filters.mhrsdUploadedTo,
-    mhrsdApprovedFrom: filters.mhrsdApprovedFrom,
-    mhrsdApprovedTo: filters.mhrsdApprovedTo,
-    mhrsdDeniedFrom: filters.mhrsdDeniedFrom,
-    mhrsdDeniedTo: filters.mhrsdDeniedTo,
-    governmentRelationsDueFrom: filters.governmentRelationsDueFrom,
-    governmentRelationsDueTo: filters.governmentRelationsDueTo,
+    expiryDateFrom: filters.expiryDateFrom ?? null,
+    expiryDateTo: filters.expiryDateTo ?? null,
+    mhrsdUploadedFrom: filters.mhrsdUploadedFrom ?? null,
+    mhrsdUploadedTo: filters.mhrsdUploadedTo ?? null,
+    mhrsdApprovedFrom: filters.mhrsdApprovedFrom ?? null,
+    mhrsdApprovedTo: filters.mhrsdApprovedTo ?? null,
+    mhrsdDeniedFrom: filters.mhrsdDeniedFrom ?? null,
+    mhrsdDeniedTo: filters.mhrsdDeniedTo ?? null,
+    governmentRelationsDueFrom: filters.governmentRelationsDueFrom ?? null,
+    governmentRelationsDueTo: filters.governmentRelationsDueTo ?? null,
 
     //--------------------------------
     // Sorting

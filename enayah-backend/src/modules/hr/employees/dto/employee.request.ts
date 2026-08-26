@@ -11,22 +11,13 @@ export const EmployeeDirectoryQuerySchema = z.object({
   nationalities: z.array(z.string().length(2)).optional(),
   hireDateFrom: z.string().optional(),
   hireDateTo: z.string().optional(),
+  staffCategory: z
+    .array(z.enum(['civilian', 'military', 'contractual']))
+    .optional(),
   contractEndDateFrom: z.string().optional(),
   contractEndDateTo: z.string().optional(),
   employmentStatuses: z
-    .array(
-      z.enum([
-        'active',
-        'terminated',
-        'resigned',
-        'eoc',
-        'transferred',
-        'retired',
-        'on_leave',
-        'suspended',
-        'deceased',
-      ]),
-    )
+    .array(z.enum(['pending', 'active', 'on_leave', 'suspended', 'ended']))
     .optional(),
 
   sortBy: z
@@ -38,6 +29,7 @@ export const EmployeeDirectoryQuerySchema = z.object({
       'categoryCode',
       'nationality',
       'gender',
+      'staffCategory',
       'createdAt',
     ])
     .optional(),

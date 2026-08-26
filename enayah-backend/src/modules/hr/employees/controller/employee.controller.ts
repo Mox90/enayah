@@ -66,6 +66,10 @@ export const EmployeeController = {
         ? String(req.query.genders).split(',')
         : undefined,
 
+      staffCategory: req.query.staffCategory
+        ? String(req.query.staffCategory).split(',')
+        : undefined,
+
       nationalities: req.query.nationalities
         ? String(req.query.nationalities).split(',')
         : undefined,

@@ -191,7 +191,7 @@
     "identification": "كشف الهوية",
     "identificationInfo": "الهوية الوطنية، أو الإقامة، أو جواز السفر، أو بطاقة هوية مجلس التعاون الخليجي، أو أي وثيقة تعريف أخرى.",
     "national_id": "الهوية الوطنية",
-    "iqamaNumber": "رقم الإقامة",
+    "iqamaNumber": "الرقم الوطني/الإقامة",
     "iqama": "الإقامة",
     "gcc_id": "هوية مجلس التعاون الخليجي",
     "passport": "جواز سفر",
@@ -273,14 +273,23 @@
       "retired": "متقاعد",
       "onLeave": "في إجازة",
       "suspended": "موقوف",
-      "deceased": "متوفى"
+      "deceased": "متوفى",
+      "ended": "أنهى"
     },
     "saving": "توفير {item}",
     "sponsor": "كفيل",
     "issuingAuthority": "سلطة الإصدار",
     "optional": "اختياري",
     "englishNameHint": "أدخل الاسم كما يظهر في السجلات الرسمية",
-    "arabicNameHint": "أدخل الاسم باللغة العربية كما يظهر في السجلات الرسمية"
+    "arabicNameHint": "أدخل الاسم باللغة العربية كما يظهر في السجلات الرسمية",
+    "staffCategory": "فئة الموظفين",
+    "staffCategories": {
+      "staffCategory": "فئة الموظفين",
+      "civilian": "مدني",
+      "military": "عسكري",
+      "contractual": "تعاقدي"
+    },
+    "filterEmployeesDescription": "ضيّق نتائج دليل الموظفين بسرعة للوصول إلى ما تحتاجه."
   },
   "departments": {
     "departmentName": "الأقسام",
@@ -401,7 +410,7 @@
     "actualDepartmentLabel": "القسم الفعلي",
     "selectDepartment": "اختر القسم",
     "actualPositionLabel": "الموقف الفعلي",
-    "selectPosition": "حدد المنصب",
+    "selectPosition": "اختر المسمى الوظيفي",
     "managerId": "معرف المدير",
     "appointmentTypeLabel": "نوع الموعد",
     "primary": "أساسي",
@@ -1124,7 +1133,8 @@
       "reuploadToMhrsd": "إعادة الرفع إلى وزارة الموارد البشرية والتنمية الاجتماعية",
       "markEocRequired": "تحديد أن إنهاء العقد مطلوب",
       "completeProcess": "إكمال المعاملة"
-    }
+    },
+    "filterCasesDescription": "قم بتصفية حالات التجديد حسب الحالة والتواريخ الرئيسية."
   },
   "tooltip": {
     "list": "عرض القائمة",

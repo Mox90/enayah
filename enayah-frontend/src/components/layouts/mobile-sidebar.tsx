@@ -41,7 +41,7 @@ const MobileSidebar = () => {
 
       <SheetContent
         side={locale === 'ar' ? 'right' : 'left'}
-        className='w-64 p-0'
+        className='data-[side=left]:w-[85vw] data-[side=right]:w-[85vw] data-[side=left]:sm:w-[300px] data-[side=right]:sm:w-[300px] data-[side=left]:sm:max-w-[300px] data-[side=right]:sm:max-w-[300px] p-0'
       >
         <SheetHeader className='sr-only'>
           <SheetTitle>Navigation Menu</SheetTitle>
@@ -73,7 +73,7 @@ const MobileSidebar = () => {
         </Link>
 
         {/* NAVIGATION */}
-        <nav className='space-y-2 p-4'>
+        <nav className='space-y-2 p-4 pe-4'>
           {navigation.map((item) => {
             if (
               item.permission &&

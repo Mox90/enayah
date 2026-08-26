@@ -47,6 +47,7 @@ export function EmployeeToolbar({
           className={cn(
             'size-10 shrink-0 rounded-xl p-0 shadow-sm',
             'sm:h-10 sm:w-auto sm:px-4',
+            'hover:text-emerald-700',
           )}
         >
           <UserPlus className='size-4 shrink-0' />
@@ -63,6 +64,7 @@ export function EmployeeToolbar({
           className={cn(
             'size-10 shrink-0 rounded-xl p-0',
             'sm:h-10 sm:w-auto sm:px-4',
+            'hover:text-green-400',
           )}
         >
           <Filter className='size-4 shrink-0' />
