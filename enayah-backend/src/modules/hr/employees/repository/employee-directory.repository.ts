@@ -38,6 +38,7 @@ export const EmployeeDirectoryRepository = {
       departmentIds,
       positionIds,
       categoryCodes,
+      staffCategory,
       employmentStatuses,
       hireDateFrom,
       hireDateTo,
@@ -74,6 +75,8 @@ export const EmployeeDirectoryRepository = {
           ilike(employees.thirdNameAr, `%${search}%`),
           ilike(employees.familyNameAr, `%${search}%`),
           ilike(currentIqama.identificationNumber, `%${search}%`),
+          //ilike(latestEmploymentRow.staffCategory, `%${search}%`),
+          //sql`${latestEmploymentRow.staffCategory}::text ILIKE ${search}`,
         )!,
       )
     }
@@ -118,6 +121,16 @@ export const EmployeeDirectoryRepository = {
 
     if (categoryCodes?.length) {
       conditions.push(inArray(positionItems.categoryCode, categoryCodes))
+    }
+
+    //--------------------------------
+    // Staff Category
+    //--------------------------------
+
+    if (staffCategory?.length) {
+      conditions.push(
+        inArray(latestEmploymentRow.staffCategory, staffCategory as any[]),
+      )
     }
 
     //--------------------------------
@@ -169,6 +182,7 @@ export const EmployeeDirectoryRepository = {
       categoryCode: positionItems.categoryCode,
       nationality: countries.nationalityEn,
       gender: employees.gender,
+      staffCategory: latestEmploymentRow.staffCategory,
       createdAt: employees.createdAt,
     }
 
@@ -218,6 +232,7 @@ export const EmployeeDirectoryRepository = {
           positionId: positions.id,
           positionTitleEn: positions.titleEn,
           positionTitleAr: positions.titleAr,
+          staffCategory: latestEmploymentRow.staffCategory,
           //--------------------------------
           // Iqama
           //--------------------------------

@@ -26,7 +26,6 @@ import {
 
 interface Props {
   selectedIds: string[]
-
   onOpen: (id: string) => void
 }
 
@@ -43,80 +42,108 @@ export function IqamaRenewalSelectionActions({ selectedIds, onOpen }: Props) {
 
   const singleSelected = selectedIds.length === 1
 
+  const compactSelectedCount =
+    selectedIds.length > 9 ? '9+' : String(selectedIds.length)
+
   return (
-    <div className='flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center'>
-      <div className='flex h-10 items-center rounded-xl border bg-muted/40 px-3 text-sm font-medium'>
-        {selectedIds.length} {t('selected')}
+    <div className='flex shrink-0 items-center gap-1.5 sm:gap-2'>
+      {/* Selected count */}
+      <div
+        className='flex h-10 min-w-10 shrink-0 items-center justify-center rounded-xl border bg-muted/40 px-2 text-sm font-medium sm:px-3'
+        title={`${selectedIds.length} ${t('selected')}`}
+      >
+        <span className='sm:hidden'>{compactSelectedCount}</span>
+
+        <span className='hidden whitespace-nowrap sm:inline'>
+          {selectedIds.length} {t('selected')}
+        </span>
       </div>
 
-      <div className='grid grid-cols-2 gap-2 sm:flex sm:items-center'>
+      {/* Export */}
+      <DropdownMenu dir={isRtl ? 'rtl' : 'ltr'}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type='button'
+            variant='outline'
+            size='icon'
+            className='h-10 w-10 shrink-0 rounded-xl md:w-auto md:px-4'
+            aria-label={t('export')}
+            title={t('export')}
+          >
+            <Download className='h-4 w-4 shrink-0' />
+
+            <span className='ms-2 hidden md:inline'>{t('export')}</span>
+
+            <ChevronDown className='ms-1.5 hidden h-4 w-4 opacity-60 md:block' />
+          </Button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent align='start' className='w-44'>
+          <DropdownMenuItem
+            onClick={() => console.log('Export Iqama Excel', selectedIds)}
+          >
+            <FileSpreadsheet className='me-2 h-4 w-4' />
+            {t('excel')}
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            onClick={() => console.log('Export Iqama CSV', selectedIds)}
+          >
+            <File className='me-2 h-4 w-4' />
+            {t('csv')}
+          </DropdownMenuItem>
+
+          <DropdownMenuItem
+            onClick={() => console.log('Export Iqama PDF', selectedIds)}
+          >
+            <FileText className='me-2 h-4 w-4' />
+            {t('pdf')}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Print */}
+      <Button
+        type='button'
+        variant='outline'
+        size='icon'
+        className='h-10 w-10 shrink-0 rounded-xl md:w-auto md:px-4'
+        onClick={() => console.log('Print Iqama cases', selectedIds)}
+        aria-label={t('print')}
+        title={t('print')}
+      >
+        <Printer className='h-4 w-4 shrink-0' />
+
+        <span className='ms-2 hidden md:inline'>{t('print')}</span>
+      </Button>
+
+      {/* Actions */}
+      {singleSelected && (
         <DropdownMenu dir={isRtl ? 'rtl' : 'ltr'}>
           <DropdownMenuTrigger asChild>
-            <Button variant='outline' className='h-10 rounded-xl'>
-              <Download className='mr-2 h-4 w-4' />
+            <Button
+              type='button'
+              variant='outline'
+              size='icon'
+              className='h-10 w-10 shrink-0 rounded-xl md:w-auto md:px-4'
+              aria-label={t('actions')}
+              title={t('actions')}
+            >
+              <MoreHorizontal className='h-4 w-4 shrink-0' />
 
-              {t('export')}
-
-              <ChevronDown className='ml-2 h-4 w-4 opacity-60' />
+              <span className='ms-2 hidden md:inline'>{t('actions')}</span>
             </Button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align='start' className='w-44'>
-            <DropdownMenuItem
-              onClick={() => console.log('Export Iqama Excel', selectedIds)}
-            >
-              <FileSpreadsheet className='mr-2 h-4 w-4' />
-              {t('excel')}
-            </DropdownMenuItem>
+          <DropdownMenuContent align='end' className='w-52'>
+            <DropdownMenuItem onClick={() => onOpen(selectedIds[0]!)}>
+              <Eye className='me-2 h-4 w-4' />
 
-            <DropdownMenuItem
-              onClick={() => console.log('Export Iqama CSV', selectedIds)}
-            >
-              <File className='mr-2 h-4 w-4' />
-              {t('csv')}
-            </DropdownMenuItem>
-
-            <DropdownMenuItem
-              onClick={() => console.log('Export Iqama PDF', selectedIds)}
-            >
-              <FileText className='mr-2 h-4 w-4' />
-              {t('pdf')}
+              {it('open')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        <Button
-          variant='outline'
-          className='h-10 rounded-xl'
-          onClick={() => console.log('Print Iqama cases', selectedIds)}
-        >
-          <Printer className='mr-2 h-4 w-4' />
-          {t('print')}
-        </Button>
-
-        {singleSelected && (
-          <DropdownMenu dir={isRtl ? 'rtl' : 'ltr'}>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant='outline'
-                className='col-span-2 h-10 rounded-xl sm:col-span-1'
-              >
-                <MoreHorizontal className='mr-2 h-4 w-4' />
-
-                {t('actions')}
-              </Button>
-            </DropdownMenuTrigger>
-
-            <DropdownMenuContent align='end' className='w-52'>
-              <DropdownMenuItem onClick={() => onOpen(selectedIds[0]!)}>
-                <Eye className='mr-2 h-4 w-4' />
-
-                {it('open')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-      </div>
+      )}
     </div>
   )
 }

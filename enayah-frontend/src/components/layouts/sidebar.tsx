@@ -39,7 +39,7 @@ const Sidebar = () => {
         </h1>
       </Link>
 
-      <nav className='space-y-2 p-4'>
+      <nav className='space-y-2 p-4 pe-4'>
         {navigation.map((item) => {
           if (item.permission && !hasPermission(permissions, item.permission)) {
             return null

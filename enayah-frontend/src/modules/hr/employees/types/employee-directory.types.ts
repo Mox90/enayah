@@ -1,3 +1,7 @@
+// enayah-frontend/src/modules/hr/employees/types/employee-directory.types.ts
+
+import { EmployeeStaffCategory } from './employee-filter.types'
+
 export interface EmployeeDirectoryParams {
   offset?: number
   limit?: number
@@ -7,12 +11,13 @@ export interface EmployeeDirectoryParams {
   categoryCodes?: number[]
   genders?: string[]
   nationalities?: string[]
+  staffCategory?: EmployeeStaffCategory[]
   employmentStatuses?: string[]
-  hireDateFrom?: string
-  hireDateTo?: string
+  hireDateFrom?: string | null
+  hireDateTo?: string | null
 
-  contractEndDateFrom?: string
-  contractEndDateTo?: string
+  contractEndDateFrom?: string | null
+  contractEndDateTo?: string | null
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
 }
@@ -55,6 +60,7 @@ export interface EmployeeDirectoryRow {
   positionTitleAr: string | null
 
   iqamaNumber: string | null
+  staffCategory: string | null
 }
 
 export interface EmployeeDirectoryResponse {

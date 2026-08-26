@@ -5,7 +5,6 @@
 import { useEffect, useState } from 'react'
 import type { RowSelectionState } from '@tanstack/react-table'
 
-import type { EmployeeView } from '../types/employee-view.types'
 import { useEmployeeDirectory } from '../hooks/use-employee-directory'
 
 import { EmployeeToolbar } from './toolbar/employee-toolbar'
@@ -15,57 +14,11 @@ import { EmployeeTreeView } from './tree/employee-tree-view'
 //import { EmployeeHierarchyView } from './hierarchy/employee-hierarchy-view'
 import { EmployeeFilterSheet } from './filter/employee-filter-sheet'
 import { OnboardingForm } from './onboarding/onboarding-form'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEmployeeWorkspaceNavigation } from '../../onboarding/hooks/use-employee-workspace-navigation'
 import { useOnboardingDraftStore } from '../../onboarding/stores/onboarding-draft.store'
-
-type EmployeeFilters = {
-  departmentIds: string[]
-  positionIds: string[]
-  categoryCodes: number[]
-  genders: string[]
-  nationalities: string[]
-  employmentStatuses: string[]
-
-  hireDateFrom?: string
-  hireDateTo?: string
-
-  contractEndDateFrom?: string
-  contractEndDateTo?: string
-}
+import { EmployeeFilters } from '../types/employee-filter.types'
 
 export function EmployeeWorkspace() {
-  //const [view, setView] = useState<EmployeeView>('list')
-  //const [mode, setMode] = useState<'directory' | 'onboarding'>('directory')
-  // const router = useRouter()
-  // const pathname = usePathname()
-  // const searchParams = useSearchParams()
-
-  // const mode =
-  //   searchParams.get('mode') === 'onboarding' ? 'onboarding' : 'directory'
-  // const viewParam = searchParams.get('view')
-  // const view: EmployeeView =
-  //   viewParam === 'kanban' || viewParam === 'tree' ? viewParam : 'list'
-  // const updateWorkspaceQuery = (
-  //   updates: Record<string, string | null | undefined>,
-  // ) => {
-  //   const params = new URLSearchParams(searchParams.toString())
-
-  //   Object.entries(updates).forEach(([key, value]) => {
-  //     if (value === null || value === undefined || value === '') {
-  //       params.delete(key)
-  //     } else {
-  //       params.set(key, value)
-  //     }
-  //   })
-
-  //   const query = params.toString()
-
-  //   router.replace(query ? `${pathname}?${query}` : pathname, {
-  //     scroll: false,
-  //   })
-  // }
-
   const { mode, view, setView, openOnboarding, closeOnboarding } =
     useEmployeeWorkspaceNavigation()
 
@@ -96,6 +49,7 @@ export function EmployeeWorkspace() {
     categoryCodes: [],
     genders: [],
     nationalities: [],
+    staffCategory: [],
     employmentStatuses: [],
 
     hireDateFrom: undefined,
@@ -134,6 +88,14 @@ export function EmployeeWorkspace() {
     ...filters,
   })
 
+  const selectedIds = Object.entries(rowSelection)
+    .filter(([, selected]) => selected)
+    .map(([id]) => id)
+
+  const selectedEmployees = (data?.items ?? []).filter(
+    (employee) => rowSelection[employee.id],
+  )
+
   if (mode === 'onboarding') {
     return (
       <OnboardingForm
@@ -149,7 +111,9 @@ export function EmployeeWorkspace() {
     <div className='space-y-4'>
       <EmployeeToolbar
         view={view}
-        selectedIds={Object.keys(rowSelection)}
+        //selectedIds={Object.keys(rowSelection)}
+        selectedIds={selectedIds}
+        selectedEmployees={selectedEmployees}
         onViewChange={setView}
         onBoard={() => {
           resetOnboardingDraft()
@@ -169,6 +133,7 @@ export function EmployeeWorkspace() {
             categoryCodes: newFilters.categoryCodes ?? [],
             genders: newFilters.genders ?? [],
             nationalities: newFilters.nationalities ?? [],
+            staffCategory: newFilters.staffCategory ?? [],
             employmentStatuses: newFilters.employmentStatuses ?? [],
 
             hireDateFrom: newFilters.hireDateFrom,
@@ -189,6 +154,7 @@ export function EmployeeWorkspace() {
             categoryCodes: [],
             genders: [],
             nationalities: [],
+            staffCategory: [],
             employmentStatuses: [],
 
             hireDateFrom: undefined,
@@ -215,7 +181,11 @@ export function EmployeeWorkspace() {
           sortOrder={sortOrder}
           rowSelection={rowSelection}
           onRowSelectionChange={setRowSelection}
-          onPageChange={setPage}
+          //onPageChange={setPage}
+          onPageChange={(nextPage) => {
+            setPage(nextPage)
+            setRowSelection({})
+          }}
           onLimitChange={(nextLimit) => {
             setPage(1)
             setLimit(nextLimit)

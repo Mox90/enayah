@@ -1,7 +1,6 @@
-//import { api } from '@/lib/api'
+// enayah-frontend/src/modules/hr/employees/services/employee.service.ts
+
 import { api } from '@/lib/api/client'
-//import { PaginatedResponse } from '@/types/pagination'
-//import { Employee, EmployeeListResponse } from '../types/employee-view.types'
 import { API_ENDPOINTS } from '@/lib/api/endpoints'
 import {
   EmployeeDirectoryParams,

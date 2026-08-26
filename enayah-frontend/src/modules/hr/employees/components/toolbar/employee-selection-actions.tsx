@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
@@ -33,21 +33,26 @@ import {
   UserRoundCog,
   UserX,
 } from 'lucide-react'
+import { EmployeeDirectoryRow } from '../../types/employee-directory.types'
 
 interface Props {
   selectedIds: string[]
+  selectedEmployees: EmployeeDirectoryRow[]
 }
 
-export function EmployeeSelectionActions({ selectedIds }: Props) {
+export function EmployeeSelectionActions({
+  selectedIds,
+  selectedEmployees,
+}: Props) {
   const router = useRouter()
 
   const locale = useLocale()
   const isRtl = locale === 'ar'
-
   const t = useTranslations('common')
+  const et = useTranslations('employees')
 
+  const [isExportingExcel, setIsExportingExcel] = useState(false)
   const actionsRef = useRef<HTMLDivElement>(null)
-
   const hasSelection = selectedIds.length > 0
 
   /*
@@ -119,6 +124,289 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
     }
   }, [hasSelection, isRtl])
 
+  const handleExportExcel = async () => {
+    if (!selectedEmployees.length || isExportingExcel) {
+      return
+    }
+
+    try {
+      setIsExportingExcel(true)
+
+      /*
+       * Browser-only Excel implementation.
+       *
+       * Dynamically imported so the Excel library is only loaded
+       * when the user actually requests an export.
+       */
+      const { default: writeExcelFile } =
+        await import('write-excel-file/browser')
+
+      const align = isRtl ? ('right' as const) : ('left' as const)
+
+      const getHeader = (value: string) => ({
+        value,
+        fontWeight: 'bold' as const,
+        align,
+      })
+
+      const getFullName = (employee: EmployeeDirectoryRow) => {
+        const englishName = [
+          employee.firstNameEn,
+          employee.secondNameEn,
+          employee.thirdNameEn,
+          employee.familyNameEn,
+        ]
+          .filter(Boolean)
+          .join(' ')
+
+        const arabicName = [
+          employee.firstNameAr,
+          employee.secondNameAr,
+          employee.thirdNameAr,
+          employee.familyNameAr,
+        ]
+          .filter(Boolean)
+          .join(' ')
+
+        return isRtl ? arabicName || englishName : englishName
+      }
+
+      const getDepartment = (employee: EmployeeDirectoryRow) => {
+        if (isRtl) {
+          return employee.departmentNameAr ?? employee.departmentNameEn ?? ''
+        }
+
+        return employee.departmentNameEn ?? ''
+      }
+
+      const getPosition = (employee: EmployeeDirectoryRow) => {
+        if (isRtl) {
+          return employee.positionTitleAr ?? employee.positionTitleEn ?? ''
+        }
+
+        return employee.positionTitleEn ?? ''
+      }
+
+      const getNationality = (employee: EmployeeDirectoryRow) => {
+        if (isRtl) {
+          return employee.nationalityAr ?? employee.nationalityEn ?? ''
+        }
+
+        return employee.nationalityEn ?? ''
+      }
+
+      const getGender = (gender: string | null | undefined) => {
+        switch (gender) {
+          case 'male':
+            return et('male')
+
+          case 'female':
+            return et('female')
+
+          default:
+            return ''
+        }
+      }
+
+      const getStaffCategory = (staffCategory: string | null | undefined) => {
+        switch (staffCategory) {
+          case 'civilian':
+            return et('staffCategories.civilian')
+
+          case 'military':
+            return et('staffCategories.military')
+
+          case 'contractual':
+            return et('staffCategories.contractual')
+
+          default:
+            return staffCategory ?? ''
+        }
+      }
+
+      const getEmploymentStatus = (status: string | null | undefined) => {
+        switch (status) {
+          case 'active':
+            return et('employmentStatuses.active')
+
+          case 'on_leave':
+            return et('employmentStatuses.onLeave')
+
+          case 'suspended':
+            return et('employmentStatuses.suspended')
+
+          case 'ended':
+            return et('employmentStatuses.ended')
+
+          default:
+            return status ?? ''
+        }
+      }
+
+      const columns = [
+        {
+          header: getHeader(et('employeeNumber')),
+          cell: (employee: EmployeeDirectoryRow) => ({
+            value: toExcelNumber(employee.employeeNumber),
+            type: Number,
+            align,
+          }),
+          width: 18,
+        },
+
+        {
+          header: getHeader(et('fullName')),
+          cell: (employee: EmployeeDirectoryRow) => ({
+            value: getFullName(employee),
+            type: String,
+            align,
+          }),
+          width: 36,
+        },
+
+        {
+          header: getHeader(et('department')),
+          cell: (employee: EmployeeDirectoryRow) => ({
+            value: getDepartment(employee),
+            type: String,
+            align,
+          }),
+          width: 30,
+        },
+
+        {
+          header: getHeader(et('position')),
+          cell: (employee: EmployeeDirectoryRow) => ({
+            value: getPosition(employee),
+            type: String,
+            align,
+          }),
+          width: 30,
+        },
+
+        {
+          header: getHeader(et('pcn')),
+          cell: (employee: EmployeeDirectoryRow) => ({
+            value: employee.pcn ?? '',
+            type: String,
+            align,
+          }),
+          width: 16,
+        },
+
+        {
+          header: getHeader(et('category')),
+
+          cell: (employee: EmployeeDirectoryRow) => ({
+            value: toExcelNumber(employee.categoryCode),
+            type: Number,
+            format: '0',
+            align,
+          }),
+
+          width: 14,
+        },
+
+        {
+          header: getHeader(et('gender')),
+          cell: (employee: EmployeeDirectoryRow) => ({
+            value: getGender(employee.gender),
+            type: String,
+            align,
+          }),
+          width: 14,
+        },
+
+        {
+          header: getHeader(et('nationality')),
+          cell: (employee: EmployeeDirectoryRow) => ({
+            value: getNationality(employee),
+            type: String,
+            align,
+          }),
+          width: 22,
+        },
+
+        {
+          header: getHeader(et('hireDate')),
+          cell: (employee: EmployeeDirectoryRow) => ({
+            value: employee.hireDate ?? '',
+            type: String,
+            align,
+          }),
+          width: 16,
+        },
+
+        {
+          header: getHeader(et('staffCategories.staffCategory')),
+          cell: (employee: EmployeeDirectoryRow) => ({
+            value: getStaffCategory(employee.staffCategory),
+            type: String,
+            align,
+          }),
+          width: 20,
+        },
+
+        {
+          header: getHeader(et('iqamaNumber')),
+
+          cell: (employee: EmployeeDirectoryRow) => ({
+            value: toExcelNumber(employee.iqamaNumber),
+            type: Number,
+            format: '0',
+            align,
+          }),
+
+          width: 20,
+        },
+
+        {
+          header: getHeader(et('status')),
+          cell: (employee: EmployeeDirectoryRow) => ({
+            value: getEmploymentStatus(employee.employmentStatus),
+            type: String,
+            align,
+          }),
+          width: 18,
+        },
+      ]
+
+      const workbook = await writeExcelFile(selectedEmployees, {
+        columns,
+        sheet: isRtl ? 'الموظفون' : 'Employees',
+        rightToLeft: isRtl,
+        stickyRowsCount: 1,
+        showGridLines: true,
+      })
+
+      const now = new Date()
+
+      const dateStamp = [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, '0'),
+        String(now.getDate()).padStart(2, '0'),
+      ].join('-')
+
+      await workbook.toFile(`employees-${dateStamp}.xlsx`)
+    } catch (error) {
+      console.error('Failed to export selected employees to Excel:', error)
+    } finally {
+      setIsExportingExcel(false)
+    }
+  }
+
+  const toExcelNumber = (
+    value: string | number | null | undefined,
+  ): number | undefined => {
+    if (value === null || value === undefined || value === '') {
+      return undefined
+    }
+
+    const parsed = Number(value)
+
+    return Number.isFinite(parsed) ? parsed : undefined
+  }
+
   /*
    * Hooks must remain above this return.
    */
@@ -172,6 +460,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
             className={cn(
               'size-10 shrink-0 rounded-xl p-0',
               'sm:h-10 sm:w-auto sm:px-4',
+              'hover:text-green-400',
             )}
           >
             <Download className='size-4 shrink-0' />
@@ -183,8 +472,20 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align='start' className='w-44'>
-          <DropdownMenuItem
+          {/* <DropdownMenuItem
             onClick={() => console.log('Export Excel', selectedIds)}
+            className='hover:text-emerald-400'
+          >
+            <FileSpreadsheet className='me-2 size-4' />
+
+            {t('excel')}
+          </DropdownMenuItem> */}
+          <DropdownMenuItem
+            disabled={isExportingExcel || selectedEmployees.length === 0}
+            onSelect={() => {
+              void handleExportExcel()
+            }}
+            className='hover:text-emerald-400'
           >
             <FileSpreadsheet className='me-2 size-4' />
 
@@ -220,6 +521,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
         className={cn(
           'size-10 shrink-0 rounded-xl p-0',
           'sm:h-10 sm:w-auto sm:px-4',
+          'hover:text-green-400',
         )}
         onClick={() => console.log('Print', selectedIds)}
       >
@@ -241,6 +543,7 @@ export function EmployeeSelectionActions({ selectedIds }: Props) {
             className={cn(
               'size-10 shrink-0 rounded-xl p-0',
               'sm:h-10 sm:w-auto sm:px-4',
+              'hover:text-green-400',
             )}
           >
             <MoreHorizontal className='size-4 shrink-0' />

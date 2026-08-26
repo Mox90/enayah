@@ -47,20 +47,20 @@ export interface ListIqamaRenewalProcessesParams {
 
   status?: IqamaRenewalStatus[]
 
-  expiryDateFrom?: string
-  expiryDateTo?: string
+  expiryDateFrom?: string | null
+  expiryDateTo?: string | null
 
-  mhrsdUploadedFrom?: string
-  mhrsdUploadedTo?: string
+  mhrsdUploadedFrom?: string | null
+  mhrsdUploadedTo?: string | null
 
-  mhrsdApprovedFrom?: string
-  mhrsdApprovedTo?: string
+  mhrsdApprovedFrom?: string | null
+  mhrsdApprovedTo?: string | null
 
-  mhrsdDeniedFrom?: string
-  mhrsdDeniedTo?: string
+  mhrsdDeniedFrom?: string | null
+  mhrsdDeniedTo?: string | null
 
-  governmentRelationsDueFrom?: string
-  governmentRelationsDueTo?: string
+  governmentRelationsDueFrom?: string | null
+  governmentRelationsDueTo?: string | null
 
   sortBy?: IqamaRenewalSortBy
   sortOrder?: 'asc' | 'desc'
