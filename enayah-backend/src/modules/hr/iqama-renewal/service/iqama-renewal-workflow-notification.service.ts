@@ -157,6 +157,10 @@ export const IqamaRenewalWorkflowNotificationService = {
       ? ` The due date is ${input.dueDate}.`
       : ''
 
+    const dueDateMessageAr = input.dueDate
+      ? ` الموعد النهائي هو ${input.dueDate}.`
+      : ''
+
     return createWorkflowNotification(tx, {
       renewalCase: input.renewalCase,
       actorUserId: input.actorUserId,
@@ -171,9 +175,8 @@ export const IqamaRenewalWorkflowNotificationService = {
         `has been assigned to you for processing.` +
         dueDateMessage,
       messageAr:
-        `تجديد إقامة ${employeeLabel}` +
-        `تم تعيينه لك للمعالجة. ` +
-        dueDateMessage,
+        `تم إسناد تجديد إقامة ${employeeLabel} إليك للمعالجة.` +
+        dueDateMessageAr,
       dueDate: input.dueDate,
       activityType: 'assigned_to_government_relations',
     })
