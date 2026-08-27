@@ -26,7 +26,9 @@ type CreateWorkflowNotificationInput = {
   type: string
   milestone: string
   title: string
+  titleAr: string
   message: string
+  messageAr: string
   dueDate: string | null
   activityType:
     | 'assigned_to_government_relations'
@@ -94,7 +96,9 @@ async function createWorkflowNotification(
     employeeId: input.renewalCase.employeeId,
     type: input.type,
     title: input.title,
+    titleAr: input.titleAr,
     message: input.message,
+    messageAr: input.messageAr,
     sourceType: IQAMA_WORKFLOW_NOTIFICATION_SOURCE_TYPE,
     /*
      * sourceId points directly to the case.
@@ -161,9 +165,14 @@ export const IqamaRenewalWorkflowNotificationService = {
       milestone:
         IQAMA_WORKFLOW_NOTIFICATION_MILESTONES.assignedToGovernmentRelations,
       title: 'Iqama renewal assigned to you',
+      titleAr: 'تم تكليفك بمهمة تجديد الإقامة',
       message:
         `${employeeLabel}'s Iqama renewal ` +
         `has been assigned to you for processing.` +
+        dueDateMessage,
+      messageAr:
+        `تجديد إقامة ${employeeLabel}` +
+        `تم تعيينه لك للمعالجة. ` +
         dueDateMessage,
       dueDate: input.dueDate,
       activityType: 'assigned_to_government_relations',
@@ -191,10 +200,9 @@ export const IqamaRenewalWorkflowNotificationService = {
       milestone:
         IQAMA_WORKFLOW_NOTIFICATION_MILESTONES.completedByGovernmentRelations,
       title: 'Iqama renewal completed',
-      message:
-        `${employeeLabel}'s Iqama was updated ` +
-        `by Government Relations and the ` +
-        `renewal process was completed.`,
+      titleAr: 'تم تجديد الإقامة',
+      message: `${employeeLabel}'s Iqama was updated by Government Relations and the renewal process was completed.`,
+      messageAr: `تم تحديث إقامة ${employeeLabel} من قِبَل قسم العلاقات الحكومية، واكتملت عملية التجديد.`,
       dueDate: null,
       activityType: 'completed_by_government_relations',
     })
@@ -237,10 +245,12 @@ export const IqamaRenewalWorkflowNotificationService = {
       type: IQAMA_WORKFLOW_NOTIFICATION_TYPES.returnedToHr,
       milestone,
       title: 'Iqama renewal returned to HR',
+      titleAr: 'تمت إعادة معاملة تجديد الإقامة إلى قسم الموارد البشرية.',
       message:
         `${employeeLabel}'s Iqama renewal case ` +
         `was returned by Government Relations. ` +
         `Reason: ${reason}`,
+      messageAr: `تمت إعادة معاملة تجديد إقامة ${employeeLabel} من قِبَل قسم العلاقات الحكومية. السبب: ${reason}`,
       dueDate: null,
       activityType: 'returned_to_hr',
     })
