@@ -12,8 +12,9 @@ import { format } from 'date-fns'
 import { toArabic, toPersianDigits } from '@/utils/utilities'
 import { cn } from '@/lib/utils'
 import { StatusBadge } from '@/components/badges/status-badge'
+import { EmploymentStatus } from '../../types/employee.types'
 
-export type EmploymentStatus = 'active' | 'on_leave' | 'suspended' | 'ended'
+//export type EmploymentStatus = 'active' | 'on_leave' | 'suspended' | 'ended'
 
 export type EmploymentStatusStyle = {
   //badgeClassName: string
@@ -22,6 +23,12 @@ export type EmploymentStatusStyle = {
 }
 
 export const employmentStatusStyles = {
+  // pending: {
+  //   dotClassName: 'bg-slate-400 dark:bg-slate-500',
+  //   rowClassName:
+  //     'bg-slate-50/30 hover:bg-slate-50/60 dark:bg-slate-950/10 dark:hover:bg-slate-950/20',
+  // },
+
   active: {
     dotClassName: 'bg-emerald-500 dark:bg-emerald-400',
     rowClassName: '',
@@ -57,12 +64,6 @@ export const employmentStatusStyles = {
   //     'bg-violet-50/25 hover:bg-violet-50/50 dark:bg-violet-950/10 dark:hover:bg-violet-950/20',
   // },
 
-  ended: {
-    dotClassName: 'bg-orange-500 dark:bg-orange-400',
-    rowClassName:
-      'bg-orange-50/30 hover:bg-orange-50/55 dark:bg-orange-950/10 dark:hover:bg-orange-950/20',
-  },
-
   on_leave: {
     dotClassName: 'bg-blue-500 dark:bg-blue-400',
     rowClassName:
@@ -73,6 +74,18 @@ export const employmentStatusStyles = {
     dotClassName: 'bg-yellow-500 dark:bg-yellow-400',
     rowClassName:
       'bg-yellow-50/45 hover:bg-yellow-50/70 dark:bg-yellow-950/15 dark:hover:bg-yellow-950/25',
+  },
+
+  // ended: {
+  //   dotClassName: 'bg-orange-500 dark:bg-orange-400',
+  //   rowClassName:
+  //     'bg-orange-50/30 hover:bg-orange-50/55 dark:bg-orange-950/10 dark:hover:bg-orange-950/20',
+  // },
+
+  ended: {
+    dotClassName: 'bg-slate-500 dark:bg-slate-400',
+    rowClassName:
+      'bg-slate-100/50 hover:bg-slate-100/75 dark:bg-slate-900/25 dark:hover:bg-slate-900/40',
   },
 
   // deceased: {
@@ -97,6 +110,7 @@ export function useEmployeeColumns(
     //eoc: t('employmentStatuses.eoc'),
     //transferred: t('employmentStatuses.transferred'),
     //retired: t('employmentStatuses.retired'),
+    //pending: t('employmentStatuses.pending'),
     on_leave: t('employmentStatuses.onLeave'),
     suspended: t('employmentStatuses.suspended'),
     //deceased: t('employmentStatuses.deceased'),

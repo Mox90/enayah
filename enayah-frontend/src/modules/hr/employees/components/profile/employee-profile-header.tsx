@@ -47,17 +47,20 @@ import { EmployeeAvatarUploader } from './employee-avatar-uploader'
 import { usePermission } from '@/hooks/usePermission'
 import { useApplyContractMovement } from '@/modules/hr/contracts/hooks/use-apply-contract-movement'
 import { ContractAmendmentDialog } from '@/components/dialogs/contract-amendment-dialog'
+import { EmploymentStatus } from '../../types/employee.types'
+import { useEmploymentSeparations } from '@/modules/hr/offboarding/hooks/use-offboarding'
+import { OffboardingDialog } from '@/modules/hr/offboarding/components/offboarding-dialog'
 
-type EmploymentStatus =
-  | 'active'
-  | 'terminated'
-  | 'resigned'
-  | 'eoc'
-  | 'transferred'
-  | 'retired'
-  | 'on_leave'
-  | 'suspended'
-  | 'deceased'
+// type EmploymentStatus =
+//   | 'active'
+//   | 'terminated'
+//   | 'resigned'
+//   | 'eoc'
+//   | 'transferred'
+//   | 'retired'
+//   | 'on_leave'
+//   | 'suspended'
+//   | 'deceased'
 
 interface Props {
   profile: EmployeeProfile
@@ -157,15 +160,18 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
   const canGoBack = usePermission('employee.view')
   const canRenewContract = usePermission('contract.renew')
   const canAmendContract = usePermission('contract.update')
+  const canOffboardEmployee = usePermission('employee.update')
   const [editOpen, setEditOpen] = useState(false)
   const [renewOpen, setRenewOpen] = useState(false)
   const [amendOpen, setAmendOpen] = useState(false)
+  const [offboardingOpen, setOffboardingOpen] = useState(false)
 
   const updatePersonalMutation = useUpdatePersonalMutation()
   const renewMutation = useRenewContract(profile.personal.id)
   const amendmentMutation = useApplyContractMovement(profile.personal.id)
   const personal = profile.personal
   const employment = profile.employment
+
   const movement = employment?.movement
   const currentContract = employment?.contract
   const avatar = personal.avatar
@@ -193,20 +199,32 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
     ? (movement?.officialDepartment?.nameAr ??
       movement?.officialDepartment?.nameEn)
     : movement?.officialDepartment?.nameEn
+  // const employmentStatus = employment?.status as
+  //   | EmploymentStatus
+  //   | null
+  //   | undefined
+  // const employmentStatusLabels: Record<EmploymentStatus, string> = {
+  //   active: et('employmentStatuses.active'),
+  //   terminated: et('employmentStatuses.terminated'),
+  //   resigned: et('employmentStatuses.resigned'),
+  //   eoc: et('employmentStatuses.eoc'),
+  //   transferred: et('employmentStatuses.transferred'),
+  //   retired: et('employmentStatuses.retired'),
+  //   on_leave: et('employmentStatuses.onLeave'),
+  //   suspended: et('employmentStatuses.suspended'),
+  //   deceased: et('employmentStatuses.deceased'),
+  // }
   const employmentStatus = employment?.status as
     | EmploymentStatus
     | null
     | undefined
+
   const employmentStatusLabels: Record<EmploymentStatus, string> = {
+    //pending: et('employmentStatuses.pending'),
     active: et('employmentStatuses.active'),
-    terminated: et('employmentStatuses.terminated'),
-    resigned: et('employmentStatuses.resigned'),
-    eoc: et('employmentStatuses.eoc'),
-    transferred: et('employmentStatuses.transferred'),
-    retired: et('employmentStatuses.retired'),
     on_leave: et('employmentStatuses.onLeave'),
     suspended: et('employmentStatuses.suspended'),
-    deceased: et('employmentStatuses.deceased'),
+    ended: et('employmentStatuses.ended'),
   }
   const employmentStatusLabel =
     employmentStatus && employmentStatus in employmentStatusLabels
@@ -221,6 +239,21 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
 
   const { data: contractDefaults, isLoading: isContractDefaultsLoading } =
     useContractRenewalDefaults(currentContract?.id, renewOpen || amendOpen)
+
+  const { data: employmentSeparations = [] } = useEmploymentSeparations(
+    employment?.id,
+  )
+
+  const openSeparation = employmentSeparations.find((separation) =>
+    ['draft', 'pending_approval', 'approved'].includes(separation.status),
+  )
+
+  const canStartOffboarding =
+    canOffboardEmployee &&
+    employment &&
+    employment.status !== 'pending' &&
+    employment.status !== 'ended' &&
+    Boolean(currentContract)
 
   return (
     <section
@@ -306,21 +339,35 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
                       {cont('amendContract')}
                     </DropdownMenuItem>
                   )}
-
-                  <DropdownMenuSeparator />
-
-                  <DropdownMenuItem className='text-amber-700 focus:bg-amber-50 focus:text-amber-800 dark:text-amber-400 dark:focus:bg-amber-950/30 dark:focus:text-amber-300'>
-                    <UserMinus aria-hidden='true' className='me-2 h-4 w-4' />
-
-                    {ct('deactivate')}
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem className='text-red-600 focus:bg-red-50 focus:text-red-700 dark:text-red-400 dark:focus:bg-red-950/30 dark:focus:text-red-300'>
-                    <UserX aria-hidden='true' className='me-2 h-4 w-4' />
-
-                    {ct('terminate')}
-                  </DropdownMenuItem>
                 </>
+              )}
+              <DropdownMenuSeparator />
+
+              <DropdownMenuItem className='text-amber-700 focus:bg-amber-50 focus:text-amber-800 dark:text-amber-400 dark:focus:bg-amber-950/30 dark:focus:text-amber-300'>
+                <UserMinus aria-hidden='true' className='me-2 h-4 w-4' />
+
+                {ct('deactivate')}
+              </DropdownMenuItem>
+
+              {/* <DropdownMenuItem className='text-red-600 focus:bg-red-50 focus:text-red-700 dark:text-red-400 dark:focus:bg-red-950/30 dark:focus:text-red-300'>
+                <UserX aria-hidden='true' className='me-2 h-4 w-4' />
+
+                {ct('terminate')}
+              </DropdownMenuItem> */}
+
+              {canStartOffboarding && (
+                <DropdownMenuItem
+                  onSelect={() => {
+                    setOffboardingOpen(true)
+                  }}
+                  className='text-red-600 focus:bg-red-50 focus:text-red-700 dark:text-red-400 dark:focus:bg-red-950/30 dark:focus:text-red-300'
+                >
+                  <UserX aria-hidden='true' className='me-2 h-4 w-4' />
+
+                  {openSeparation
+                    ? et('offboarding.continueOffboarding')
+                    : et('offboarding.startOffboarding')}
+                </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
@@ -549,6 +596,17 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
             />
           )}
         </>
+      )}
+
+      {offboardingOpen && employment && currentContract && (
+        <OffboardingDialog
+          open={offboardingOpen}
+          onOpenChange={setOffboardingOpen}
+          employmentId={employment.id}
+          employeeName={fullName}
+          employmentStartDate={employment.startDate}
+          contractEndDate={currentContract.endDate}
+        />
       )}
     </section>
   )

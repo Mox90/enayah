@@ -20,6 +20,7 @@ export const API_ENDPOINTS = {
       director: '/hr/dashboard/director',
       employee: '/hr/dashboard/employee',
     },
+    offboarding: '/hr/offboarding',
   },
 
   iam: {

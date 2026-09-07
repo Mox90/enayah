@@ -289,7 +289,11 @@
       "military": "عسكري",
       "contractual": "تعاقدي"
     },
-    "filterEmployeesDescription": "ضيّق نتائج دليل الموظفين بسرعة للوصول إلى ما تحتاجه."
+    "filterEmployeesDescription": "ضيّق نتائج دليل الموظفين بسرعة للوصول إلى ما تحتاجه.",
+    "offboarding": {
+      "startOffboarding": "بدء إنهاء الخدمة",
+      "continueOffboarding": "عرض إجراءات إنهاء الخدمة"
+    }
   },
   "departments": {
     "departmentName": "الأقسام",
@@ -1279,5 +1283,68 @@
     "renewal": "التجديد",
     "details": "التفاصيل",
     "settings": "الإعدادات"
+  },
+  "offboarding": {
+    "title": "إنهاء خدمة الموظف",
+    "description": "بدء أو مراجعة إجراءات انتهاء خدمة الموظف {employee}.",
+    "separationType": "نوع انتهاء الخدمة",
+    "noticeDate": "تاريخ الإشعار",
+    "lastActiveDay": "آخر يوم عمل",
+    "reason": "السبب",
+    "remarks": "ملاحظات",
+    "currentStatus": "الحالة الحالية",
+    "saveDraft": "حفظ كمسودة",
+    "saveChanges": "حفظ التعديلات",
+    "draftSaved": "تم حفظ مسودة إنهاء الخدمة بنجاح.",
+    "saveFailed": "تعذر حفظ إجراءات إنهاء الخدمة.",
+    "eocDateHint": "في حالة انتهاء العقد، يجب أن يطابق آخر يوم عمل تاريخ انتهاء العقد.",
+    "types": {
+      "eoc": "انتهاء العقد",
+      "resignation": "استقالة",
+      "termination": "إنهاء خدمة",
+      "retirement": "تقاعد",
+      "transferOut": "نقل خارج المنشأة",
+      "death": "وفاة",
+      "mutualAgreement": "اتفاق متبادل",
+      "other": "أخرى"
+    },
+    "statuses": {
+      "draft": "مسودة",
+      "pending_approval": "بانتظار الموافقة",
+      "approved": "معتمد",
+      "completed": "مكتمل",
+      "cancelled": "ملغي"
+    },
+    "validation": {
+      "effectiveDateRequired": "آخر يوم عمل مطلوب.",
+      "beforeEmploymentStart": "لا يمكن أن يكون آخر يوم عمل قبل تاريخ بدء الخدمة.",
+      "afterContractEnd": "لا يمكن أن يكون آخر يوم عمل بعد تاريخ انتهاء العقد الحالي.",
+      "noticeAfterEffectiveDate": "لا يمكن أن يكون تاريخ الإشعار بعد آخر يوم عمل.",
+      "eocMustMatchContractEnd": "في حالة انتهاء العقد، يجب أن يطابق آخر يوم عمل تاريخ انتهاء العقد."
+    },
+    "employmentOverview": "بيانات الخدمة",
+    "employmentOverviewSub": "راجع بيانات الموظف وفترة العقد الحالية قبل بدء إجراءات انتهاء الخدمة.",
+    "employee": "الموظف",
+    "employmentStartDate": "تاريخ بدء الخدمة",
+    "contractEndDate": "تاريخ انتهاء العقد",
+
+    "separationDetails": "تفاصيل انتهاء الخدمة",
+    "separationDetailsSub": "حدد سبب انتهاء علاقة الموظف الوظيفية.",
+
+    "separationDates": "تواريخ انتهاء الخدمة",
+    "separationDatesSub": "سجل تاريخ الإشعار وآخر يوم عمل فعلي للموظف.",
+    "noticeDateSub": "تاريخ تقديم الإشعار الرسمي بانتهاء الخدمة، عند انطباق ذلك.",
+    "lastActiveDaySub": "يمثل آخر يوم عمل فعلي للموظف.",
+
+    "reasonSub": "أدخل السبب أو التوضيح الأساسي لانتهاء الخدمة.",
+    "reasonPlaceholder": "أدخل سبب انتهاء الخدمة...",
+
+    "remarksSub": "أضف أي ملاحظات إضافية للموارد البشرية تتعلق بإجراءات انتهاء الخدمة.",
+    "remarksPlaceholder": "أدخل ملاحظات إضافية...",
+
+    "saving": "جارٍ الحفظ...",
+
+    "workflowLockedTitle": "إجراءات انتهاء الخدمة قيد التنفيذ",
+    "workflowLockedDescription": "حالة إجراءات انتهاء الخدمة الحالية هي {status} ولم يعد من الممكن تعديلها من ملف الموظف."
   }
 }

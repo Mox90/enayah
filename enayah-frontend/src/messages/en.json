@@ -285,7 +285,11 @@
       "military": "Military",
       "contractual": "Contractual"
     },
-    "filterEmployeesDescription": "Quickly narrow the employee directory to the results you need."
+    "filterEmployeesDescription": "Quickly narrow the employee directory to the results you need.",
+    "offboarding": {
+      "startOffboarding": "Offboard Employee",
+      "continueOffboarding": "View Offboarding"
+    }
   },
   "departments": {
     "departmentName": "Departments",
@@ -1276,5 +1280,68 @@
     "renewal": "Renewal",
     "details": "Details",
     "settings": "Settings"
+  },
+  "offboarding": {
+    "title": "Offboard Employee",
+    "description": "Start or review the employment separation process for {employee}.",
+    "separationType": "Separation Type",
+    "noticeDate": "Notice Date",
+    "lastActiveDay": "Last Active Day",
+    "reason": "Reason",
+    "remarks": "Remarks",
+    "currentStatus": "Current Status",
+    "saveDraft": "Save Draft",
+    "saveChanges": "Save Changes",
+    "draftSaved": "Offboarding draft saved successfully.",
+    "saveFailed": "Unable to save the offboarding process.",
+    "eocDateHint": "For End of Contract, the last active day must match the contract end date.",
+    "types": {
+      "eoc": "End of Contract",
+      "resignation": "Resignation",
+      "termination": "Termination",
+      "retirement": "Retirement",
+      "transferOut": "Transfer Out",
+      "death": "Death",
+      "mutualAgreement": "Mutual Agreement",
+      "other": "Other"
+    },
+    "statuses": {
+      "draft": "Draft",
+      "pending_approval": "Pending Approval",
+      "approved": "Approved",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "validation": {
+      "effectiveDateRequired": "Last active day is required.",
+      "beforeEmploymentStart": "Last active day cannot be before the employment start date.",
+      "afterContractEnd": "Last active day cannot be after the active contract end date.",
+      "noticeAfterEffectiveDate": "Notice date cannot be after the last active day.",
+      "eocMustMatchContractEnd": "For End of Contract, the last active day must match the contract end date."
+    },
+    "employmentOverview": "Employment Overview",
+    "employmentOverviewSub": "Review the employee and current contractual period before starting the separation process.",
+    "employee": "Employee",
+    "employmentStartDate": "Employment Start Date",
+    "contractEndDate": "Contract End Date",
+
+    "separationDetails": "Separation Details",
+    "separationDetailsSub": "Specify the reason the employee's employment relationship will end.",
+
+    "separationDates": "Separation Dates",
+    "separationDatesSub": "Record the notice date and the employee's final active working day.",
+    "noticeDateSub": "The date formal notice of separation was given, when applicable.",
+    "lastActiveDaySub": "This is the employee's final active day of employment.",
+
+    "reasonSub": "Provide the underlying reason or explanation for the separation.",
+    "reasonPlaceholder": "Enter the reason for separation...",
+
+    "remarksSub": "Add any additional HR notes relevant to this separation process.",
+    "remarksPlaceholder": "Enter additional remarks...",
+
+    "saving": "Saving...",
+
+    "workflowLockedTitle": "Separation workflow in progress",
+    "workflowLockedDescription": "This separation is currently {status} and can no longer be edited from the employee profile."
   }
 }
