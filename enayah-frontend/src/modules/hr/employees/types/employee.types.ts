@@ -40,3 +40,13 @@ export interface Employee {
 
   version: number
 }
+
+export const employmentStatusValues = [
+  'pending',
+  'active',
+  'on_leave',
+  'suspended',
+  'ended',
+] as const
+
+export type EmploymentStatus = (typeof employmentStatusValues)[number]
