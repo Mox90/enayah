@@ -42,7 +42,7 @@ export interface Employee {
 }
 
 export const employmentStatusValues = [
-  //'pending',
+  'pending',
   'active',
   'on_leave',
   'suspended',

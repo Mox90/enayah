@@ -23,11 +23,11 @@ export type EmploymentStatusStyle = {
 }
 
 export const employmentStatusStyles = {
-  // pending: {
-  //   dotClassName: 'bg-slate-400 dark:bg-slate-500',
-  //   rowClassName:
-  //     'bg-slate-50/30 hover:bg-slate-50/60 dark:bg-slate-950/10 dark:hover:bg-slate-950/20',
-  // },
+  pending: {
+    dotClassName: 'bg-slate-400 dark:bg-slate-500',
+    rowClassName:
+      'bg-slate-50/30 hover:bg-slate-50/60 dark:bg-slate-950/10 dark:hover:bg-slate-950/20',
+  },
 
   active: {
     dotClassName: 'bg-emerald-500 dark:bg-emerald-400',
@@ -104,13 +104,13 @@ export function useEmployeeColumns(
   const isRtl = locale === 'ar'
 
   const employmentStatusLabels: Record<EmploymentStatus, string> = {
+    pending: t('employmentStatuses.pending'),
     active: t('employmentStatuses.active'),
     //terminated: t('employmentStatuses.terminated'),
     //resigned: t('employmentStatuses.resigned'),
     //eoc: t('employmentStatuses.eoc'),
     //transferred: t('employmentStatuses.transferred'),
     //retired: t('employmentStatuses.retired'),
-    //pending: t('employmentStatuses.pending'),
     on_leave: t('employmentStatuses.onLeave'),
     suspended: t('employmentStatuses.suspended'),
     //deceased: t('employmentStatuses.deceased'),

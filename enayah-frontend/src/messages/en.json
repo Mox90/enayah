@@ -68,7 +68,8 @@
     "add": "Add {item}",
     "noRecords": "No {item} records found",
     "optional": "Optional",
-    "status": "Status"
+    "status": "Status",
+    "close": "Close"
   },
   "auth": {
     "loginTitle": "Login to Your Account",

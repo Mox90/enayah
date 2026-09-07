@@ -220,7 +220,7 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
     | undefined
 
   const employmentStatusLabels: Record<EmploymentStatus, string> = {
-    //pending: et('employmentStatuses.pending'),
+    pending: et('employmentStatuses.pending'),
     active: et('employmentStatuses.active'),
     on_leave: et('employmentStatuses.onLeave'),
     suspended: et('employmentStatuses.suspended'),

@@ -68,7 +68,8 @@
     "add": "أضف {item}",
     "noRecords": "لم يتم العثور على سجلات {item}",
     "optional": "اختياري",
-    "status": "حالة"
+    "status": "حالة",
+    "close": "قريب"
   },
 
   "auth": {
