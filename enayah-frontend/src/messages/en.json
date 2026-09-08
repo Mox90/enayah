@@ -263,6 +263,7 @@
     "expired": "Expired",
     "suspended": "Suspended",
     "employmentStatuses": {
+      "pending": "Pending",
       "active": "Active",
       "terminated": "Terminated",
       "resigned": "Resigned",
@@ -1343,6 +1344,34 @@
     "saving": "Saving...",
 
     "workflowLockedTitle": "Separation workflow in progress",
-    "workflowLockedDescription": "This separation is currently {status} and can no longer be edited from the employee profile."
+    "workflowLockedDescription": "This separation is currently {status} and can no longer be edited from the employee profile.",
+    "submitForApproval": "Submit for Approval",
+    "submittedForApproval": "Offboarding submitted for approval.",
+    "approve": "Approve Offboarding",
+    "approvedSuccessfully": "Offboarding approved successfully.",
+    "cancelOffboarding": "Cancel Offboarding",
+    "cancelledSuccessfully": "Offboarding process cancelled.",
+    "completeSeparation": "Complete Separation",
+    "completedSuccessfully": "Employee separation completed successfully.",
+    "workflowActionFailed": "Unable to complete the requested offboarding action.",
+
+    "pendingApprovalTitle": "Pending Approval",
+    "pendingApprovalDescription": "The separation request has been submitted and can no longer be edited.",
+
+    "approvedTitle": "Offboarding Approved",
+    "approvedDescription": "The separation has been approved. Employment remains active until {date}.",
+
+    "readyForCompletionTitle": "Ready for Completion",
+    "readyForCompletionDescription": "The approved effective date has been reached. The employment lifecycle can now be completed.",
+
+    "scheduledCompletion": "Scheduled for completion on {date}",
+
+    "cancelConfirmTitle": "Cancel Offboarding?",
+    "cancelConfirmDescription": "This will cancel the current separation process. The employee's employment will remain unchanged.",
+
+    "completeConfirmTitle": "Complete Employee Separation?",
+    "completeConfirmDescription": "This will complete the separation for {employee} effective {date}. Employment, contract, movement and appointments will be closed and the assigned PCN may be released.",
+    "loadFailed": "Unable to load offboarding information",
+    "loadFailedDescription": "The employee's current offboarding status could not be retrieved. Close this window and try again."
   }
 }

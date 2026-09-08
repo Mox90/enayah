@@ -2,13 +2,12 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-//import { offboardingService } from '../services/offboarding.service'
+import { offboardingService } from '../service/offboarding.service'
 import type {
   CreateSeparationPayload,
   EmploymentSeparation,
   UpdateSeparationPayload,
 } from '../types/offboarding.types'
-import { offboardingService } from '../service/offboarding.service'
 
 export const offboardingKeys = {
   all: ['offboarding'] as const,
@@ -42,7 +41,9 @@ export function useCreateSeparation(employmentId: string) {
     mutationFn: (payload: CreateSeparationPayload) =>
       offboardingService.create(employmentId, payload),
 
-    onSuccess: () => {
+    onSuccess: (result) => {
+      queryClient.setQueryData(offboardingKeys.detail(result.id), result)
+
       queryClient.invalidateQueries({
         queryKey: offboardingKeys.employment(employmentId),
       })
@@ -63,11 +64,11 @@ export function useUpdateSeparation(employmentId: string) {
     }) => offboardingService.update(separationId, payload),
 
     onSuccess: (result: EmploymentSeparation) => {
+      queryClient.setQueryData(offboardingKeys.detail(result.id), result)
+
       queryClient.invalidateQueries({
         queryKey: offboardingKeys.employment(employmentId),
       })
-
-      queryClient.setQueryData(offboardingKeys.detail(result.id), result)
     },
   })
 }
@@ -76,9 +77,12 @@ export function useSubmitSeparation(employmentId: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: offboardingService.submit,
+    mutationFn: (separationId: string) =>
+      offboardingService.submit(separationId),
 
-    onSuccess: () => {
+    onSuccess: (result) => {
+      queryClient.setQueryData(offboardingKeys.detail(result.id), result)
+
       queryClient.invalidateQueries({
         queryKey: offboardingKeys.employment(employmentId),
       })
@@ -90,9 +94,12 @@ export function useApproveSeparation(employmentId: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: offboardingService.approve,
+    mutationFn: (separationId: string) =>
+      offboardingService.approve(separationId),
 
-    onSuccess: () => {
+    onSuccess: (result) => {
+      queryClient.setQueryData(offboardingKeys.detail(result.id), result)
+
       queryClient.invalidateQueries({
         queryKey: offboardingKeys.employment(employmentId),
       })
@@ -104,11 +111,57 @@ export function useCancelSeparation(employmentId: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: offboardingService.cancel,
+    mutationFn: (separationId: string) =>
+      offboardingService.cancel(separationId),
 
-    onSuccess: () => {
+    onSuccess: (result) => {
+      queryClient.setQueryData(offboardingKeys.detail(result.id), result)
+
       queryClient.invalidateQueries({
         queryKey: offboardingKeys.employment(employmentId),
+      })
+    },
+  })
+}
+
+export function useCompleteSeparation(employmentId: string) {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (separationId: string) =>
+      offboardingService.complete(separationId),
+
+    onSuccess: (result) => {
+      if (result?.separation) {
+        queryClient.setQueryData(
+          offboardingKeys.detail(result.separation.id),
+          result.separation,
+        )
+      }
+
+      queryClient.invalidateQueries({
+        queryKey: offboardingKeys.employment(employmentId),
+      })
+
+      /*
+       * Completion changes employment,
+       * contract, movement, appointments
+       * and PCN.
+       */
+      queryClient.invalidateQueries({
+        queryKey: ['employees'],
+      })
+
+      queryClient.invalidateQueries({
+        queryKey: ['contracts'],
+      })
+
+      queryClient.invalidateQueries({
+        queryKey: ['position-items'],
+      })
+
+      queryClient.invalidateQueries({
+        queryKey: ['appointments'],
       })
     },
   })

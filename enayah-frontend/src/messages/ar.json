@@ -266,6 +266,7 @@
     "expired": "منتهي الصلاحية",
     "suspended": "معلق",
     "employmentStatuses": {
+      "pending": "قيد الانتظار",
       "active": "على رأس العمل",
       "terminated": "منتهي الخدمة",
       "resigned": "مستقيل",
@@ -1346,6 +1347,34 @@
     "saving": "جارٍ الحفظ...",
 
     "workflowLockedTitle": "إجراءات انتهاء الخدمة قيد التنفيذ",
-    "workflowLockedDescription": "حالة إجراءات انتهاء الخدمة الحالية هي {status} ولم يعد من الممكن تعديلها من ملف الموظف."
+    "workflowLockedDescription": "حالة إجراءات انتهاء الخدمة الحالية هي {status} ولم يعد من الممكن تعديلها من ملف الموظف.",
+    "submitForApproval": "إرسال للاعتماد",
+    "submittedForApproval": "تم إرسال إجراءات انتهاء الخدمة للاعتماد.",
+    "approve": "اعتماد انتهاء الخدمة",
+    "approvedSuccessfully": "تم اعتماد انتهاء الخدمة بنجاح.",
+    "cancelOffboarding": "إلغاء إجراءات انتهاء الخدمة",
+    "cancelledSuccessfully": "تم إلغاء إجراءات انتهاء الخدمة.",
+    "completeSeparation": "إكمال انتهاء الخدمة",
+    "completedSuccessfully": "تم إكمال انتهاء خدمة الموظف بنجاح.",
+    "workflowActionFailed": "تعذر تنفيذ الإجراء المطلوب على انتهاء الخدمة.",
+
+    "pendingApprovalTitle": "بانتظار الاعتماد",
+    "pendingApprovalDescription": "تم إرسال طلب انتهاء الخدمة للاعتماد ولم يعد من الممكن تعديل البيانات.",
+
+    "approvedTitle": "تم اعتماد انتهاء الخدمة",
+    "approvedDescription": "تم اعتماد انتهاء الخدمة، ويظل الموظف على رأس العمل حتى {date}.",
+
+    "readyForCompletionTitle": "جاهز للإكمال",
+    "readyForCompletionDescription": "تم الوصول إلى تاريخ انتهاء الخدمة المعتمد ويمكن الآن إكمال إجراءات إنهاء دورة الخدمة.",
+
+    "scheduledCompletion": "مجدول للإكمال بتاريخ {date}",
+
+    "cancelConfirmTitle": "إلغاء إجراءات انتهاء الخدمة؟",
+    "cancelConfirmDescription": "سيتم إلغاء إجراءات انتهاء الخدمة الحالية دون تغيير حالة خدمة الموظف.",
+
+    "completeConfirmTitle": "إكمال انتهاء خدمة الموظف؟",
+    "completeConfirmDescription": "سيتم إكمال انتهاء خدمة {employee} اعتباراً من {date}، وإغلاق الخدمة والعقد والحركة والتكليفات وقد يتم تحرير رقم البند الوظيفي.",
+    "loadFailed": "Unable to load offboarding information",
+    "loadFailedDescription": "The employee's current offboarding status could not be retrieved. Close this window and try again."
   }
 }

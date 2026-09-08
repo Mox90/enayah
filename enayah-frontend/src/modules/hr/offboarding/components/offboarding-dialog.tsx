@@ -6,7 +6,14 @@ import type { ReactNode } from 'react'
 import { useState } from 'react'
 
 import { AxiosError } from 'axios'
-import { LoaderCircle, UserX } from 'lucide-react'
+import {
+  Ban,
+  CheckCircle2,
+  Clock3,
+  LoaderCircle,
+  Send,
+  UserX,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { useLocale, useTranslations } from 'next-intl'
 
@@ -23,6 +30,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { Textarea } from '@/components/ui/textarea'
 
 import {
@@ -34,10 +51,15 @@ import {
 } from '../types/offboarding.types'
 
 import {
+  useApproveSeparation,
+  useCancelSeparation,
+  useCompleteSeparation,
   useCreateSeparation,
   useEmploymentSeparations,
+  useSubmitSeparation,
   useUpdateSeparation,
 } from '../hooks/use-offboarding'
+import { getTodayInRiyadh } from '@/utils/utilities'
 
 /* -------------------------------------------------------------------------- */
 /* Types                                                                       */
@@ -87,6 +109,8 @@ const openStatuses: EmploymentSeparationStatus[] = [
   'pending_approval',
   'approved',
 ]
+
+type ConfirmAction = 'cancel' | 'complete' | null
 
 /* -------------------------------------------------------------------------- */
 /* UI Helpers                                                                  */
@@ -178,14 +202,24 @@ function OffboardingDialogContent({
   const common = useTranslations('common')
 
   const createMutation = useCreateSeparation(employmentId)
-
   const updateMutation = useUpdateSeparation(employmentId)
 
   const [form, setForm] = useState<FormState>(() => createInitialForm(existing))
-
   const [error, setError] = useState<string | null>(null)
 
-  const isSubmitting = createMutation.isPending || updateMutation.isPending
+  const submitMutation = useSubmitSeparation(employmentId)
+  const approveMutation = useApproveSeparation(employmentId)
+  const cancelMutation = useCancelSeparation(employmentId)
+  const completeMutation = useCompleteSeparation(employmentId)
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null)
+
+  const isSubmitting =
+    createMutation.isPending ||
+    updateMutation.isPending ||
+    submitMutation.isPending ||
+    approveMutation.isPending ||
+    cancelMutation.isPending ||
+    completeMutation.isPending
 
   /*
    * Once submitted / approved, the employee profile
@@ -194,9 +228,20 @@ function OffboardingDialogContent({
    * The approval workflow can later live in the
    * dedicated Offboarding workspace.
    */
-  const readOnly =
-    existing?.status === 'pending_approval' || existing?.status === 'approved'
+  //const readOnly =
+  //  existing?.status === 'pending_approval' || existing?.status === 'approved'
 
+  const isDraft = existing?.status === 'draft'
+  const isPendingApproval = existing?.status === 'pending_approval'
+  const isApproved = existing?.status === 'approved'
+
+  const readOnly = isPendingApproval || isApproved
+
+  const today = getTodayInRiyadh()
+
+  const canCompleteNow = Boolean(
+    isApproved && existing && existing.effectiveDate <= today,
+  )
   /* ------------------------------------------------------------------------ */
   /* Labels                                                                    */
   /* ------------------------------------------------------------------------ */
@@ -247,6 +292,16 @@ function OffboardingDialogContent({
     return null
   }
 
+  function buildPayload(): CreateSeparationPayload {
+    return {
+      separationType: form.separationType,
+      noticeDate: form.noticeDate,
+      effectiveDate: form.effectiveDate,
+      reason: form.reason.trim() || null,
+      remarks: form.remarks.trim() || null,
+    }
+  }
+
   /* ------------------------------------------------------------------------ */
   /* Save                                                                      */
   /* ------------------------------------------------------------------------ */
@@ -262,30 +317,17 @@ function OffboardingDialogContent({
 
     if (validationError) {
       setError(validationError)
-
       return
     }
 
-    const payload: CreateSeparationPayload = {
-      separationType: form.separationType,
-
-      noticeDate: form.noticeDate,
-
-      effectiveDate: form.effectiveDate,
-
-      reason: form.reason.trim() || null,
-
-      remarks: form.remarks.trim() || null,
-    }
-
     try {
-      if (existing?.status === 'draft') {
+      if (isDraft && existing) {
         await updateMutation.mutateAsync({
           separationId: existing.id,
-          payload,
+          payload: buildPayload(),
         })
       } else {
-        await createMutation.mutateAsync(payload)
+        await createMutation.mutateAsync(buildPayload())
       }
 
       toast.success(t('draftSaved'))
@@ -296,6 +338,96 @@ function OffboardingDialogContent({
         err instanceof AxiosError ? err.response?.data?.message : undefined
 
       setError(message ?? t('saveFailed'))
+    }
+  }
+
+  async function handleSubmitForApproval() {
+    if (!existing || existing.status !== 'draft' || isSubmitting) {
+      return
+    }
+
+    setError(null)
+
+    const validationError = validate()
+
+    if (validationError) {
+      setError(validationError)
+      return
+    }
+
+    try {
+      /*
+       * Persist any unsaved edits first.
+       */
+      await updateMutation.mutateAsync({
+        separationId: existing.id,
+        payload: buildPayload(),
+      })
+
+      await submitMutation.mutateAsync(existing.id)
+
+      toast.success(t('submittedForApproval'))
+    } catch (err) {
+      const message =
+        err instanceof AxiosError ? err.response?.data?.message : undefined
+
+      setError(message ?? t('workflowActionFailed'))
+    }
+  }
+
+  async function handleApprove() {
+    if (!existing || existing.status !== 'pending_approval' || isSubmitting) {
+      return
+    }
+
+    setError(null)
+
+    try {
+      await approveMutation.mutateAsync(existing.id)
+
+      toast.success(t('approvedSuccessfully'))
+    } catch (err) {
+      const message =
+        err instanceof AxiosError ? err.response?.data?.message : undefined
+
+      setError(message ?? t('workflowActionFailed'))
+    }
+  }
+
+  async function executeConfirmedAction() {
+    if (!existing || !confirmAction) {
+      return
+    }
+
+    setError(null)
+
+    try {
+      if (confirmAction === 'cancel') {
+        await cancelMutation.mutateAsync(existing.id)
+
+        toast.success(t('cancelledSuccessfully'))
+
+        setConfirmAction(null)
+        onOpenChange(false)
+
+        return
+      }
+
+      if (confirmAction === 'complete') {
+        await completeMutation.mutateAsync(existing.id)
+
+        toast.success(t('completedSuccessfully'))
+
+        setConfirmAction(null)
+        onOpenChange(false)
+      }
+    } catch (err) {
+      const message =
+        err instanceof AxiosError ? err.response?.data?.message : undefined
+
+      setConfirmAction(null)
+
+      setError(message ?? t('workflowActionFailed'))
     }
   }
 
@@ -344,6 +476,12 @@ function OffboardingDialogContent({
             />
           </div>
         </Section>
+
+        {error && (
+          <div className='rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive'>
+            {error}
+          </div>
+        )}
 
         {/* ------------------------------------------------ */}
         {/* Separation Type */}
@@ -471,9 +609,9 @@ function OffboardingDialogContent({
             </div>
           </div>
 
-          {error && (
+          {/* {error && (
             <p className='mt-4 text-xs font-medium text-destructive'>{error}</p>
-          )}
+          )} */}
         </Section>
 
         {/* ------------------------------------------------ */}
@@ -550,22 +688,46 @@ function OffboardingDialogContent({
         {/* Read-only workflow notice */}
         {/* ------------------------------------------------ */}
 
-        {readOnly && existing && (
+        {isPendingApproval && existing && (
           <section className='rounded-2xl border border-dashed bg-muted/10 px-5 py-4'>
             <div className='flex items-start gap-3'>
               <div className='mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-muted'>
-                <UserX className='size-4 text-muted-foreground' />
+                <Clock3 className='size-4 text-muted-foreground' />
               </div>
 
               <div className='min-w-0'>
                 <h3 className='text-sm font-semibold'>
-                  {t('workflowLockedTitle')}
+                  {t('pendingApprovalTitle')}
                 </h3>
 
                 <p className='mt-1 text-xs leading-relaxed text-muted-foreground'>
-                  {t('workflowLockedDescription', {
-                    status: t(`statuses.${existing.status}`),
-                  })}
+                  {t('pendingApprovalDescription')}
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {isApproved && existing && (
+          <section className='rounded-2xl border border-dashed bg-muted/10 px-5 py-4'>
+            <div className='flex items-start gap-3'>
+              <div className='mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-muted'>
+                <CheckCircle2 className='size-4 text-muted-foreground' />
+              </div>
+
+              <div className='min-w-0'>
+                <h3 className='text-sm font-semibold'>
+                  {canCompleteNow
+                    ? t('readyForCompletionTitle')
+                    : t('approvedTitle')}
+                </h3>
+
+                <p className='mt-1 text-xs leading-relaxed text-muted-foreground'>
+                  {canCompleteNow
+                    ? t('readyForCompletionDescription')
+                    : t('approvedDescription', {
+                        date: existing.effectiveDate,
+                      })}
                 </p>
               </div>
             </div>
@@ -574,29 +736,222 @@ function OffboardingDialogContent({
       </div>
 
       {/* ------------------------------------------------ */}
-      {/* Footer */}
+      {/* New Separation */}
       {/* ------------------------------------------------ */}
 
-      {!readOnly ? (
+      {!existing && (
         <Footer
           onCancel={closeDialog}
           onSave={handleSave}
-          label={
-            existing?.status === 'draft' ? t('saveChanges') : t('saveDraft')
-          }
+          label={t('saveDraft')}
           savingLabel={t('saving')}
           disabled={isSubmitting}
           isSaving={isSubmitting}
           saveVariant='default'
           saveIcon={<UserX className='size-4' />}
         />
-      ) : (
-        <div className='flex shrink-0 justify-end border-t bg-background px-4 py-4 sm:px-6'>
-          <Button type='button' variant='outline' onClick={closeDialog}>
-            {common('close')}
+      )}
+
+      {/* ------------------------------------------------ */}
+      {/* Draft */}
+      {/* ------------------------------------------------ */}
+
+      {isDraft && existing && (
+        <div className='flex shrink-0 flex-col-reverse gap-3 border-t bg-background px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6'>
+          <div className='flex flex-wrap gap-2'>
+            <Button
+              type='button'
+              variant='outline'
+              disabled={isSubmitting}
+              onClick={closeDialog}
+            >
+              {common('close')}
+            </Button>
+
+            <Button
+              type='button'
+              variant='ghost'
+              disabled={isSubmitting}
+              className='text-destructive hover:bg-destructive/10 hover:text-destructive'
+              onClick={() => setConfirmAction('cancel')}
+            >
+              <Ban className='me-2 size-4' />
+
+              {t('cancelOffboarding')}
+            </Button>
+          </div>
+
+          <div className='flex flex-wrap justify-end gap-2'>
+            <Button
+              type='button'
+              variant='outline'
+              disabled={isSubmitting}
+              onClick={handleSave}
+            >
+              {t('saveChanges')}
+            </Button>
+
+            <Button
+              type='button'
+              disabled={isSubmitting}
+              onClick={handleSubmitForApproval}
+            >
+              {submitMutation.isPending ? (
+                <LoaderCircle className='me-2 size-4 animate-spin' />
+              ) : (
+                <Send className='me-2 size-4' />
+              )}
+
+              {t('submitForApproval')}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------ */}
+      {/* Pending Approval */}
+      {/* ------------------------------------------------ */}
+
+      {isPendingApproval && existing && (
+        <div className='flex shrink-0 flex-col-reverse gap-3 border-t bg-background px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6'>
+          <div className='flex flex-wrap gap-2'>
+            <Button
+              type='button'
+              variant='outline'
+              disabled={isSubmitting}
+              onClick={closeDialog}
+            >
+              {common('close')}
+            </Button>
+
+            <Button
+              type='button'
+              variant='ghost'
+              disabled={isSubmitting}
+              className='text-destructive hover:bg-destructive/10 hover:text-destructive'
+              onClick={() => setConfirmAction('cancel')}
+            >
+              <Ban className='me-2 size-4' />
+
+              {t('cancelOffboarding')}
+            </Button>
+          </div>
+
+          <Button type='button' disabled={isSubmitting} onClick={handleApprove}>
+            {approveMutation.isPending ? (
+              <LoaderCircle className='me-2 size-4 animate-spin' />
+            ) : (
+              <CheckCircle2 className='me-2 size-4' />
+            )}
+
+            {t('approve')}
           </Button>
         </div>
       )}
+
+      {/* ------------------------------------------------ */}
+      {/* Approved */}
+      {/* ------------------------------------------------ */}
+
+      {isApproved && existing && (
+        <div className='flex shrink-0 flex-col gap-3 border-t bg-background px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6'>
+          <div className='flex flex-wrap gap-2'>
+            <Button
+              type='button'
+              variant='outline'
+              disabled={isSubmitting}
+              onClick={closeDialog}
+            >
+              {common('close')}
+            </Button>
+
+            <Button
+              type='button'
+              variant='ghost'
+              disabled={isSubmitting}
+              className='text-destructive hover:bg-destructive/10 hover:text-destructive'
+              onClick={() => setConfirmAction('cancel')}
+            >
+              <Ban className='me-2 size-4' />
+
+              {t('cancelOffboarding')}
+            </Button>
+          </div>
+
+          {canCompleteNow ? (
+            <Button
+              type='button'
+              variant='destructive'
+              disabled={isSubmitting}
+              onClick={() => setConfirmAction('complete')}
+            >
+              {completeMutation.isPending ? (
+                <LoaderCircle className='me-2 size-4 animate-spin' />
+              ) : (
+                <CheckCircle2 className='me-2 size-4' />
+              )}
+
+              {t('completeSeparation')}
+            </Button>
+          ) : (
+            <div className='flex items-center gap-2 text-sm text-muted-foreground'>
+              <Clock3 className='size-4' />
+
+              {t('scheduledCompletion', {
+                date: existing.effectiveDate,
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      <AlertDialog
+        open={confirmAction !== null}
+        onOpenChange={(open) => {
+          if (!open && !isSubmitting) {
+            setConfirmAction(null)
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmAction === 'complete'
+                ? t('completeConfirmTitle')
+                : t('cancelConfirmTitle')}
+            </AlertDialogTitle>
+
+            <AlertDialogDescription>
+              {confirmAction === 'complete'
+                ? t('completeConfirmDescription', {
+                    employee: employeeName,
+                    date: existing?.effectiveDate ?? '',
+                  })
+                : t('cancelConfirmDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isSubmitting}>
+              {common('cancel')}
+            </AlertDialogCancel>
+
+            <AlertDialogAction
+              disabled={isSubmitting}
+              className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
+              onClick={(event) => {
+                event.preventDefault()
+
+                void executeConfirmedAction()
+              }}
+            >
+              {confirmAction === 'complete'
+                ? t('completeSeparation')
+                : t('cancelOffboarding')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
@@ -608,10 +963,16 @@ function OffboardingDialogContent({
 export function OffboardingDialog(props: Props) {
   const t = useTranslations('offboarding')
 
-  const { data: separations = [], isLoading } = useEmploymentSeparations(
-    props.employmentId,
-    props.open,
-  )
+  // const { data: separations = [], isLoading } = useEmploymentSeparations(
+  //   props.employmentId,
+  //   props.open,
+  // )
+  const {
+    data: separations = [],
+    isLoading,
+    isError,
+    error,
+  } = useEmploymentSeparations(props.employmentId, props.open)
 
   const existing = separations.find((item) =>
     openStatuses.includes(item.status),
@@ -629,6 +990,29 @@ export function OffboardingDialog(props: Props) {
   const dialogKey = `${props.employmentId}:${existing?.id ?? 'new'}`
 
   return (
+    // <FormDialog
+    //   open={props.open}
+    //   onOpenChange={props.onOpenChange}
+    //   title={t('title')}
+    //   description={t('description', {
+    //     employee: props.employeeName,
+    //   })}
+    //   className='flex h-[calc(100dvh-1rem)] min-h-0 w-[calc(100vw-1rem)] flex-col overflow-hidden p-0 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100vw-2rem)] md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
+    //   headerClassName='shrink-0 border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
+    // >
+    //   {props.open &&
+    //     (isLoading ? (
+    //       <div className='flex min-h-72 flex-1 items-center justify-center'>
+    //         <LoaderCircle className='size-6 animate-spin text-muted-foreground' />
+    //       </div>
+    //     ) : (
+    //       <OffboardingDialogContent
+    //         key={dialogKey}
+    //         {...props}
+    //         existing={existing}
+    //       />
+    //     ))}
+    // </FormDialog>
     <FormDialog
       open={props.open}
       onOpenChange={props.onOpenChange}
@@ -643,6 +1027,24 @@ export function OffboardingDialog(props: Props) {
         (isLoading ? (
           <div className='flex min-h-72 flex-1 items-center justify-center'>
             <LoaderCircle className='size-6 animate-spin text-muted-foreground' />
+          </div>
+        ) : isError ? (
+          <div className='flex min-h-72 flex-1 flex-col items-center justify-center gap-3 px-6 text-center'>
+            <div className='text-sm font-semibold text-destructive'>
+              {t('loadFailed')}
+            </div>
+
+            <p className='max-w-md text-sm text-muted-foreground'>
+              {t('loadFailedDescription')}
+            </p>
+
+            <Button
+              type='button'
+              variant='outline'
+              onClick={() => props.onOpenChange(false)}
+            >
+              {t('close')}
+            </Button>
           </div>
         ) : (
           <OffboardingDialogContent
