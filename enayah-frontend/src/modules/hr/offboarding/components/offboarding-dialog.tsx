@@ -962,6 +962,7 @@ function OffboardingDialogContent({
 
 export function OffboardingDialog(props: Props) {
   const t = useTranslations('offboarding')
+  const common = useTranslations('common')
 
   // const { data: separations = [], isLoading } = useEmploymentSeparations(
   //   props.employmentId,
@@ -1043,7 +1044,7 @@ export function OffboardingDialog(props: Props) {
               variant='outline'
               onClick={() => props.onOpenChange(false)}
             >
-              {t('close')}
+              {common('close')}
             </Button>
           </div>
         ) : (

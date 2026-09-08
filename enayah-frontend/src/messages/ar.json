@@ -1374,7 +1374,7 @@
 
     "completeConfirmTitle": "إكمال انتهاء خدمة الموظف؟",
     "completeConfirmDescription": "سيتم إكمال انتهاء خدمة {employee} اعتباراً من {date}، وإغلاق الخدمة والعقد والحركة والتكليفات وقد يتم تحرير رقم البند الوظيفي.",
-    "loadFailed": "Unable to load offboarding information",
-    "loadFailedDescription": "The employee's current offboarding status could not be retrieved. Close this window and try again."
+    "loadFailed": "تعذر تحميل بيانات إنهاء الخدمة",
+    "loadFailedDescription": "لم يتم استرجاع حالة إنهاء الخدمة الحالية للموظف. أغلق هذه النافذة وأعد المحاولة."
   }
 }
