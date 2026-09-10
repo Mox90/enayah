@@ -69,7 +69,8 @@
     "noRecords": "No {item} records found",
     "optional": "Optional",
     "status": "Status",
-    "close": "Close"
+    "close": "Close",
+    "excelExportFailed": "Failed to export the Excel file. Please try again."
   },
   "auth": {
     "loginTitle": "Login to Your Account",
