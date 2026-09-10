@@ -6,7 +6,11 @@ import { FilePlus2, Filter } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
-import type { IqamaRenewalView } from '../../types/iqama-renewal.types'
+
+import type {
+  IqamaRenewalCase,
+  IqamaRenewalView,
+} from '../../types/iqama-renewal.types'
 
 import { IqamaRenewalViewSwitcher } from '../iqama-renewal-view-switcher'
 import { IqamaRenewalSelectionActions } from './iqama-renewal-selection-actions'
@@ -14,6 +18,8 @@ import { IqamaRenewalSelectionActions } from './iqama-renewal-selection-actions'
 interface Props {
   view: IqamaRenewalView
   selectedIds: string[]
+  selectedCases: IqamaRenewalCase[]
+
   onViewChange: (view: IqamaRenewalView) => void
   onCreate?: () => void
   onFilter?: () => void
@@ -23,6 +29,7 @@ interface Props {
 export function IqamaRenewalToolbar({
   view,
   selectedIds,
+  selectedCases,
   onViewChange,
   onCreate,
   onFilter,
@@ -66,6 +73,7 @@ export function IqamaRenewalToolbar({
         {/* Selected actions */}
         <IqamaRenewalSelectionActions
           selectedIds={selectedIds}
+          selectedCases={selectedCases}
           onOpen={onOpen}
         />
 

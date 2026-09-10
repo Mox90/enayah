@@ -2,7 +2,7 @@
 
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import type { RowSelectionState } from '@tanstack/react-table'
 
@@ -135,6 +135,14 @@ export function IqamaRenewalWorkspace() {
     sortOrder,
   })
 
+  const selectedCases = useMemo(() => {
+    if (!data?.data) {
+      return []
+    }
+
+    return data.data.filter((renewalCase) => rowSelection[renewalCase.id])
+  }, [data, rowSelection])
+
   if (isError) {
     console.error('Iqama renewal request failed:', error)
   }
@@ -192,6 +200,7 @@ export function IqamaRenewalWorkspace() {
       <IqamaRenewalToolbar
         view={view}
         selectedIds={selectedCaseIds}
+        selectedCases={selectedCases}
         onViewChange={setView}
         onCreate={openCreateForm}
         onFilter={() => setFilterOpen(true)}

@@ -69,7 +69,8 @@
     "noRecords": "لم يتم العثور على سجلات {item}",
     "optional": "اختياري",
     "status": "حالة",
-    "close": "قريب"
+    "close": "قريب",
+    "excelExportFailed": "تعذر تصدير ملف Excel. يرجى المحاولة مرة أخرى."
   },
 
   "auth": {

@@ -34,6 +34,7 @@ import {
   UserX,
 } from 'lucide-react'
 import { EmployeeDirectoryRow } from '../../types/employee-directory.types'
+import { toast } from 'sonner'
 
 interface Props {
   selectedIds: string[]
@@ -52,6 +53,7 @@ export function EmployeeSelectionActions({
   const et = useTranslations('employees')
 
   const [isExportingExcel, setIsExportingExcel] = useState(false)
+  const [isExportingPdf, setIsExportingPdf] = useState(false)
   const actionsRef = useRef<HTMLDivElement>(null)
   const hasSelection = selectedIds.length > 0
 
@@ -390,8 +392,246 @@ export function EmployeeSelectionActions({
       await workbook.toFile(`employees-${dateStamp}.xlsx`)
     } catch (error) {
       console.error('Failed to export selected employees to Excel:', error)
+      toast.error(t('excelExportFailed'))
     } finally {
       setIsExportingExcel(false)
+    }
+  }
+
+  const handleExportPdf = async () => {
+    if (!selectedEmployees.length || isExportingPdf) {
+      return
+    }
+
+    try {
+      setIsExportingPdf(true)
+
+      /*
+       * Browser-only PDF implementation.
+       *
+       * Dynamically imported so jsPDF is only loaded
+       * when the user requests a PDF export.
+       */
+      const [{ jsPDF }, { autoTable }] = await Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable'),
+      ])
+
+      const doc = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4',
+      })
+
+      doc.setLanguage(isRtl ? 'ar-SA' : 'en')
+      doc.setR2L(isRtl)
+
+      const align = isRtl ? ('right' as const) : ('left' as const)
+
+      const getFullName = (employee: EmployeeDirectoryRow) => {
+        const englishName = [
+          employee.firstNameEn,
+          employee.secondNameEn,
+          employee.thirdNameEn,
+          employee.familyNameEn,
+        ]
+          .filter(Boolean)
+          .join(' ')
+
+        const arabicName = [
+          employee.firstNameAr,
+          employee.secondNameAr,
+          employee.thirdNameAr,
+          employee.familyNameAr,
+        ]
+          .filter(Boolean)
+          .join(' ')
+
+        return isRtl ? arabicName || englishName : englishName
+      }
+
+      const getDepartment = (employee: EmployeeDirectoryRow) => {
+        if (isRtl) {
+          return employee.departmentNameAr ?? employee.departmentNameEn ?? ''
+        }
+
+        return employee.departmentNameEn ?? ''
+      }
+
+      const getPosition = (employee: EmployeeDirectoryRow) => {
+        if (isRtl) {
+          return employee.positionTitleAr ?? employee.positionTitleEn ?? ''
+        }
+
+        return employee.positionTitleEn ?? ''
+      }
+
+      const getNationality = (employee: EmployeeDirectoryRow) => {
+        if (isRtl) {
+          return employee.nationalityAr ?? employee.nationalityEn ?? ''
+        }
+
+        return employee.nationalityEn ?? ''
+      }
+
+      const getGender = (gender: string | null | undefined) => {
+        switch (gender) {
+          case 'male':
+            return et('male')
+
+          case 'female':
+            return et('female')
+
+          default:
+            return ''
+        }
+      }
+
+      const getStaffCategory = (staffCategory: string | null | undefined) => {
+        switch (staffCategory) {
+          case 'civilian':
+            return et('staffCategories.civilian')
+
+          case 'military':
+            return et('staffCategories.military')
+
+          case 'contractual':
+            return et('staffCategories.contractual')
+
+          default:
+            return staffCategory ?? ''
+        }
+      }
+
+      const getEmploymentStatus = (status: string | null | undefined) => {
+        switch (status) {
+          case 'active':
+            return et('employmentStatuses.active')
+
+          case 'on_leave':
+            return et('employmentStatuses.onLeave')
+
+          case 'suspended':
+            return et('employmentStatuses.suspended')
+
+          case 'ended':
+            return et('employmentStatuses.ended')
+
+          default:
+            return status ?? ''
+        }
+      }
+
+      /*
+       * Header
+       */
+      const title = isRtl ? 'الموظفون المحددون' : 'Selected Employees'
+
+      const pageWidth = doc.internal.pageSize.getWidth()
+
+      doc.setFontSize(14)
+
+      doc.text(title, isRtl ? pageWidth - 8 : 8, 10, {
+        align,
+      })
+
+      /*
+       * Table
+       */
+      autoTable(doc, {
+        head: [
+          [
+            et('employeeNumber'),
+            et('fullName'),
+            et('department'),
+            et('position'),
+            et('pcn'),
+            et('category'),
+            et('gender'),
+            et('nationality'),
+            et('hireDate'),
+            et('staffCategories.staffCategory'),
+            et('iqamaNumber'),
+            et('status'),
+          ],
+        ],
+
+        body: selectedEmployees.map((employee) => [
+          employee.employeeNumber ?? '',
+          getFullName(employee),
+          getDepartment(employee),
+          getPosition(employee),
+          employee.pcn ?? '',
+          employee.categoryCode ?? '',
+          getGender(employee.gender),
+          getNationality(employee),
+          employee.hireDate ?? '',
+          getStaffCategory(employee.staffCategory),
+          employee.iqamaNumber ?? '',
+          getEmploymentStatus(employee.employmentStatus),
+        ]),
+
+        startY: 15,
+
+        theme: 'grid',
+
+        styles: {
+          fontSize: 6.5,
+          cellPadding: 1.2,
+          halign: align,
+          valign: 'middle',
+          overflow: 'linebreak',
+        },
+
+        headStyles: {
+          fontStyle: 'bold',
+          halign: align,
+        },
+
+        margin: {
+          top: 15,
+          right: 8,
+          bottom: 10,
+          left: 8,
+        },
+
+        /*
+         * If all columns cannot reasonably fit in one A4 landscape page,
+         * split them horizontally.
+         *
+         * Employee Number + Name repeat on each horizontal section.
+         */
+        horizontalPageBreak: true,
+        horizontalPageBreakRepeat: [0, 1],
+        horizontalPageBreakBehaviour: 'afterAllRows',
+
+        showHead: 'everyPage',
+
+        didDrawPage: () => {
+          const currentPage = doc.getCurrentPageInfo().pageNumber
+          const height = doc.internal.pageSize.getHeight()
+
+          doc.setFontSize(7)
+
+          doc.text(String(currentPage), pageWidth / 2, height - 4, {
+            align: 'center',
+          })
+        },
+      })
+
+      const now = new Date()
+
+      const dateStamp = [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, '0'),
+        String(now.getDate()).padStart(2, '0'),
+      ].join('-')
+
+      doc.save(`employees-${dateStamp}.pdf`)
+    } catch (error) {
+      console.error('Failed to export selected employees to PDF:', error)
+    } finally {
+      setIsExportingPdf(false)
     }
   }
 
@@ -501,7 +741,10 @@ export function EmployeeSelectionActions({
           </DropdownMenuItem>
 
           <DropdownMenuItem
-            onClick={() => console.log('Export PDF', selectedIds)}
+            disabled={isExportingPdf || selectedEmployees.length === 0}
+            onSelect={() => {
+              void handleExportPdf()
+            }}
           >
             <FileText className='me-2 size-4' />
 
