@@ -25,6 +25,8 @@ export function PositionItemsTable() {
     sortOrder,
   })
 
+  //console.log('data', data)
+
   // const columns = getPositionItemColumns(sortBy, sortOrder, locale, {
   //   itemNumber: t('itemNumber'),
   //   department: t('departmentTitle'),

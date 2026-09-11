@@ -14,6 +14,7 @@ import { Footer } from '@/components/footer/footer'
 import { FormDialog, FormInput } from '@/components/forms'
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -321,11 +322,18 @@ const EditPositionDialog = ({ position, open, onOpenChange }: Props) => {
                           )
                         }}
                       >
-                        <SelectTrigger className='w-full data-[size=default]:h-11'>
+                        {/* <SelectTrigger className='w-full data-[size=default]:h-11'>
                           <SelectValue
                             placeholder={t('selectWorkforceCategory')}
                           />
-                        </SelectTrigger>
+                        </SelectTrigger> */}
+                        <FormControl>
+                          <SelectTrigger className='w-full data-[size=default]:h-11'>
+                            <SelectValue
+                              placeholder={t('selectWorkforceCategory')}
+                            />
+                          </SelectTrigger>
+                        </FormControl>
 
                         <SelectContent>
                           {categoryOptions.map((option) => (

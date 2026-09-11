@@ -15,6 +15,7 @@ import { FormDialog, FormInput } from '@/components/forms'
 import { Button } from '@/components/ui/button'
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
@@ -195,7 +196,7 @@ export function CreateDepartmentDialog() {
                 description={t('departmentHierarchySub')}
                 badge={c('optional')}
               >
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name='parentDepartmentId'
                   render={({ field }) => (
@@ -226,6 +227,44 @@ export function CreateDepartmentDialog() {
                           field.onChange(department.id)
                         }}
                       />
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                /> */}
+                <FormField
+                  control={form.control}
+                  name='parentDepartmentId'
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className='flex items-center justify-between gap-3'>
+                        <FormLabel>{t('parentDepartment')}</FormLabel>
+
+                        {field.value && (
+                          <Button
+                            type='button'
+                            variant='ghost'
+                            size='sm'
+                            className='h-7 px-2 text-xs text-muted-foreground hover:text-destructive'
+                            disabled={isSaving}
+                            onClick={() => field.onChange(undefined)}
+                          >
+                            <X className='me-1 size-3.5' />
+
+                            {c('none')}
+                          </Button>
+                        )}
+                      </div>
+
+                      <FormControl>
+                        <DepartmentCombobox
+                          value={field.value ?? null}
+                          selectedLabel={selectedParentLabel}
+                          onChange={(department) => {
+                            field.onChange(department.id)
+                          }}
+                        />
+                      </FormControl>
 
                       <FormMessage />
                     </FormItem>

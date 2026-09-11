@@ -1,15 +1,13 @@
-// enayah-frontend/src/modules/hr/positions-items/hooks/use-update-position-item.ts
-
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
-import type { CreateJobPositionItemFormValues } from '../schemas/position.items.schema'
+import type { UpdatePositionItemPayload } from '../schemas/position.items.schema'
 import { positionItemService } from '../services/position.item.service'
 
 interface UpdatePositionItemInput {
   id: string
-  data: CreateJobPositionItemFormValues
+  data: UpdatePositionItemPayload
 }
 
 export function useUpdatePositionItem() {

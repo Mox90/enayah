@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { forwardRef, useState, type ComponentPropsWithoutRef } from 'react'
+
 import { Check, ChevronsUpDown } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 
@@ -18,6 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
 
 import { useDepartments } from '@/modules/hr/departments/hooks/use-departments'
 
@@ -28,151 +30,312 @@ export interface DepartmentLookupItem {
   nameAr?: string | null
 }
 
-interface Props {
+// interface Props {
+//   value?: string | null
+//   selectedLabel?: string | null
+//   excludeIds?: string[]
+//   onChange: (department: DepartmentLookupItem) => void
+// }
+interface Props extends Omit<
+  ComponentPropsWithoutRef<typeof Button>,
+  'value' | 'onChange'
+> {
   value?: string | null
   selectedLabel?: string | null
   excludeIds?: string[]
   onChange: (department: DepartmentLookupItem) => void
 }
 
-export function DepartmentCombobox({
-  value,
-  onChange,
-  selectedLabel,
-  excludeIds = [],
-}: Props) {
-  const [open, setOpen] = useState(false)
-  const [search, setSearch] = useState('')
+export const DepartmentCombobox = forwardRef<HTMLButtonElement, Props>(
+  (
+    {
+      value,
+      onChange,
+      selectedLabel,
+      excludeIds = [],
+      className,
+      disabled,
+      ...triggerProps
+    },
+    ref,
+  ) => {
+    const [open, setOpen] = useState(false)
+    const [search, setSearch] = useState('')
 
-  const locale = useLocale()
-  const isRtl = locale === 'ar'
-  const t = useTranslations('departments')
-  const cnt = useTranslations('contracts')
+    const locale = useLocale()
+    const isRtl = locale === 'ar'
+    const t = useTranslations('departments')
+    const cnt = useTranslations('contracts')
 
-  const { data, isLoading } = useDepartments({
-    page: 1,
-    limit: 20,
-    search,
-  })
+    const { data, isLoading } = useDepartments({
+      page: 1,
+      limit: 20,
+      search,
+    })
 
-  const allItems: DepartmentLookupItem[] = data?.data ?? []
+    const allItems: DepartmentLookupItem[] = data?.data ?? []
 
-  /*
-   * Keep the selected item lookup against the unfiltered list.
-   *
-   * This preserves the existing single-select behaviour used by
-   * onboarding even when excludeIds is supplied somewhere else.
-   */
-  const selected = allItems.find((item) => item.id === value)
+    /*
+     * Keep the selected item lookup against the unfiltered list.
+     *
+     * This preserves the existing single-select behaviour used by
+     * onboarding even when excludeIds is supplied somewhere else.
+     */
+    const selected = allItems.find((item) => item.id === value)
 
-  /*
-   * Items already selected by a multi-select consumer, such as the
-   * employee filter sheet, are removed from the dropdown.
-   */
-  const items = allItems.filter(
-    (department) => !excludeIds.includes(department.id),
-  )
+    /*
+     * Items already selected by a multi-select consumer, such as the
+     * employee filter sheet, are removed from the dropdown.
+     */
+    const items = allItems.filter(
+      (department) => !excludeIds.includes(department.id),
+    )
 
-  const displaySelectedLabel = selected
-    ? isRtl
-      ? (selected.nameAr ?? selected.nameEn)
-      : selected.nameEn
-    : selectedLabel
+    const displaySelectedLabel = selected
+      ? isRtl
+        ? (selected.nameAr ?? selected.nameEn)
+        : selected.nameEn
+      : selectedLabel
 
-  return (
-    <Popover
-      open={open}
-      onOpenChange={(nextOpen) => {
-        setOpen(nextOpen)
+    return (
+      <Popover
+        open={open}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen)
 
-        if (!nextOpen) {
-          setSearch('')
-        }
-      }}
-    >
-      <PopoverTrigger asChild>
-        <Button
-          type='button'
-          variant='outline'
-          role='combobox'
-          aria-expanded={open}
-          className='h-11 w-full justify-between'
-        >
-          <span className='truncate'>
-            {displaySelectedLabel ?? cnt('selectDepartment')}
-          </span>
-
-          <ChevronsUpDown className='ms-2 h-4 w-4 shrink-0 opacity-50' />
-        </Button>
-      </PopoverTrigger>
-
-      <PopoverContent
-        align='start'
-        className='w-[var(--radix-popover-trigger-width)] p-0'
+          if (!nextOpen) {
+            setSearch('')
+          }
+        }}
       >
-        <Command shouldFilter={false}>
-          <CommandInput
-            placeholder={t('searchDepartment')}
-            value={search}
-            onValueChange={setSearch}
-          />
+        <PopoverTrigger asChild>
+          <Button
+            ref={ref}
+            {...triggerProps}
+            type='button'
+            variant='outline'
+            role='combobox'
+            aria-expanded={open}
+            disabled={disabled}
+            className={cn('h-11 w-full justify-between', className)}
+          >
+            <span className='truncate'>
+              {displaySelectedLabel ?? cnt('selectDepartment')}
+            </span>
 
-          <CommandList>
-            {isLoading && <CommandItem disabled>Loading...</CommandItem>}
+            <ChevronsUpDown className='ms-2 h-4 w-4 shrink-0 opacity-50' />
+          </Button>
+        </PopoverTrigger>
 
-            {!isLoading && <CommandEmpty>No department found.</CommandEmpty>}
+        <PopoverContent
+          align='start'
+          className='w-[var(--radix-popover-trigger-width)] p-0'
+        >
+          <Command shouldFilter={false}>
+            <CommandInput
+              placeholder={t('searchDepartment')}
+              value={search}
+              onValueChange={setSearch}
+            />
 
-            <CommandGroup>
-              {items.map((department) => {
-                const label = isRtl
-                  ? (department.nameAr ?? department.nameEn)
-                  : department.nameEn
+            <CommandList>
+              {isLoading && <CommandItem disabled>Loading...</CommandItem>}
 
-                return (
-                  <CommandItem
-                    key={department.id}
-                    value={`${department.code ?? ''} ${
-                      department.nameEn ?? ''
-                    } ${department.nameAr ?? ''}`}
-                    onSelect={() => {
-                      onChange(department)
-                      setSearch('')
-                      setOpen(false)
-                    }}
-                  >
-                    <Check
-                      className={`me-2 h-4 w-4 ${
-                        value === department.id ? 'opacity-100' : 'opacity-0'
-                      }`}
-                    />
+              {!isLoading && <CommandEmpty>No department found.</CommandEmpty>}
 
-                    <div className='min-w-0 flex flex-col'>
-                      <span className='truncate font-medium'>{label}</span>
+              <CommandGroup>
+                {items.map((department) => {
+                  const label = isRtl
+                    ? (department.nameAr ?? department.nameEn)
+                    : department.nameEn
 
-                      {(department.code ||
-                        (isRtl ? department.nameEn : department.nameAr)) && (
-                        <span className='truncate text-xs text-muted-foreground'>
-                          {department.code}
+                  return (
+                    <CommandItem
+                      key={department.id}
+                      value={`${department.code ?? ''} ${
+                        department.nameEn ?? ''
+                      } ${department.nameAr ?? ''}`}
+                      onSelect={() => {
+                        onChange(department)
+                        setSearch('')
+                        setOpen(false)
+                      }}
+                    >
+                      <Check
+                        className={`me-2 h-4 w-4 ${
+                          value === department.id ? 'opacity-100' : 'opacity-0'
+                        }`}
+                      />
 
-                          {department.code &&
-                          (isRtl ? department.nameEn : department.nameAr)
-                            ? ' · '
-                            : ''}
+                      <div className='min-w-0 flex flex-col'>
+                        <span className='truncate font-medium'>{label}</span>
 
-                          {isRtl ? department.nameEn : department.nameAr}
-                        </span>
-                      )}
-                    </div>
-                  </CommandItem>
-                )
-              })}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  )
-}
+                        {(department.code ||
+                          (isRtl ? department.nameEn : department.nameAr)) && (
+                          <span className='truncate text-xs text-muted-foreground'>
+                            {department.code}
+
+                            {department.code &&
+                            (isRtl ? department.nameEn : department.nameAr)
+                              ? ' · '
+                              : ''}
+
+                            {isRtl ? department.nameEn : department.nameAr}
+                          </span>
+                        )}
+                      </div>
+                    </CommandItem>
+                  )
+                })}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    )
+  },
+)
+
+DepartmentCombobox.displayName = 'DepartmentCombobox'
+
+// export function DepartmentCombobox({
+//   value,
+//   onChange,
+//   selectedLabel,
+//   excludeIds = [],
+// }: Props) {
+//   const [open, setOpen] = useState(false)
+//   const [search, setSearch] = useState('')
+
+//   const locale = useLocale()
+//   const isRtl = locale === 'ar'
+//   const t = useTranslations('departments')
+//   const cnt = useTranslations('contracts')
+
+//   const { data, isLoading } = useDepartments({
+//     page: 1,
+//     limit: 20,
+//     search,
+//   })
+
+//   const allItems: DepartmentLookupItem[] = data?.data ?? []
+
+//   /*
+//    * Keep the selected item lookup against the unfiltered list.
+//    *
+//    * This preserves the existing single-select behaviour used by
+//    * onboarding even when excludeIds is supplied somewhere else.
+//    */
+//   const selected = allItems.find((item) => item.id === value)
+
+//   /*
+//    * Items already selected by a multi-select consumer, such as the
+//    * employee filter sheet, are removed from the dropdown.
+//    */
+//   const items = allItems.filter(
+//     (department) => !excludeIds.includes(department.id),
+//   )
+
+//   const displaySelectedLabel = selected
+//     ? isRtl
+//       ? (selected.nameAr ?? selected.nameEn)
+//       : selected.nameEn
+//     : selectedLabel
+
+//   return (
+//     <Popover
+//       open={open}
+//       onOpenChange={(nextOpen) => {
+//         setOpen(nextOpen)
+
+//         if (!nextOpen) {
+//           setSearch('')
+//         }
+//       }}
+//     >
+//       <PopoverTrigger asChild>
+//         <Button
+//           type='button'
+//           variant='outline'
+//           role='combobox'
+//           aria-expanded={open}
+//           className='h-11 w-full justify-between'
+//         >
+//           <span className='truncate'>
+//             {displaySelectedLabel ?? cnt('selectDepartment')}
+//           </span>
+
+//           <ChevronsUpDown className='ms-2 h-4 w-4 shrink-0 opacity-50' />
+//         </Button>
+//       </PopoverTrigger>
+
+//       <PopoverContent
+//         align='start'
+//         className='w-[var(--radix-popover-trigger-width)] p-0'
+//       >
+//         <Command shouldFilter={false}>
+//           <CommandInput
+//             placeholder={t('searchDepartment')}
+//             value={search}
+//             onValueChange={setSearch}
+//           />
+
+//           <CommandList>
+//             {isLoading && <CommandItem disabled>Loading...</CommandItem>}
+
+//             {!isLoading && <CommandEmpty>No department found.</CommandEmpty>}
+
+//             <CommandGroup>
+//               {items.map((department) => {
+//                 const label = isRtl
+//                   ? (department.nameAr ?? department.nameEn)
+//                   : department.nameEn
+
+//                 return (
+//                   <CommandItem
+//                     key={department.id}
+//                     value={`${department.code ?? ''} ${
+//                       department.nameEn ?? ''
+//                     } ${department.nameAr ?? ''}`}
+//                     onSelect={() => {
+//                       onChange(department)
+//                       setSearch('')
+//                       setOpen(false)
+//                     }}
+//                   >
+//                     <Check
+//                       className={`me-2 h-4 w-4 ${
+//                         value === department.id ? 'opacity-100' : 'opacity-0'
+//                       }`}
+//                     />
+
+//                     <div className='min-w-0 flex flex-col'>
+//                       <span className='truncate font-medium'>{label}</span>
+
+//                       {(department.code ||
+//                         (isRtl ? department.nameEn : department.nameAr)) && (
+//                         <span className='truncate text-xs text-muted-foreground'>
+//                           {department.code}
+
+//                           {department.code &&
+//                           (isRtl ? department.nameEn : department.nameAr)
+//                             ? ' · '
+//                             : ''}
+
+//                           {isRtl ? department.nameEn : department.nameAr}
+//                         </span>
+//                       )}
+//                     </div>
+//                   </CommandItem>
+//                 )
+//               })}
+//             </CommandGroup>
+//           </CommandList>
+//         </Command>
+//       </PopoverContent>
+//     </Popover>
+//   )
+// }
 
 // 'use client'
 

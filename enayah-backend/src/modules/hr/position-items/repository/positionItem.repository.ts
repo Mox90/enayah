@@ -215,6 +215,7 @@ export const PositionItemRepository = {
         maxSalary: positionItems.maxSalary,
 
         status: positionItems.status,
+        version: positionItems.version,
       })
       .from(positionItems)
       .leftJoin(departments, eq(positionItems.departmentId, departments.id))
@@ -295,6 +296,7 @@ export const PositionItemRepository = {
         minSalary: positionItems.minSalary,
         maxSalary: positionItems.maxSalary,
         createdAt: positionItems.createdAt,
+        version: positionItems.version,
       })
       .from(positionItems)
       .leftJoin(departments, eq(positionItems.departmentId, departments.id))
@@ -391,10 +393,22 @@ export const PositionItemRepository = {
         ...(userId && { deletedBy: userId, updatedBy: userId }),
         version: sql`${positionItems.version} + 1`,
       })
-      .where(and(eq(positionItems.id, id), isActive))
+      .where(
+        and(
+          eq(positionItems.id, id),
+          isActive,
+          ne(positionItems.status, 'filled'),
+          ne(positionItems.status, 'reserved'),
+        ),
+      )
       .returning()
 
-    return assertExists(row, 'Soft delete failed: record not found', 404)
+    //return assertExists(row, 'Soft delete failed: record not found', 404)
+    return assertExists(
+      row,
+      'Filled or reserved position items cannot be deleted',
+      409,
+    )
   },
 
   updateStatus: (tx: DB, id: string, status: string) => {

@@ -62,6 +62,7 @@ export function PositionCombobox({
 
   const t = useTranslations('positions')
   const cnt = useTranslations('contracts')
+  const et = useTranslations('employees')
 
   const { data, isLoading } = usePositions({
     page: 1,
@@ -167,7 +168,8 @@ export function PositionCombobox({
 
                       {position.workforceCategory && position.categoryCode && (
                         <span className='mt-0.5 text-[11px] text-muted-foreground'>
-                          {position.workforceCategory} · {position.categoryCode}
+                          {et(position.workforceCategory)} ·{' '}
+                          {position.categoryCode}
                         </span>
                       )}
                     </div>

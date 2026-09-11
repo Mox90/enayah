@@ -42,7 +42,7 @@ export const positionItemService = {
     id: string,
     data: CreateJobPositionItemFormValues,
   ): Promise<PositionItem> => {
-    const response = await api.put(
+    const response = await api.patch(
       `${API_ENDPOINTS.hr.positionItems}/${id}`,
       data,
     )

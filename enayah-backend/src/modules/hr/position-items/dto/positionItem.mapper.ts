@@ -67,6 +67,7 @@ export const toPositionItemResponse = (dbRecord: any) => ({
   minSalary: dbRecord.minSalary,
   maxSalary: dbRecord.maxSalary,
   status: dbRecord.status,
+  version: dbRecord.version,
 })
 
 export function toHierarchyResponse(items: PositionItemHierarchy[]) {

@@ -89,7 +89,18 @@
     "confirmPassword": "Confirm Password",
     "email": "Email",
     "alreadyHaveAccount": "Already have an account?",
-    "signup": "Signup"
+    "signup": "Signup",
+
+    "branding": {
+      "ministry": "Ministry of Defense Health Services",
+      "hospital": "Najran Armed Forces Hospital",
+      "systemName": "NAFH · Human Resources Management System",
+      "shortName": "NAFH HRMS",
+      "systemShortName": "Human Resources Management System",
+      "headline1": "Empowering people.",
+      "headline2": "Supporting healthcare.",
+      "description": "A centralized human resources platform designed to support workforce planning, employee services, compliance, and organizational excellence."
+    }
   },
   "navigation": {
     "dashboard": "Dashboard",

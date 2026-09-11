@@ -11,37 +11,26 @@ export type PositionItemWorkforceCategory =
 
 export interface PositionItem {
   id: string
-
   itemNumber: string
-
   departmentId: string
-
   departmentNameEn: string | null
   departmentNameAr: string | null
-
   positionId: string
-
   positionTitleEn: string | null
   positionTitleAr: string | null
-
   jobGradeId?: string | null
-
   workforceCategory: PositionItemWorkforceCategory | null
-
   categoryCode: number | null
-
   status: PositionItemStatus
-
+  version: number
   minSalary?: string | null
   maxSalary?: string | null
-
   createdAt?: string
   updatedAt?: string
 }
 
 export interface PaginatedPositionItems {
   data: PositionItem[]
-
   meta: {
     page: number
     limit: number

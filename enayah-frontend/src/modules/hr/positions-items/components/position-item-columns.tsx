@@ -82,7 +82,7 @@ export const getPositionItemColumns = (
 
     cell: ({ row }) =>
       locale === 'ar'
-        ? row.original.departmentNameAr
+        ? (row.original.departmentNameAr ?? row.original.departmentNameEn)
         : row.original.departmentNameEn,
   },
 

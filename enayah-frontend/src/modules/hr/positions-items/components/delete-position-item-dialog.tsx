@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl'
 
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -14,6 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
 
 import { useDeletePositionItem } from '../hooks/use-delete-position-item'
 import type { PositionItem } from '../types/position.item.types'
@@ -38,17 +38,21 @@ export function DeletePositionItemDialog({
     positionItem.status === 'filled' || positionItem.status === 'reserved'
 
   async function handleDelete() {
-    if (isAssigned) {
+    if (isAssigned || deletePositionItem.isPending) {
       return
     }
 
     try {
       await deletePositionItem.mutateAsync(positionItem.id)
 
+      // Close only after successful deletion.
       onOpenChange(false)
     } catch {
       /*
        * Toast handled by mutation hook.
+       *
+       * Keep the dialog open so the user can see that
+       * the deletion did not succeed.
        */
     }
   }
@@ -72,16 +76,19 @@ export function DeletePositionItemDialog({
         </AlertDialogHeader>
 
         <AlertDialogFooter>
-          <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+          <AlertDialogCancel disabled={deletePositionItem.isPending}>
+            {t('cancel')}
+          </AlertDialogCancel>
 
           {!isAssigned && (
-            <AlertDialogAction
-              onClick={handleDelete}
+            <Button
+              type='button'
+              variant='destructive'
+              onClick={() => void handleDelete()}
               disabled={deletePositionItem.isPending}
-              className='bg-destructive text-destructive-foreground hover:bg-destructive/90'
             >
               {t('delete')}
-            </AlertDialogAction>
+            </Button>
           )}
         </AlertDialogFooter>
       </AlertDialogContent>

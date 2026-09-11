@@ -10,6 +10,7 @@ export interface PositionItemResponse {
   categoryCode?: number
   minSalary?: number
   maxSalary?: number
+  version: number
   //status: string
 }
 

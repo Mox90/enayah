@@ -3,7 +3,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Save } from 'lucide-react'
@@ -110,6 +110,10 @@ export function EditPositionItemDialog({
   const et = useTranslations('employees')
 
   const updatePositionItem = useUpdatePositionItem()
+  //console.log('positionItem', positionItem)
+
+  const wasOpenRef = useRef(false)
+  const initializedItemIdRef = useRef<string | null>(null)
 
   const form = useForm<CreateJobPositionItemFormValues>({
     resolver: zodResolver(createPositionItemSchema),
@@ -138,34 +142,43 @@ export function EditPositionItemDialog({
   })
 
   useEffect(() => {
-    if (!open) {
-      return
+    const justOpened = open && !wasOpenRef.current
+
+    const selectedItemChanged =
+      open && initializedItemIdRef.current !== positionItem.id
+
+    if (open && (justOpened || selectedItemChanged)) {
+      form.reset({
+        itemNumber: positionItem.itemNumber,
+        departmentId: positionItem.departmentId,
+        positionId: positionItem.positionId,
+
+        workforceCategory: positionItem.workforceCategory ?? undefined,
+
+        categoryCode: positionItem.categoryCode ?? undefined,
+
+        minSalary:
+          positionItem.minSalary !== null &&
+          positionItem.minSalary !== undefined
+            ? Number(positionItem.minSalary)
+            : undefined,
+
+        maxSalary:
+          positionItem.maxSalary !== null &&
+          positionItem.maxSalary !== undefined
+            ? Number(positionItem.maxSalary)
+            : undefined,
+
+        status: positionItem.status,
+      })
+
+      setDepartmentLabel(null)
+      setPositionLabel(null)
+
+      initializedItemIdRef.current = positionItem.id
     }
 
-    form.reset({
-      itemNumber: positionItem.itemNumber,
-      departmentId: positionItem.departmentId,
-      positionId: positionItem.positionId,
-
-      workforceCategory: positionItem.workforceCategory ?? undefined,
-
-      categoryCode: positionItem.categoryCode ?? undefined,
-
-      minSalary:
-        positionItem.minSalary !== null && positionItem.minSalary !== undefined
-          ? Number(positionItem.minSalary)
-          : undefined,
-
-      maxSalary:
-        positionItem.maxSalary !== null && positionItem.maxSalary !== undefined
-          ? Number(positionItem.maxSalary)
-          : undefined,
-
-      status: positionItem.status,
-    })
-
-    setDepartmentLabel(null)
-    setPositionLabel(null)
+    wasOpenRef.current = open
   }, [open, positionItem, form])
 
   const workforceCategory = form.watch('workforceCategory')
@@ -192,7 +205,10 @@ export function EditPositionItemDialog({
     try {
       await updatePositionItem.mutateAsync({
         id: positionItem.id,
-        data: values,
+        data: {
+          ...values,
+          version: positionItem.version,
+        },
       })
 
       onOpenChange(false)

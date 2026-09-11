@@ -28,11 +28,8 @@ const categoryCodeMap = {
 export const createPositionItemSchema = z
   .object({
     itemNumber: z.string().trim().min(5).max(50),
-
     departmentId: z.uuid(),
-
     positionId: z.uuid(),
-
     /*
      * Derived from the selected Position.
      *
@@ -40,13 +37,9 @@ export const createPositionItemSchema = z
      * render without a selected Position.
      */
     workforceCategory: positionItemWorkforceCategorySchema.optional(),
-
     categoryCode: z.number().int().optional(),
-
     minSalary: z.number().nonnegative().optional(),
-
     maxSalary: z.number().nonnegative().optional(),
-
     status: positionItemStatusSchema,
   })
   .superRefine((data, ctx) => {
@@ -97,3 +90,7 @@ export const createPositionItemSchema = z
 export type CreateJobPositionItemFormValues = z.infer<
   typeof createPositionItemSchema
 >
+
+export type UpdatePositionItemPayload = CreateJobPositionItemFormValues & {
+  version: number
+}

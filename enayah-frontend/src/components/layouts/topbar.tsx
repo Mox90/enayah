@@ -6,9 +6,6 @@ import { useTheme } from 'next-themes'
 import { useAuthStore } from '@/modules/iam/stores/auth.store'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import Image from 'next/image'
-import gsap from 'gsap'
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +24,7 @@ import { NotificationBell } from '@/modules/notifications/components/notificatio
 import { useMyEmployeeProfile } from '@/modules/hr/employees/hooks/use-my-employee-profile'
 import { useQueryClient } from '@tanstack/react-query'
 import TopbarBreadcrumb from './topbar-breadcrumb'
-import { useEffect, useRef } from 'react'
+import RotatingLogo from './rotating-logo'
 //import { router } from 'next/client'
 
 const Topbar = () => {
@@ -40,9 +37,6 @@ const Topbar = () => {
   //   (user?.employeeId || user?.employee?.id) ?? undefined,
   // )
   const { data: employeeProfile } = useMyEmployeeProfile(user?.id)
-
-  const logo1Ref = useRef<HTMLDivElement>(null)
-  const logo2Ref = useRef<HTMLDivElement>(null)
 
   const avatar = employeeProfile?.personal.avatar ?? null
   const logout = useAuthStore((state) => state.logout)
@@ -78,64 +72,6 @@ const Topbar = () => {
 
   const displayInitials = isRtl ? initials : initials.toUpperCase()
 
-  useEffect(() => {
-    const logo1 = logo1Ref.current
-    const logo2 = logo2Ref.current
-
-    if (!logo1 || !logo2) return
-
-    // Initial state
-    gsap.set(logo1, { opacity: 1 })
-    gsap.set(logo2, { opacity: 0 })
-
-    let showingFirstLogo = true
-
-    const interval = window.setInterval(() => {
-      const timeline = gsap.timeline()
-
-      if (showingFirstLogo) {
-        timeline
-          .to(logo1, {
-            opacity: 0,
-            duration: 1.2,
-            ease: 'power2.inOut',
-          })
-          .to(
-            logo2,
-            {
-              opacity: 1,
-              duration: 1.2,
-              ease: 'power2.inOut',
-            },
-            '<',
-          )
-      } else {
-        timeline
-          .to(logo2, {
-            opacity: 0,
-            duration: 1.2,
-            ease: 'power2.inOut',
-          })
-          .to(
-            logo1,
-            {
-              opacity: 1,
-              duration: 1.2,
-              ease: 'power2.inOut',
-            },
-            '<',
-          )
-      }
-
-      showingFirstLogo = !showingFirstLogo
-    }, 60_000)
-
-    return () => {
-      window.clearInterval(interval)
-      gsap.killTweensOf([logo1, logo2])
-    }
-  }, [])
-
   return (
     <header className='flex h-16 items-center justify-between border-b bg-background px-6'>
       {/* LEFT */}
@@ -156,7 +92,7 @@ const Topbar = () => {
             className='h-auto w-auto rounded-full object-contain'
             priority
           /> */}
-          <div className='relative size-9 shrink-0'>
+          {/* <div className='relative size-9 shrink-0'>
             <div ref={logo1Ref} className='absolute inset-0'>
               <Image
                 src='/MODHS3.png'
@@ -177,7 +113,8 @@ const Topbar = () => {
                 className='h-auto w-auto rounded-full object-contain'
               />
             </div>
-          </div>
+          </div> */}
+          <RotatingLogo size={36} />
 
           <h1
             className={`hidden min-[370px]:block truncate text-2xl font-bold ${
