@@ -1,8 +1,25 @@
+// export interface Position {
+//   id: string
+//   titleEn: string
+//   titleAr: string
+//   gradeId?: string
+// }
+
 export interface Position {
   id: string
   titleEn: string
-  titleAr: string
-  gradeId?: string
+  titleAr?: string | null
+
+  gradeId?: string | null
+
+  workforceCategory:
+    | 'physician'
+    | 'nurse'
+    | 'allied_health'
+    | 'administrative'
+    | 'support_service'
+
+  categoryCode: number
 }
 
 export interface PaginatedPositions {

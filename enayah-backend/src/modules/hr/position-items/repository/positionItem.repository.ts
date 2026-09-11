@@ -70,25 +70,6 @@ function assertExists<T>(value: T | undefined, msg: string, status = 500): T {
 }
 
 export const PositionItemRepository = {
-  // assignIfAvailable: async (id: string, tx = db) => {
-  //   const result = await tx
-  //     .update(positionItems)
-  //     .set({ status: 'filled', updatedAt: new Date() }) // Update the status to 'filled' and set the updatedAt field
-  //     .where(
-  //       and(
-  //         eq(positionItems.id, id),
-  //         inArray(positionItems.status, ['vacant']), // or 'open'
-  //       ),
-  //     )
-  //     .returning()
-
-  //   if (result.length === 0) {
-  //     throw new AppError('Position item not available', 400)
-  //   }
-
-  //   return result[0]
-  // },
-
   assignIfAvailable: async (tx: DB, id: string) => {
     const [row] = await tx
       .update(positionItems)
@@ -234,6 +215,7 @@ export const PositionItemRepository = {
         maxSalary: positionItems.maxSalary,
 
         status: positionItems.status,
+        version: positionItems.version,
       })
       .from(positionItems)
       .leftJoin(departments, eq(positionItems.departmentId, departments.id))
@@ -244,12 +226,6 @@ export const PositionItemRepository = {
   },
 
   findById: async (tx: DB, id: string) => {
-    //return db.select().from(positionItems).where(eq(positionItems.id, id))
-    //const positionItem = await db.query.positionItems.findFirst({
-    //  where: eq(positionItems.id, id),
-    //})
-    //return toPositionItemResponse(positionItem)
-    //return positionItem ? toPositionItemResponse(positionItem) : undefined
     return findByIdOrThrow(tx, id)
   },
 
@@ -295,25 +271,6 @@ export const PositionItemRepository = {
 
     const sortColumn = sortableColumns[sortBy] ?? positionItems.itemNumber
 
-    // const [totalResult] = await db
-    //   .select({
-    //     count: sql<number>`count(*)`,
-    //   })
-    //   .from(positionItems)
-    //   .where(and(...conditions))
-
-    // const data = await db.query.positionItems.findMany({
-    //   where: and(...conditions),
-    //   orderBy: sortOrder === 'asc' ? asc(sortColumn) : desc(sortColumn),
-    //   limit,
-    //   offset,
-    //   with: {
-    //     department: true,
-    //     position: true,
-    //     jobGrade: true,
-    //   },
-    // })
-
     const [totalResult] = await db
       .select({
         count: sql<number>`count(*)`,
@@ -339,6 +296,7 @@ export const PositionItemRepository = {
         minSalary: positionItems.minSalary,
         maxSalary: positionItems.maxSalary,
         createdAt: positionItems.createdAt,
+        version: positionItems.version,
       })
       .from(positionItems)
       .leftJoin(departments, eq(positionItems.departmentId, departments.id))
@@ -424,19 +382,6 @@ export const PositionItemRepository = {
   },
 
   softDelete: async (tx: DB, id: string, userId?: string) => {
-    //return db.delete(positionItems).where(eq(positionItems.id, id)).returning()
-    /*const existing = await findByIdOrThrow(tx, id)
-
-    await tx
-      .update(positionItems)
-      .set({
-        isDeleted: true,
-        deletedAt: new Date(),
-        ...(userId && { deletedBy: userId }),
-      })
-      .where(eq(positionItems.id, id))
-
-    return existing*/
     await findByIdOrThrow(tx, id) // ensures 404 if missing/already deleted
 
     const [row] = await tx
@@ -448,10 +393,22 @@ export const PositionItemRepository = {
         ...(userId && { deletedBy: userId, updatedBy: userId }),
         version: sql`${positionItems.version} + 1`,
       })
-      .where(and(eq(positionItems.id, id), isActive))
+      .where(
+        and(
+          eq(positionItems.id, id),
+          isActive,
+          ne(positionItems.status, 'filled'),
+          ne(positionItems.status, 'reserved'),
+        ),
+      )
       .returning()
 
-    return assertExists(row, 'Soft delete failed: record not found', 404)
+    //return assertExists(row, 'Soft delete failed: record not found', 404)
+    return assertExists(
+      row,
+      'Filled or reserved position items cannot be deleted',
+      409,
+    )
   },
 
   updateStatus: (tx: DB, id: string, status: string) => {

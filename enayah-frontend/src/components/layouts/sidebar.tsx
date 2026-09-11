@@ -3,12 +3,12 @@
 'use client'
 
 import { useLocale, useTranslations } from 'next-intl'
-import Image from 'next/image'
 import { navigation } from '@/lib/navigation/navigation.config'
 import { hasPermission } from '@/lib/permissions/hasPermission'
 import NavigationItem from '../navigation/navigation-item'
 import { useAuthStore } from '@/modules/iam/stores/auth.store'
 import { Link } from '../../../i18n/navigation'
+import RotatingLogo from './rotating-logo'
 
 const Sidebar = () => {
   const locale = useLocale()
@@ -23,7 +23,7 @@ const Sidebar = () => {
   //const canViewAuditLogs = usePermission('audit_logs.view')
   return (
     <aside className='hidden w-64 border-r bg-background lg:block'>
-      <Link href='/dashboard' className='flex h-16 items-center border-b px-6'>
+      {/* <Link href='/dashboard' className='flex h-16 items-center border-b px-6'>
         <Image
           src='/MODHS3.png'
           alt='MODHS Logo'
@@ -32,8 +32,20 @@ const Sidebar = () => {
           className='h-auto w-auto rounded-full object-contain'
           priority
         />
+        
         <h1
           className={`truncate text-3xl ${locale === 'ar' ? 'pr-2.5' : 'pl-2.5'} font-bold`}
+        >
+          NAFH
+        </h1>
+      </Link> */}
+      <Link href='/dashboard' className='flex h-16 items-center border-b px-6'>
+        <RotatingLogo size={48} />
+
+        <h1
+          className={`truncate text-3xl font-bold ${
+            locale === 'ar' ? 'pr-2.5' : 'pl-2.5'
+          }`}
         >
           NAFH
         </h1>

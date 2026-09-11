@@ -155,6 +155,20 @@
       "when": 1787638834223,
       "tag": "0021_sharp_omega_flight",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1789061725465,
+      "tag": "0022_flowery_kree",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1789062065944,
+      "tag": "0023_tense_natasha_romanoff",
+      "breakpoints": true
     }
   ]
 }

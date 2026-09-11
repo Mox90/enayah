@@ -1,10 +1,12 @@
+// enayah-frontend/src/modules/hr/positions-items/components/position-items-table.tsx
+
 'use client'
 
-import { useLocale, useTranslations } from 'next-intl'
 import { useState } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
+import { DataTable } from '@/components/tables'
 import { usePositionItems } from '../hooks/use-position-items'
 import { getPositionItemColumns } from './position-item-columns'
-import { DataTable } from '@/components/tables'
 
 export function PositionItemsTable() {
   const [page, setPage] = useState(1)
@@ -23,16 +25,37 @@ export function PositionItemsTable() {
     sortOrder,
   })
 
-  const columns = getPositionItemColumns(sortBy, sortOrder, locale, {
-    itemNumber: t('itemNumber'),
-    department: t('departmentTitle'),
-    position: t('positionTitle'),
-    categoryCode: t('categoryCode'),
-    status: t('status'),
-    actions: t('actions'),
-  })
+  //console.log('data', data)
 
-  //console.log(data)
+  // const columns = getPositionItemColumns(sortBy, sortOrder, locale, {
+  //   itemNumber: t('itemNumber'),
+  //   department: t('departmentTitle'),
+  //   position: t('positionTitle'),
+  //   workforceCategory: t('workforceCategory'),
+  //   categoryCode: t('categoryCode'),
+  //   status: t('status'),
+  //   actions: t('actions'),
+
+  //   statusVacant: t('vacant'),
+  //   statusReserved: t('reserved'),
+  //   statusFilled: t('filled'),
+  //   statusFrozen: t('frozen'),
+  // })
+  const columns = getPositionItemColumns(
+    sortBy,
+    sortOrder,
+    locale,
+    {
+      itemNumber: t('itemNumber'),
+      department: t('departmentTitle'),
+      position: t('positionTitle'),
+      workforceCategory: t('workforceCategory'),
+      categoryCode: t('categoryCode'),
+      status: t('status'),
+      actions: t('actions'),
+    },
+    (status) => t(status),
+  )
 
   return (
     <DataTable
@@ -53,10 +76,10 @@ export function PositionItemsTable() {
         setPage(1)
         setSearch(value)
       }}
-      onSortChange={(sortBy, sortOrder) => {
+      onSortChange={(nextSortBy, nextSortOrder) => {
         setPage(1)
-        setSortBy(sortBy)
-        setSortOrder(sortOrder)
+        setSortBy(nextSortBy)
+        setSortOrder(nextSortOrder)
       }}
     />
   )

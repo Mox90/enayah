@@ -2,7 +2,6 @@
 
 'use client'
 
-import Image from 'next/image'
 import { Menu } from 'lucide-react'
 import {
   Sheet,
@@ -18,6 +17,7 @@ import { hasPermission } from '@/lib/permissions/hasPermission'
 import NavigationItem from '../navigation/navigation-item'
 import { useAuthStore } from '@/modules/iam/stores/auth.store'
 import { Link } from '../../../i18n/navigation'
+import RotatingLogo from './rotating-logo'
 import { useState } from 'react'
 
 const MobileSidebar = () => {
@@ -54,14 +54,15 @@ const MobileSidebar = () => {
           href='/dashboard'
           className='flex h-16 items-center border-b px-6'
         >
-          <Image
+          {/* <Image
             src='/MODHS3.png'
             alt='MODHS Logo'
             width={45}
             height={45}
             className='h-auto w-auto rounded-full object-contain'
             priority
-          />
+          /> */}
+          <RotatingLogo size={36} />
 
           <h1
             className={`truncate text-3xl font-bold ${

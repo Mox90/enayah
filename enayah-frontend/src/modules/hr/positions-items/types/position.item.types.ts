@@ -1,40 +1,32 @@
-export interface PositionItem2 {
-  id: string
-  itemNumber: string
-  departmentId: string
-  department: {
-    id: string
-    nameEn: string
-    nameAr: string
-  }
-  positionId: string
-  position: {
-    id: string
-    titleEn: string
-    titleAr: string
-  }
-  jobGradeId?: string
-  workforceCategory: string
-  categoryCode: string
-  status: string
-  minSalary?: string
-  maxSalary?: string
-}
+// enayah-frontend/src/modules/hr/positions-items/types/position.item.types.ts
+
+export type PositionItemStatus = 'vacant' | 'reserved' | 'filled' | 'frozen'
+
+export type PositionItemWorkforceCategory =
+  | 'physician'
+  | 'nurse'
+  | 'allied_health'
+  | 'administrative'
+  | 'support_service'
 
 export interface PositionItem {
   id: string
   itemNumber: string
   departmentId: string
-  departmentNameEn: string
-  departmentNameAr: string
+  departmentNameEn: string | null
+  departmentNameAr: string | null
   positionId: string
-  positionTitleEn: string
-  positionTitleAr?: string
-  categoryCode: number
-  workforceCategory: string
-  status: string
-  minSalary?: string
-  maxSalary?: string
+  positionTitleEn: string | null
+  positionTitleAr: string | null
+  jobGradeId?: string | null
+  workforceCategory: PositionItemWorkforceCategory | null
+  categoryCode: number | null
+  status: PositionItemStatus
+  version: number
+  minSalary?: string | null
+  maxSalary?: string | null
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface PaginatedPositionItems {

@@ -89,7 +89,18 @@
     "confirmPassword": "Confirm Password",
     "email": "Email",
     "alreadyHaveAccount": "Already have an account?",
-    "signup": "Signup"
+    "signup": "Signup",
+
+    "branding": {
+      "ministry": "Ministry of Defense Health Services",
+      "hospital": "Najran Armed Forces Hospital",
+      "systemName": "NAFH · Human Resources Management System",
+      "shortName": "NAFH HRMS",
+      "systemShortName": "Human Resources Management System",
+      "headline1": "Empowering people.",
+      "headline2": "Supporting healthcare.",
+      "description": "A centralized human resources platform designed to support workforce planning, employee services, compliance, and organizational excellence."
+    }
   },
   "navigation": {
     "dashboard": "Dashboard",
@@ -319,7 +330,13 @@
     "update": "Update",
     "updating": "Updating...",
     "departmentActions": "Department actions",
-    "deleteDepartment": "Delete Department"
+    "deleteDepartment": "Delete Department",
+    "createDepartmentSub": "Create a department and define its place in the organizational hierarchy.",
+    "departmentInformation": "Department Information",
+    "departmentInformationSub": "Enter the department code and official bilingual name.",
+    "departmentHierarchy": "Organizational Hierarchy",
+    "departmentHierarchySub": "Optionally assign this department under a parent department.",
+    "departmentCannotBeOwnParent": "A department cannot be its own parent."
   },
   "positions": {
     "positionName": "Job Positions",
@@ -346,7 +363,27 @@
     "update": "Update",
     "updating": "Updating...",
     "positionActions": "Job Position actions",
-    "deletePosition": "Delete Job Position"
+    "deletePosition": "Delete Job Position",
+    "createPositionSub": "Create a job position and define its workforce classification.",
+    "positionInformation": "Position Information",
+    "positionInformationSub": "Enter the official bilingual title of the job position.",
+
+    "workforceClassification": "Workforce Classification",
+    "workforceClassificationSub": "Classify the position for manpower planning, reporting, and employee categorization.",
+    "workforceCategory": "Workforce Category",
+    "selectWorkforceCategory": "Select workforce category",
+    "categoryCode": "Category Code",
+    "classificationStatus": "Classification",
+    "systemDefined": "System Defined",
+
+    "categoryPhysician": "Physician",
+    "categoryNurse": "Nurse",
+    "categoryAlliedHealth": "Technicians / Ancillary",
+    "categoryAdministrative": "Administrative",
+    "categorySupportService": "Support Service",
+
+    "workforceClassificationHelp": "The category code is automatically determined from the selected workforce category. This classification is used as the employee category when no PCN is assigned.",
+    "loading": "Loading..."
   },
   "positionItems": {
     "positionItemName": "Position Control Number (PCN)",
@@ -355,28 +392,57 @@
     "departmentTitle": "Department",
     "positionTitle": "Job Title",
     "categoryCode": "Category",
-    "workforceCategory": "Workforce Category",
     "status": "Status",
     "searchPositionItem": "Search pcn...",
-    "create": "Create",
-    "creating": "Creating...",
     "actions": "Actions",
-    "createSuccess": "PCN created successfully",
-    "createError": "Unable to create PCN",
-    "updateSuccess": "PCN updated successfully",
-    "updateError": "Unable to update PCN",
-    "deleteSuccess": "PCN deleted successfully",
-    "deleteError": "Unable to delete PCN",
-    "editPositionItem": "Edit PCN",
-    "editPositionItemSub": "Update PCN details",
-    "update": "Update",
-    "updating": "Updating...",
     "positionItemActions": "PCN actions",
-    "deletePositionItem": "Delete Position Control Number (PCN)",
     "searchPcnCombo": "Search PCN, department, position...",
     "selectVacant": "Select Vacant Position",
     "noVacantFound": "No vacant position item found.",
-    "clearSelection": "Clear PCN"
+    "clearSelection": "Clear PCN",
+    "createPositionItem": "Create Position Item",
+    "createPositionItemSub": "Create a new approved manpower position item and assign its organizational placement.",
+    "editPositionItem": "Edit Position Item",
+    "editPositionItemSub": "Review and update the manpower position item information.",
+
+    "positionItemInformation": "Position Item Information",
+    "positionItemInformationSub": "Enter the official PCN or item number and review its current lifecycle status.",
+
+    "organizationalAssignment": "Organizational Assignment",
+    "organizationalAssignmentSub": "Assign the PCN to its approved department and job position.",
+
+    "workforceClassification": "Workforce Classification",
+    "workforceClassificationSub": "The workforce category and category code are automatically inherited from the selected job position.",
+    "workforceCategory": "Workforce Category",
+    "classificationSource": "Classification Source",
+    "fromPosition": "From Position",
+    "positionClassificationRequired": "The selected position does not have a workforce classification.",
+
+    "salaryRange": "Salary Range",
+    "salaryRangeSub": "Optionally define the approved salary range for this position item.",
+    "minSalary": "Minimum Salary",
+    "maxSalary": "Maximum Salary",
+    "optional": "Optional",
+
+    "vacant": "Vacant",
+    "reserved": "Reserved",
+    "filled": "Filled",
+    "frozen": "Frozen",
+
+    "create": "Create",
+    "creating": "Creating...",
+    "update": "Update",
+    "updating": "Updating...",
+
+    "deletePositionItem": "Delete Position Item",
+    "cannotDeleteAssigned": "Position item {itemNumber} cannot be deleted because it is currently filled or reserved.",
+
+    "createSuccess": "Position item created successfully.",
+    "createError": "Unable to create the position item.",
+    "updateSuccess": "Position item updated successfully.",
+    "updateError": "Unable to update the position item.",
+    "deleteSuccess": "Position item deleted successfully.",
+    "deleteError": "Unable to delete the position item."
   },
   "contracts": {
     "contract": "Contract",

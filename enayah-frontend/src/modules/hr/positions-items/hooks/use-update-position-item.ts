@@ -1,17 +1,22 @@
-// enayah-frontend/src/modules/hr/positions-items/hooks/use-create-position-item.ts
-
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 
+import type { UpdatePositionItemPayload } from '../schemas/position.items.schema'
 import { positionItemService } from '../services/position.item.service'
 
-export function useCreatePositionItem() {
+interface UpdatePositionItemInput {
+  id: string
+  data: UpdatePositionItemPayload
+}
+
+export function useUpdatePositionItem() {
   const queryClient = useQueryClient()
   const t = useTranslations('positionItems')
 
   return useMutation({
-    mutationFn: positionItemService.create,
+    mutationFn: ({ id, data }: UpdatePositionItemInput) =>
+      positionItemService.update(id, data),
 
     onSuccess: () => {
       void queryClient.invalidateQueries({
@@ -22,11 +27,11 @@ export function useCreatePositionItem() {
         queryKey: ['position-item-lookup'],
       })
 
-      toast.success(t('createSuccess'))
+      toast.success(t('updateSuccess'))
     },
 
     onError: () => {
-      toast.error(t('createError'))
+      toast.error(t('updateError'))
     },
   })
 }

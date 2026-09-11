@@ -6,8 +6,6 @@ import { useTheme } from 'next-themes'
 import { useAuthStore } from '@/modules/iam/stores/auth.store'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import Image from 'next/image'
-
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +24,7 @@ import { NotificationBell } from '@/modules/notifications/components/notificatio
 import { useMyEmployeeProfile } from '@/modules/hr/employees/hooks/use-my-employee-profile'
 import { useQueryClient } from '@tanstack/react-query'
 import TopbarBreadcrumb from './topbar-breadcrumb'
+import RotatingLogo from './rotating-logo'
 //import { router } from 'next/client'
 
 const Topbar = () => {
@@ -85,14 +84,37 @@ const Topbar = () => {
         {/* MOBILE LOGO */}
 
         <Link href='/dashboard' className='flex items-center lg:hidden'>
-          <Image
+          {/* <Image
             src='/MODHS3.png'
             alt='MODHS Logo'
             width={36}
             height={36}
             className='h-auto w-auto rounded-full object-contain'
             priority
-          />
+          /> */}
+          {/* <div className='relative size-9 shrink-0'>
+            <div ref={logo1Ref} className='absolute inset-0'>
+              <Image
+                src='/MODHS3.png'
+                alt='MODHS Logo'
+                width={36}
+                height={36}
+                className='h-auto w-auto rounded-full object-contain'
+                priority
+              />
+            </div>
+
+            <div ref={logo2Ref} className='absolute inset-0 opacity-0'>
+              <Image
+                src='/MODHS.jpg'
+                alt=''
+                width={36}
+                height={36}
+                className='h-auto w-auto rounded-full object-contain'
+              />
+            </div>
+          </div> */}
+          <RotatingLogo size={36} />
 
           <h1
             className={`hidden min-[370px]:block truncate text-2xl font-bold ${

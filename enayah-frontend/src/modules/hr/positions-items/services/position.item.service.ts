@@ -1,7 +1,13 @@
+// enayah-frontend/src/modules/hr/positions-items/services/position.item.service.ts
+
 import { api } from '@/lib/api/client'
 import { API_ENDPOINTS } from '@/lib/api/endpoints'
-import { CreateJobPositionItemFormValues } from '../schemas/position.items.schema'
-import { PositionItem } from '../types/position.item.types'
+
+import type { CreateJobPositionItemFormValues } from '../schemas/position.items.schema'
+import type {
+  PaginatedPositionItems,
+  PositionItem,
+} from '../types/position.item.types'
 
 export const positionItemService = {
   getPositionItems: async (params: {
@@ -10,32 +16,41 @@ export const positionItemService = {
     search?: string
     sortBy?: string
     sortOrder?: 'asc' | 'desc'
-  }) => {
-    const response = await api.get(API_ENDPOINTS.hr.positionItems, { params })
+  }): Promise<PaginatedPositionItems> => {
+    const response = await api.get(API_ENDPOINTS.hr.positionItems, {
+      params,
+    })
+
     return response.data
   },
 
-  findLookup: async () => {
-    const response = await api.get<PositionItem[]>(
-      `${API_ENDPOINTS.hr.positionItems}/lookup`,
-    )
+  findLookup: async (): Promise<PositionItem[]> => {
+    const response = await api.get(`${API_ENDPOINTS.hr.positionItems}/lookup`)
+
     return response.data
   },
 
-  create: async (data: CreateJobPositionItemFormValues) => {
+  create: async (
+    data: CreateJobPositionItemFormValues,
+  ): Promise<PositionItem> => {
     const response = await api.post(API_ENDPOINTS.hr.positionItems, data)
+
     return response.data
   },
 
-  update: async (id: string, data: CreateJobPositionItemFormValues) => {
-    const response = await api.put(
+  update: async (
+    id: string,
+    data: CreateJobPositionItemFormValues,
+  ): Promise<PositionItem> => {
+    const response = await api.patch(
       `${API_ENDPOINTS.hr.positionItems}/${id}`,
       data,
     )
+
     return response.data
   },
 
-  delete: async (id: string) => {
+  delete: async (id: string): Promise<void> => {
     await api.delete(`${API_ENDPOINTS.hr.positionItems}/${id}`)
   },
 }

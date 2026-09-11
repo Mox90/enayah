@@ -71,10 +71,15 @@ export const PositionItemService = {
     return { message: 'Employee unassigned successfully' }
   },
 
+  // delete: async (id: string, userId?: string) => {
+  //   return db.transaction(async (tx) => {
+  //     const existing = await PositionItemRepository.softDelete(tx, id, userId)
+  //     return existing
+  //   })
+  // },
   delete: async (id: string, userId?: string) => {
-    return db.transaction(async (tx) => {
-      const existing = await PositionItemRepository.softDelete(tx, id, userId)
-      return existing
-    })
+    return db.transaction((tx) =>
+      PositionItemRepository.softDelete(tx, id, userId),
+    )
   },
 }
