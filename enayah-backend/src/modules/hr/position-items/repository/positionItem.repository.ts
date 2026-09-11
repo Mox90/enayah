@@ -70,25 +70,6 @@ function assertExists<T>(value: T | undefined, msg: string, status = 500): T {
 }
 
 export const PositionItemRepository = {
-  // assignIfAvailable: async (id: string, tx = db) => {
-  //   const result = await tx
-  //     .update(positionItems)
-  //     .set({ status: 'filled', updatedAt: new Date() }) // Update the status to 'filled' and set the updatedAt field
-  //     .where(
-  //       and(
-  //         eq(positionItems.id, id),
-  //         inArray(positionItems.status, ['vacant']), // or 'open'
-  //       ),
-  //     )
-  //     .returning()
-
-  //   if (result.length === 0) {
-  //     throw new AppError('Position item not available', 400)
-  //   }
-
-  //   return result[0]
-  // },
-
   assignIfAvailable: async (tx: DB, id: string) => {
     const [row] = await tx
       .update(positionItems)
@@ -244,12 +225,6 @@ export const PositionItemRepository = {
   },
 
   findById: async (tx: DB, id: string) => {
-    //return db.select().from(positionItems).where(eq(positionItems.id, id))
-    //const positionItem = await db.query.positionItems.findFirst({
-    //  where: eq(positionItems.id, id),
-    //})
-    //return toPositionItemResponse(positionItem)
-    //return positionItem ? toPositionItemResponse(positionItem) : undefined
     return findByIdOrThrow(tx, id)
   },
 
@@ -294,25 +269,6 @@ export const PositionItemRepository = {
     }
 
     const sortColumn = sortableColumns[sortBy] ?? positionItems.itemNumber
-
-    // const [totalResult] = await db
-    //   .select({
-    //     count: sql<number>`count(*)`,
-    //   })
-    //   .from(positionItems)
-    //   .where(and(...conditions))
-
-    // const data = await db.query.positionItems.findMany({
-    //   where: and(...conditions),
-    //   orderBy: sortOrder === 'asc' ? asc(sortColumn) : desc(sortColumn),
-    //   limit,
-    //   offset,
-    //   with: {
-    //     department: true,
-    //     position: true,
-    //     jobGrade: true,
-    //   },
-    // })
 
     const [totalResult] = await db
       .select({
@@ -424,19 +380,6 @@ export const PositionItemRepository = {
   },
 
   softDelete: async (tx: DB, id: string, userId?: string) => {
-    //return db.delete(positionItems).where(eq(positionItems.id, id)).returning()
-    /*const existing = await findByIdOrThrow(tx, id)
-
-    await tx
-      .update(positionItems)
-      .set({
-        isDeleted: true,
-        deletedAt: new Date(),
-        ...(userId && { deletedBy: userId }),
-      })
-      .where(eq(positionItems.id, id))
-
-    return existing*/
     await findByIdOrThrow(tx, id) // ensures 404 if missing/already deleted
 
     const [row] = await tx

@@ -28,7 +28,9 @@ const NavigationItem = ({
       href={href}
       className={cn(
         'flex min-h-12 w-full items-center gap-3',
-        'rounded-s-none rounded-e-2xl',
+        'rounded-s-none rounded-e-4xl',
+        //'rounded-s-none rounded-e-[24px]',
+        // 'rounded-l-none rounded-r-full',
         'ps-6 pe-4 py-3',
         'text-sm font-medium',
         'transition-colors duration-150',

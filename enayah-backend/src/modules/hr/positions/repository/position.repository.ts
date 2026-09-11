@@ -1,18 +1,46 @@
-import { db, positions } from '../../../../db'
-import { and, or, eq, isNull, ilike, sql, desc, asc } from 'drizzle-orm'
-import { PositionQueryDTO } from '../dto/position.request'
+// enayah-backend/src/modules/hr/positions/repository/position.repository.ts
+
+import { and, asc, desc, eq, ilike, isNull, or, sql } from 'drizzle-orm'
+
+import { db, positionItems, positions } from '../../../../db'
+
+import type { PositionQueryDTO } from '../dto/position.request'
+import type { WorkforceCategory } from '../constants/workforce-category'
+
+interface PositionUpdateData {
+  titleEn?: string
+  titleAr?: string
+  gradeId?: string | null
+  workforceCategory?: WorkforceCategory
+  categoryCode?: number
+}
 
 export const PositionRepository = {
-  create: (data: any) => {
+  /* ------------------------------------------------------------------------ */
+  /* Create                                                                   */
+  /* ------------------------------------------------------------------------ */
+
+  create: (data: typeof positions.$inferInsert) => {
     return db.insert(positions).values(data).returning()
   },
 
+  /* ------------------------------------------------------------------------ */
+  /* Find by ID                                                               */
+  /* ------------------------------------------------------------------------ */
+
   findById: (id: string) => {
-    //return db.select().from(positions).where(eq(positions.id, id)).limit(1)
     return db.query.positions.findFirst({
-      where: eq(positions.id, id),
+      where: and(
+        eq(positions.id, id),
+        eq(positions.isDeleted, false),
+        isNull(positions.deletedAt),
+      ),
     })
   },
+
+  /* ------------------------------------------------------------------------ */
+  /* Lookup                                                                   */
+  /* ------------------------------------------------------------------------ */
 
   findLookup: () => {
     return db
@@ -20,23 +48,41 @@ export const PositionRepository = {
         id: positions.id,
         titleEn: positions.titleEn,
         titleAr: positions.titleAr,
+
+        /*
+         * Include classification because consumers
+         * may need Position classification when
+         * there is no PCN.
+         */
+        workforceCategory: positions.workforceCategory,
+        categoryCode: positions.categoryCode,
       })
       .from(positions)
       .where(and(eq(positions.isDeleted, false), isNull(positions.deletedAt)))
       .orderBy(asc(positions.titleEn))
   },
 
+  /* ------------------------------------------------------------------------ */
+  /* Find all                                                                 */
+  /* ------------------------------------------------------------------------ */
+
   findAll: () => {
-    //return db.select().from(positions)
     return db.query.positions.findMany({
       where: and(eq(positions.isDeleted, false), isNull(positions.deletedAt)),
+
+      orderBy: asc(positions.titleEn),
     })
   },
+
+  /* ------------------------------------------------------------------------ */
+  /* Paginated                                                                */
+  /* ------------------------------------------------------------------------ */
 
   findPaginated: async ({
     page,
     limit,
     search,
+    workforceCategory,
     sortBy,
     sortOrder,
   }: PositionQueryDTO) => {
@@ -56,9 +102,15 @@ export const PositionRepository = {
       )
     }
 
+    if (workforceCategory) {
+      conditions.push(eq(positions.workforceCategory, workforceCategory))
+    }
+
     const sortableColumns = {
       titleEn: positions.titleEn,
       titleAr: positions.titleAr,
+      workforceCategory: positions.workforceCategory,
+      categoryCode: positions.categoryCode,
       createdAt: positions.createdAt,
     }
 
@@ -83,21 +135,81 @@ export const PositionRepository = {
       meta: {
         page,
         limit,
-        total: Number(totalResult?.count),
-        totalPages: Math.ceil(Number(totalResult?.count) / limit),
+        total: Number(totalResult?.count ?? 0),
+        totalPages: Math.ceil(Number(totalResult?.count ?? 0) / limit),
       },
     }
   },
 
-  update: (id: string, data: any) => {
-    data.updatedAt = new Date()
-    data.version = (data.version || 0) + 1
-    return db
-      .update(positions)
-      .set(data)
-      .where(eq(positions.id, id))
-      .returning()
+  /* ------------------------------------------------------------------------ */
+  /* Update                                                                   */
+  /* ------------------------------------------------------------------------ */
+
+  update: async (
+    id: string,
+    data: PositionUpdateData,
+    syncPositionItems = false,
+  ) => {
+    return db.transaction(async (tx) => {
+      const now = new Date()
+
+      /*
+       * Update the Position itself.
+       */
+      const [updated] = await tx
+        .update(positions)
+        .set({
+          ...data,
+          updatedAt: now,
+          version: sql`${positions.version} + 1`,
+        })
+        .where(
+          and(
+            eq(positions.id, id),
+            eq(positions.isDeleted, false),
+            isNull(positions.deletedAt),
+          ),
+        )
+        .returning()
+
+      if (!updated) {
+        return undefined
+      }
+
+      /*
+       * If HR changed the Position workforce classification,
+       * propagate the authoritative classification to every
+       * active PCN using this Position.
+       */
+      if (
+        syncPositionItems &&
+        data.workforceCategory !== undefined &&
+        data.categoryCode !== undefined
+      ) {
+        await tx
+          .update(positionItems)
+          .set({
+            workforceCategory: data.workforceCategory,
+            categoryCode: data.categoryCode,
+            updatedAt: now,
+            version: sql`${positionItems.version} + 1`,
+          })
+          .where(
+            and(
+              eq(positionItems.positionId, id),
+              eq(positionItems.isDeleted, false),
+              isNull(positionItems.deletedAt),
+            ),
+          )
+      }
+
+      return updated
+    })
   },
+
+  /* ------------------------------------------------------------------------ */
+  /* Soft delete                                                              */
+  /* ------------------------------------------------------------------------ */
 
   softDelete: (id: string, userId: string) => {
     return db
@@ -106,8 +218,16 @@ export const PositionRepository = {
         isDeleted: true,
         deletedAt: new Date(),
         deletedBy: userId,
+        updatedAt: new Date(),
+        version: sql`${positions.version} + 1`,
       })
-      .where(eq(positions.id, id))
+      .where(
+        and(
+          eq(positions.id, id),
+          eq(positions.isDeleted, false),
+          isNull(positions.deletedAt),
+        ),
+      )
       .returning()
   },
 }

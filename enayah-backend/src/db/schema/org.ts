@@ -1,4 +1,5 @@
 import {
+  check,
   index,
   integer,
   numeric,
@@ -8,9 +9,10 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core'
 import { baseColumns } from './base'
-import { relations } from 'drizzle-orm'
+import { relations, sql } from 'drizzle-orm'
 import { userRoles } from './userRoles'
 import { positionItems } from './hr'
+import { workforceCategoryEnum } from './enums'
 
 export const departments = pgTable(
   'departments',
@@ -49,22 +51,88 @@ export const jobGrades = pgTable(
   }),
 )
 
+// export const positions = pgTable(
+//   'positions',
+//   {
+//     id: uuid('id').defaultRandom().primaryKey(),
+//     titleEn: varchar('title_en', { length: 150 }).notNull(),
+//     titleAr: varchar('title_ar', { length: 150 }),
+
+//     gradeId: uuid('grade_id').references(() => jobGrades.id),
+//     ...baseColumns,
+//   },
+//   (table) => ({
+//     titleIdx: index('idx_positions_title_en_ar').on(
+//       table.titleEn,
+//       table.titleAr,
+//     ),
+//   }),
+// )
+
 export const positions = pgTable(
   'positions',
   {
     id: uuid('id').defaultRandom().primaryKey(),
+
     titleEn: varchar('title_en', { length: 150 }).notNull(),
     titleAr: varchar('title_ar', { length: 150 }),
 
     gradeId: uuid('grade_id').references(() => jobGrades.id),
+
+    /*
+     * Default workforce classification of this legal job position.
+     *
+     * Used directly when an employee has no PCN.
+     */
+    workforceCategory: workforceCategoryEnum('workforce_category'), //.notNull(),
+
+    /*
+     * Numeric reporting/category code corresponding to workforceCategory:
+     *
+     * physician        -> 1000
+     * nurse            -> 2000
+     * allied_health    -> 3000
+     * administrative  -> 4000
+     * support_service -> 5000
+     */
+    categoryCode: integer('category_code'), //.notNull(),
+
     ...baseColumns,
   },
-  (table) => ({
-    titleIdx: index('idx_positions_title_en_ar').on(
-      table.titleEn,
-      table.titleAr,
+  (table) => [
+    index('idx_positions_title_en_ar').on(table.titleEn, table.titleAr),
+    index('idx_positions_workforce_category').on(table.workforceCategory),
+    index('idx_positions_category_code').on(table.categoryCode),
+    check(
+      'chk_positions_workforce_category_code',
+      sql`
+        (
+          ${table.workforceCategory} = 'physician'
+          AND ${table.categoryCode} = 1000
+        )
+        OR
+        (
+          ${table.workforceCategory} = 'nurse'
+          AND ${table.categoryCode} = 2000
+        )
+        OR
+        (
+          ${table.workforceCategory} = 'allied_health'
+          AND ${table.categoryCode} = 3000
+        )
+        OR
+        (
+          ${table.workforceCategory} = 'administrative'
+          AND ${table.categoryCode} = 4000
+        )
+        OR
+        (
+          ${table.workforceCategory} = 'support_service'
+          AND ${table.categoryCode} = 5000
+        )
+      `,
     ),
-  }),
+  ],
 )
 
 export const departmentsRelations = relations(departments, ({ one, many }) => ({

@@ -26,6 +26,11 @@ const DeletePositionDialog = ({ position, open, onOpenChange }: Props) => {
   const locale = useLocale()
 
   const deletePosition = useDeletePosition()
+  const positionName =
+    locale === 'ar'
+      ? (position.titleAr ?? position.titleEn ?? '')
+      : //: (position.titleEn ?? position.titleAr ?? '')
+        position.titleEn
 
   const handleDelete = async () => {
     try {
@@ -44,7 +49,7 @@ const DeletePositionDialog = ({ position, open, onOpenChange }: Props) => {
 
           <AlertDialogDescription>
             {t.rich('confirmDelete', {
-              name: locale === 'ar' ? position.titleAr : position.titleEn,
+              name: positionName,
               strong: (chunks) => <strong>{chunks}</strong>,
             })}
           </AlertDialogDescription>

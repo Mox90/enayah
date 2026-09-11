@@ -108,7 +108,6 @@ export const employments = pgTable(
     ),
   ],
 )
-//CREATE INDEX idx_employments_employee_id ON employments(employee_id);
 
 export const appointments = pgTable(
   'appointments',
