@@ -401,6 +401,11 @@ async function completeSeparationInTransaction(
     const releaseResult = await PositionItemRepository.releaseIfFilled(
       tx,
       movement.positionItemId,
+      {
+        effectiveDate: separation.effectiveDate,
+        changeReason: 'PCN released upon completed employment separation',
+        recordedBy: userId ?? null,
+      },
     )
 
     if (!releaseResult.released && releaseResult.reason === 'not_found') {

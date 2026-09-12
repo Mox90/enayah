@@ -388,3 +388,40 @@ export const contractDocumentTypeEnum = pgEnum('contract_document_type', [
   'renewal',
   'amendment',
 ])
+
+export type PositionItemStatus = 'vacant' | 'reserved' | 'filled' | 'frozen'
+
+export type PositionItemChangeType =
+  | 'baseline'
+  | 'created'
+  | 'updated'
+  | 'transferred'
+  | 'position_changed'
+  | 'job_grade_changed'
+  | 'classification_changed'
+  | 'salary_range_changed'
+  | 'status_changed'
+  | 'reserved'
+  | 'released'
+  | 'filled'
+  | 'vacated'
+  | 'frozen'
+  | 'unfrozen'
+  | 'renumbered'
+  | 'corrected'
+  | 'deleted'
+  | 'restored'
+
+export type PositionItemTrackedField =
+  | 'itemNumber'
+  | 'departmentId'
+  | 'positionId'
+  | 'jobGradeId'
+  | 'workforceCategory'
+  | 'categoryCode'
+  | 'minSalary'
+  | 'maxSalary'
+  | 'status'
+  | 'classificationSource'
+  | 'isDeleted'
+  | 'deletedAt'

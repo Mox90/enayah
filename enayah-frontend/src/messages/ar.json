@@ -1435,5 +1435,144 @@
     "completeConfirmDescription": "سيتم إكمال انتهاء خدمة {employee} اعتباراً من {date}، وإغلاق الخدمة والعقد والحركة والتكليفات وقد يتم تحرير رقم البند الوظيفي.",
     "loadFailed": "تعذر تحميل بيانات إنهاء الخدمة",
     "loadFailedDescription": "لم يتم استرجاع حالة إنهاء الخدمة الحالية للموظف. أغلق هذه النافذة وأعد المحاولة."
+  },
+  "hrDashboard": {
+    "admin": {
+      "title": "لوحة إدارة الموارد البشرية",
+      "description": "نظرة عامة على عمليات الموارد البشرية.",
+
+      "cards": {
+        "workforce": {
+          "title": "نظرة عامة على القوى العاملة",
+          "employees": "الموظفون",
+          "active": "النشطون"
+        },
+        "manpower": {
+          "title": "تخطيط القوى العاملة",
+          "pcn": "الوظائف المعتمدة",
+          "vacant": "الشاغرة"
+        },
+        "compliance": {
+          "title": "تنبيهات الامتثال",
+          "licenses": "التراخيص",
+          "contracts": "العقود"
+        },
+        "movement": {
+          "title": "حركة الموظفين · {year}",
+          "transfer": "النقل",
+          "promotion": "الترقية"
+        }
+      },
+
+      "hiringAnalytics": {
+        "title": "تحليلات التوظيف",
+        "description": "الاتجاه الشهري للتوظيف حسب فئة القوى العاملة.",
+        "selectYear": "اختر السنة",
+        "categories": {
+          "physicians": "الأطباء",
+          "nurses": "التمريض",
+          "alliedHealth": "المهن الصحية المساندة",
+          "administrative": "الإداريون",
+          "supportService": "الخدمات المساندة"
+        }
+      },
+
+      "states": {
+        "updating": "جارٍ التحديث...",
+        "loadingActivity": "جارٍ تحميل بيانات النشاط..."
+      },
+
+      "errors": {
+        "summary": {
+          "title": "تعذر تحميل لوحة الموارد البشرية",
+          "description": "تعذر استرجاع معلومات لوحة الموارد البشرية من الخادم."
+        },
+        "activity": {
+          "title": "تعذر تحميل بيانات النشاط لعام {year}",
+          "description": "تعذر استرجاع بيانات التوظيف وحركة الموظفين."
+        }
+      },
+
+      "actions": {
+        "tryAgain": "إعادة المحاولة"
+      },
+      "reports": {
+        "hiring": "تحليلات التوظيف",
+        "turnover": "دوران الموظفين"
+      },
+      "staffTurnover": {
+        "title": "دوران القوى العاملة",
+        "description": "تحليل الوظائف المعتمدة والمشغولة والشاغرة خلال الفترة المحددة.",
+        "noData": "لا توجد بيانات متاحة للفترة المحددة.",
+
+        "period": {
+          "monthly": "شهري",
+          "quarterly": "ربع سنوي"
+        },
+
+        "states": {
+          "loading": "جارٍ تحميل بيانات الدوران الشهري..."
+        },
+
+        "errors": {
+          "monthlyTitle": "تعذر تحميل بيانات الدوران للفترة {period}",
+          "monthlyDescription": "تعذر استرجاع بيانات الدوران الشهري."
+        },
+
+        "monthly": {
+          "title": "الدوران الشهري",
+          "description": "حالة الوظائف في نهاية الشهر حسب القسم وفئة القوى العاملة.",
+          "selectMonth": "اختر الشهر",
+
+          "metrics": {
+            "vacancyRate": "نسبة الشواغر",
+            "established": "الوظائف المعتمدة",
+            "occupied": "الوظائف المشغولة",
+            "vacant": "الوظائف الشاغرة"
+          },
+
+          "topRowsNote": "يتم عرض أعلى {count} مجموعة من حيث نسبة الشواغر للشهر المحدد.",
+          "chartTitle": "حالة الوظائف حسب مجموعة التقرير وفئة القوى العاملة",
+          "chartDescription": "عرض الوظائف المعتمدة حسب مجموعة التقرير وفئة القوى العاملة موزعة بين الوظائف المشغولة والشاغرة.",
+          "chartValueNote": "توضح القيم: الشاغر / المعتمد (نسبة الشواغر).",
+          "departments": "الأقسام"
+        },
+
+        "quarterly": {
+          "title": "دوران ربع سنوي",
+          "description": "حالة الوظائف في نهاية الربع حسب القسم وفئة القوى العاملة.",
+          "quarter": "Q{quarter}",
+          "selectedPeriod": "Q{quarter} · {year}",
+          "comingSoon": "سيتم عرض تحليلات الدوران ربع السنوية هنا."
+        },
+
+        "workforce": {
+          "physician": "الأطباء",
+          "nurse": "التمريض",
+          "alliedHealth": "الفنيون",
+          "administrative": "الإداريون",
+          "supportService": "الخدمات المساندة"
+        },
+        "groups": {
+          "clinics": "العيادات",
+          "alliedHealth": "الخدمات الصحية المساندة",
+          "infectionControl": "مكافحة العدوى",
+          "emergencyRoom": "الطوارئ",
+          "intensiveCareUnit": "العناية المركزة",
+          "pediatricIntensiveCareUnit": "العناية المركزة للأطفال",
+          "operatingRoom": "غرفة العمليات",
+          "laborDelivery": "الولادة",
+          "neonatalIntensiveCareUnit": "العناية المركزة لحديثي الولادة",
+          "maleWard": "جناح الرجال",
+          "femaleWard": "جناح النساء",
+          "pediatricWard": "جناح الأطفال",
+          "obstetricsGynecology": "النساء والولادة",
+          "nursingOffice": "مكتب التمريض والشؤون الأكاديمية",
+          "administration": "الإدارة",
+          "supportService": "الخدمات المساندة",
+          "other": "أخرى"
+        }
+      }
+    }
   }
 }

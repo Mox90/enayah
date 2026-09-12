@@ -1440,5 +1440,149 @@
     "completeConfirmDescription": "This will complete the separation for {employee} effective {date}. Employment, contract, movement and appointments will be closed and the assigned PCN may be released.",
     "loadFailed": "Unable to load offboarding information",
     "loadFailedDescription": "The employee's current offboarding status could not be retrieved. Close this window and try again."
+  },
+  "hrDashboard": {
+    "admin": {
+      "title": "HR Administration Dashboard",
+      "description": "Human resources operations overview.",
+
+      "cards": {
+        "workforce": {
+          "title": "Workforce Overview",
+          "employees": "Employees",
+          "active": "Active"
+        },
+        "manpower": {
+          "title": "Manpower Planning",
+          "pcn": "PCN",
+          "vacant": "Vacant"
+        },
+        "compliance": {
+          "title": "Compliance Alerts",
+          "licenses": "Licenses",
+          "contracts": "Contracts"
+        },
+        "movement": {
+          "title": "Movement Activity · {year}",
+          "transfer": "Transfer",
+          "promotion": "Promotion"
+        }
+      },
+
+      "hiringAnalytics": {
+        "title": "Hiring Analytics",
+        "description": "Monthly hiring trend by workforce category.",
+        "selectYear": "Select year",
+        "categories": {
+          "physicians": "Physicians",
+          "nurses": "Nurses",
+          "alliedHealth": "Allied Health",
+          "administrative": "Administrative",
+          "supportService": "Support Service"
+        }
+      },
+
+      "states": {
+        "updating": "Updating...",
+        "loadingActivity": "Loading activity..."
+      },
+
+      "errors": {
+        "summary": {
+          "title": "Unable to load the HR dashboard",
+          "description": "Dashboard information could not be retrieved from the server."
+        },
+        "activity": {
+          "title": "Unable to load activity for {year}",
+          "description": "Hiring and movement activity could not be retrieved."
+        }
+      },
+
+      "actions": {
+        "tryAgain": "Try again"
+      },
+      "reports": {
+        "hiring": "Hiring Analytics",
+        "turnover": "Staff Turnover"
+      },
+      "staffTurnover": {
+        "title": "Staff Turnover",
+        "description": "Monthly employee separation trend.",
+        "noData": "Staff turnover analytics will be displayed here."
+      },
+      "staffTurnover": {
+        "title": "Staff Turnover",
+        "description": "Analyze established, occupied, and vacant positions for the selected reporting period.",
+        "noData": "No turnover data is available for the selected period.",
+
+        "period": {
+          "monthly": "Monthly",
+          "quarterly": "Quarterly"
+        },
+
+        "states": {
+          "loading": "Loading monthly turnover..."
+        },
+
+        "errors": {
+          "monthlyTitle": "Unable to load turnover for {period}",
+          "monthlyDescription": "Monthly turnover information could not be retrieved."
+        },
+
+        "monthly": {
+          "title": "Monthly Turnover",
+          "description": "Month-end workforce position status by department and workforce category.",
+          "selectMonth": "Select month",
+
+          "metrics": {
+            "vacancyRate": "Vacancy Rate",
+            "established": "Established Positions",
+            "occupied": "Occupied Positions",
+            "vacant": "Vacant Positions"
+          },
+
+          "topRowsNote": "Showing the {count} highest vacancy-rate groups for the selected month.",
+          "chartTitle": "Position Status by Reporting Group and Workforce",
+          "chartDescription": "Established positions by reporting group and workforce, divided into occupied and vacant positions.",
+          "chartValueNote": "Labels show Vacant / Established (Vacancy Rate).",
+          "departments": "Departments"
+        },
+
+        "quarterly": {
+          "title": "Quarterly Turnover",
+          "description": "Quarter-end workforce position status by reporting group and workforce category.",
+          "quarter": "Q{quarter}",
+          "selectedPeriod": "Q{quarter} · {year}",
+          "comingSoon": "Quarterly turnover analytics will be displayed here."
+        },
+
+        "workforce": {
+          "physician": "Physician",
+          "nurse": "Nurse",
+          "alliedHealth": "Technician",
+          "administrative": "Administrative",
+          "supportService": "Support Service"
+        },
+        "groups": {
+          "clinics": "Clinics",
+          "alliedHealth": "Allied Health",
+          "infectionControl": "Infection Control",
+          "emergencyRoom": "Emergency Room",
+          "intensiveCareUnit": "Intensive Care Unit",
+          "pediatricIntensiveCareUnit": "Pediatric Intensive Care Unit",
+          "operatingRoom": "Operating Room",
+          "laborDelivery": "Labor & Delivery",
+          "neonatalIntensiveCareUnit": "Neonatal Intensive Care Unit",
+          "maleWard": "Male Ward",
+          "femaleWard": "Female Ward",
+          "pediatricWard": "Pediatric Ward",
+          "obstetricsGynecology": "Obstetrics & Gynecology",
+          "nursingOffice": "Nursing Office & Academic Affairs",
+          "administration": "Administration",
+          "supportService": "Support Service",
+          "other": "Other"
+        }
+      }
+    }
   }
 }

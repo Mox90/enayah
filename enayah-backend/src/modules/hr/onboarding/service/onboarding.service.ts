@@ -21,7 +21,7 @@ import { CompensationAllowanceRepository } from '../../compensations/repository/
 import { RunningNumberService } from '../../../../core/service/running-number.service'
 
 export const OnboardingService = {
-  submit: async (dto: OnboardingSubmitDto) => {
+  submit: async (dto: OnboardingSubmitDto, userId: string) => {
     return db.transaction(async (tx) => {
       // ----------------------------------
       // 1. Employee master record
@@ -94,10 +94,6 @@ export const OnboardingService = {
       })
 
       // ----------------------------------
-      // 5. Initial Contract Movement / PCN
-      // ----------------------------------
-
-      // ----------------------------------
       // 5. Initial Contract Movement / Legal Assignment
       // ----------------------------------
 
@@ -117,6 +113,11 @@ export const OnboardingService = {
         positionItem = await PositionItemRepository.assignIfAvailable(
           tx,
           positionItemId,
+          {
+            effectiveDate: contract.startDate,
+            changeReason: 'Initial employee onboarding',
+            recordedBy: userId,
+          },
         )
 
         if (!positionItem) {
@@ -194,69 +195,6 @@ export const OnboardingService = {
         movementType: 'initial',
         remarks: dto.movement.remarks ?? null,
       })
-
-      // const requiresPositionItem =
-      //   dto.employment.staffCategory === 'civilian' ||
-      //   dto.employment.staffCategory === 'contractual'
-
-      // let positionItem = null
-
-      // if (dto.movement.positionItemId) {
-      //   positionItem = await PositionItemRepository.assignIfAvailable(
-      //     tx,
-      //     dto.movement.positionItemId,
-      //   )
-
-      //   if (!positionItem) {
-      //     throw new AppError(
-      //       'Position item not found or is no longer vacant',
-      //       409,
-      //     )
-      //   }
-      // } else if (requiresPositionItem) {
-      //   // Defensive service validation.
-      //   // Zod should already reject this.
-      //   throw new AppError(
-      //     'Position item is required for civilian and contractual employees',
-      //     400,
-      //   )
-      // }
-
-      // const officialDepartmentId =
-      //   positionItem?.departmentId ?? dto.movement.officialDepartmentId
-
-      // const officialPositionId =
-      //   positionItem?.positionId ?? dto.movement.officialPositionId
-
-      // if (!officialDepartmentId) {
-      //   throw new AppError(
-      //     'Official department is required for the legal assignment',
-      //     400,
-      //   )
-      // }
-
-      // if (!officialPositionId) {
-      //   throw new AppError(
-      //     'Official position is required for the legal assignment',
-      //     400,
-      //   )
-      // }
-
-      // const movement = await ContractMovementRepository.create(tx, {
-      //   contractId: contract.id,
-      //   positionItemId: positionItem?.id ?? null,
-      //   officialDepartmentId,
-      //   officialPositionId,
-      //   startDate: contract.startDate,
-      //   endDate: contract.endDate,
-      //   sequenceNumber: 1,
-      //   movementType: 'initial',
-      //   remarks: dto.movement.remarks ?? null,
-      // })
-
-      // ----------------------------------
-      // 6. Appointment / Actual Assignment
-      // ----------------------------------
 
       const appointment = dto.appointment
         ? await AppointmentRepository.create(tx, {

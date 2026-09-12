@@ -1,0 +1,2 @@
+ALTER TABLE "position_item_history" ADD COLUMN "is_deleted" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "position_item_history" ADD COLUMN "deleted_at" timestamp with time zone;

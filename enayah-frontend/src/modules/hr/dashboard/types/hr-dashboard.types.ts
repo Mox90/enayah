@@ -24,6 +24,7 @@ export type HrAdminDashboardSummaryData = {
   activityYear: number
   alertWindowDays: number
   availableYears: number[]
+  availableTurnoverYears: number[]
   summary: HrAdminDashboardSummary
 }
 
@@ -40,4 +41,38 @@ export type ApiResponse<T> = {
   success?: boolean
   message?: string
   data: T
+}
+
+export type WorkforceCategory =
+  | 'physician'
+  | 'nurse'
+  | 'allied_health'
+  | 'administrative'
+  | 'support_service'
+
+export type MonthlyTurnoverRow = {
+  departmentId: string
+  departmentNameEn: string
+  departmentNameAr: string | null
+  workforceCategory: WorkforceCategory
+  vacantPositions: number
+  occupiedPositions: number
+  establishedPositions: number
+  vacancyRate: number
+}
+
+export type MonthlyTurnoverSummary = {
+  vacantPositions: number
+  occupiedPositions: number
+  establishedPositions: number
+  vacancyRate: number
+}
+
+export type MonthlyTurnoverResponse = {
+  year: number
+  month: number
+  periodStart: string
+  periodEnd: string
+  summary: MonthlyTurnoverSummary
+  rows: MonthlyTurnoverRow[]
 }

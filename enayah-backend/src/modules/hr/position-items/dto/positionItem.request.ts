@@ -1,26 +1,45 @@
 import z from 'zod'
 
+const workforceCategorySchema = z.enum([
+  'physician',
+  'nurse',
+  'allied_health',
+  'administrative',
+  'support_service',
+])
+
 export const createPositionItemSchema = z.object({
   itemNumber: z.string().min(5).max(50),
   departmentId: z.uuid(),
   positionId: z.uuid(),
   jobGradeId: z.uuid().optional(),
-  workforceCategory: z
-    .enum([
-      'physician',
-      'nurse',
-      'allied_health',
-      'administrative',
-      'support_service',
-    ])
-    .optional(),
+  workforceCategory: workforceCategorySchema.optional(),
   categoryCode: z.number().int().nonnegative().optional(),
   minSalary: z.number().nonnegative().optional(),
   maxSalary: z.number().nonnegative().optional(),
-  //status: z.string().max(20).default('vacant'),
+
+  /*
+   * Business-effective establishment date.
+   *
+   * PostgreSQL DATE / Drizzle date() is represented
+   * as a YYYY-MM-DD string.
+   */
+  establishedDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected YYYY-MM-DD'),
 })
 
 export const updatePositionItemSchema = createPositionItemSchema
+  /*
+   * establishedDate affects historical reporting,
+   * so do not allow ordinary PCN editing to modify it.
+   *
+   * A future historical-correction workflow can
+   * handle this explicitly.
+   */
+  .omit({
+    establishedDate: true,
+  })
   .partial()
   .extend({
     version: z.number().int().positive(),
@@ -39,9 +58,11 @@ export const positionItemQuerySchema = z.object({
       'positionTitleAr',
       'categoryCode',
       'status',
+      'establishedDate',
       'createdAt',
     ])
     .default('itemNumber'),
+
   sortOrder: z.enum(['asc', 'desc']).default('asc'),
 })
 
@@ -56,14 +77,14 @@ export const positionItemIdSchema = z.object({
 export type JobPositionItemQueryDTO = z.infer<typeof positionItemQuerySchema>
 
 export type CreatePositionItemDTO = z.infer<typeof createPositionItemSchema>
-export type UpdatePositionItemDTO = z.infer<typeof updatePositionItemSchema>
-//export type AssignEmployeeDTO = z.infer<typeof assignEmployeeSchema>
-export type PositionItemIdDTO = z.infer<typeof positionItemIdSchema>
 
-// positionItem.request.ts
+export type UpdatePositionItemDTO = z.infer<typeof updatePositionItemSchema>
+
+export type PositionItemIdDTO = z.infer<typeof positionItemIdSchema>
 
 export const PositionItemLookupQuerySchema = z.object({
   search: z.string().trim().optional(),
+
   limit: z.coerce.number().int().min(1).max(100).default(20),
 })
 
