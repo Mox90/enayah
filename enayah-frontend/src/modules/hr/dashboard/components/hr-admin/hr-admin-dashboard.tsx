@@ -33,19 +33,37 @@ const HRAdminDashboard = () => {
   // ----------------------------------
 
   const now = new Date()
+
   const currentYear = now.getFullYear()
   const currentMonth = now.getMonth() + 1
   const currentQuarter = Math.floor((currentMonth - 1) / 3) + 1
 
-  // ----------------------------------
-  // Dashboard report state
-  // ----------------------------------
+  // ==================================
+  // DASHBOARD REPORT STATE
+  // ==================================
 
   const [activeReport, setActiveReport] = useState<DashboardReport>('hiring')
+
   const [turnoverPeriod, setTurnoverPeriod] =
     useState<TurnoverPeriod>('monthly')
-  const [year, setYear] = useState(currentYear)
+
+  /*
+   * Hiring/activity and turnover use separate
+   * year state because their available year
+   * ranges come from different business data:
+   *
+   * Hiring:
+   *   employments.hireDate
+   *
+   * Turnover:
+   *   position_items.establishedDate
+   */
+  const [activityYear, setActivityYear] = useState(currentYear)
+
+  const [turnoverYear, setTurnoverYear] = useState(currentYear)
+
   const [turnoverMonth, setTurnoverMonth] = useState(currentMonth)
+
   const [turnoverQuarter, setTurnoverQuarter] = useState(currentQuarter)
 
   // ==================================
@@ -68,6 +86,9 @@ const HRAdminDashboard = () => {
   // Used by:
   // - Movement KPI
   // - Hiring Analytics
+  //
+  // This uses activityYear, not the
+  // turnover reporting year.
   // ==================================
 
   const {
@@ -76,10 +97,13 @@ const HRAdminDashboard = () => {
     isFetching: isActivityFetching,
     isError: isActivityError,
     refetch: refetchActivity,
-  } = useHrAdminDashboardActivity(year)
+  } = useHrAdminDashboardActivity(activityYear)
 
   // ==================================
   // MONTHLY STAFF TURNOVER
+  //
+  // Turnover uses its own historical
+  // PCN reporting year.
   // ==================================
 
   const {
@@ -88,7 +112,7 @@ const HRAdminDashboard = () => {
     isFetching: isTurnoverFetching,
     isError: isTurnoverError,
     refetch: refetchTurnover,
-  } = useHrAdminMonthlyTurnover(year, turnoverMonth)
+  } = useHrAdminMonthlyTurnover(turnoverYear, turnoverMonth)
 
   // ==================================
   // SUMMARY ERROR
@@ -136,14 +160,18 @@ const HRAdminDashboard = () => {
 
       {/* ==================================
           KPI CARDS
+
+          Movement Activity follows the
+          Hiring / activity reporting year.
       ================================== */}
 
       <HrAdminKpiCards
-        year={year}
+        year={activityYear}
         summary={summaryData?.summary}
         activity={activityData}
         isSummaryLoading={isSummaryLoading}
         isActivityLoading={isActivityLoading}
+        isActivityError={isActivityError}
       />
 
       {/* ==================================
@@ -160,19 +188,28 @@ const HRAdminDashboard = () => {
         >
           {/* ==================================
               REPORT TOOLBAR
+
+              Hiring:
+                activityYear
+
+              Turnover:
+                turnoverYear
           ================================== */}
 
           <HrAdminReportToolbar
             activeReport={activeReport}
             turnoverPeriod={turnoverPeriod}
             onTurnoverPeriodChange={setTurnoverPeriod}
-            year={year}
-            onYearChange={setYear}
+            year={activeReport === 'turnover' ? turnoverYear : activityYear}
+            onYearChange={
+              activeReport === 'turnover' ? setTurnoverYear : setActivityYear
+            }
             month={turnoverMonth}
             onMonthChange={setTurnoverMonth}
             quarter={turnoverQuarter}
             onQuarterChange={setTurnoverQuarter}
             availableYears={summaryData?.availableYears ?? []}
+            availableTurnoverYears={summaryData?.availableTurnoverYears ?? []}
             isSummaryLoading={isSummaryLoading}
           />
 
@@ -181,7 +218,7 @@ const HRAdminDashboard = () => {
           ================================== */}
 
           <HiringAnalyticsPanel
-            year={year}
+            year={activityYear}
             data={activityData}
             isLoading={isActivityLoading}
             isFetching={isActivityFetching}
@@ -195,7 +232,7 @@ const HRAdminDashboard = () => {
 
           <TurnoverReport
             period={turnoverPeriod}
-            year={year}
+            year={turnoverYear}
             month={turnoverMonth}
             quarter={turnoverQuarter}
             data={turnoverData}

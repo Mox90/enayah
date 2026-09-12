@@ -28,6 +28,9 @@ import {
   genderEnum,
   movementActionTypeEnum,
   movementTypeEnum,
+  PositionItemChangeType,
+  PositionItemStatus,
+  PositionItemTrackedField,
   staffCategoryEnum,
   workforceCategoryEnum,
 } from './enums'
@@ -403,7 +406,14 @@ export const positionItems = pgTable(
     minSalary: numeric('min_salary'),
     maxSalary: numeric('max_salary'),
 
-    status: varchar('status', { length: 20 }).default('vacant').notNull(), // vacant, reserved, filled, frozen
+    //status: varchar('status', { length: 20 }).default('vacant').notNull(), // vacant, reserved, filled, frozen
+    status: varchar('status', {
+      length: 20,
+    })
+      .$type<PositionItemStatus>()
+      .default('vacant')
+      .notNull(),
+    establishedDate: date('established_date').notNull(),
 
     ...baseColumns,
   },
@@ -411,6 +421,151 @@ export const positionItems = pgTable(
     index('idx_position_items_status')
       .on(table.status)
       .where(sql`${table.isDeleted} = false`),
+    index('idx_position_items_established_date').on(table.establishedDate),
+  ],
+)
+
+export const positionItemHistory = pgTable(
+  'position_item_history',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+
+    /*
+     * The PCN whose historical state
+     * this revision represents.
+     */
+    positionItemId: uuid('position_item_id')
+      .notNull()
+      .references(() => positionItems.id),
+
+    /*
+     * Sequential revision number for
+     * this PCN:
+     *
+     * 1, 2, 3, 4...
+     */
+    revisionNumber: integer('revision_number').notNull(),
+
+    /*
+     * Business-effective date.
+     *
+     * Historical reports should use
+     * this instead of createdAt.
+     */
+    effectiveDate: date('effective_date').notNull(),
+
+    /*
+     * ==================================
+     * PCN SNAPSHOT
+     * ==================================
+     */
+
+    itemNumber: varchar('item_number', {
+      length: 50,
+    }).notNull(),
+    departmentId: uuid('department_id')
+      .notNull()
+      .references(() => departments.id),
+    positionId: uuid('position_id')
+      .notNull()
+      .references(() => positions.id),
+    jobGradeId: uuid('job_grade_id').references(() => jobGrades.id),
+    workforceCategory: workforceCategoryEnum('workforce_category'),
+    categoryCode: integer('category_code'),
+    minSalary: numeric('min_salary'),
+    maxSalary: numeric('max_salary'),
+
+    /*
+     * Same database representation
+     * used by position_items.
+     */
+    status: varchar('status', {
+      length: 20,
+    })
+      .$type<PositionItemStatus>()
+      .notNull(),
+    isDeleted: boolean('is_deleted').default(false).notNull(),
+    deletedAt: timestamp('deleted_at', {
+      withTimezone: true,
+    }),
+
+    /*
+     * ==================================
+     * CLASSIFICATION ORIGIN
+     * ==================================
+     *
+     * position:
+     *   workforceCategory/categoryCode
+     *   were synchronized from Position.
+     *
+     * manual:
+     *   HR intentionally kept or entered
+     *   another classification.
+     */
+    classificationSource: varchar('classification_source', {
+      length: 20,
+    })
+      .$type<'position' | 'manual' | 'legacy'>()
+      .notNull(),
+    //.default('position'),
+
+    classificationOverrideReason: text('classification_override_reason'),
+
+    /*
+     * ==================================
+     * CHANGE INFORMATION
+     * ==================================
+     */
+
+    changeTypes: varchar('change_types', {
+      length: 50,
+    })
+      .array()
+      .$type<PositionItemChangeType[]>()
+      .notNull(),
+    changedFields: varchar('changed_fields', {
+      length: 50,
+    })
+      .array()
+      .$type<PositionItemTrackedField[]>()
+      .notNull(),
+    changeReason: text('change_reason'),
+    remarks: text('remarks'),
+
+    /*
+     * ==================================
+     * AUDIT
+     * ==================================
+     *
+     * These tell us when the history row
+     * was entered into Enayah.
+     *
+     * They are NOT the historical
+     * effective date.
+     */
+    recordedAt: timestamp('recorded_at', {
+      withTimezone: true,
+    })
+      .defaultNow()
+      .notNull(),
+
+    recordedBy: uuid('recorded_by'),
+  },
+
+  (table) => [
+    uniqueIndex('uq_position_item_history_revision').on(
+      table.positionItemId,
+      table.revisionNumber,
+    ),
+
+    index('idx_position_item_history_effective').on(
+      table.positionItemId,
+      table.effectiveDate,
+    ),
+
+    index('idx_position_item_history_department').on(table.departmentId),
+    index('idx_position_item_history_position').on(table.positionId),
+    index('idx_position_item_history_status').on(table.status),
   ],
 )
 

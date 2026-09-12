@@ -9,6 +9,7 @@ import {
 import { ContractService } from '../service/contract.service'
 import { RenewContractSchema } from '../dto/contract-renewal.request'
 import { ApplyContractMovementSchema } from '../dto/contract-movement.request'
+import { AppError } from '../../../../core/errors/AppError'
 
 export const ContractController = {
   create: asyncHandler(async (req: Request, res: Response) => {
@@ -20,14 +21,25 @@ export const ContractController = {
 
   renew: asyncHandler(async (req: Request, res: Response) => {
     const body = RenewContractSchema.parse(req.body)
-    const result = await ContractService.renew(body)
+    const userId = req.user?.id
+
+    if (!userId) {
+      throw new AppError('Unauthorized', 401)
+    }
+
+    const result = await ContractService.renew(body, userId)
 
     res.status(201).json(result)
   }),
 
   applyMovement: asyncHandler(async (req: Request, res: Response) => {
     const body = ApplyContractMovementSchema.parse(req.body)
-    const result = await ContractService.applyMovement(body)
+    const userId = req.user?.id
+
+    if (!userId) {
+      throw new AppError('Unauthorized', 401)
+    }
+    const result = await ContractService.applyMovement(body, userId)
 
     res.status(201).json(result)
   }),

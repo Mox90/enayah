@@ -1,0 +1,1 @@
+ALTER TABLE "position_items" ALTER COLUMN "established_date" SET NOT NULL;

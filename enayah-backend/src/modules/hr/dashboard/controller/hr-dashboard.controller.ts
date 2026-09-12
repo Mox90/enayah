@@ -25,7 +25,8 @@ export const HrDashboardController = {
           ? Number(yearQuery)
           : new Date().getUTCFullYear()
 
-      if (!Number.isInteger(year) || year < 1900) {
+      const currentYear = new Date().getUTCFullYear()
+      if (!Number.isInteger(year) || year < 1900 || year > currentYear) {
         res.status(400).json({
           message: 'The dashboard year must be a valid integer.',
           code: 'INVALID_DASHBOARD_YEAR',

@@ -25,6 +25,7 @@ interface HrAdminKpiCardsProps {
 
   isSummaryLoading: boolean
   isActivityLoading: boolean
+  isActivityError: boolean
 }
 
 const numberFormatter = new Intl.NumberFormat('en-US')
@@ -35,11 +36,12 @@ const HrAdminKpiCards = ({
   activity,
   isSummaryLoading,
   isActivityLoading,
+  isActivityError,
 }: HrAdminKpiCardsProps) => {
   const t = useTranslations('hrDashboard.admin')
 
-  const formatValue = (value: number | undefined, loading = false) => {
-    if (loading) {
+  const formatValue = (value: number | undefined, unavailable = false) => {
+    if (unavailable) {
       return '—'
     }
 
@@ -55,7 +57,6 @@ const HrAdminKpiCards = ({
             label: t('cards.workforce.employees'),
             value: formatValue(summary?.employees, isSummaryLoading),
           },
-
           {
             label: t('cards.workforce.active'),
             value: formatValue(summary?.activeEmployees, isSummaryLoading),
@@ -70,7 +71,6 @@ const HrAdminKpiCards = ({
             label: t('cards.manpower.pcn'),
             value: formatValue(summary?.positionItems, isSummaryLoading),
           },
-
           {
             label: t('cards.manpower.vacant'),
             value: formatValue(summary?.vacantPositionItems, isSummaryLoading),
@@ -85,7 +85,6 @@ const HrAdminKpiCards = ({
             label: t('cards.compliance.licenses'),
             value: formatValue(summary?.expiringLicenses, isSummaryLoading),
           },
-
           {
             label: t('cards.compliance.contracts'),
             value: formatValue(summary?.expiringContracts, isSummaryLoading),
@@ -100,12 +99,17 @@ const HrAdminKpiCards = ({
         items={[
           {
             label: t('cards.movement.transfer'),
-            value: formatValue(activity?.transfers, isActivityLoading),
+            value: formatValue(
+              activity?.transfers,
+              isActivityLoading || isActivityError,
+            ),
           },
-
           {
             label: t('cards.movement.promotion'),
-            value: formatValue(activity?.promotions, isActivityLoading),
+            value: formatValue(
+              activity?.promotions,
+              isActivityLoading || isActivityError,
+            ),
           },
         ]}
       />

@@ -95,18 +95,54 @@ function getMonthlyPeriod(year: number, month: number) {
 }
 
 export const HrDashboardService = {
+  // getAdminSummary: async () => {
+  //   const currentYear = new Date().getUTCFullYear()
+  //   const [oldestHiringYear, summary] = await Promise.all([
+  //     HrDashboardRepository.getOldestHiringYear(),
+  //     HrDashboardRepository.getSummary(currentYear, ALERT_WINDOW_DAYS),
+  //   ])
+  //   const availableYears = createYearRange(oldestHiringYear, currentYear)
+
+  //   return {
+  //     activityYear: currentYear,
+  //     alertWindowDays: ALERT_WINDOW_DAYS,
+  //     availableYears,
+  //     summary,
+  //   }
+  // },
+
   getAdminSummary: async () => {
     const currentYear = new Date().getUTCFullYear()
-    const [oldestHiringYear, summary] = await Promise.all([
+    const [oldestHiringYear, oldestTurnoverYear, summary] = await Promise.all([
       HrDashboardRepository.getOldestHiringYear(),
+      HrDashboardRepository.getOldestTurnoverYear(),
       HrDashboardRepository.getSummary(currentYear, ALERT_WINDOW_DAYS),
     ])
+
+    /*
+     * Hiring/activity years are based on
+     * employment hire dates.
+     */
     const availableYears = createYearRange(oldestHiringYear, currentYear)
+
+    /*
+     * Turnover/vacancy years are based on
+     * PCN establishment dates.
+     *
+     * This intentionally includes years where
+     * no employees were hired because vacant
+     * PCNs may still have existed.
+     */
+    const availableTurnoverYears = createYearRange(
+      oldestTurnoverYear,
+      currentYear,
+    )
 
     return {
       activityYear: currentYear,
       alertWindowDays: ALERT_WINDOW_DAYS,
       availableYears,
+      availableTurnoverYears,
       summary,
     }
   },

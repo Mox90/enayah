@@ -24,6 +24,7 @@ export type HrAdminDashboardSummaryData = {
   activityYear: number
   alertWindowDays: number
   availableYears: number[]
+  availableTurnoverYears: number[]
   summary: HrAdminDashboardSummary
 }
 

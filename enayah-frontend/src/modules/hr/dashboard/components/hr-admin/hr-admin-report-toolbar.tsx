@@ -36,6 +36,7 @@ interface HrAdminReportToolbarProps {
   onQuarterChange: (value: number) => void
 
   availableYears: number[]
+  availableTurnoverYears: number[]
   isSummaryLoading: boolean
 }
 
@@ -55,6 +56,7 @@ const HrAdminReportToolbar = ({
   onQuarterChange,
 
   availableYears,
+  availableTurnoverYears,
   isSummaryLoading,
 }: HrAdminReportToolbarProps) => {
   const locale = useLocale()
@@ -76,6 +78,9 @@ const HrAdminReportToolbar = ({
       label: monthFormatter.format(new Date(2000, index, 1)),
     }))
   }, [locale])
+
+  const yearOptions =
+    activeReport === 'turnover' ? availableTurnoverYears : availableYears
 
   return (
     <div className='mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between'>
@@ -207,7 +212,7 @@ const HrAdminReportToolbar = ({
               [Quarter] [Year]
         ================================== */}
 
-        <Select
+        {/* <Select
           value={String(year)}
           disabled={isSummaryLoading || availableYears.length === 0}
           onValueChange={(value) => {
@@ -220,6 +225,25 @@ const HrAdminReportToolbar = ({
 
           <SelectContent>
             {availableYears.map((availableYear) => (
+              <SelectItem key={availableYear} value={String(availableYear)}>
+                {availableYear}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select> */}
+        <Select
+          value={String(year)}
+          disabled={isSummaryLoading || yearOptions.length === 0}
+          onValueChange={(value) => {
+            onYearChange(Number(value))
+          }}
+        >
+          <SelectTrigger className='w-[140px]'>
+            <SelectValue placeholder={t('hiringAnalytics.selectYear')} />
+          </SelectTrigger>
+
+          <SelectContent>
+            {yearOptions.map((availableYear) => (
               <SelectItem key={availableYear} value={String(availableYear)}>
                 {availableYear}
               </SelectItem>
