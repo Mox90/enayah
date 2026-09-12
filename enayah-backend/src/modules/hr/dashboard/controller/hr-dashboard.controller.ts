@@ -43,6 +43,43 @@ export const HrDashboardController = {
       next(error)
     }
   },
+
+  getMonthlyTurnover: async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const year = Number(req.query.year)
+      const month = Number(req.query.month)
+
+      if (!Number.isInteger(year) || year < 1900) {
+        res.status(400).json({
+          message: 'The dashboard year must be a valid integer.',
+          code: 'INVALID_DASHBOARD_YEAR',
+        })
+
+        return
+      }
+
+      if (!Number.isInteger(month) || month < 1 || month > 12) {
+        res.status(400).json({
+          message: 'The dashboard month must be between 1 and 12.',
+          code: 'INVALID_DASHBOARD_MONTH',
+        })
+
+        return
+      }
+
+      const data = await HrDashboardService.getMonthlyTurnover(year, month)
+
+      res.status(200).json({
+        data,
+      })
+    } catch (error) {
+      next(error)
+    }
+  },
 }
 
 // export const HrDashboardController = {

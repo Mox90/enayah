@@ -12,14 +12,6 @@ const router = Router()
 router.use(requireAuth)
 router.use(attachPermissions)
 
-// router.get(
-//   '/hr-admin',
-//   // Use your existing permission initially, or replace this with
-//   // hr.dashboard.view when that permission exists.
-//   requirePermission('hr.dashboard.view'),
-//   HrDashboardController.getAdminDashboard,
-// )
-
 router.get(
   '/hr-admin/summary',
   requirePermission('hr.dashboard.view'),
@@ -30,6 +22,12 @@ router.get(
   '/hr-admin/activity',
   requirePermission('hr.dashboard.view'),
   HrDashboardController.getHiringTrend,
+)
+
+router.get(
+  '/hr-admin/turnover/monthly',
+  requirePermission('hr.dashboard.view'),
+  HrDashboardController.getMonthlyTurnover,
 )
 
 export default router

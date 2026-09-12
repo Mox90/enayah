@@ -7,6 +7,7 @@ import type {
   ApiResponse,
   HrAdminDashboardActivityData,
   HrAdminDashboardSummaryData,
+  MonthlyTurnoverResponse,
 } from '../types/hr-dashboard.types'
 
 export async function getHrAdminDashboardSummary(): Promise<HrAdminDashboardSummaryData> {
@@ -27,6 +28,19 @@ export async function getHrAdminDashboardActivity(
         year,
       },
     },
+  )
+
+  return response.data.data
+}
+
+export const getHrAdminMonthlyTurnover = async (
+  year: number,
+  month: number,
+): Promise<MonthlyTurnoverResponse> => {
+  const response = await api.get<{
+    data: MonthlyTurnoverResponse
+  }>(
+    `${API_ENDPOINTS.hr.dashboard.admin}/turnover/monthly?year=${year}&month=${month}`,
   )
 
   return response.data.data

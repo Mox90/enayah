@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import {
   getHrAdminDashboardActivity,
   getHrAdminDashboardSummary,
+  getHrAdminMonthlyTurnover,
 } from '../service/hr-dashboard.service'
 
 export const hrDashboardKeys = {
@@ -35,5 +36,20 @@ export function useHrAdminDashboardActivity(year: number) {
     // frequently than the current-state summary.
     staleTime: 5 * 60_000,
     refetchOnWindowFocus: false,
+  })
+}
+
+export const useHrAdminMonthlyTurnover = (year: number, month: number) => {
+  return useQuery({
+    queryKey: ['hr-admin-dashboard', 'monthly-turnover', year, month],
+
+    queryFn: () => getHrAdminMonthlyTurnover(year, month),
+
+    enabled:
+      Number.isInteger(year) &&
+      year >= 1900 &&
+      Number.isInteger(month) &&
+      month >= 1 &&
+      month <= 12,
   })
 }

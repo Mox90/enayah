@@ -6,7 +6,7 @@ import { useAuthStore } from '@/modules/iam/stores/auth.store'
 
 import EmployeeDashboard from './employee-dashboard'
 import ManagerDashboard from './manager-dashboard'
-import HRAdminDashboard from './hr-admin-dashboard'
+import HRAdminDashboard from './hr-admin/hr-admin-dashboard'
 import DirectorDashboard from './director-dashboard'
 import SystemAdminDashboard from './system-admin-dashboard'
 import { PERMISSIONS } from '@/constants/permissions'
