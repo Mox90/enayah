@@ -57,17 +57,55 @@ export function PhoneCodeCombobox({ value, onChange, className }: Props) {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
+      {/* <PopoverTrigger asChild>
         <Button
           type='button'
           variant='ghost'
           className={cn(
-            'h-full w-[120px] justify-between rounded-none border-r px-3',
+            //'h-full w-[120px] justify-between rounded-none border-r px-3',
+            'h-full w-[120px] shrink-0 justify-between rounded-none border-0 border-e px-3',
             className,
           )}
         >
           {selected?.flag} {selected?.dialCode}
           <ChevronsUpDown className='h-4 w-4 opacity-50' />
+        </Button>
+      </PopoverTrigger> */}
+      {/* <PopoverTrigger asChild>
+        <Button
+          type='button'
+          dir='ltr'
+          variant='ghost'
+          className={cn(
+            'h-full w-[120px] shrink-0 justify-between rounded-none border-0 border-e px-3',
+            className,
+          )}
+        >
+          <span className='flex items-center gap-2'>
+            <span aria-hidden='true'>{selected?.flag}</span>
+
+            <bdi dir='ltr'>{selected?.dialCode}</bdi>
+          </span>
+
+          <ChevronsUpDown className='size-4 shrink-0 opacity-50' />
+        </Button>
+      </PopoverTrigger> */}
+      <PopoverTrigger asChild>
+        <Button
+          type='button'
+          dir='ltr'
+          variant='ghost'
+          className={cn(
+            'h-full w-[120px] shrink-0 justify-between rounded-none border-0 border-e px-3',
+            className,
+          )}
+        >
+          <span className='flex items-center gap-2'>
+            <span>{selected?.flag}</span>
+            <span>{selected?.dialCode}</span>
+          </span>
+
+          <ChevronsUpDown className='size-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
 

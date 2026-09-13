@@ -21,6 +21,7 @@ import { HireEmployeePayload } from '@/modules/hr/onboarding/types/onboarding.ty
 import { PositionItemCombobox } from '@/modules/hr/positions-items/components/position-item-combobox'
 import { PositionCombobox } from '@/modules/hr/positions/components/position-combobox'
 import { useLocale, useTranslations } from 'next-intl'
+import { FloatingField } from '@/components/forms/floating-field'
 
 type EmploymentInput = HireEmployeePayload['employment']
 type MovementInput = HireEmployeePayload['movement']
@@ -250,26 +251,21 @@ export function EmploymentContractAssignmentInformation({
           {/* Effective / Hire Date */}
 
           <div className='space-y-2'>
-            <Label
-              htmlFor='hire-date'
-              className={
-                employmentContractErrors.hireDate
-                  ? 'text-destructive'
-                  : undefined
-              }
-            >
-              {t('hireEffectiveDate')}
-
-              <span aria-hidden='true' className='ms-1 text-destructive'>
-                *
-              </span>
-            </Label>
-
-            <DatePicker
+            <FloatingField
               id='hire-date'
-              value={employment.hireDate ?? null}
-              onChange={updateEffectiveDate}
-            />
+              label={t('hireEffectiveDate')}
+              filled={Boolean(employment.hireDate)}
+              invalid={Boolean(employmentContractErrors.hireDate)}
+              required
+            >
+              <DatePicker
+                id='hire-date'
+                value={employment.hireDate ?? null}
+                hidePlaceholder
+                required
+                onChange={updateEffectiveDate}
+              />
+            </FloatingField>
 
             <p className='text-xs leading-relaxed text-muted-foreground'>
               {t('hireEffectiveDateHint')}
@@ -281,26 +277,21 @@ export function EmploymentContractAssignmentInformation({
           {/* Contract End Date */}
 
           <div className='space-y-2'>
-            <Label
-              htmlFor='contract-end-date'
-              className={
-                employmentContractErrors.contractEndDate
-                  ? 'text-destructive'
-                  : undefined
-              }
-            >
-              {t('endDate')}
-
-              <span aria-hidden='true' className='ms-1 text-destructive'>
-                *
-              </span>
-            </Label>
-
-            <DatePicker
+            <FloatingField
               id='contract-end-date'
-              value={contract.endDate ?? null}
-              onChange={updateContractEndDate}
-            />
+              label={t('endDate')}
+              filled={Boolean(contract.endDate)}
+              invalid={Boolean(employmentContractErrors.contractEndDate)}
+              required
+            >
+              <DatePicker
+                id='contract-end-date'
+                value={contract.endDate ?? null}
+                hidePlaceholder
+                required
+                onChange={updateContractEndDate}
+              />
+            </FloatingField>
 
             <FieldError message={employmentContractErrors.contractEndDate} />
           </div>
@@ -308,47 +299,44 @@ export function EmploymentContractAssignmentInformation({
           {/* Employment Type */}
 
           <div className='space-y-2'>
-            <Label
-              htmlFor='employment-type'
-              className={
-                employmentContractErrors.employmentType
-                  ? 'text-destructive'
-                  : undefined
-              }
+            <FloatingField
+              id='employment-type'
+              label={t('employmentType')}
+              filled={Boolean(employment.employmentType)}
+              invalid={Boolean(employmentContractErrors.employmentType)}
+              required
             >
-              {t('employmentType')}
+              <Select
+                required
+                dir={isRtl ? 'rtl' : 'ltr'}
+                value={employment.employmentType}
+                onValueChange={(selectedValue) => {
+                  onClearError('employmentType')
 
-              <span aria-hidden='true' className='ms-1 text-destructive'>
-                *
-              </span>
-            </Label>
-
-            <Select
-              dir={isRtl ? 'rtl' : 'ltr'}
-              value={employment.employmentType}
-              onValueChange={(selectedValue) => {
-                onClearError('employmentType')
-
-                updateEmployment(
-                  'employmentType',
-                  selectedValue as EmploymentType,
-                )
-              }}
-            >
-              <SelectTrigger
-                id='employment-type'
-                className='w-full data-[size=default]:h-11'
-                aria-invalid={Boolean(employmentContractErrors.employmentType)}
+                  updateEmployment(
+                    'employmentType',
+                    selectedValue as EmploymentType,
+                  )
+                }}
               >
-                <SelectValue />
-              </SelectTrigger>
+                <SelectTrigger
+                  id='employment-type'
+                  data-floating-control='true'
+                  className='w-full bg-transparent dark:bg-transparent data-[size=default]:h-12'
+                  aria-invalid={Boolean(
+                    employmentContractErrors.employmentType,
+                  )}
+                >
+                  <SelectValue />
+                </SelectTrigger>
 
-              <SelectContent>
-                <SelectItem value='full_time'>{t('fullTime')}</SelectItem>
-                <SelectItem value='part_time'>{t('partTime')}</SelectItem>
-                <SelectItem value='locum'>{t('locum')}</SelectItem>
-              </SelectContent>
-            </Select>
+                <SelectContent>
+                  <SelectItem value='full_time'>{t('fullTime')}</SelectItem>
+                  <SelectItem value='part_time'>{t('partTime')}</SelectItem>
+                  <SelectItem value='locum'>{t('locum')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </FloatingField>
 
             <FieldError message={employmentContractErrors.employmentType} />
           </div>
@@ -356,69 +344,70 @@ export function EmploymentContractAssignmentInformation({
           {/* Staff Category */}
 
           <div className='space-y-2'>
-            <Label
-              htmlFor='staff-category'
-              className={
-                employmentContractErrors.staffCategory
-                  ? 'text-destructive'
-                  : undefined
-              }
+            <FloatingField
+              id='staff-category'
+              label={t('staffCategory')}
+              filled={Boolean(employment.staffCategory)}
+              invalid={Boolean(employmentContractErrors.staffCategory)}
+              required
             >
-              {t('staffCategory')}
+              <Select
+                required
+                dir={isRtl ? 'rtl' : 'ltr'}
+                value={employment.staffCategory}
+                onValueChange={(selectedValue) => {
+                  onClearError('staffCategory')
 
-              <span aria-hidden='true' className='ms-1 text-destructive'>
-                *
-              </span>
-            </Label>
+                  if (selectedValue === 'military') {
+                    onClearError('positionItemId')
+                  } else {
+                    onClearError('actualDepartmentId')
+                    onClearError('actualPositionId')
+                  }
 
-            <Select
-              dir={isRtl ? 'rtl' : 'ltr'}
-              value={employment.staffCategory}
-              onValueChange={(selectedValue) => {
-                onClearError('staffCategory')
-                if (selectedValue === 'military') {
-                  onClearError('positionItemId')
-                } else {
-                  onClearError('actualDepartmentId')
-                  onClearError('actualPositionId')
-                }
-
-                updateEmployment(
-                  'staffCategory',
-                  selectedValue as StaffCategory,
-                )
-              }}
-            >
-              <SelectTrigger
-                id='staff-category'
-                className='w-full data-[size=default]:h-11'
-                aria-invalid={Boolean(employmentContractErrors.staffCategory)}
+                  updateEmployment(
+                    'staffCategory',
+                    selectedValue as StaffCategory,
+                  )
+                }}
               >
-                <SelectValue />
-              </SelectTrigger>
+                <SelectTrigger
+                  id='staff-category'
+                  data-floating-control='true'
+                  className='w-full bg-transparent dark:bg-transparent data-[size=default]:h-12'
+                  aria-invalid={Boolean(employmentContractErrors.staffCategory)}
+                >
+                  <SelectValue />
+                </SelectTrigger>
 
-              <SelectContent>
-                <SelectItem value='civilian'>{t('civilian')}</SelectItem>
-                <SelectItem value='military'>{t('military')}</SelectItem>
-                <SelectItem value='contractual'>{t('contractual')}</SelectItem>
-              </SelectContent>
-            </Select>
+                <SelectContent>
+                  <SelectItem value='civilian'>{t('civilian')}</SelectItem>
+                  <SelectItem value='military'>{t('military')}</SelectItem>
+                  <SelectItem value='contractual'>
+                    {t('contractual')}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </FloatingField>
 
             <FieldError message={employmentContractErrors.staffCategory} />
           </div>
 
           {/* Contract Type */}
 
-          <div className='space-y-2'>
-            <Label>{t('contractType')}</Label>
-
-            <div className='flex h-11 items-center justify-between gap-3 rounded-md border bg-muted/30 px-3'>
+          {/* Contract Type */}
+          <div className='relative'>
+            <div className='flex h-12 items-center justify-between gap-3 rounded-lg border border-border/80 bg-muted/30 px-3'>
               <span className='text-sm font-medium'>{t('initial')}</span>
 
               <span className='rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary'>
                 {t('systemDefined')}
               </span>
             </div>
+
+            <span className='pointer-events-none absolute start-3 top-0 z-10 -translate-y-1/2 bg-card px-1 text-sm font-medium leading-none text-emerald-600'>
+              {t('contractType')}
+            </span>
           </div>
         </div>
       </FormSection>
@@ -434,7 +423,7 @@ export function EmploymentContractAssignmentInformation({
         <div className='space-y-5'>
           {/* PCN */}
 
-          <div className='space-y-2'>
+          {/* <div className='space-y-2'>
             <Label
               className={
                 employmentContractErrors.positionItemId
@@ -526,11 +515,100 @@ export function EmploymentContractAssignmentInformation({
                 </div>
               </div>
             )}
+          </div> */}
+          <div className='space-y-2'>
+            <FloatingField
+              id='position-item'
+              label={t('pcnLabel')}
+              filled={Boolean(movement.positionItemId)}
+              invalid={Boolean(employmentContractErrors.positionItemId)}
+              required={requiresPositionItem}
+            >
+              <PositionItemCombobox
+                id='position-item'
+                hidePlaceholder
+                value={movement.positionItemId}
+                selectedLabel={movement.itemNumber}
+                required={requiresPositionItem}
+                aria-invalid={Boolean(employmentContractErrors.positionItemId)}
+                onChange={(item) => {
+                  onClearError('positionItemId')
+
+                  if (!item) {
+                    onChange({
+                      ...value,
+                      movement: {
+                        ...movement,
+                        positionItemId: null,
+                        itemNumber: null,
+                      },
+                    })
+
+                    return
+                  }
+
+                  onChange({
+                    ...value,
+                    movement: {
+                      ...movement,
+                      positionItemId: item.id,
+                      itemNumber: item.itemNumber,
+                      startDate: movement.startDate || value.contract.startDate,
+                    },
+                    appointment: {
+                      ...appointment,
+                      actualDepartmentId: item.departmentId,
+                      actualPositionId: item.positionId,
+                      actualDepartmentNameEn: item.departmentNameEn ?? null,
+                      actualDepartmentNameAr: item.departmentNameAr ?? null,
+                      actualPositionTitleEn: item.positionTitleEn ?? null,
+                      actualPositionTitleAr: item.positionTitleAr ?? null,
+                      startDate:
+                        value.appointment?.startDate ??
+                        movement.startDate ??
+                        value.contract.startDate ??
+                        null,
+                      appointmentType:
+                        value.appointment?.appointmentType ?? 'primary',
+                      assignmentReason:
+                        value.appointment?.assignmentReason ??
+                        'management_decision',
+                    },
+                  })
+                }}
+              />
+            </FloatingField>
+
+            {employment.staffCategory === 'military' && (
+              <p className='text-xs leading-relaxed text-muted-foreground'>
+                {t('pcnOptionalForMilitary')}
+              </p>
+            )}
+
+            <FieldError message={employmentContractErrors.positionItemId} />
+
+            {movement.itemNumber && (
+              <div className='rounded-lg border bg-muted/20 px-3 py-2.5'>
+                <div className='flex flex-wrap items-center gap-x-3 gap-y-1'>
+                  <span className='text-xs text-muted-foreground'>
+                    {t('selectedPcn')}
+                  </span>
+
+                  <span className='text-sm font-semibold text-emerald-600'>
+                    {movement.itemNumber}
+                  </span>
+
+                  <span className='text-xs text-muted-foreground'>
+                    {t('appointmentDefaultsFromPcn')}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Movement Remarks */}
 
-          <div className='space-y-2'>
+          {/* <div className='space-y-2'>
             <Label htmlFor='movement-remarks'>{t('movementRemarks')}</Label>
 
             <Textarea
@@ -542,6 +620,23 @@ export function EmploymentContractAssignmentInformation({
               rows={2}
               placeholder={t('movementRemarksPlaceholder')}
             />
+          </div> */}
+          <div className='space-y-2'>
+            <FloatingField
+              id='movement-remarks'
+              label={t('movementRemarks')}
+              filled={Boolean(movement.remarks?.trim())}
+            >
+              <Textarea
+                id='movement-remarks'
+                value={movement.remarks ?? ''}
+                onChange={(event) =>
+                  updateMovement('remarks', event.target.value)
+                }
+                rows={2}
+                className='pt-5'
+              />
+            </FloatingField>
           </div>
         </div>
       </FormSection>
@@ -569,41 +664,43 @@ export function EmploymentContractAssignmentInformation({
 
           <div className='grid grid-cols-1 gap-x-5 gap-y-5 md:grid-cols-2'>
             {/* Actual Department */}
-
             <div className='space-y-2'>
-              <Label
-                className={
-                  employmentContractErrors.actualDepartmentId
-                    ? 'text-destructive'
-                    : undefined
-                }
+              <FloatingField
+                id='actual-department'
+                label={t('actualDepartmentLabel')}
+                filled={Boolean(appointment.actualDepartmentId)}
+                invalid={Boolean(employmentContractErrors.actualDepartmentId)}
+                required={isMilitary}
               >
-                {t('actualDepartmentLabel')}
-                {isMilitary && <span className='ms-1 text-destructive'>*</span>}
-              </Label>
-
-              <DepartmentCombobox
-                value={appointment.actualDepartmentId ?? null}
-                selectedLabel={
-                  isRtl
-                    ? (appointment.actualDepartmentNameAr ??
-                      appointment.actualDepartmentNameEn ??
-                      undefined)
-                    : (appointment.actualDepartmentNameEn ?? undefined)
-                }
-                onChange={(department) => {
-                  onClearError('actualDepartmentId')
-                  onChange({
-                    ...value,
-                    appointment: {
-                      ...appointment,
-                      actualDepartmentId: department.id,
-                      actualDepartmentNameEn: department.nameEn ?? null,
-                      actualDepartmentNameAr: department.nameAr ?? null,
-                    },
-                  })
-                }}
-              />
+                <DepartmentCombobox
+                  id='actual-department'
+                  hidePlaceholder
+                  required={isMilitary}
+                  ariaInvalid={Boolean(
+                    employmentContractErrors.actualDepartmentId,
+                  )}
+                  value={appointment.actualDepartmentId ?? null}
+                  selectedLabel={
+                    isRtl
+                      ? (appointment.actualDepartmentNameAr ??
+                        appointment.actualDepartmentNameEn ??
+                        undefined)
+                      : (appointment.actualDepartmentNameEn ?? undefined)
+                  }
+                  onChange={(department) => {
+                    onClearError('actualDepartmentId')
+                    onChange({
+                      ...value,
+                      appointment: {
+                        ...appointment,
+                        actualDepartmentId: department.id,
+                        actualDepartmentNameEn: department.nameEn ?? null,
+                        actualDepartmentNameAr: department.nameAr ?? null,
+                      },
+                    })
+                  }}
+                />
+              </FloatingField>
 
               <FieldError
                 message={employmentContractErrors.actualDepartmentId}
@@ -611,117 +708,128 @@ export function EmploymentContractAssignmentInformation({
             </div>
 
             {/* Actual Position */}
-
             <div className='space-y-2'>
-              <Label
-                className={
-                  employmentContractErrors.actualPositionId
-                    ? 'text-destructive'
-                    : undefined
-                }
+              <FloatingField
+                id='actual-position'
+                label={t('actualPositionLabel')}
+                filled={Boolean(appointment.actualPositionId)}
+                invalid={Boolean(employmentContractErrors.actualPositionId)}
+                required={isMilitary}
               >
-                {t('actualPositionLabel')}
-
-                {isMilitary && <span className='ms-1 text-destructive'>*</span>}
-              </Label>
-
-              <PositionCombobox
-                value={appointment.actualPositionId ?? null}
-                selectedLabel={
-                  isRtl
-                    ? (appointment.actualPositionTitleAr ??
-                      appointment.actualPositionTitleEn ??
-                      undefined)
-                    : (appointment.actualPositionTitleEn ?? undefined)
-                }
-                onChange={(position) => {
-                  onClearError('actualPositionId')
-                  onChange({
-                    ...value,
-                    appointment: {
-                      ...appointment,
-                      actualPositionId: position.id,
-                      actualPositionTitleEn: position.titleEn ?? null,
-                      actualPositionTitleAr: position.titleAr ?? null,
-                    },
-                  })
-                }}
-              />
+                <PositionCombobox
+                  id='actual-position'
+                  hidePlaceholder
+                  required={isMilitary}
+                  ariaInvalid={Boolean(
+                    employmentContractErrors.actualPositionId,
+                  )}
+                  value={appointment.actualPositionId ?? null}
+                  selectedLabel={
+                    isRtl
+                      ? (appointment.actualPositionTitleAr ??
+                        appointment.actualPositionTitleEn ??
+                        undefined)
+                      : (appointment.actualPositionTitleEn ?? undefined)
+                  }
+                  onChange={(position) => {
+                    onClearError('actualPositionId')
+                    onChange({
+                      ...value,
+                      appointment: {
+                        ...appointment,
+                        actualPositionId: position.id,
+                        actualPositionTitleEn: position.titleEn ?? null,
+                        actualPositionTitleAr: position.titleAr ?? null,
+                      },
+                    })
+                  }}
+                />
+              </FloatingField>
 
               <FieldError message={employmentContractErrors.actualPositionId} />
             </div>
 
             {/* Manager */}
-
             <div className='space-y-2'>
-              <Label htmlFor='manager-id'>{t('managerId')}</Label>
-
-              <Input
+              <FloatingField
                 id='manager-id'
-                className='h-11'
-                value={appointment.managerId ?? ''}
-                onChange={(event) =>
-                  updateAppointment('managerId', event.target.value || null)
-                }
-                placeholder={t('optional')}
-              />
+                label={t('managerId')}
+                filled={Boolean(appointment.managerId)}
+              >
+                <Input
+                  id='manager-id'
+                  value={appointment.managerId ?? ''}
+                  onChange={(event) =>
+                    updateAppointment('managerId', event.target.value || null)
+                  }
+                />
+              </FloatingField>
             </div>
 
             {/* Appointment Type */}
-
             <div className='space-y-2'>
-              <Label htmlFor='appointment-type'>
-                {t('appointmentTypeLabel')}
-              </Label>
-
-              <Select
-                dir={isRtl ? 'rtl' : 'ltr'}
-                value={appointment.appointmentType ?? 'primary'}
-                onValueChange={(selectedValue) =>
-                  updateAppointment(
-                    'appointmentType',
-                    selectedValue as AppointmentType,
-                  )
-                }
+              <FloatingField
+                id='appointment-type'
+                label={t('appointmentTypeLabel')}
+                filled={Boolean(appointment.appointmentType ?? 'primary')}
               >
-                <SelectTrigger
-                  id='appointment-type'
-                  className='w-full data-[size=default]:h-11'
+                <Select
+                  dir={isRtl ? 'rtl' : 'ltr'}
+                  value={appointment.appointmentType ?? 'primary'}
+                  onValueChange={(selectedValue) =>
+                    updateAppointment(
+                      'appointmentType',
+                      selectedValue as AppointmentType,
+                    )
+                  }
                 >
-                  <SelectValue />
-                </SelectTrigger>
+                  <SelectTrigger
+                    id='appointment-type'
+                    data-floating-control='true'
+                    className='w-full bg-transparent dark:bg-transparent data-[size=default]:h-12'
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
 
-                <SelectContent>
-                  <SelectItem value='primary'>{t('primary')}</SelectItem>
-                  <SelectItem value='acting'>{t('acting')}</SelectItem>
-                  <SelectItem value='temporary'>{t('temporary')}</SelectItem>
-                  <SelectItem value='rotation'>{t('rotation')}</SelectItem>
-                  <SelectItem value='secondment'>{t('secondment')}</SelectItem>
-                  <SelectItem value='concurrent'>{t('concurrent')}</SelectItem>
-                  <SelectItem value='permanent_transfer'>
-                    {t('permanent')}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                  <SelectContent>
+                    <SelectItem value='primary'>{t('primary')}</SelectItem>
+                    <SelectItem value='acting'>{t('acting')}</SelectItem>
+                    <SelectItem value='temporary'>{t('temporary')}</SelectItem>
+                    <SelectItem value='rotation'>{t('rotation')}</SelectItem>
+                    <SelectItem value='secondment'>
+                      {t('secondment')}
+                    </SelectItem>
+                    <SelectItem value='concurrent'>
+                      {t('concurrent')}
+                    </SelectItem>
+                    <SelectItem value='permanent_transfer'>
+                      {t('permanent')}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </FloatingField>
             </div>
           </div>
 
           {/* Appointment Remarks */}
 
+          {/* Appointment Remarks */}
           <div className='space-y-2'>
-            <Label htmlFor='appointment-remarks'>
-              {t('appointmentRemarks')}
-            </Label>
-
-            <Textarea
+            <FloatingField
               id='appointment-remarks'
-              value={appointment.remarks ?? ''}
-              onChange={(event) =>
-                updateAppointment('remarks', event.target.value)
-              }
-              rows={3}
-              placeholder={t('appointmentRemarksPlaceholder')}
-            />
+              label={t('appointmentRemarks')}
+              filled={Boolean(appointment.remarks?.trim())}
+            >
+              <Textarea
+                id='appointment-remarks'
+                value={appointment.remarks ?? ''}
+                onChange={(event) =>
+                  updateAppointment('remarks', event.target.value)
+                }
+                rows={3}
+                className='pt-5'
+              />
+            </FloatingField>
           </div>
         </div>
       </FormSection>

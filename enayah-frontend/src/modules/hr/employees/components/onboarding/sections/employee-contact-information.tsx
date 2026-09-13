@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label'
 import { PhoneCodeCombobox } from '@/modules/countries/components/phone-code'
 import { PersonalErrors } from '@/modules/hr/onboarding/types/onboarding-errors.types'
 import { HireEmployeePayload } from '@/modules/hr/onboarding/types/onboarding.types'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { OnboardingFormSection } from './onboarding-form-section'
 
 interface Props {
@@ -24,6 +24,8 @@ export function EmployeeContactInformation({
   onClearError,
 }: Props) {
   const et = useTranslations('employees')
+  const locale = useLocale()
+  const isRtl = locale === 'ar'
 
   const email = value.personal?.emails?.[0]
   const phone = value.personal?.phoneNumbers?.[0]
@@ -188,7 +190,7 @@ export function EmployeeContactInformation({
           )}
         </div> */}
         {/* Mobile */}
-        <div className='space-y-2'>
+        {/* <div className='space-y-2'>
           <Label
             htmlFor='primary-mobile'
             className={
@@ -205,20 +207,64 @@ export function EmployeeContactInformation({
             <PhoneCodeCombobox
               value={phone?.countryCode ?? '+966'}
               onChange={updatePhoneCode}
-              className='rounded-none border-0 border-e bg-transparent'
+              //className='rounded-none border-0 border-e bg-transparent'
+              className='bg-transparent'
             />
 
             <Input
               id='primary-mobile'
               type='tel'
+              dir={isRtl ? 'rtl' : 'ltr'}
               inputMode='numeric'
               autoComplete='tel'
               data-embedded='true'
-              className='h-full flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0'
+              className='h-full flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent'
               value={phone?.phoneNumber ?? ''}
               aria-invalid={Boolean(personalErrors.primaryMobile)}
               onChange={(event) => updatePhone(event.target.value)}
-              placeholder='512345678'
+              placeholder='532345678'
+            />
+          </div>
+
+          {personalErrors.primaryMobile && (
+            <p className='text-xs font-medium text-destructive'>
+              {personalErrors.primaryMobile}
+            </p>
+          )}
+        </div> */}
+        <div className='space-y-2'>
+          <Label
+            htmlFor='primary-mobile'
+            className={
+              personalErrors.primaryMobile ? 'text-destructive' : undefined
+            }
+          >
+            {et('primaryMobile')}
+          </Label>
+
+          <div
+            dir='ltr'
+            data-slot='input-group'
+            data-invalid={Boolean(personalErrors.primaryMobile)}
+          >
+            <PhoneCodeCombobox
+              value={phone?.countryCode ?? '+966'}
+              onChange={updatePhoneCode}
+              className='bg-transparent'
+            />
+
+            <Input
+              id='primary-mobile'
+              type='tel'
+              dir='ltr'
+              inputMode='numeric'
+              autoComplete='tel'
+              data-embedded='true'
+              className='h-full flex-1 rounded-none border-0 bg-transparent text-left shadow-none focus-visible:ring-0 dark:bg-transparent'
+              value={phone?.phoneNumber ?? ''}
+              aria-invalid={Boolean(personalErrors.primaryMobile)}
+              onChange={(event) => updatePhone(event.target.value)}
+              placeholder='532345678'
             />
           </div>
 

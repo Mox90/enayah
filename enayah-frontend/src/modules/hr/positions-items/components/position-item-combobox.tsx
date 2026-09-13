@@ -23,15 +23,23 @@ import { useLocale, useTranslations } from 'next-intl'
 import { toArabicDigits } from '@/utils/utilities'
 
 interface Props {
+  id?: string
   value?: string | null
   selectedLabel?: string | null
+  hidePlaceholder?: boolean
+  required?: boolean
+  ariaInvalid?: boolean
   onChange: (item: PositionItemLookupItem | null) => void
 }
 
 export function PositionItemCombobox({
   value,
+  id,
   selectedLabel,
   onChange,
+  required = false,
+  ariaInvalid = false,
+  hidePlaceholder = false,
 }: Props) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -43,35 +51,41 @@ export function PositionItemCombobox({
 
   const items = data?.items ?? []
   const selected = items.find((item) => item.id === value)
+
   const locale = useLocale()
   const isRtl = locale === 'ar'
   const pt = useTranslations('positionItems')
   const et = useTranslations('employees')
 
-  //console.log('isRtl ?' + isRtl)
+  const displayLabel = selected
+    ? `${selected.itemNumber} - ${
+        isRtl ? selected.departmentNameAr : (selected.departmentNameEn ?? '')
+      } - ${
+        isRtl
+          ? (selected.positionTitleAr ?? selected.positionTitleEn ?? '')
+          : (selected.positionTitleEn ?? '')
+      }`
+    : selectedLabel || ''
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          id={id}
+          data-floating-control='true'
+          type='button'
           variant='outline'
           role='combobox'
-          className='w-full h-11 justify-between'
+          aria-expanded={open}
+          aria-required={required}
+          aria-invalid={ariaInvalid}
+          className='h-12 w-full justify-between bg-transparent hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent'
         >
-          {/* {selected
-            ? `${selected.itemNumber} — ${selected.positionTitleEn ?? ''}`
-            : 'Select vacant PCN'} */}
-          {selected
-            ? `${selected.itemNumber} - ${isRtl ? selected.departmentNameAr : (selected.departmentNameEn ?? '')} - ${
-                isRtl
-                  ? (selected.positionTitleAr ?? selected.positionTitleEn ?? '')
-                  : (selected.positionTitleEn ?? '')
-              }`
-            : selectedLabel
-              ? selectedLabel
-              : pt('selectVacant')}
+          <span className='truncate font-normal'>
+            {displayLabel || (!hidePlaceholder ? pt('selectVacant') : null)}
+          </span>
 
-          <ChevronsUpDown className='ml-2 h-4 w-4 opacity-50' />
+          <ChevronsUpDown className='ms-2 h-4 w-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
 

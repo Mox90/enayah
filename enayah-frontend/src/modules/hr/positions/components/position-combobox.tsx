@@ -42,17 +42,25 @@ export interface PositionLookupItem {
 }
 
 interface Props {
+  id?: string
   value?: string | null
   selectedLabel?: string | null
   excludeIds?: string[]
   onChange: (position: PositionLookupItem) => void
+  hidePlaceholder?: boolean
+  required?: boolean
+  ariaInvalid?: boolean
 }
 
 export function PositionCombobox({
+  id,
   value,
   onChange,
   selectedLabel,
   excludeIds = [],
+  required = false,
+  ariaInvalid = false,
+  hidePlaceholder = false,
 }: Props) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
@@ -98,14 +106,19 @@ export function PositionCombobox({
     >
       <PopoverTrigger asChild>
         <Button
+          id={id}
           type='button'
           variant='outline'
           role='combobox'
           aria-expanded={open}
-          className='h-11 w-full justify-between'
+          aria-required={required}
+          aria-invalid={ariaInvalid}
+          className='h-12 w-full justify-between bg-transparent hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent'
         >
-          <span className='truncate'>
-            {displaySelectedLabel ?? cnt('selectPosition')}
+          <span className='truncate font-normal'>
+            {/* {displaySelectedLabel ?? cnt('selectPosition')} */}
+            {displaySelectedLabel ||
+              (!hidePlaceholder ? cnt('selectPosition') : null)}
           </span>
 
           <ChevronsUpDown className='ms-2 size-4 shrink-0 opacity-50' />
@@ -166,12 +179,13 @@ export function PositionCombobox({
                         </span>
                       )}
 
-                      {position.workforceCategory && position.categoryCode && (
-                        <span className='mt-0.5 text-[11px] text-muted-foreground'>
-                          {et(position.workforceCategory)} ·{' '}
-                          {position.categoryCode}
-                        </span>
-                      )}
+                      {position.workforceCategory &&
+                        position.categoryCode != null && (
+                          <span className='mt-0.5 text-[11px] text-muted-foreground'>
+                            {et(position.workforceCategory)} ·{' '}
+                            {position.categoryCode}
+                          </span>
+                        )}
                     </div>
                   </CommandItem>
                 )
