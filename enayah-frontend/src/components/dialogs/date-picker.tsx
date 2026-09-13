@@ -17,6 +17,7 @@ interface Props {
   onChange: (value: DatePickerValue) => void
   className?: string
   disabled?: boolean
+  hidePlaceholder?: boolean
 }
 
 /**
@@ -31,6 +32,7 @@ export function DatePicker({
   onChange,
   className,
   disabled = false,
+  hidePlaceholder = false,
 }: Props) {
   const selectedDate = value
     ? new DateObject({
@@ -41,10 +43,13 @@ export function DatePicker({
 
   const displayValue = selectedDate
     ? selectedDate.format('DD/MM/YYYY')
-    : 'Select date'
+    : hidePlaceholder
+      ? ''
+      : 'Select date'
 
   return (
     <DatePickerBase
+      portal
       value={selectedDate}
       disabled={disabled}
       format='DD/MM/YYYY'
@@ -77,15 +82,34 @@ export function DatePicker({
           variant='outline'
           disabled={disabled}
           onClick={openCalendar}
+          // className={cn(
+          //   'h-12 w-full justify-start rounded-lg border-border/80 text-left font-normal',
+          //   'bg-transparent dark:bg-transparent',
+          //   'transition-all duration-200',
+          //   'hover:bg-transparent dark:hover:bg-transparent',
+          //   'focus-visible:border-emerald-500',
+          //   'focus-visible:bg-transparent dark:focus-visible:bg-transparent',
+          //   'focus-visible:ring-4 focus-visible:ring-emerald-500/10',
+          //   !value && 'text-muted-foreground',
+          //   className,
+          // )}
           className={cn(
-            'h-11 w-full justify-start text-left font-normal',
+            'h-12 w-full justify-start rounded-lg border-border/80 text-left font-normal',
+            'bg-transparent dark:bg-transparent',
+            'transition-all duration-200',
+            'hover:bg-transparent dark:hover:bg-transparent',
             !value && 'text-muted-foreground',
             className,
           )}
         >
-          <CalendarDays className='mr-2 h-4 w-4 shrink-0' />
+          <CalendarDays
+            className={cn(
+              'h-4 w-4 shrink-0',
+              displayValue ? 'me-2' : 'ms-auto',
+            )}
+          />
 
-          {displayValue}
+          {displayValue && <span>{displayValue}</span>}
         </Button>
       )}
       onChange={(selectedDate: DateObject | null) => {

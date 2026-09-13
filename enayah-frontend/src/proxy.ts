@@ -1,4 +1,4 @@
-// enayah-frontend/proxy.ts
+// enayah-frontend/src/proxy.ts
 
 import createMiddleware from 'next-intl/middleware'
 

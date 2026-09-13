@@ -30,28 +30,25 @@ import type { CountryLookupItem } from '../services/countries.service'
 
 interface Props {
   value?: string | null
-
+  id?: string
   selectedLabel?: string | null
 
-  /*
-   * Country IDs or alpha2 values that should not be
-   * displayed in the combobox.
-   *
-   * For the employee filter we will use alpha2.
-   */
   excludeAlpha2?: string[]
 
   onChange: (country: CountryLookupItem) => void
 
   placeholder?: string
+  hidePlaceholder?: boolean
 }
 
 export function CountryCombobox({
   value,
+  id,
   selectedLabel,
   excludeAlpha2 = [],
   onChange,
   placeholder,
+  hidePlaceholder = false,
 }: Props) {
   const t = useTranslations('employees')
 
@@ -103,14 +100,17 @@ export function CountryCombobox({
     >
       <PopoverTrigger asChild>
         <Button
+          id={id}
+          data-floating-control='true'
           type='button'
           variant='outline'
           role='combobox'
           aria-expanded={open}
-          className='h-11 w-full justify-between'
+          className='h-12 w-full justify-between bg-transparent hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent'
         >
           <span className='truncate'>
-            {displayLabel || placeholder || t('selectNationality')}
+            {displayLabel ||
+              (!hidePlaceholder ? placeholder || t('selectNationality') : null)}
           </span>
 
           <ChevronsUpDown className='ms-2 h-4 w-4 shrink-0 opacity-50' />
