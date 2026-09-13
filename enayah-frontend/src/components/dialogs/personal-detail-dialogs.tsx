@@ -833,7 +833,7 @@ function PhoneDialogContent({
               </Select>
             </div>
 
-            <div className='space-y-2'>
+            {/* <div className='space-y-2'>
               <Label>{pt('mobile')}</Label>
 
               <div className='flex h-11 overflow-hidden rounded-md border border-input bg-background'>
@@ -845,6 +845,30 @@ function PhoneDialogContent({
 
                 <Input
                   className='border-0! rounded-none! bg-transparent! shadow-none! focus-visible:ring-0 focus-visible:ring-offset-0'
+                  value={form.phoneNumber}
+                  onChange={(e) => update('phoneNumber', e.target.value)}
+                  placeholder='512345678'
+                />
+              </div>
+            </div> */}
+            <div className='space-y-2'>
+              <Label>{pt('mobile')}</Label>
+
+              <div data-slot='input-group'>
+                {/* <PhoneCodeCombobox
+                  value={form.countryCode || '+966'}
+                  onChange={(value) => update('countryCode', value)}
+                  className='rounded-none border-0 border-e bg-transparent'
+                /> */}
+                <PhoneCodeCombobox
+                  value={form.countryCode || '+966'}
+                  onChange={(value) => update('countryCode', value)}
+                  className='rounded-none border-0 border-e border-border/80 bg-transparent shadow-none focus-visible:ring-0'
+                />
+
+                <Input
+                  data-embedded='true'
+                  className='h-full flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0'
                   value={form.phoneNumber}
                   onChange={(e) => update('phoneNumber', e.target.value)}
                   placeholder='512345678'

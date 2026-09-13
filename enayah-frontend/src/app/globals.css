@@ -29,61 +29,61 @@
 
 /* Custom variants */
 @custom-variant data-open {
-  &:where([data-state="open"]),
-  &:where([data-open]:not([data-open="false"])) {
+  &:where([data-state='open']),
+  &:where([data-open]:not([data-open='false'])) {
     @slot;
   }
 }
 
 @custom-variant data-closed {
-  &:where([data-state="closed"]),
-  &:where([data-closed]:not([data-closed="false"])) {
+  &:where([data-state='closed']),
+  &:where([data-closed]:not([data-closed='false'])) {
     @slot;
   }
 }
 
 @custom-variant data-checked {
-  &:where([data-state="checked"]),
-  &:where([data-checked]:not([data-checked="false"])) {
+  &:where([data-state='checked']),
+  &:where([data-checked]:not([data-checked='false'])) {
     @slot;
   }
 }
 
 @custom-variant data-unchecked {
-  &:where([data-state="unchecked"]),
-  &:where([data-unchecked]:not([data-unchecked="false"])) {
+  &:where([data-state='unchecked']),
+  &:where([data-unchecked]:not([data-unchecked='false'])) {
     @slot;
   }
 }
 
 @custom-variant data-selected {
-  &:where([data-selected="true"]) {
+  &:where([data-selected='true']) {
     @slot;
   }
 }
 
 @custom-variant data-disabled {
-  &:where([data-disabled="true"]),
-  &:where([data-disabled]:not([data-disabled="false"])) {
+  &:where([data-disabled='true']),
+  &:where([data-disabled]:not([data-disabled='false'])) {
     @slot;
   }
 }
 
 @custom-variant data-active {
-  &:where([data-state="active"]),
-  &:where([data-active]:not([data-active="false"])) {
+  &:where([data-state='active']),
+  &:where([data-active]:not([data-active='false'])) {
     @slot;
   }
 }
 
 @custom-variant data-horizontal {
-  &:where([data-orientation="horizontal"]) {
+  &:where([data-orientation='horizontal']) {
     @slot;
   }
 }
 
 @custom-variant data-vertical {
-  &:where([data-orientation="vertical"]) {
+  &:where([data-orientation='vertical']) {
     @slot;
   }
 }
@@ -99,27 +99,27 @@
 
 /* scroll-fade */
 @property --scroll-fade-t {
-  syntax: "<length-percentage>";
+  syntax: '<length-percentage>';
   inherits: false;
   initial-value: 0px;
 }
 @property --scroll-fade-b {
-  syntax: "<length-percentage>";
+  syntax: '<length-percentage>';
   inherits: false;
   initial-value: 0px;
 }
 @property --scroll-fade-s {
-  syntax: "<length-percentage>";
+  syntax: '<length-percentage>';
   inherits: false;
   initial-value: 0px;
 }
 @property --scroll-fade-e {
-  syntax: "<length-percentage>";
+  syntax: '<length-percentage>';
   inherits: false;
   initial-value: 0px;
 }
 @property --scroll-fade-mask {
-  syntax: "*";
+  syntax: '*';
   inherits: false;
 }
 
@@ -129,12 +129,18 @@
       --scroll-fade-t: 0px;
     }
     to {
-      --scroll-fade-t: var(--_scroll-fade-size-t, var(--scroll-fade-size, min(12%, calc(var(--spacing) * 10))));
+      --scroll-fade-t: var(
+        --_scroll-fade-size-t,
+        var(--scroll-fade-size, min(12%, calc(var(--spacing) * 10)))
+      );
     }
   }
   @keyframes scroll-fade-reveal-b {
     from {
-      --scroll-fade-b: var(--_scroll-fade-size-b, var(--scroll-fade-size, min(12%, calc(var(--spacing) * 10))));
+      --scroll-fade-b: var(
+        --_scroll-fade-size-b,
+        var(--scroll-fade-size, min(12%, calc(var(--spacing) * 10)))
+      );
     }
     to {
       --scroll-fade-b: 0px;
@@ -145,12 +151,18 @@
       --scroll-fade-s: 0px;
     }
     to {
-      --scroll-fade-s: var(--_scroll-fade-size-s, var(--scroll-fade-size, min(12%, calc(var(--spacing) * 10))));
+      --scroll-fade-s: var(
+        --_scroll-fade-size-s,
+        var(--scroll-fade-size, min(12%, calc(var(--spacing) * 10)))
+      );
     }
   }
   @keyframes scroll-fade-reveal-e {
     from {
-      --scroll-fade-e: var(--_scroll-fade-size-e, var(--scroll-fade-size, min(12%, calc(var(--spacing) * 10))));
+      --scroll-fade-e: var(
+        --_scroll-fade-size-e,
+        var(--scroll-fade-size, min(12%, calc(var(--spacing) * 10)))
+      );
     }
     to {
       --scroll-fade-e: 0px;
@@ -254,7 +266,7 @@
     #000 calc(100% - var(--scroll-fade-e, 0px)),
     transparent 100%
   );
-  &:where([dir="rtl"], [dir="rtl"] *) {
+  &:where([dir='rtl'], [dir='rtl'] *) {
     --scroll-fade-inline: linear-gradient(
       to left,
       transparent 0,
@@ -424,7 +436,7 @@
     #000 var(--scroll-fade-s, 0px),
     #000 100%
   );
-  &:where([dir="rtl"], [dir="rtl"] *) {
+  &:where([dir='rtl'], [dir='rtl'] *) {
     --scroll-fade-mask: linear-gradient(
       to left,
       transparent 0,
@@ -462,7 +474,7 @@
     #000 calc(100% - var(--scroll-fade-e, 0px)),
     transparent 100%
   );
-  &:where([dir="rtl"], [dir="rtl"] *) {
+  &:where([dir='rtl'], [dir='rtl'] *) {
     --scroll-fade-mask: linear-gradient(
       to left,
       #000 0,
@@ -523,16 +535,16 @@
 
 /* shimmer */
 @property --shimmer-angle {
-  syntax: "<angle>";
+  syntax: '<angle>';
   inherits: true;
   initial-value: 20deg;
 }
 @property --shimmer-image {
-  syntax: "*";
+  syntax: '*';
   inherits: false;
 }
 @property --shimmer-text-fill {
-  syntax: "*";
+  syntax: '*';
   inherits: false;
 }
 
@@ -583,7 +595,7 @@
     );
   }
 
-  &:where([dir="rtl"], [dir="rtl"] *) {
+  &:where([dir='rtl'], [dir='rtl'] *) {
     animation-direction: reverse;
   }
 }
@@ -775,15 +787,131 @@
   }
 }
 
+/* @layer components {
+  [data-slot='input'] {
+    @apply h-11 rounded-xl border-border/80 bg-background/50 transition-all duration-200;
+  }
+
+  [data-slot='input']:focus-visible {
+    @apply border-emerald-500 bg-background ring-4 ring-emerald-500/10;
+  }
+} */
+
+@layer components {
+  /* =========================================================
+     FLOATING FIELD
+     ========================================================= */
+
+  [data-slot='floating-field'] {
+    @apply relative;
+  }
+
+  /* Text inputs */
+  [data-slot='floating-field'] [data-slot='input'] {
+    @apply bg-transparent;
+  }
+
+  /* Combobox / Select / DatePicker triggers */
+  [data-slot='floating-field'] [data-floating-control='true'] {
+    @apply border-border/80 bg-transparent transition-all duration-200 dark:bg-transparent;
+  }
+
+  [data-slot='floating-field'] [data-floating-control='true']:hover {
+    @apply bg-transparent dark:bg-transparent;
+  }
+
+  [data-slot='floating-field'] [data-floating-control='true']:hover {
+    @apply bg-transparent;
+  }
+
+  /* Focus */
+  [data-slot='floating-field']:focus-within [data-floating-control='true'] {
+    @apply border-emerald-500 bg-transparent ring-4 ring-emerald-500/10;
+  }
+
+  /* Floating label */
+  [data-slot='floating-field'] [data-slot='floating-label'] {
+    @apply pointer-events-none absolute start-3 top-1/2 z-10
+      -translate-y-1/2
+      text-sm font-medium leading-none
+      text-muted-foreground
+      transition-all duration-200;
+  }
+
+  /* Focused OR filled */
+  [data-slot='floating-field']:focus-within [data-slot='floating-label'],
+  [data-slot='floating-field'][data-filled='true']
+    [data-slot='floating-label'] {
+    @apply top-0
+      -translate-y-1/2
+      px-1
+      text-xs
+      font-medium
+      text-emerald-600;
+
+    background-color: var(--floating-label-bg, var(--card));
+  }
+
+  /* Invalid label */
+  [data-slot='floating-field'][data-invalid='true']
+    [data-slot='floating-label'] {
+    @apply text-destructive;
+  }
+
+  /* Invalid custom control */
+  [data-slot='floating-field'][data-invalid='true']
+    [data-floating-control='true'] {
+    @apply border-destructive;
+  }
+
+  [data-slot='floating-field'][data-invalid='true']:focus-within
+    [data-floating-control='true'] {
+    @apply border-destructive ring-destructive/20;
+  }
+}
+
+/* =========================================================
+   STANDARD INPUT
+   ========================================================= */
+
+[data-slot='input']:not([data-embedded='true']) {
+  @apply h-12 rounded-lg border-border/80 bg-background/50 transition-all duration-200;
+}
+
+[data-slot='input']:not([data-embedded='true']):focus-visible {
+  @apply border-emerald-500 bg-background ring-4 ring-emerald-500/10;
+}
+
+/* =========================================================
+   COMPOSITE INPUT
+   ========================================================= */
+
+[data-slot='input-group'] {
+  @apply flex h-12 overflow-hidden rounded-lg border border-border/80 bg-background/50 transition-all duration-200;
+}
+
+[data-slot='input-group']:focus-within {
+  @apply border-emerald-500 bg-background ring-4 ring-emerald-500/10;
+}
+
+[data-slot='input-group'][data-invalid='true'] {
+  @apply border-destructive;
+}
+
+[data-slot='input-group'][data-invalid='true']:focus-within {
+  @apply border-destructive ring-destructive/20;
+}
+
 html[dir='rtl'] {
   --font-ui: var(--font-cairo);
 }
 
 /* =========================================================
-   Enayah React Multi Date Picker
+   Nafh React Multi Date Picker
    ========================================================= */
 
 .enayah-date-picker.rmdp-wrapper {
+  z-index: 50;
   background: var(--popover);
   color: var(--popover-foreground);
   border: 1px solid var(--border);
@@ -897,15 +1025,15 @@ html[dir='rtl'] {
   color: var(--foreground);
 }
 
-.rmdp-container .enayah-date-picker.ep-arrow::after {
+.enayah-date-picker.ep-arrow::after {
   background: var(--popover);
 }
 
-.rmdp-container .enayah-date-picker.ep-arrow[direction='bottom'] {
+.enayah-date-picker.ep-arrow[direction='bottom'] {
   border-top-color: var(--border);
 }
 
-.rmdp-container .enayah-date-picker.ep-arrow[direction='top'] {
+.enayah-date-picker.ep-arrow[direction='top'] {
   border-bottom-color: var(--border);
 }
 

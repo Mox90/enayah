@@ -62,4 +62,7 @@ echo ""
 
 docker compose down --remove-orphans
 
+echo "Cleaning Next.js development cache..."
+rm -rf ./enayah-frontend/.next
+
 docker compose up --build

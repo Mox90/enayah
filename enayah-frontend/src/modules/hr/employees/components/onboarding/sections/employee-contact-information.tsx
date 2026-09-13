@@ -126,7 +126,6 @@ export function EmployeeContactInformation({
             id='primary-email'
             type='email'
             autoComplete='email'
-            className='h-11'
             value={email?.email ?? ''}
             aria-invalid={Boolean(personalErrors.primaryEmail)}
             onChange={(event) => updateEmail(event.target.value)}
@@ -142,7 +141,7 @@ export function EmployeeContactInformation({
 
         {/* Mobile */}
 
-        <div className='space-y-2'>
+        {/* <div className='space-y-2'>
           <Label
             htmlFor='primary-mobile'
             className={
@@ -175,6 +174,47 @@ export function EmployeeContactInformation({
               inputMode='numeric'
               autoComplete='tel'
               className='h-full rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 focus-visible:ring-offset-0'
+              value={phone?.phoneNumber ?? ''}
+              aria-invalid={Boolean(personalErrors.primaryMobile)}
+              onChange={(event) => updatePhone(event.target.value)}
+              placeholder='512345678'
+            />
+          </div>
+
+          {personalErrors.primaryMobile && (
+            <p className='text-xs font-medium text-destructive'>
+              {personalErrors.primaryMobile}
+            </p>
+          )}
+        </div> */}
+        {/* Mobile */}
+        <div className='space-y-2'>
+          <Label
+            htmlFor='primary-mobile'
+            className={
+              personalErrors.primaryMobile ? 'text-destructive' : undefined
+            }
+          >
+            {et('primaryMobile')}
+          </Label>
+
+          <div
+            data-slot='input-group'
+            data-invalid={Boolean(personalErrors.primaryMobile)}
+          >
+            <PhoneCodeCombobox
+              value={phone?.countryCode ?? '+966'}
+              onChange={updatePhoneCode}
+              className='rounded-none border-0 border-e bg-transparent'
+            />
+
+            <Input
+              id='primary-mobile'
+              type='tel'
+              inputMode='numeric'
+              autoComplete='tel'
+              data-embedded='true'
+              className='h-full flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0'
               value={phone?.phoneNumber ?? ''}
               aria-invalid={Boolean(personalErrors.primaryMobile)}
               onChange={(event) => updatePhone(event.target.value)}
