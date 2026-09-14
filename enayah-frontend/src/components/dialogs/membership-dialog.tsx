@@ -138,10 +138,8 @@ function MembershipDialogContent({
     if (isSubmitting || formInvalid) return
 
     setIsSubmitting(true)
-
     try {
       const clientId = generateId ? (form.id ?? createClientId()) : null
-
       await onSubmit({
         ...(!generateId && form.id ? { id: form.id } : {}),
         ...(generateId && clientId ? { clientId } : {}),
@@ -169,33 +167,41 @@ function MembershipDialogContent({
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
-              Membership Details
+              {t('membershipDocument.detailsTitle')}
             </h3>
+
             <p className='text-xs text-muted-foreground'>
-              Enter the professional organization and membership number.
+              {t('membershipDocument.detailsDescription')}
             </p>
           </div>
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2 xl:col-span-2'>
-              <Label>Organization *</Label>
+              <Label>
+                {t('membershipDocument.organization')}
+                <span className='ms-1 text-destructive'>*</span>
+              </Label>
+
               <Input
                 className='h-11'
                 value={form.organization}
                 onChange={(e) => update('organization', e.target.value)}
-                placeholder='Saudi Commission for Health Specialties'
+                placeholder={t('membershipDocument.organizationPlaceholder')}
               />
             </div>
 
             <div className='space-y-2 xl:col-span-2'>
-              <Label>Membership Number</Label>
+              <Label>{t('membershipDocument.membershipNumber')}</Label>
+
               <Input
                 className='h-11'
                 value={form.membershipNumber ?? ''}
                 onChange={(e) =>
                   update('membershipNumber', e.target.value || null)
                 }
-                placeholder='MEM-123456'
+                placeholder={t(
+                  'membershipDocument.membershipNumberPlaceholder',
+                )}
               />
             </div>
           </div>
@@ -254,54 +260,41 @@ function MembershipDialogContent({
         <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
-              Validity Period
+              {t('membershipDocument.validityTitle')}
             </h3>
+
             <p className='text-xs text-muted-foreground'>
-              Add the membership start and expiry dates if available.
+              {t('membershipDocument.validityDescription')}
             </p>
           </div>
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              {/* <Label>Start Date</Label>
-              <Input
-                type='date'
-                className='h-11 bg-background'
-                value={form.startDate ?? ''}
-                onChange={(e) => update('startDate', e.target.value || null)}
-              /> */}
               <label
-                htmlFor={'startDate'}
-                className='text-xs text-muted-foreground block'
+                htmlFor='startDate'
+                className='block text-xs text-muted-foreground'
               >
-                {'Start Date'}
+                {t('membershipDocument.startDate')}
               </label>
 
               <DatePicker
                 id='startDate'
-                value={form.startDate}
+                value={form.startDate ?? null}
                 onChange={(value) => update('startDate', value)}
               />
             </div>
 
             <div className='space-y-2'>
-              {/* <Label>Expiry Date</Label>
-              <Input
-                type='date'
-                className='h-11 bg-background'
-                value={form.expiryDate ?? ''}
-                onChange={(e) => update('expiryDate', e.target.value || null)}
-              /> */}
               <label
-                htmlFor={'expiryDate'}
-                className='text-xs text-muted-foreground block'
+                htmlFor='expiryDate'
+                className='block text-xs text-muted-foreground'
               >
-                {'Expiry Date'}
+                {t('membershipDocument.expiryDate')}
               </label>
 
               <DatePicker
                 id='expiryDate'
-                value={form.expiryDate}
+                value={form.expiryDate ?? null}
                 onChange={(value) => update('expiryDate', value)}
               />
             </div>

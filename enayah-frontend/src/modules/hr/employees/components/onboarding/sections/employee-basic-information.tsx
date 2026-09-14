@@ -601,8 +601,12 @@ export function EmployeeBasicInformation({
                 id='dateOfBirth'
                 value={employee.dateOfBirth ?? null}
                 hidePlaceholder
-                onChange={(date) => updateEmployee('dateOfBirth', date)}
                 required
+                ariaInvalid={Boolean(personalErrors.dateOfBirth)}
+                ariaDescribedBy={
+                  personalErrors.dateOfBirth ? 'date-of-birth-error' : undefined
+                }
+                onChange={(date) => updateEmployee('dateOfBirth', date)}
               />
             </FloatingField>
             {personalErrors.dateOfBirth && (

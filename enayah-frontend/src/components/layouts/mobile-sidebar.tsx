@@ -41,7 +41,7 @@ const MobileSidebar = () => {
 
       <SheetContent
         side={locale === 'ar' ? 'right' : 'left'}
-        className='data-[side=left]:w-[85vw] data-[side=right]:w-[85vw] data-[side=left]:sm:w-[300px] data-[side=right]:sm:w-[300px] data-[side=left]:sm:max-w-[300px] data-[side=right]:sm:max-w-[300px] p-0'
+        className='data-[side=left]:w-[75vw] data-[side=right]:w-[75vw] data-[side=left]:sm:w-[300px] data-[side=right]:sm:w-[300px] data-[side=left]:sm:max-w-[300px] data-[side=right]:sm:max-w-[300px] p-0'
       >
         <SheetHeader className='sr-only'>
           <SheetTitle>Navigation Menu</SheetTitle>
@@ -62,7 +62,7 @@ const MobileSidebar = () => {
             className='h-auto w-auto rounded-full object-contain'
             priority
           /> */}
-          <RotatingLogo size={36} />
+          <RotatingLogo size={45} />
 
           <h1
             className={`truncate text-3xl font-bold ${

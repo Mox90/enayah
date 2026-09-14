@@ -207,7 +207,7 @@ function BoardDialogContent({
                 value={form.boardName}
                 disabled={isSubmitting}
                 onChange={(event) => update('boardName', event.target.value)}
-                placeholder='Saudi Board in General Surgery'
+                placeholder={crt('boardDocument.scfhsBoardPlaceholder')}
               />
             </div>
 
@@ -222,7 +222,7 @@ function BoardDialogContent({
                 onChange={(event) =>
                   update('specialty', event.target.value || null)
                 }
-                placeholder='General Surgery'
+                placeholder={crt('boardDocument.gsuPlaceHolder')}
               />
             </div>
 
@@ -238,7 +238,7 @@ function BoardDialogContent({
                 value={form.issuingBody}
                 disabled={isSubmitting}
                 onChange={(event) => update('issuingBody', event.target.value)}
-                placeholder='Saudi Commission for Health Specialties'
+                placeholder={crt('boardDocument.issuingBodyPlaceHolder')}
               />
             </div>
           </div>

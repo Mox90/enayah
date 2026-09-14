@@ -40,7 +40,7 @@ const Sidebar = () => {
         </h1>
       </Link> */}
       <Link href='/dashboard' className='flex h-16 items-center border-b px-6'>
-        <RotatingLogo size={48} />
+        <RotatingLogo size={50} />
 
         <h1
           className={`truncate text-3xl font-bold ${

@@ -226,13 +226,22 @@ export function EmployeeIdentificationInformation({
               id='identification-issue-date'
               value={identification?.issueDate ?? null}
               hidePlaceholder
+              ariaInvalid={Boolean(personalErrors.identificationIssueDate)}
+              ariaDescribedBy={
+                personalErrors.identificationIssueDate
+                  ? 'identification-issue-date-error'
+                  : undefined
+              }
               required={requiresCommonFields}
               onChange={(date) => updateIdentification('issueDate', date)}
             />
           </FloatingField>
 
           {personalErrors.identificationIssueDate && (
-            <p className='text-xs font-medium text-destructive'>
+            <p
+              id='identification-issue-date-error'
+              className='text-xs font-medium text-destructive'
+            >
               {personalErrors.identificationIssueDate}
             </p>
           )}

@@ -930,6 +930,18 @@
   @apply border-destructive ring-destructive/20;
 }
 
+/* Numeric input: hide native browser spinners */
+[data-money-input='true']::-webkit-outer-spin-button,
+[data-money-input='true']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+[data-money-input='true'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
 html[dir='rtl'] {
   --font-ui: var(--font-cairo);
 }

@@ -15,7 +15,7 @@ interface RotatingLogoProps {
 }
 
 const RotatingLogo = ({
-  size = 48,
+  size = 45,
   firstSrc = '/MODHS3.png',
   secondSrc = '/MODHS.jpg',
   interval = 60_000,

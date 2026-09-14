@@ -114,7 +114,7 @@ const Topbar = () => {
               />
             </div>
           </div> */}
-          <RotatingLogo size={36} />
+          <RotatingLogo size={45} />
 
           <h1
             className={`hidden min-[370px]:block truncate text-2xl font-bold ${

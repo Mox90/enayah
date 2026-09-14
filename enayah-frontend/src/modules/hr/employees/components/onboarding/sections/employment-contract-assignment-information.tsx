@@ -89,12 +89,22 @@ function FormSection({
   )
 }
 
-function FieldError({ message }: { message?: string }) {
+function FieldError({
+  message,
+  idName,
+}: {
+  message?: string
+  idName?: string
+}) {
   if (!message) {
     return null
   }
 
-  return <p className='text-xs font-medium text-destructive'>{message}</p>
+  return (
+    <p id={idName} className='text-xs font-medium text-destructive'>
+      {message}
+    </p>
+  )
 }
 
 export function EmploymentContractAssignmentInformation({
@@ -263,15 +273,27 @@ export function EmploymentContractAssignmentInformation({
                 value={employment.hireDate ?? null}
                 hidePlaceholder
                 required
+                ariaInvalid={Boolean(employmentContractErrors.hireDate)}
+                ariaDescribedBy={
+                  employmentContractErrors.hireDate
+                    ? 'hire-date-hint hire-date-error'
+                    : 'hire-date-hint'
+                }
                 onChange={updateEffectiveDate}
               />
             </FloatingField>
 
-            <p className='text-xs leading-relaxed text-muted-foreground'>
+            <p
+              id='hire-date-hint'
+              className='text-xs leading-relaxed text-muted-foreground'
+            >
               {t('hireEffectiveDateHint')}
             </p>
 
-            <FieldError message={employmentContractErrors.hireDate} />
+            <FieldError
+              idName='hire-date-error'
+              message={employmentContractErrors.hireDate}
+            />
           </div>
 
           {/* Contract End Date */}
@@ -290,10 +312,19 @@ export function EmploymentContractAssignmentInformation({
                 hidePlaceholder
                 required
                 onChange={updateContractEndDate}
+                ariaInvalid={Boolean(employmentContractErrors.contractEndDate)}
+                ariaDescribedBy={
+                  employmentContractErrors.contractEndDate
+                    ? 'hire-date-error'
+                    : undefined
+                }
               />
             </FloatingField>
 
-            <FieldError message={employmentContractErrors.contractEndDate} />
+            <FieldError
+              idName='hire-date-error'
+              message={employmentContractErrors.contractEndDate}
+            />
           </div>
 
           {/* Employment Type */}
@@ -312,7 +343,6 @@ export function EmploymentContractAssignmentInformation({
                 value={employment.employmentType}
                 onValueChange={(selectedValue) => {
                   onClearError('employmentType')
-
                   updateEmployment(
                     'employmentType',
                     selectedValue as EmploymentType,
@@ -396,7 +426,7 @@ export function EmploymentContractAssignmentInformation({
           {/* Contract Type */}
 
           {/* Contract Type */}
-          <div className='relative'>
+          {/* <div className='relative'>
             <div className='flex h-12 items-center justify-between gap-3 rounded-lg border border-border/80 bg-muted/30 px-3'>
               <span className='text-sm font-medium'>{t('initial')}</span>
 
@@ -408,6 +438,24 @@ export function EmploymentContractAssignmentInformation({
             <span className='pointer-events-none absolute start-3 top-0 z-10 -translate-y-1/2 bg-card px-1 text-sm font-medium leading-none text-emerald-600'>
               {t('contractType')}
             </span>
+          </div> */}
+
+          <div className='space-y-2'>
+            <div
+              data-slot='floating-field'
+              data-filled='true'
+              className='relative'
+            >
+              <div className='flex h-12 items-center justify-between gap-3 rounded-lg border border-border/80 bg-muted/30 px-3'>
+                <span className='text-sm font-medium'>{t('initial')}</span>
+
+                <span className='shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary'>
+                  {t('systemDefined')}
+                </span>
+              </div>
+
+              <span data-slot='floating-label'>{t('contractType')}</span>
+            </div>
           </div>
         </div>
       </FormSection>

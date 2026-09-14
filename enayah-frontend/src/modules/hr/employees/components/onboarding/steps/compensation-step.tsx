@@ -8,23 +8,19 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAllowanceOptions } from '@/modules/hr/compensations/utils/allowance-options'
 import { HireEmployeePayload } from '@/modules/hr/onboarding/types/onboarding.types'
-import { Plus, Trash2, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, Plus, Trash2, X } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import { OnboardingFormSection } from '../sections/onboarding-form-section'
 import { CompensationErrors } from '@/modules/hr/onboarding/types/onboarding-errors.types'
 import { SaudiRiyalSymbol } from '@/components/icons/saudi-riyal-symbol'
-import { base } from 'next/dist/build/webpack/config/blocks/base'
+import { FloatingField } from '@/components/forms/floating-field'
 
 interface Props {
   value: HireEmployeePayload
-
   onChange: (value: HireEmployeePayload) => void
-
   errors: CompensationErrors
-
   onClearError: (field: keyof CompensationErrors) => void
-
   onUpdateErrors: (
     updater: (previous: CompensationErrors) => CompensationErrors,
   ) => void
@@ -46,22 +42,50 @@ export function CompensationStep({
   const compensation = value.compensation
   const allowances = value.allowances ?? []
   const totalAllowances = allowances.reduce(
-    (total, allowance) => total + Number(allowance.amount || 0),
+    (total, allowance) => total + Number(allowance.amount || 0.0),
     0,
   )
-  const baseSalary = Number(compensation?.baseSalary || 0)
+  const baseSalary = Number(compensation?.baseSalary || 0.0)
   const totalMonthlyCompensation = baseSalary + totalAllowances
+
+  // function stepBaseSalary(direction: 1 | -1) {
+  //   const current = Number(compensation?.baseSalary ?? 0)
+  //   const next = Math.max(0, Number((current + direction * 1).toFixed(2)))
+
+  //   updateCompensation('baseSalary', next)
+  // }
+  // function stepBaseSalary(direction: 1 | -1) {
+  //   if (!compensation) {
+  //     return
+  //   }
+
+  //   const current = Number(compensation.baseSalary ?? 0)
+
+  //   // Work in cents to avoid floating-point precision issues.
+  //   const currentInCents = Math.round(current * 100)
+  //   const nextInCents = Math.max(0, currentInCents + direction)
+
+  //   updateCompensation('baseSalary', nextInCents / 100)
+  // }
+  function stepBaseSalary(direction: 1 | -1) {
+    if (!compensation) {
+      return
+    }
+
+    const current = Number(compensation.baseSalary ?? 0)
+    const next = Math.max(0, current + direction)
+
+    updateCompensation('baseSalary', next)
+  }
 
   function enableCompensation() {
     onClearError('baseSalary')
     onClearError('effectiveDate')
-
     onChange({
       ...value,
-
       compensation: {
         effectiveDate: value.contract.startDate,
-        baseSalary: 0,
+        baseSalary: 0.0,
         status: 'approved',
         reason: 'Initial hire',
       },
@@ -73,7 +97,6 @@ export function CompensationStep({
     onClearError('effectiveDate')
     onClearError('allowanceTypes')
     onClearError('allowanceAmounts')
-
     onChange({
       ...value,
       compensation: undefined,
@@ -99,7 +122,6 @@ export function CompensationStep({
 
     onChange({
       ...value,
-
       compensation: {
         ...compensation,
         [field]: fieldValue,
@@ -114,12 +136,11 @@ export function CompensationStep({
 
     onChange({
       ...value,
-
       allowances: [
         ...allowances,
         {
           type: '',
-          amount: 0,
+          amount: 0.0,
         },
       ],
     })
@@ -162,7 +183,6 @@ export function CompensationStep({
     fieldValue: string,
   ) {
     const nextAllowances = [...allowances]
-
     const current = nextAllowances[index]
 
     if (!current) {
@@ -204,9 +224,7 @@ export function CompensationStep({
      * recreate any remaining errors.
      */
     onClearError('allowanceTypes')
-
     onClearError('allowanceAmounts')
-
     onChange({
       ...value,
       allowances: nextAllowances,
@@ -222,6 +240,29 @@ export function CompensationStep({
     )
 
     return allowanceOptions.filter((option) => !selected.has(option.value))
+  }
+
+  // function stepAllowanceAmount(index: number, direction: 1 | -1) {
+  //   const allowance = allowances[index]
+  //   if (!allowance) {
+  //     return
+  //   }
+
+  //   const current = Number(allowance.amount ?? 0)
+  //   const next = Math.max(0, Number((current + direction * 0.01).toFixed(2)))
+  //   updateAllowance(index, 'amount', String(next))
+  // }
+  function stepAllowanceAmount(index: number, direction: 1 | -1) {
+    const allowance = allowances[index]
+
+    if (!allowance) {
+      return
+    }
+
+    const current = Number(allowance.amount ?? 0)
+    const next = Math.max(0, current + direction)
+
+    updateAllowance(index, 'amount', String(next))
   }
 
   if (!compensation) {
@@ -283,37 +324,94 @@ export function CompensationStep({
             {/* Base Salary */}
 
             <div className='space-y-2'>
-              <Label htmlFor='base-salary'>
-                {t('baseSalary')}
-                <span className='ms-1 text-destructive'>*</span>
-              </Label>
+              <FloatingField
+                id='base-salary'
+                label={t('baseSalary')}
+                filled={
+                  compensation.baseSalary !== null &&
+                  compensation.baseSalary !== undefined
+                }
+                invalid={Boolean(errors.baseSalary)}
+                required
+              >
+                <div className='relative' dir='ltr'>
+                  <span
+                    className='pointer-events-none absolute inset-y-0 left-3 z-10 flex items-center text-base font-medium text-muted-foreground'
+                    aria-hidden='true'
+                  >
+                    <SaudiRiyalSymbol
+                      showAccessibleText={false}
+                      className='text-base'
+                    />
+                  </span>
 
-              <div className='relative'>
-                <span className='pointer-events-none absolute inset-y-0 start-3 z-10 flex items-center text-base font-medium text-muted-foreground'>
-                  <SaudiRiyalSymbol
-                    showAccessibleText={false}
-                    className='text-base'
+                  <Input
+                    id='base-salary'
+                    data-money-input='true'
+                    type='number'
+                    min='0'
+                    step='0.01'
+                    inputMode='decimal'
+                    dir='ltr'
+                    required
+                    className='ps-10 pe-12 text-left'
+                    value={compensation.baseSalary ?? ''}
+                    aria-invalid={Boolean(errors.baseSalary)}
+                    aria-describedby={
+                      errors.baseSalary ? 'base-salary-error' : undefined
+                    }
+                    onChange={(event) =>
+                      updateCompensation(
+                        'baseSalary',
+                        Number(event.target.value),
+                      )
+                    }
                   />
-                </span>
 
-                <Input
-                  id='base-salary'
-                  type='number'
-                  min='0'
-                  step='0.01'
-                  inputMode='decimal'
-                  className='h-11 ps-9'
-                  value={compensation.baseSalary || ''}
-                  aria-invalid={Boolean(errors.baseSalary)}
-                  aria-describedby={
-                    errors.baseSalary ? 'base-salary-error' : undefined
-                  }
-                  onChange={(event) =>
-                    updateCompensation('baseSalary', Number(event.target.value))
-                  }
-                  placeholder='0.00'
-                />
-              </div>
+                  {/* <div className='absolute inset-y-0 right-2 flex flex-col justify-center gap-1'>
+                    <button
+                      type='button'
+                      tabIndex={-1}
+                      aria-label='Increase base salary'
+                      className='flex h-4 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-600'
+                      onClick={() => stepBaseSalary(1)}
+                    >
+                      <ChevronUp className='size-3' />
+                    </button>
+
+                    <button
+                      type='button'
+                      tabIndex={-1}
+                      aria-label='Decrease base salary'
+                      className='flex h-4 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-600'
+                      onClick={() => stepBaseSalary(-1)}
+                    >
+                      <ChevronDown className='size-3' />
+                    </button>
+                  </div> */}
+                  <div className='absolute right-2 top-1/2 flex h-7 w-6 -translate-y-1/2 flex-col overflow-hidden rounded-md'>
+                    <button
+                      type='button'
+                      aria-label={t('increaseAmount')}
+                      onClick={() => stepBaseSalary(1)}
+                      className='flex flex-1 items-center justify-center rounded-t-md text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-500'
+                    >
+                      <ChevronUp className='size-3.5' />
+                    </button>
+
+                    <div className='mx-1 border-t border-border/40' />
+
+                    <button
+                      type='button'
+                      aria-label={t('decreaseAmount')}
+                      onClick={() => stepBaseSalary(-1)}
+                      className='flex flex-1 items-center justify-center rounded-b-md text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-500'
+                    >
+                      <ChevronDown className='size-3.5' />
+                    </button>
+                  </div>
+                </div>
+              </FloatingField>
 
               {errors.baseSalary && (
                 <p
@@ -327,7 +425,7 @@ export function CompensationStep({
 
             {/* Effective Date */}
 
-            <div className='space-y-2'>
+            {/* <div className='space-y-2'>
               <Label>{t('effectiveDate')}</Label>
 
               <div
@@ -352,11 +450,45 @@ export function CompensationStep({
                   {t('compensationEffectiveDateHint')}
                 </p>
               )}
+            </div> */}
+            {/* Effective Date */}
+            <div className='space-y-2'>
+              <div
+                data-slot='floating-field'
+                data-filled='true'
+                data-invalid={errors.effectiveDate ? 'true' : 'false'}
+                className='relative'
+              >
+                <div
+                  className='flex h-12 items-center justify-between gap-3 rounded-lg border border-border/80 bg-muted/30 px-3'
+                  aria-invalid={Boolean(errors.effectiveDate)}
+                >
+                  <span className='text-sm tabular-nums' dir='ltr'>
+                    {value.contract.startDate ?? '—'}
+                  </span>
+
+                  <span className='shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary'>
+                    {t('systemDefined')}
+                  </span>
+                </div>
+
+                <span data-slot='floating-label'>{t('effectiveDate')}</span>
+              </div>
+
+              {errors.effectiveDate ? (
+                <p className='text-xs font-medium text-destructive'>
+                  {errors.effectiveDate}
+                </p>
+              ) : (
+                <p className='text-xs leading-relaxed text-muted-foreground'>
+                  {t('compensationEffectiveDateHint')}
+                </p>
+              )}
             </div>
 
             {/* Status */}
 
-            <div className='space-y-2'>
+            {/* <div className='space-y-2'>
               <Label>{ct('status')}</Label>
 
               <div className='flex h-11 items-center justify-between gap-3 rounded-md border bg-muted/30 px-3'>
@@ -366,12 +498,30 @@ export function CompensationStep({
                   {t('systemDefined')}
                 </span>
               </div>
+            </div> */}
+
+            <div className='space-y-2'>
+              <div
+                data-slot='floating-field'
+                data-filled='true'
+                className='relative'
+              >
+                <div className='flex h-12 items-center justify-between gap-3 rounded-lg border border-border/80 bg-muted/30 px-3'>
+                  <span className='text-sm font-medium'>{t('approved')}</span>
+
+                  <span className='shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary'>
+                    {t('systemDefined')}
+                  </span>
+                </div>
+
+                <span data-slot='floating-label'>{ct('status')}</span>
+              </div>
             </div>
 
             {/* Reason */}
 
             <div className='space-y-2'>
-              <Label htmlFor='compensation-reason'>{t('reason')}</Label>
+              {/* <Label htmlFor='compensation-reason'>{t('reason')}</Label>
 
               <Input
                 id='compensation-reason'
@@ -381,7 +531,22 @@ export function CompensationStep({
                   updateCompensation('reason', event.target.value)
                 }
                 placeholder={t('reasonPlaceholder')}
-              />
+              /> */}
+
+              <FloatingField
+                id='compensation-reason'
+                label={t('reason')}
+                filled={Boolean(compensation.reason)}
+              >
+                <Input
+                  id='compensation-reason'
+                  //dir='rtl'
+                  value={compensation.reason ?? ''}
+                  onChange={(event) =>
+                    updateCompensation('reason', event.target.value)
+                  }
+                />
+              </FloatingField>
             </div>
           </div>
         </div>
@@ -417,71 +582,236 @@ export function CompensationStep({
               </p>
             </div>
           ) : (
+            // <div className='space-y-3'>
+            //   {allowances.map((allowance, index) => {
+            //     const typeError = errors.allowanceTypes?.[index]
+
+            //     const amountError = errors.allowanceAmounts?.[index]
+
+            //     return (
+            //       <div
+            //         key={index}
+            //         className='grid grid-cols-1 gap-3 rounded-lg border bg-muted/10 p-3 sm:grid-cols-[minmax(0,1fr)_180px_40px] sm:items-end'
+            //       >
+            //         <div className='space-y-2'>
+            //           <Label>
+            //             {t('allowanceType')}
+
+            //             <span className='ms-1 text-destructive'>*</span>
+            //           </Label>
+
+            //           <AllowanceTypeCombobox
+            //             value={allowance.type}
+            //             options={getAvailableAllowanceTypes(index)}
+            //             onChange={(selectedType) =>
+            //               updateAllowance(index, 'type', selectedType)
+            //             }
+            //           />
+
+            //           {typeError && (
+            //             <p className='text-xs font-medium text-destructive'>
+            //               {typeError}
+            //             </p>
+            //           )}
+            //         </div>
+
+            //         <div className='space-y-2'>
+            //           <Label htmlFor={`allowance-amount-${index}`}>
+            //             {t('amount')}
+            //             <span className='ms-1 text-destructive'>*</span>
+            //           </Label>
+
+            //           <div className='relative'>
+            //             <span className='pointer-events-none absolute inset-y-0 start-3 z-10 flex items-center text-base font-medium text-muted-foreground'>
+            //               <SaudiRiyalSymbol
+            //                 showAccessibleText={false}
+            //                 className='text-base'
+            //               />
+            //             </span>
+
+            //             <Input
+            //               id={`allowance-amount-${index}`}
+            //               type='number'
+            //               min='0'
+            //               step='0.01'
+            //               inputMode='decimal'
+            //               className='h-11 ps-9'
+            //               value={allowance.amount || ''}
+            //               aria-invalid={Boolean(amountError)}
+            //               onChange={(event) =>
+            //                 updateAllowance(index, 'amount', event.target.value)
+            //               }
+            //               placeholder='0.00'
+            //             />
+            //           </div>
+
+            //           {amountError && (
+            //             <p className='text-xs font-medium text-destructive'>
+            //               {amountError}
+            //             </p>
+            //           )}
+            //         </div>
+
+            //         <Button
+            //           type='button'
+            //           variant='ghost'
+            //           size='icon'
+            //           className='size-10 text-muted-foreground hover:text-destructive'
+            //           aria-label={t('removeAllowance')}
+            //           onClick={() => removeAllowance(index)}
+            //         >
+            //           <Trash2 className='size-4' />
+            //         </Button>
+            //       </div>
+            //     )
+            //   })}
+            // </div>
             <div className='space-y-3'>
               {allowances.map((allowance, index) => {
                 const typeError = errors.allowanceTypes?.[index]
-
                 const amountError = errors.allowanceAmounts?.[index]
+
+                const typeId = `allowance-type-${index}`
+                const typeErrorId = `allowance-type-${index}-error`
+
+                const amountId = `allowance-amount-${index}`
+                const amountErrorId = `allowance-amount-${index}-error`
 
                 return (
                   <div
                     key={index}
                     className='grid grid-cols-1 gap-3 rounded-lg border bg-muted/10 p-3 sm:grid-cols-[minmax(0,1fr)_180px_40px] sm:items-end'
                   >
+                    {/* Allowance Type */}
                     <div className='space-y-2'>
-                      <Label>
-                        {t('allowanceType')}
-
-                        <span className='ms-1 text-destructive'>*</span>
-                      </Label>
-
-                      <AllowanceTypeCombobox
-                        value={allowance.type}
-                        options={getAvailableAllowanceTypes(index)}
-                        onChange={(selectedType) =>
-                          updateAllowance(index, 'type', selectedType)
-                        }
-                      />
+                      <FloatingField
+                        id={typeId}
+                        label={t('allowanceType')}
+                        filled={Boolean(allowance.type)}
+                        invalid={Boolean(typeError)}
+                        required
+                      >
+                        <AllowanceTypeCombobox
+                          id={typeId}
+                          hidePlaceholder
+                          required
+                          ariaInvalid={Boolean(typeError)}
+                          ariaDescribedBy={typeError ? typeErrorId : undefined}
+                          value={allowance.type}
+                          options={getAvailableAllowanceTypes(index)}
+                          onChange={(selectedType) =>
+                            updateAllowance(index, 'type', selectedType)
+                          }
+                        />
+                      </FloatingField>
 
                       {typeError && (
-                        <p className='text-xs font-medium text-destructive'>
+                        <p
+                          id={typeErrorId}
+                          className='text-xs font-medium text-destructive'
+                        >
                           {typeError}
                         </p>
                       )}
                     </div>
 
+                    {/* Allowance Amount */}
                     <div className='space-y-2'>
-                      <Label htmlFor={`allowance-amount-${index}`}>
-                        {t('amount')}
-                        <span className='ms-1 text-destructive'>*</span>
-                      </Label>
+                      <FloatingField
+                        id={amountId}
+                        label={t('amount')}
+                        filled={
+                          allowance.amount !== null &&
+                          allowance.amount !== undefined
+                        }
+                        invalid={Boolean(amountError)}
+                        required
+                      >
+                        <div className='relative' dir='ltr'>
+                          <span
+                            aria-hidden='true'
+                            className='pointer-events-none absolute inset-y-0 left-3 z-10 flex items-center text-base font-medium text-muted-foreground'
+                          >
+                            <SaudiRiyalSymbol
+                              showAccessibleText={false}
+                              className='text-base'
+                            />
+                          </span>
 
-                      <div className='relative'>
-                        <span className='pointer-events-none absolute inset-y-0 start-3 z-10 flex items-center text-base font-medium text-muted-foreground'>
-                          <SaudiRiyalSymbol
-                            showAccessibleText={false}
-                            className='text-base'
+                          <Input
+                            id={amountId}
+                            data-money-input='true'
+                            type='number'
+                            dir='ltr'
+                            min='0'
+                            step='0.01'
+                            inputMode='decimal'
+                            required
+                            className='ps-10 pe-12 text-left'
+                            value={allowance.amount ?? ''}
+                            aria-invalid={Boolean(amountError)}
+                            aria-describedby={
+                              amountError ? amountErrorId : undefined
+                            }
+                            onChange={(event) =>
+                              updateAllowance(
+                                index,
+                                'amount',
+                                event.target.value,
+                              )
+                            }
                           />
-                        </span>
 
-                        <Input
-                          id={`allowance-amount-${index}`}
-                          type='number'
-                          min='0'
-                          step='0.01'
-                          inputMode='decimal'
-                          className='h-11 ps-9'
-                          value={allowance.amount || ''}
-                          aria-invalid={Boolean(amountError)}
-                          onChange={(event) =>
-                            updateAllowance(index, 'amount', event.target.value)
-                          }
-                          placeholder='0.00'
-                        />
-                      </div>
+                          {/* <div className='absolute right-2 top-1/2 flex h-9 w-7 -translate-y-1/2 flex-col gap-0.5'>
+                            <button
+                              type='button'
+                              tabIndex={-1}
+                              aria-label={t('increaseAmount')}
+                              onClick={() => stepAllowanceAmount(index, 1)}
+                              className='flex flex-1 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-500'
+                            >
+                              <ChevronUp className='size-3.5' />
+                            </button>
+
+                            <button
+                              type='button'
+                              tabIndex={-1}
+                              aria-label={t('decreaseAmount')}
+                              onClick={() => stepAllowanceAmount(index, -1)}
+                              className='flex flex-1 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-500'
+                            >
+                              <ChevronDown className='size-3.5' />
+                            </button>
+                          </div> */}
+                          <div className='absolute right-2 top-1/2 flex h-7 w-6 -translate-y-1/2 flex-col overflow-hidden rounded-md'>
+                            <button
+                              type='button'
+                              aria-label={t('increaseAmount')}
+                              onClick={() => stepAllowanceAmount(index, 1)}
+                              className='flex flex-1 items-center justify-center rounded-t-md text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-500'
+                            >
+                              <ChevronUp className='size-3.5' />
+                            </button>
+
+                            <div className='mx-1 border-t border-border/40' />
+
+                            <button
+                              type='button'
+                              aria-label={t('decreaseAmount')}
+                              onClick={() => stepAllowanceAmount(index, -1)}
+                              className='flex flex-1 items-center justify-center rounded-b-md text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-500'
+                            >
+                              <ChevronDown className='size-3.5' />
+                            </button>
+                          </div>
+                        </div>
+                      </FloatingField>
 
                       {amountError && (
-                        <p className='text-xs font-medium text-destructive'>
+                        <p
+                          id={amountErrorId}
+                          className='text-xs font-medium text-destructive'
+                        >
                           {amountError}
                         </p>
                       )}
