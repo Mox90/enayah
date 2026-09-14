@@ -57,13 +57,30 @@ export type CommentNotificationRecipientsInput = {
   threadRootAuthorUserId: string | null
 }
 
+// export type CreateCommentNotificationInput = {
+//   commentId: string
+//   caseId: string
+//   employeeId: string
+
+//   employeeNumber: string | null
+//   employeeName: string | null
+
+//   body: string
+//   isReply: boolean
+
+//   parentCommentId: string | null
+//   threadRootId: string | null
+
+//   recipientUserIds: string[]
+// }
 export type CreateCommentNotificationInput = {
   commentId: string
   caseId: string
   employeeId: string
 
   employeeNumber: string | null
-  employeeName: string | null
+  employeeNameEn: string | null
+  employeeNameAr: string | null
 
   body: string
   isReply: boolean

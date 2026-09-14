@@ -31,6 +31,7 @@ import {
 import { IqamaRenewalWorkflowNotificationService } from './iqama-renewal-workflow-notification.service'
 import { getRiyadhTodayDateOnly } from '../../../../core/utils/date'
 import { IqamaRenewalCaseCommentRepository } from '../repository/iqama-renewal-case-comment.repository'
+import { IqamaRenewalCaseCommentService } from './iqama-renewal-case-comment.service'
 
 const allowedTransitions = {
   pending_upload: ['uploaded_to_mhrsd', 'cancelled'],
@@ -226,9 +227,7 @@ export const IqamaRenewalProcessService = {
         employeeId: users.employeeId,
         email: users.email,
         username: users.username,
-
         employeeNumber: employees.employeeNumber,
-
         labelEn: sql<string>`
         nullif(
           trim(
@@ -293,17 +292,14 @@ export const IqamaRenewalProcessService = {
     return result.map((user) => ({
       id: user.id,
       employeeId: user.employeeId,
-
       // Useful fallbacks when an account is not linked correctly.
       labelEn: user.labelEn || user.email || user.username || 'Unnamed user',
-
       labelAr:
         user.labelAr ||
         user.labelEn ||
         user.email ||
         user.username ||
         'مستخدم بدون اسم',
-
       email: user.email,
       username: user.username,
       employeeNumber: user.employeeNumber,
@@ -489,17 +485,99 @@ export const IqamaRenewalProcessService = {
     })
   },
 
+  // changeStatus: async (
+  //   id: string,
+  //   input: ChangeIqamaRenewalStatusInput,
+  //   actor: IqamaRenewalCaseActor,
+  // ) => {
+  //   return db.transaction(async (tx) => {
+  //     const current = await IqamaRenewalProcessRepository.findById(tx, id)
+
+  //     const record = assertCaseExists(current)
+
+  //     validateStatusTransition(record.status, input.status)
+
+  //     if (input.status === 'sent_to_government_relations') {
+  //       if (!input.assignedToUserId) {
+  //         throw new IqamaRenewalProcessError(
+  //           'Government Relations assignee is required.',
+  //           422,
+  //           'GOVERNMENT_RELATIONS_ASSIGNEE_REQUIRED',
+  //         )
+  //       }
+
+  //       await assertGovernmentRelationsAssignee(tx, input.assignedToUserId)
+  //     }
+
+  //     const updateData = buildStatusUpdate(input, actor)
+  //     const updated = await IqamaRenewalProcessRepository.updateWithVersion(
+  //       tx,
+  //       id,
+  //       input.version,
+  //       updateData,
+  //     )
+
+  //     assertVersionUpdateSucceeded(updated)
+
+  //     const refreshed = await IqamaRenewalProcessRepository.findById(tx, id)
+  //     const updatedCase = assertCaseExists(refreshed)
+
+  //     /*
+  //      * Notify the assigned Government Relations user
+  //      * after the case was successfully transferred.
+  //      */
+  //     if (input.status === 'sent_to_government_relations') {
+  //       if (!updatedCase.assignedToUserId) {
+  //         throw new IqamaRenewalProcessError(
+  //           'The updated case has no Government Relations assignee.',
+  //           500,
+  //           'GOVERNMENT_RELATIONS_ASSIGNEE_MISSING',
+  //         )
+  //       }
+
+  //       await IqamaRenewalWorkflowNotificationService.notifyGovernmentRelationsAssignment(
+  //         tx,
+  //         {
+  //           renewalCase: {
+  //             id: updatedCase.id,
+  //             employeeId: updatedCase.employeeId,
+  //             employeeNumber: updatedCase.employeeNumber ?? null,
+  //             employeeNameEn: updatedCase.employeeNameEn ?? null,
+  //             employeeNameAr: updatedCase.employeeNameAr ?? null,
+  //           },
+  //           actorUserId: actor.userId,
+  //           assignedToUserId: updatedCase.assignedToUserId,
+  //           dueDate: updatedCase.governmentRelationsDueDate ?? null,
+  //         },
+  //       )
+  //     }
+
+  //     return updatedCase
+  //   })
+  // },
+
   changeStatus: async (
     id: string,
     input: ChangeIqamaRenewalStatusInput,
     actor: IqamaRenewalCaseActor,
   ) => {
     return db.transaction(async (tx) => {
-      const current = await IqamaRenewalProcessRepository.findById(tx, id)
+      //--------------------------------
+      // Current case
+      //--------------------------------
 
+      const current = await IqamaRenewalProcessRepository.findById(tx, id)
       const record = assertCaseExists(current)
 
+      //--------------------------------
+      // Validate transition
+      //--------------------------------
+
       validateStatusTransition(record.status, input.status)
+
+      //--------------------------------
+      // Validate Government Relations
+      //--------------------------------
 
       if (input.status === 'sent_to_government_relations') {
         if (!input.assignedToUserId) {
@@ -513,6 +591,10 @@ export const IqamaRenewalProcessService = {
         await assertGovernmentRelationsAssignee(tx, input.assignedToUserId)
       }
 
+      //--------------------------------
+      // Update workflow status
+      //--------------------------------
+
       const updateData = buildStatusUpdate(input, actor)
       const updated = await IqamaRenewalProcessRepository.updateWithVersion(
         tx,
@@ -523,13 +605,48 @@ export const IqamaRenewalProcessService = {
 
       assertVersionUpdateSucceeded(updated)
 
+      //--------------------------------
+      // Reload resulting case
+      //--------------------------------
+
       const refreshed = await IqamaRenewalProcessRepository.findById(tx, id)
+
       const updatedCase = assertCaseExists(refreshed)
 
-      /*
-       * Notify the assigned Government Relations user
-       * after the case was successfully transferred.
-       */
+      //--------------------------------
+      // Workflow comment
+      //--------------------------------
+
+      const workflowComment = input.comment?.trim()
+
+      if (workflowComment) {
+        await IqamaRenewalCaseCommentService.createWithinTransaction(tx, {
+          renewalCase: {
+            id: updatedCase.id,
+            employeeId: updatedCase.employeeId,
+            employeeNumber: updatedCase.employeeNumber ?? null,
+            employeeNameEn: updatedCase.employeeNameEn ?? null,
+            employeeNameAr: updatedCase.employeeNameAr ?? null,
+            assignedToUserId: updatedCase.assignedToUserId ?? null,
+
+            /*
+             * The comment records the resulting
+             * workflow status.
+             */
+            status: updatedCase.status,
+            createdBy: updatedCase.createdBy ?? null,
+          },
+
+          actorUserId: actor.userId,
+          body: workflowComment,
+        })
+      }
+
+      //--------------------------------
+      // Government Relations assignment
+      // notification
+      //--------------------------------
+
       if (input.status === 'sent_to_government_relations') {
         if (!updatedCase.assignedToUserId) {
           throw new IqamaRenewalProcessError(
@@ -549,12 +666,17 @@ export const IqamaRenewalProcessService = {
               employeeNameEn: updatedCase.employeeNameEn ?? null,
               employeeNameAr: updatedCase.employeeNameAr ?? null,
             },
+
             actorUserId: actor.userId,
             assignedToUserId: updatedCase.assignedToUserId,
             dueDate: updatedCase.governmentRelationsDueDate ?? null,
           },
         )
       }
+
+      //--------------------------------
+      // Result
+      //--------------------------------
 
       return updatedCase
     })

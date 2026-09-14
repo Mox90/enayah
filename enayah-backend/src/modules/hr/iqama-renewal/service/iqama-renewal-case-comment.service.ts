@@ -135,22 +135,61 @@ async function createCommentNotification(
     return null
   }
 
-  const employeeLabel = input.employeeName || input.employeeNumber || 'employee'
+  const employeeLabelEn =
+    input.employeeNameEn?.trim() ||
+    input.employeeNameAr?.trim() ||
+    input.employeeNumber ||
+    'employee'
+
+  const employeeLabelAr =
+    input.employeeNameAr?.trim() ||
+    input.employeeNameEn?.trim() ||
+    input.employeeNumber ||
+    'الموظف'
 
   const preview =
     input.body.length > 140 ? `${input.body.slice(0, 137)}...` : input.body
 
   const notification = await NotificationRepository.createNotification(tx, {
     employeeId: input.employeeId,
+
     type: IQAMA_COMMENT_NOTIFICATION_TYPES[activityType],
 
+    //--------------------------------
+    // English
+    //--------------------------------
+
     title: input.isReply
-      ? `New reply in ${employeeLabel}'s Iqama case`
-      : `New comment on ${employeeLabel}'s Iqama case`,
+      ? `New reply in ${employeeLabelEn}'s Iqama case`
+      : `New comment on ${employeeLabelEn}'s Iqama case`,
 
     message: preview,
+
+    //--------------------------------
+    // Arabic
+    //--------------------------------
+
+    titleAr: input.isReply
+      ? `رد جديد في معاملة تجديد إقامة ${employeeLabelAr}`
+      : `تعليق جديد على معاملة تجديد إقامة ${employeeLabelAr}`,
+
+    /*
+     * The user's comment itself is preserved.
+     *
+     * We do not automatically translate user-entered
+     * content. The Arabic notification title is localized,
+     * while the message remains exactly what the user wrote.
+     */
+    messageAr: preview,
+
+    //--------------------------------
+    // Source
+    //--------------------------------
+
     sourceType: IQAMA_COMMENT_SOURCE_TYPE,
+
     sourceId: input.commentId,
+
     severity: 'info',
 
     metadata: {
@@ -274,17 +313,18 @@ async function createCaseCommentActivity(
     threadRootAuthorUserId: threadRoot?.authorUserId ?? null,
   })
 
-  const employeeName =
-    input.renewalCase.employeeNameEn?.trim() ||
-    input.renewalCase.employeeNameAr?.trim() ||
-    null
+  // const employeeName =
+  //   input.renewalCase.employeeNameEn?.trim() ||
+  //   input.renewalCase.employeeNameAr?.trim() ||
+  //   null
 
   await createCommentNotification(tx, {
     commentId: created.id,
     caseId: input.renewalCase.id,
     employeeId: input.renewalCase.employeeId,
     employeeNumber: input.renewalCase.employeeNumber ?? null,
-    employeeName,
+    employeeNameEn: input.renewalCase.employeeNameEn ?? null,
+    employeeNameAr: input.renewalCase.employeeNameAr ?? null,
     body: created.body,
     isReply: created.parentCommentId !== null,
     parentCommentId: created.parentCommentId,

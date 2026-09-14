@@ -134,13 +134,11 @@ export const iqamaRenewalCaseComments = pgTable(
   'iqama_renewal_case_comments',
   {
     id: uuid('id').defaultRandom().primaryKey(),
-
     caseId: uuid('case_id')
       .notNull()
       .references(() => iqamaRenewalCases.id, {
         onDelete: 'cascade',
       }),
-
     authorUserId: uuid('author_user_id')
       .notNull()
       .references(() => users.id, {
@@ -165,11 +163,8 @@ export const iqamaRenewalCaseComments = pgTable(
     threadRootId: uuid('thread_root_id').references(
       (): AnyPgColumn => iqamaRenewalCaseComments.id,
     ),
-
     body: text('body').notNull(),
-
     statusAtTime: iqamaRenewalStatusEnum('status_at_time').notNull(),
-
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
 
