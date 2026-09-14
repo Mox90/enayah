@@ -18,6 +18,9 @@ interface Props {
   className?: string
   disabled?: boolean
   hidePlaceholder?: boolean
+  required?: boolean
+  ariaInvalid?: boolean
+  ariaDescribedBy?: string
 }
 
 /**
@@ -33,6 +36,9 @@ export function DatePicker({
   className,
   disabled = false,
   hidePlaceholder = false,
+  required = false,
+  ariaInvalid = false,
+  ariaDescribedBy,
 }: Props) {
   const selectedDate = value
     ? new DateObject({
@@ -82,6 +88,9 @@ export function DatePicker({
           variant='outline'
           disabled={disabled}
           onClick={openCalendar}
+          aria-required={required}
+          aria-invalid={ariaInvalid}
+          aria-describedby={ariaDescribedBy}
           // className={cn(
           //   'h-12 w-full justify-start rounded-lg border-border/80 text-left font-normal',
           //   'bg-transparent dark:bg-transparent',

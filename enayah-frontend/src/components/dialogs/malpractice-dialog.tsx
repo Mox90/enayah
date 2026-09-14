@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { FormDialog } from '../forms'
 import { Footer } from '../footer/footer'
-import { Save } from 'lucide-react'
+import { ChevronDown, ChevronUp, Save } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { CredentialDocumentMetadata } from '@/modules/hr/credentials/types/credential-document.types'
 import { CredentialDocumentSummary } from '@/modules/hr/credentials/components/credential-document-summary'
@@ -171,6 +171,12 @@ function MalpracticeDialogContent({
       setIsSubmitting(false)
     }
   }
+  function stepCoverageAmount(direction: 1 | -1) {
+    const current = Number(form.coverageAmount ?? 0)
+    const next = Math.max(0, current + direction)
+
+    update('coverageAmount', String(next))
+  }
 
   return (
     <>
@@ -178,39 +184,52 @@ function MalpracticeDialogContent({
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
-              Insurance Details
+              {crt('malpracticeDocument.detailsTitle')}
             </h3>
+
             <p className='text-xs text-muted-foreground'>
-              Enter the insurance company, policy number, and coverage amount.
+              {crt('malpracticeDocument.detailsDescription')}
             </p>
           </div>
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>Insurance Company *</Label>
+              <Label>
+                {crt('malpracticeDocument.insuranceCompany')}
+                <span className='ms-1 text-destructive'>*</span>
+              </Label>
+
               <Input
                 className='h-11'
                 value={form.insuranceCompany}
                 onChange={(e) => update('insuranceCompany', e.target.value)}
-                placeholder='Insurance Company'
+                placeholder={crt(
+                  'malpracticeDocument.insuranceCompanyPlaceholder',
+                )}
               />
             </div>
 
             <div className='space-y-2'>
-              <Label>Policy Number *</Label>
+              <Label>
+                {crt('malpracticeDocument.policyNumber')}
+                <span className='ms-1 text-destructive'>*</span>
+              </Label>
+
               <Input
                 className='h-11'
                 value={form.policyNumber}
                 onChange={(e) => update('policyNumber', e.target.value)}
-                placeholder='POL-123456'
+                placeholder={crt('malpracticeDocument.policyNumberPlaceholder')}
               />
             </div>
 
             <div className='space-y-2 xl:col-span-2'>
-              <Label htmlFor={`coverage-amount`}>Coverage Amount</Label>
+              <Label htmlFor='coverage-amount'>
+                {crt('malpracticeDocument.coverageAmount')}
+              </Label>
 
-              <div className='relative'>
-                <span className='pointer-events-none absolute inset-y-0 start-3 z-10 flex items-center text-muted-foreground'>
+              <div className='relative' dir='ltr'>
+                <span className='pointer-events-none absolute inset-y-0 left-3 z-10 flex items-center text-muted-foreground'>
                   <SaudiRiyalSymbol
                     showAccessibleText={false}
                     className='text-base'
@@ -218,10 +237,14 @@ function MalpracticeDialogContent({
                 </span>
 
                 <Input
-                  id={`coverage-amount`}
+                  id='coverage-amount'
+                  data-money-input='true'
                   type='number'
                   min='0'
-                  className='h-11 ps-9'
+                  step='0.01'
+                  inputMode='decimal'
+                  dir='ltr'
+                  className='h-11 ps-9 pe-12 text-left'
                   value={form.coverageAmount ?? ''}
                   onChange={(e) => {
                     const val = e.target.value
@@ -230,9 +253,74 @@ function MalpracticeDialogContent({
 
                     update('coverageAmount', val || null)
                   }}
-                  placeholder='0.00'
                 />
+
+                <div className='absolute right-2 top-1/2 flex h-7 w-6 -translate-y-1/2 flex-col overflow-hidden rounded-md'>
+                  <button
+                    type='button'
+                    aria-label={crt('increaseAmount')}
+                    onClick={() => stepCoverageAmount(1)}
+                    className='flex flex-1 items-center justify-center rounded-t-md text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-500'
+                  >
+                    <ChevronUp className='size-3.5' />
+                  </button>
+
+                  <div className='mx-1 border-t border-border/40' />
+
+                  <button
+                    type='button'
+                    aria-label={crt('decreaseAmount')}
+                    onClick={() => stepCoverageAmount(-1)}
+                    className='flex flex-1 items-center justify-center rounded-b-md text-muted-foreground transition-colors hover:bg-emerald-500/10 hover:text-emerald-500'
+                  >
+                    <ChevronDown className='size-3.5' />
+                  </button>
+                </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
+          <div className='mb-4'>
+            <h3 className='text-sm font-semibold text-foreground'>
+              {crt('malpracticeDocument.validityTitle')}
+            </h3>
+
+            <p className='text-xs text-muted-foreground'>
+              {crt('malpracticeDocument.validityDescription')}
+            </p>
+          </div>
+
+          <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
+            <div className='space-y-2'>
+              <label
+                htmlFor='startDate'
+                className='block text-xs text-muted-foreground'
+              >
+                {crt('malpracticeDocument.startDate')}
+              </label>
+
+              <DatePicker
+                id='startDate'
+                value={form.startDate ?? null}
+                onChange={(value) => update('startDate', value)}
+              />
+            </div>
+
+            <div className='space-y-2'>
+              <label
+                htmlFor='expiryDate'
+                className='block text-xs text-muted-foreground'
+              >
+                {crt('malpracticeDocument.expiryDate')}
+              </label>
+
+              <DatePicker
+                id='expiryDate'
+                value={form.expiryDate ?? null}
+                onChange={(value) => update('expiryDate', value ?? null)}
+              />
             </div>
           </div>
         </section>
@@ -286,63 +374,6 @@ function MalpracticeDialogContent({
             </div>
           </section>
         )}
-
-        <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
-          <div className='mb-4'>
-            <h3 className='text-sm font-semibold text-foreground'>
-              Validity Period
-            </h3>
-            <p className='text-xs text-muted-foreground'>
-              Add the insurance start and expiry dates if available.
-            </p>
-          </div>
-
-          <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
-            <div className='space-y-2'>
-              {/* <Label>Start Date</Label>
-              <Input
-                type='date'
-                className='h-11 bg-background'
-                value={form.startDate ?? ''}
-                onChange={(e) => update('startDate', e.target.value || null)}
-              /> */}
-              <label
-                htmlFor={'startDate'}
-                className='text-xs text-muted-foreground block'
-              >
-                {'Start Date'}
-              </label>
-
-              <DatePicker
-                id='startDate'
-                value={form.startDate ?? null}
-                onChange={(value) => update('startDate', value)}
-              />
-            </div>
-
-            <div className='space-y-2'>
-              {/* <Label>Expiry Date</Label>
-              <Input
-                type='date'
-                className='h-11 bg-background'
-                value={form.expiryDate ?? ''}
-                onChange={(e) => update('expiryDate', e.target.value)}
-              /> */}
-              <label
-                htmlFor={'expiryDate'}
-                className='text-xs text-muted-foreground block'
-              >
-                {'Expiry Date'}
-              </label>
-
-              <DatePicker
-                id='expiryDate'
-                value={form.expiryDate ?? ''}
-                onChange={(value) => update('expiryDate', value ?? null)}
-              />
-            </div>
-          </div>
-        </section>
       </div>
 
       <Footer
@@ -373,16 +404,13 @@ export function MalpracticeDialog({
   employeeId,
 }: Props) {
   const dialogKey = initialValue?.id ?? (open ? 'add-malpractice' : 'closed')
+  const t = useTranslations('credentials')
 
   return (
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={
-        initialValue
-          ? 'Edit Malpractice Insurance'
-          : 'Add Malpractice Insurance'
-      }
+      title={initialValue ? t('editMalpractice') : t('addMalpractice')}
       description="Enter the employee's malpractice insurance details."
       className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'

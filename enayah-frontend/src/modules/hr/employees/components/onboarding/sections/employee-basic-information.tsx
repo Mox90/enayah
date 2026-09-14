@@ -134,6 +134,7 @@ export function EmployeeBasicInformation({
             >
               <Input
                 id='employee-number'
+                required
                 value={employee.employeeNumber ?? ''}
                 aria-invalid={Boolean(personalErrors.employeeNumber)}
                 aria-describedby={
@@ -355,6 +356,7 @@ export function EmployeeBasicInformation({
               >
                 <Input
                   id='family-name-en'
+                  required
                   value={employee.familyNameEn ?? ''}
                   aria-invalid={Boolean(personalErrors.familyNameEn)}
                   aria-describedby={
@@ -420,6 +422,8 @@ export function EmployeeBasicInformation({
               >
                 <Input
                   id='first-name-ar'
+                  required
+                  dir='rtl'
                   value={employee.firstNameAr ?? ''}
                   aria-invalid={Boolean(personalErrors.firstNameAr)}
                   aria-describedby={
@@ -459,6 +463,7 @@ export function EmployeeBasicInformation({
               >
                 <Input
                   id='second-name-ar'
+                  dir='rtl'
                   value={employee.secondNameAr ?? ''}
                   onChange={(event) =>
                     updateEmployee('secondNameAr', event.target.value)
@@ -486,6 +491,7 @@ export function EmployeeBasicInformation({
               >
                 <Input
                   id='third-name-ar'
+                  dir='rtl'
                   value={employee.thirdNameAr ?? ''}
                   onChange={(event) =>
                     updateEmployee('thirdNameAr', event.target.value)
@@ -526,6 +532,8 @@ export function EmployeeBasicInformation({
               >
                 <Input
                   id='family-name-ar'
+                  dir='rtl'
+                  type='text'
                   value={employee.familyNameAr ?? ''}
                   aria-invalid={Boolean(personalErrors.familyNameAr)}
                   aria-describedby={
@@ -559,6 +567,7 @@ export function EmployeeBasicInformation({
             >
               <Select
                 dir={isRtl ? 'rtl' : 'ltr'}
+                required
                 value={employee.gender}
                 onValueChange={(gender) =>
                   updateEmployee('gender', gender as EmployeeGender)
@@ -580,20 +589,32 @@ export function EmployeeBasicInformation({
             </FloatingField>
           </div>
 
-          <FloatingField
-            id='dateOfBirth'
-            label={et('dateOfBirth')}
-            filled={Boolean(employee.dateOfBirth)}
-            invalid={Boolean(personalErrors.dateOfBirth)}
-            required
-          >
-            <DatePicker
+          <div className='space-y-2'>
+            <FloatingField
               id='dateOfBirth'
-              value={employee.dateOfBirth ?? null}
-              hidePlaceholder
-              onChange={(date) => updateEmployee('dateOfBirth', date)}
-            />
-          </FloatingField>
+              label={et('dateOfBirth')}
+              filled={Boolean(employee.dateOfBirth)}
+              invalid={Boolean(personalErrors.dateOfBirth)}
+              required
+            >
+              <DatePicker
+                id='dateOfBirth'
+                value={employee.dateOfBirth ?? null}
+                hidePlaceholder
+                required
+                ariaInvalid={Boolean(personalErrors.dateOfBirth)}
+                ariaDescribedBy={
+                  personalErrors.dateOfBirth ? 'date-of-birth-error' : undefined
+                }
+                onChange={(date) => updateEmployee('dateOfBirth', date)}
+              />
+            </FloatingField>
+            {personalErrors.dateOfBirth && (
+              <div id='date-of-birth-error'>
+                {errorText(personalErrors.dateOfBirth)}
+              </div>
+            )}
+          </div>
 
           {/* <div className='space-y-2'>
             <Label htmlFor='employee-gender'>

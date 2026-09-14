@@ -18,6 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { useTranslations } from 'next-intl'
 
 interface ProviderOption {
   value: string
@@ -33,6 +34,7 @@ interface Props {
 export function ProviderCombobox({ value, options, onChange }: Props) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
+  const t = useTranslations('credentials')
 
   const selected = options.find((option) => option.value === value)
 
@@ -66,7 +68,9 @@ export function ProviderCombobox({ value, options, onChange }: Props) {
           role='combobox'
           className='w-full h-11 justify-between'
         >
-          {selected?.label || value || 'Select provider type'}
+          {selected?.label ||
+            value ||
+            t('lifeSupportDocument.selectProviderType')}
 
           <ChevronsUpDown className='ml-2 h-4 w-4 opacity-50' />
         </Button>
@@ -77,11 +81,13 @@ export function ProviderCombobox({ value, options, onChange }: Props) {
           <CommandInput
             value={search}
             onValueChange={setSearch}
-            placeholder='Search or add provider...'
+            placeholder={t('lifeSupportDocument.searchPlaceHolder')}
           />
 
           <CommandList>
-            <CommandEmpty>No provider found.</CommandEmpty>
+            <CommandEmpty>
+              {t('lifeSupportDocument.noProviderFound')}
+            </CommandEmpty>
 
             <CommandGroup>
               {filtered.map((option) => (

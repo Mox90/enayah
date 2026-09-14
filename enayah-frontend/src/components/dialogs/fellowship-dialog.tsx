@@ -177,52 +177,56 @@ function FellowshipDialogContent({
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
-              Fellowship Qualification
+              {t('fellowshipDocument.qualificationTitle')}
             </h3>
+
             <p className='text-xs text-muted-foreground'>
-              Enter the fellowship name, abbreviation, specialty, and issuing
-              body.
+              {t('fellowshipDocument.qualificationDescription')}
             </p>
           </div>
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2 xl:col-span-2'>
-              <Label>{t('fellowshipName')}</Label>
+              <Label>{t('fellowshipDocument.fellowshipName')}</Label>
+
               <Input
                 className='h-11'
                 value={form.fellowshipName}
                 onChange={(e) => update('fellowshipName', e.target.value)}
-                placeholder='Fellowship in Cardiology'
+                placeholder={t('fellowshipDocument.fellowshipNamePlaceholder')}
               />
             </div>
 
             <div className='space-y-2'>
-              <Label>{t('fellowAbb')}</Label>
+              <Label>{t('fellowshipDocument.abbreviation')}</Label>
+
               <Input
                 className='h-11'
                 value={form.abbreviation ?? ''}
                 onChange={(e) => update('abbreviation', e.target.value || null)}
-                placeholder='FACC'
+                placeholder={t('fellowshipDocument.abbreviationPlaceholder')}
               />
             </div>
 
             <div className='space-y-2'>
-              <Label>{t('specialty')}</Label>
+              <Label>{t('fellowshipDocument.specialty')}</Label>
+
               <Input
                 className='h-11'
                 value={form.specialty ?? ''}
                 onChange={(e) => update('specialty', e.target.value || null)}
-                placeholder='Cardiology'
+                placeholder={t('fellowshipDocument.specialtyPlaceholder')}
               />
             </div>
 
             <div className='space-y-2 xl:col-span-2'>
-              <Label>{t('issuingBody')}</Label>
+              <Label>{t('fellowshipDocument.issuingBody')}</Label>
+
               <Input
                 className='h-11'
                 value={form.issuingBody}
                 onChange={(e) => update('issuingBody', e.target.value)}
-                placeholder='American College of Cardiology'
+                placeholder={t('fellowshipDocument.issuingBodyPlaceholder')}
               />
             </div>
           </div>
@@ -281,49 +285,36 @@ function FellowshipDialogContent({
         <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
-              Validity Period
+              {t('fellowshipDocument.validityTitle')}
             </h3>
+
             <p className='text-xs text-muted-foreground'>
-              Add the issue and expiry dates if available.
+              {t('fellowshipDocument.validityDescription')}
             </p>
           </div>
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              {/* <Label>{cmt('issueDate')}</Label>
-              <Input
-                type='date'
-                className='h-11 bg-background'
-                value={form.issueDate ?? ''}
-                onChange={(e) => update('issueDate', e.target.value || null)}
-              /> */}
               <label
-                htmlFor={'issueDate'}
-                className='text-xs text-muted-foreground block'
+                htmlFor='issueDate'
+                className='block text-xs text-muted-foreground'
               >
-                {cmt('issueDate')}
+                {t('fellowshipDocument.issueDate')}
               </label>
 
               <DatePicker
                 id='issueDate'
-                value={form.issueDate ?? ''}
+                value={form.issueDate ?? null}
                 onChange={(value) => update('issueDate', value ?? null)}
               />
             </div>
 
             <div className='space-y-2'>
-              {/* <Label>{cmt('expiryDate')}</Label>
-              <Input
-                type='date'
-                className='h-11 bg-background'
-                value={form.expiryDate ?? ''}
-                onChange={(e) => update('expiryDate', e.target.value || null)}
-              /> */}
               <label
-                htmlFor={'expiryDate'}
-                className='text-xs text-muted-foreground block'
+                htmlFor='expiryDate'
+                className='block text-xs text-muted-foreground'
               >
-                {cmt('expiryDate')}
+                {t('fellowshipDocument.expiryDate')}
               </label>
 
               <DatePicker
@@ -362,12 +353,13 @@ export function FellowshipDialog({
   employeeId,
 }: Props) {
   const dialogKey = initialValue?.id ?? (open ? 'add-fellowship' : 'closed')
+  const t = useTranslations('credentials')
 
   return (
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit Fellowship' : 'Add Fellowship'}
+      title={initialValue ? t('editFellow') : t('addFellow')}
       description="Enter the employee's fellowship qualification details."
       className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'

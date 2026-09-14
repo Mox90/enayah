@@ -743,6 +743,7 @@
     "certificateNum": "Certificate #",
     "malpracticeLabel": "Malpractice Insurance",
     "addMalpractice": "Add Malpractice",
+    "editMalpractice": "Edit Malpractice",
     "policyNum": "Policy Number",
     "amount": "Coverage Amount",
     "startDate": "Start Date",
@@ -860,17 +861,89 @@
       "currentTitle": "Current board certificate",
       "currentDescription": "The document currently attached to this board certification.",
       "replaceTitle": "Replace board certificate",
-      "replaceDescription": "Upload a new document to replace the current certificate."
+      "replaceDescription": "Upload a new document to replace the current certificate.",
+      "scfhsBoardPlaceholder": "Saudi Board in General Surgery",
+      "gsuPlaceHolder": "General Surgery",
+      "issuingBodyPlaceHolder": "Saudi Commission for Health Specialties"
+    },
+    "licenseDocument": {
+      "detailsTitle": "License Details",
+      "detailsDescription": "Enter the professional license number, issuing authority, profession, and specialty.",
+
+      "licenseNumber": "License Number",
+      "licenseNumberPlaceholder": "2626912923",
+
+      "issuingAuthority": "Issuing Authority",
+      "issuingAuthorityPlaceholder": "Saudi Commission for Health Specialties",
+
+      "profession": "Profession",
+      "professionPlaceholder": "Nurse",
+
+      "specialty": "Specialty",
+      "specialtyPlaceholder": "Emergency Nursing",
+
+      "validityTitle": "Validity Period",
+      "validityDescription": "Enter the license issue and expiry dates.",
+      "issueDate": "Issue Date",
+      "expiryDate": "Expiry Date",
+
+      "currentTitle": "Current License Document",
+      "currentDescription": "View the document currently attached to this professional license.",
+
+      "title": "License Document",
+      "description": "Upload a supporting document for this professional license.",
+
+      "replaceTitle": "Replace License Document",
+      "replaceDescription": "Upload a new document to replace the currently attached license document.",
+
+      "item": "License",
+      "itemLowercase": "license"
     },
     "fellowshipDocument": {
-      "title": "Fellowship certificate",
-      "description": "Upload the fellowship certification document.",
-      "currentTitle": "Current fellowship certificate",
-      "currentDescription": "The document currently attached to this fellowship certification.",
-      "replaceTitle": "Replace fellowship certificate",
-      "replaceDescription": "Upload a new document to replace the current certificate."
+      "qualificationTitle": "Fellowship Qualification",
+      "qualificationDescription": "Enter the fellowship name, abbreviation, specialty, and issuing body.",
+
+      "fellowshipName": "Fellowship Name",
+      "fellowshipNamePlaceholder": "Fellowship in Cardiology",
+
+      "abbreviation": "Abbreviation",
+      "abbreviationPlaceholder": "FACC",
+
+      "specialty": "Specialty",
+      "specialtyPlaceholder": "Cardiology",
+
+      "issuingBody": "Issuing Body",
+      "issuingBodyPlaceholder": "American College of Cardiology",
+
+      "validityTitle": "Validity Period",
+      "validityDescription": "Add the issue and expiry dates if available.",
+      "issueDate": "Issue Date",
+      "expiryDate": "Expiry Date",
+
+      "currentTitle": "Current Fellowship Document",
+      "currentDescription": "View the document currently attached to this fellowship qualification.",
+
+      "title": "Fellowship Document",
+      "description": "Upload a supporting document for this fellowship qualification.",
+
+      "replaceTitle": "Replace Fellowship Document",
+      "replaceDescription": "Upload a new document to replace the currently attached fellowship document."
     },
     "membershipDocument": {
+      "detailsTitle": "Membership Details",
+      "detailsDescription": "Enter the professional organization and membership number.",
+
+      "organization": "Organization",
+      "organizationPlaceholder": "Saudi Commission for Health Specialties",
+
+      "membershipNumber": "Membership Number",
+      "membershipNumberPlaceholder": "MEM-123456",
+
+      "validityTitle": "Validity Period",
+      "validityDescription": "Add the membership start and expiry dates if available.",
+      "startDate": "Start Date",
+      "expiryDate": "Expiry Date",
+
       "title": "Membership certificate",
       "description": "Upload the membership certification document.",
       "currentTitle": "Current membership certificate",
@@ -879,20 +952,52 @@
       "replaceDescription": "Upload a new document to replace the current certificate."
     },
     "lifeSupportDocument": {
-      "title": "Life Support certificate",
-      "description": "Upload the Life Support certification document.",
-      "currentTitle": "Current Life Support certificate",
-      "currentDescription": "The document currently attached to this Life Support certification.",
-      "replaceTitle": "Replace Life Support certificate",
-      "replaceDescription": "Upload a new document to replace the current certificate."
+      "detailsTitle": "Certification Details",
+      "detailsDescription": "Enter the life support type, provider, and certificate number.",
+
+      "type": "Type",
+      "provider": "Provider",
+      "certificateNumber": "Certificate Number",
+      "certificateNumberPlaceholder": "CERT-123456",
+
+      "validityTitle": "Validity Period",
+      "validityDescription": "Add the certificate issue and expiry dates.",
+      "issueDate": "Issue Date",
+      "expiryDate": "Expiry Date",
+
+      "title": "Life Support Certificate",
+      "description": "Upload the supporting document for this life support certification.",
+      "currentTitle": "Current Life Support Certificate",
+      "currentDescription": "The document currently attached to this life support certification.",
+      "replaceTitle": "Replace Life Support Certificate",
+      "replaceDescription": "Upload a new document to replace the currently attached certificate.",
+      "selectProviderType": "Select provider type",
+      "noProviderFound": "No provider found.",
+      "searchPlaceHolder": "Search or add provider..."
     },
     "malpracticeDocument": {
-      "title": "Malpractice Insurance Policy",
-      "description": "Upload the malpractice insurance document.",
-      "currentTitle": "Current malpractice insurance policy",
-      "currentDescription": "The document currently attached to this malpractice insurance policy.",
-      "replaceTitle": "Replace malpractice insurance",
-      "replaceDescription": "Upload a new document to replace the current insurance policy."
+      "detailsTitle": "Insurance Details",
+      "detailsDescription": "Enter the insurance company, policy number, and coverage amount.",
+
+      "insuranceCompany": "Insurance Company",
+      "insuranceCompanyPlaceholder": "Insurance Company",
+
+      "policyNumber": "Policy Number",
+      "policyNumberPlaceholder": "POL-123456",
+
+      "coverageAmount": "Coverage Amount",
+
+      "validityTitle": "Validity Period",
+      "validityDescription": "Add the insurance start and expiry dates if available.",
+      "startDate": "Start Date",
+      "expiryDate": "Expiry Date",
+
+      "title": "Malpractice Insurance Document",
+      "description": "Upload the supporting malpractice insurance document.",
+      "currentTitle": "Current Malpractice Insurance Document",
+      "currentDescription": "The document currently attached to this malpractice insurance record.",
+      "replaceTitle": "Replace Malpractice Insurance Document",
+      "replaceDescription": "Upload a new document to replace the currently attached malpractice insurance document."
     },
     "degree": "degree",
     "board": "board",

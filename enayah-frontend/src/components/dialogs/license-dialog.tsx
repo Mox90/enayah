@@ -191,52 +191,65 @@ function LicenseDialogContent({
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
-              License Details
+              {t('licenseDocument.detailsTitle')}
             </h3>
+
             <p className='text-xs text-muted-foreground'>
-              Enter the professional license number, authority, profession, and
-              specialty.
+              {t('licenseDocument.detailsDescription')}
             </p>
           </div>
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              <Label>License Number *</Label>
+              <Label>
+                {t('licenseDocument.licenseNumber')}
+                <span className='ms-1 text-destructive'>*</span>
+              </Label>
+
               <Input
                 className='h-11'
                 value={form.licenseNumber}
                 onChange={(e) => update('licenseNumber', e.target.value)}
-                placeholder='2626912923'
+                placeholder={t('licenseDocument.licenseNumberPlaceholder')}
               />
             </div>
 
             <div className='space-y-2'>
-              <Label>Issuing Authority *</Label>
+              <Label>
+                {t('licenseDocument.issuingAuthority')}
+                <span className='ms-1 text-destructive'>*</span>
+              </Label>
+
               <Input
                 className='h-11'
                 value={form.authority}
                 onChange={(e) => update('authority', e.target.value)}
-                placeholder='Saudi Commission for Health Specialties'
+                placeholder={t('licenseDocument.issuingAuthorityPlaceholder')}
               />
             </div>
 
             <div className='space-y-2'>
-              <Label>Profession *</Label>
+              <Label>
+                {t('licenseDocument.profession')}
+                <span className='ms-1 text-destructive'>*</span>
+              </Label>
+
               <Input
                 className='h-11'
                 value={form.profession ?? ''}
                 onChange={(e) => update('profession', e.target.value)}
-                placeholder='Nurse'
+                placeholder={t('licenseDocument.professionPlaceholder')}
               />
             </div>
 
             <div className='space-y-2'>
-              <Label>Specialty</Label>
+              <Label>{t('licenseDocument.specialty')}</Label>
+
               <Input
                 className='h-11'
                 value={form.specialty ?? ''}
                 onChange={(e) => update('specialty', e.target.value || null)}
-                placeholder='Emergency Nursing'
+                placeholder={t('licenseDocument.specialtyPlaceholder')}
               />
             </div>
           </div>
@@ -245,27 +258,21 @@ function LicenseDialogContent({
         <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
-              Validity Period
+              {t('licenseDocument.validityTitle')}
             </h3>
+
             <p className='text-xs text-muted-foreground'>
-              Add the license issue and expiry dates.
+              {t('licenseDocument.validityDescription')}
             </p>
           </div>
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
             <div className='space-y-2'>
-              {/* <Label>Issue Date *</Label>
-              <Input
-                type='date'
-                className='h-11 bg-background'
-                value={form.issueDate ?? ''}
-                onChange={(e) => update('issueDate', e.target.value)}
-              /> */}
               <label
-                htmlFor={'issueDate'}
-                className='text-xs text-muted-foreground block'
+                htmlFor='issueDate'
+                className='block text-xs text-muted-foreground'
               >
-                {'Issue Date *'}
+                {t('licenseDocument.issueDate')} *
               </label>
 
               <DatePicker
@@ -276,35 +283,13 @@ function LicenseDialogContent({
             </div>
 
             <div className='space-y-2'>
-              {/* <Label>Expiry Date *</Label>
-              <Input
-                type='date'
-                className='h-11 bg-background'
-                value={form.expiryDate ?? ''}
-                onChange={(e) => update('expiryDate', e.target.value)}
-              /> */}
               <label
-                htmlFor={'expiryDate'}
-                className='text-xs text-muted-foreground block'
+                htmlFor='expiryDate'
+                className='block text-xs text-muted-foreground'
               >
-                {'Expiry Date *'}
+                {t('licenseDocument.expiryDate')} *
               </label>
 
-              {/* Passed the generated id to the DatePicker component */}
-              {/* <DatePicker
-                id='expiryDate'
-                value={form.expiryDate ?? ''}
-                onChange={(value) => {
-                  if (!value) {
-                    update('expiryDate', null)
-                  } else if (typeof value === 'string') {
-                    update('expiryDate', value)
-                  } else {
-                    // If it's an object, convert it to a string cleanly
-                    update('expiryDate', String(value))
-                  }
-                }}
-              /> */}
               <DatePicker
                 id='expiryDate'
                 value={form.expiryDate ?? null}
@@ -323,11 +308,11 @@ function LicenseDialogContent({
                 <div className='mb-5'>
                   <div className='mb-3'>
                     <h3 className='text-sm font-semibold text-foreground'>
-                      {t('boardDocument.currentTitle')}
+                      {t('licenseDocument.currentTitle')}
                     </h3>
 
                     <p className='text-xs text-muted-foreground'>
-                      {t('boardDocument.currentDescription')}
+                      {t('licenseDocument.currentDescription')}
                     </p>
                   </div>
 
@@ -344,14 +329,14 @@ function LicenseDialogContent({
               <div className='mb-4'>
                 <h3 className='text-sm font-semibold text-foreground'>
                   {canAccessCurrentDocument
-                    ? t('boardDocument.replaceTitle')
-                    : t('boardDocument.title')}
+                    ? t('licenseDocument.replaceTitle')
+                    : t('licenseDocument.title')}
                 </h3>
 
                 <p className='text-xs text-muted-foreground'>
                   {canAccessCurrentDocument
-                    ? t('boardDocument.replaceDescription')
-                    : t('boardDocument.description')}
+                    ? t('licenseDocument.replaceDescription')
+                    : t('licenseDocument.description')}
                 </p>
               </div>
 
@@ -391,12 +376,13 @@ export function LicenseDialog({
   employeeId,
 }: Props) {
   const dialogKey = initialValue?.id ?? (open ? 'add-license' : 'closed')
+  const t = useTranslations('credentials')
 
   return (
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={initialValue ? 'Edit License' : 'Add License'}
+      title={initialValue ? t('editLicense') : t('addLicense')}
       description="Enter the employee's obtained license details."
       className='md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
       headerClassName='border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-4 py-4 text-white sm:px-6 sm:py-5'

@@ -852,7 +852,7 @@ function PhoneDialogContent({
               </div>
             </div> */}
             <div className='space-y-2'>
-              <Label>{pt('mobile')}</Label>
+              <Label htmlFor='mobile'>{pt('mobile')}</Label>
 
               <div data-slot='input-group'>
                 {/* <PhoneCodeCombobox
@@ -867,6 +867,7 @@ function PhoneDialogContent({
                 />
 
                 <Input
+                  id='mobile'
                   data-embedded='true'
                   className='h-full flex-1 rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0'
                   value={form.phoneNumber}

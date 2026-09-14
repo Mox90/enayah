@@ -25,12 +25,26 @@ interface AllowanceOption {
 }
 
 interface Props {
+  id?: string
   value: string
   options: AllowanceOption[]
   onChange: (value: string) => void
+  hidePlaceholder?: boolean
+  required?: boolean
+  ariaInvalid?: boolean
+  ariaDescribedBy?: string
 }
 
-export function AllowanceTypeCombobox({ value, options, onChange }: Props) {
+export function AllowanceTypeCombobox({
+  id,
+  value,
+  options,
+  onChange,
+  hidePlaceholder = false,
+  required = false,
+  ariaInvalid = false,
+  ariaDescribedBy,
+}: Props) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
@@ -55,14 +69,24 @@ export function AllowanceTypeCombobox({ value, options, onChange }: Props) {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
+          id={id}
+          data-floating-control='true'
           type='button'
           variant='outline'
           role='combobox'
-          className='w-full h-11 justify-between'
+          aria-expanded={open}
+          aria-required={required}
+          aria-invalid={ariaInvalid}
+          aria-describedby={ariaDescribedBy}
+          className='h-12 w-full justify-between bg-transparent hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent'
         >
-          {selected?.label || value || 'Select allowance type'}
+          <span className='truncate font-normal'>
+            {selected?.label ||
+              value ||
+              (!hidePlaceholder ? 'Select allowance type' : null)}
+          </span>
 
-          <ChevronsUpDown className='ml-2 h-4 w-4 opacity-50' />
+          <ChevronsUpDown className='ms-2 size-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
 

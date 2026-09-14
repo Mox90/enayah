@@ -196,20 +196,26 @@ function LifeSupportDialogContent({
 
   return (
     <>
-      <div className='space-y-6 px-6 py-1'>
+      <div className='min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-6 sm:py-5'>
         <section className='rounded-2xl border bg-card p-5 shadow-sm'>
           <div className='mb-4'>
             <h3 className='text-sm font-semibold text-foreground'>
-              Certification Details
+              {crt('lifeSupportDocument.detailsTitle')}
             </h3>
+
             <p className='text-xs text-muted-foreground'>
-              Enter the life support type, provider, and certificate number.
+              {crt('lifeSupportDocument.detailsDescription')}
             </p>
           </div>
 
           <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
+            {/* Type */}
             <div className='space-y-2'>
-              <Label>Type *</Label>
+              <Label>
+                {crt('lifeSupportDocument.type')}
+                <span className='ms-1 text-destructive'>*</span>
+              </Label>
+
               <Select
                 dir={isRtl ? 'rtl' : 'ltr'}
                 value={form.type}
@@ -240,8 +246,13 @@ function LifeSupportDialogContent({
               </Select>
             </div>
 
+            {/* Provider */}
             <div className='space-y-2'>
-              <Label>Provider *</Label>
+              <Label>
+                {crt('lifeSupportDocument.provider')}
+                <span className='ms-1 text-destructive'>*</span>
+              </Label>
+
               <ProviderCombobox
                 value={form.provider}
                 options={providerOptions}
@@ -249,15 +260,66 @@ function LifeSupportDialogContent({
               />
             </div>
 
+            {/* Certificate Number */}
             <div className='space-y-2 xl:col-span-2'>
-              <Label>Certificate Number</Label>
+              <Label>{crt('lifeSupportDocument.certificateNumber')}</Label>
+
               <Input
                 className='h-11'
                 value={form.certificateNumber ?? ''}
                 onChange={(e) =>
                   update('certificateNumber', e.target.value || null)
                 }
-                placeholder='CERT-123456'
+                placeholder={crt(
+                  'lifeSupportDocument.certificateNumberPlaceholder',
+                )}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
+          <div className='mb-4'>
+            <h3 className='text-sm font-semibold text-foreground'>
+              {crt('lifeSupportDocument.validityTitle')}
+            </h3>
+
+            <p className='text-xs text-muted-foreground'>
+              {crt('lifeSupportDocument.validityDescription')}
+            </p>
+          </div>
+
+          <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
+            {/* Issue Date */}
+            <div className='space-y-2'>
+              <label
+                htmlFor='issueDate'
+                className='block text-xs text-muted-foreground'
+              >
+                {crt('lifeSupportDocument.issueDate')}
+              </label>
+
+              <DatePicker
+                id='issueDate'
+                value={form.issueDate ?? null}
+                onChange={(value) => update('issueDate', value)}
+              />
+            </div>
+
+            {/* Expiry Date */}
+            <div className='space-y-2'>
+              <label
+                htmlFor='expiryDate'
+                className='block text-xs text-muted-foreground'
+              >
+                {crt('lifeSupportDocument.expiryDate')}
+                <span className='ms-1 text-destructive'>*</span>
+              </label>
+
+              <DatePicker
+                id='expiryDate'
+                value={form.expiryDate ?? null}
+                onChange={(value) => update('expiryDate', value)}
               />
             </div>
           </div>
@@ -312,64 +374,6 @@ function LifeSupportDialogContent({
             </div>
           </section>
         )}
-
-        <section className='rounded-2xl border bg-muted/30 p-5 shadow-sm'>
-          <div className='mb-4'>
-            <h3 className='text-sm font-semibold text-foreground'>
-              Validity Period
-            </h3>
-            <p className='text-xs text-muted-foreground'>
-              Add the certificate issue and expiry dates.
-            </p>
-          </div>
-
-          <div className='grid grid-cols-1 gap-4 xl:grid-cols-2'>
-            <div className='space-y-2'>
-              {/* <Label>Issue Date</Label>
-              <Input
-                type='date'
-                className='h-11 bg-background'
-                value={form.issueDate ?? ''}
-                onChange={(e) => update('issueDate', e.target.value || null)}
-              /> */}
-              <label
-                htmlFor={'issueDate'}
-                className='text-xs text-muted-foreground block'
-              >
-                {'Issue Date'}
-              </label>
-
-              <DatePicker
-                id='issueDate'
-                value={form.issueDate}
-                onChange={(value) => update('issueDate', value)}
-              />
-            </div>
-
-            <div className='space-y-2'>
-              {/* <Label>Expiry Date *</Label>
-              <Input
-                type='date'
-                className='h-11 bg-background'
-                value={form.expiryDate ?? ''}
-                onChange={(e) => update('expiryDate', e.target.value)}
-              /> */}
-
-              <label
-                htmlFor={'expiryDate'}
-                className='text-xs text-muted-foreground block'
-              >
-                {'Expiry Date *'}
-              </label>
-
-              <DatePicker
-                id='expiryDate'
-                value={form.expiryDate}
-                onChange={(value) => update('expiryDate', value)}
-              />
-            </div>
-          </div>
-        </section>
       </div>
 
       <Footer

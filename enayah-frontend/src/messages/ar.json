@@ -736,7 +736,8 @@
     "addLifeSupport": "إضافة دعم الحياة",
     "certificateNum": "رقم الشهادة",
     "malpracticeLabel": "تأمين ضد الأخطاء الطبية",
-    "addMalpractice": "أضف تأمين المسؤولية الطبية",
+    "addMalpractice": "إضافة وثيقة تأمين ضد الأخطاء المهنية",
+    "editMalpractice": "تعديل وثيقة التأمين ضد المسؤولية المهنية",
     "policyNum": "رقم السياسة",
     "amount": "مبلغ التغطية",
     "startDate": "تاريخ البدء",
@@ -854,39 +855,143 @@
       "currentTitle": "شهادة البورد الحالية",
       "currentDescription": "المستند المرفق حالياً بشهادة البورد.",
       "replaceTitle": "استبدال شهادة البورد",
-      "replaceDescription": "قم برفع مستند جديد لاستبدال الشهادة الحالية."
+      "replaceDescription": "قم برفع مستند جديد لاستبدال الشهادة الحالية.",
+      "scfhsBoardPlaceholder": "البورد السعودي في الجراحة العامة",
+      "gsuPlaceHolder": "الجراحة العامة",
+      "issuingBodyPlaceHolder": "الهيئة السعودية للتخصصات الصحية"
+    },
+    "licenseDocument": {
+      "detailsTitle": "تفاصيل الترخيص",
+      "detailsDescription": "أدخل رقم الترخيص المهني، جهة الإصدار، المهنة، والتخصص.",
+
+      "licenseNumber": "رقم الترخيص",
+      "licenseNumberPlaceholder": "2626912923",
+
+      "issuingAuthority": "جهة الإصدار",
+      "issuingAuthorityPlaceholder": "الهيئة السعودية للتخصصات الصحية",
+
+      "profession": "المهنة",
+      "professionPlaceholder": "ممرض/ممرضة",
+
+      "specialty": "التخصص",
+      "specialtyPlaceholder": "تمريض الطوارئ",
+
+      "validityTitle": "فترة صلاحية الترخيص",
+      "validityDescription": "أدخل تاريخ إصدار الترخيص وتاريخ انتهائه.",
+      "issueDate": "تاريخ الإصدار",
+      "expiryDate": "تاريخ الانتهاء",
+
+      "currentTitle": "مستند الترخيص الحالي",
+      "currentDescription": "عرض المستند المرفق حاليًا بهذا الترخيص المهني.",
+
+      "title": "مستند الترخيص",
+      "description": "ارفع المستند الداعم لهذا الترخيص المهني.",
+
+      "replaceTitle": "استبدال مستند الترخيص",
+      "replaceDescription": "ارفع مستندًا جديدًا لاستبدال مستند الترخيص الحالي.",
+
+      "item": "رخصة",
+      "itemLowercase": "رخصة"
     },
     "fellowshipDocument": {
-      "title": "شهادة الزمالة",
-      "description": "قم برفع مستند شهادة الزمالة.",
-      "currentTitle": "شهادة الزمالة الحالية",
-      "currentDescription": "المستند المرفق حالياً بشهادة الزمالة.",
-      "replaceTitle": "استبدال شهادة الزمالة",
-      "replaceDescription": "قم برفع مستند جديد لاستبدال الشهادة الحالية."
+      "qualificationTitle": "بيانات الزمالة",
+      "qualificationDescription": "أدخل اسم الزمالة، الاختصار، التخصص، والجهة المانحة.",
+
+      "fellowshipName": "اسم الزمالة",
+      "fellowshipNamePlaceholder": "زمالة في أمراض القلب",
+
+      "abbreviation": "الاختصار",
+      "abbreviationPlaceholder": "FACC",
+
+      "specialty": "التخصص",
+      "specialtyPlaceholder": "أمراض القلب",
+
+      "issuingBody": "الجهة المانحة",
+      "issuingBodyPlaceholder": "الكلية الأمريكية لأمراض القلب",
+
+      "validityTitle": "فترة الصلاحية",
+      "validityDescription": "أضف تاريخ الإصدار وتاريخ الانتهاء إن وُجدا.",
+      "issueDate": "تاريخ الإصدار",
+      "expiryDate": "تاريخ الانتهاء",
+
+      "currentTitle": "مستند الزمالة الحالي",
+      "currentDescription": "عرض المستند المرفق حاليًا بمؤهل الزمالة.",
+
+      "title": "مستند الزمالة",
+      "description": "ارفع مستندًا داعمًا لمؤهل الزمالة.",
+
+      "replaceTitle": "استبدال مستند الزمالة",
+      "replaceDescription": "ارفع مستندًا جديدًا لاستبدال مستند الزمالة الحالي."
     },
     "membershipDocument": {
-      "title": "شهادة عضوية",
-      "description": "قم برفع مستند شهادة عضوية.",
-      "currentTitle": "شهادة عضوية الحالية",
-      "currentDescription": "المستند المرفق حالياً بشهادة عضوية.",
-      "replaceTitle": "استبدال شهادة عضوية",
-      "replaceDescription": "قم برفع مستند جديد لاستبدال الشهادة الحالية."
+      "detailsTitle": "تفاصيل العضوية",
+      "detailsDescription": "أدخل اسم الجهة المهنية ورقم العضوية.",
+
+      "organization": "الجهة",
+      "organizationPlaceholder": "الهيئة السعودية للتخصصات الصحية",
+
+      "membershipNumber": "رقم العضوية",
+      "membershipNumberPlaceholder": "MEM-123456",
+
+      "validityTitle": "فترة صلاحية العضوية",
+      "validityDescription": "أضف تاريخ بدء العضوية وتاريخ انتهائها إن وُجدا.",
+      "startDate": "تاريخ البدء",
+      "expiryDate": "تاريخ الانتهاء",
+
+      "title": "شهادة العضوية",
+      "description": "ارفع مستند شهادة العضوية.",
+      "currentTitle": "شهادة العضوية الحالية",
+      "currentDescription": "المستند المرفق حاليًا بهذه العضوية.",
+      "replaceTitle": "استبدال شهادة العضوية",
+      "replaceDescription": "ارفع مستندًا جديدًا لاستبدال شهادة العضوية الحالية."
     },
     "lifeSupportDocument": {
+      "detailsTitle": "تفاصيل شهادة دعم الحياة",
+      "detailsDescription": "أدخل نوع شهادة دعم الحياة، الجهة المقدمة، ورقم الشهادة.",
+
+      "type": "النوع",
+      "provider": "الجهة المقدمة",
+      "certificateNumber": "رقم الشهادة",
+      "certificateNumberPlaceholder": "CERT-123456",
+
+      "validityTitle": "فترة الصلاحية",
+      "validityDescription": "أضف تاريخ إصدار الشهادة وتاريخ انتهائها.",
+      "issueDate": "تاريخ الإصدار",
+      "expiryDate": "تاريخ الانتهاء",
+
       "title": "شهادة دعم الحياة",
-      "description": "قم بتحميل وثيقة شهادة دعم الحياة.",
-      "currentTitle": "شهادة سارية المفعول في دعم الحياة",
-      "currentDescription": "المستند المرفق حالياً بشهادة دعم الحياة هذه.",
+      "description": "ارفع المستند الداعم لشهادة دعم الحياة.",
+      "currentTitle": "شهادة دعم الحياة الحالية",
+      "currentDescription": "المستند المرفق حاليًا بشهادة دعم الحياة هذه.",
       "replaceTitle": "استبدال شهادة دعم الحياة",
-      "replaceDescription": "قم بتحميل مستند جديد لاستبدال الشهادة الحالية."
+      "replaceDescription": "ارفع مستندًا جديدًا لاستبدال الشهادة الحالية.",
+      "selectProviderType": "اختر نوع مقدم الخدمة",
+      "noProviderFound": "لم يتم العثور على مزود.",
+      "searchPlaceHolder": "ابحث عن مقدم خدمة أو أضفه..."
     },
     "malpracticeDocument": {
-      "title": "وثيقة التأمين ضد الأخطاء المهنية",
-      "description": "قم بتحميل وثيقة التأمين ضد الأخطاء المهنية.",
-      "currentTitle": "وثيقة التأمين الحالية ضد الأخطاء المهنية",
-      "currentDescription": "المستند المرفق حالياً بوثيقة التأمين هذه ضد الأخطاء المهنية.",
-      "replaceTitle": "استبدال تأمين المسؤولية المهنية",
-      "replaceDescription": "قم بتحميل مستند جديد لاستبدال وثيقة التأمين الحالية."
+      "detailsTitle": "تفاصيل التأمين",
+      "detailsDescription": "أدخل شركة التأمين، رقم الوثيقة، ومبلغ التغطية.",
+
+      "insuranceCompany": "شركة التأمين",
+      "insuranceCompanyPlaceholder": "شركة التأمين",
+
+      "policyNumber": "رقم الوثيقة",
+      "policyNumberPlaceholder": "POL-123456",
+
+      "coverageAmount": "مبلغ التغطية",
+
+      "validityTitle": "فترة صلاحية التأمين",
+      "validityDescription": "أضف تاريخ بدء التأمين وتاريخ انتهائه إن وُجدا.",
+      "startDate": "تاريخ البدء",
+      "expiryDate": "تاريخ الانتهاء",
+
+      "title": "مستند تأمين المسؤولية المهنية",
+      "description": "ارفع المستند الداعم لتأمين المسؤولية المهنية.",
+      "currentTitle": "مستند تأمين المسؤولية المهنية الحالي",
+      "currentDescription": "المستند المرفق حاليًا بسجل تأمين المسؤولية المهنية هذا.",
+      "replaceTitle": "استبدال مستند تأمين المسؤولية المهنية",
+      "replaceDescription": "ارفع مستندًا جديدًا لاستبدال مستند تأمين المسؤولية المهنية الحالي."
     },
     "degree": "درجة علمية",
     "board": "مجلس",

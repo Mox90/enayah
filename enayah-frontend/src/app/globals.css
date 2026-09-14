@@ -871,6 +871,26 @@
 }
 
 /* =========================================================
+   STANDARD TEXTAREA
+   ========================================================= */
+
+[data-slot='textarea'] {
+  @apply rounded-lg border-border/80 bg-background/50 transition-all duration-200;
+}
+
+[data-slot='textarea']:focus-visible {
+  @apply border-emerald-500 bg-background ring-4 ring-emerald-500/10;
+}
+
+[data-slot='textarea']:focus {
+  @apply text-emerald-600;
+}
+
+[data-slot='floating-field'] [data-slot='textarea'] {
+  @apply bg-transparent;
+}
+
+/* =========================================================
    STANDARD INPUT
    ========================================================= */
 
@@ -880,6 +900,14 @@
 
 [data-slot='input']:not([data-embedded='true']):focus-visible {
   @apply border-emerald-500 bg-background ring-4 ring-emerald-500/10;
+}
+
+[data-slot='input']:not([data-embedded='true']):focus-visible {
+  @apply border-emerald-500 bg-background ring-4 ring-emerald-500/10;
+}
+
+[data-slot='input']:not([data-embedded='true']):focus {
+  @apply text-emerald-600;
 }
 
 /* =========================================================
@@ -900,6 +928,18 @@
 
 [data-slot='input-group'][data-invalid='true']:focus-within {
   @apply border-destructive ring-destructive/20;
+}
+
+/* Numeric input: hide native browser spinners */
+[data-money-input='true']::-webkit-outer-spin-button,
+[data-money-input='true']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+[data-money-input='true'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
 }
 
 html[dir='rtl'] {

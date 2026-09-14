@@ -44,6 +44,9 @@ interface Props extends Omit<
   selectedLabel?: string | null
   excludeIds?: string[]
   onChange: (department: DepartmentLookupItem) => void
+  hidePlaceholder?: boolean
+  required?: boolean
+  ariaInvalid?: boolean
 }
 
 export const DepartmentCombobox = forwardRef<HTMLButtonElement, Props>(
@@ -55,6 +58,9 @@ export const DepartmentCombobox = forwardRef<HTMLButtonElement, Props>(
       excludeIds = [],
       className,
       disabled,
+      required = false,
+      ariaInvalid = false,
+      hidePlaceholder = false,
       ...triggerProps
     },
     ref,
@@ -116,11 +122,18 @@ export const DepartmentCombobox = forwardRef<HTMLButtonElement, Props>(
             variant='outline'
             role='combobox'
             aria-expanded={open}
+            aria-required={required}
+            aria-invalid={ariaInvalid}
             disabled={disabled}
-            className={cn('h-11 w-full justify-between', className)}
+            className={cn(
+              'h-12 w-full justify-between bg-transparent hover:bg-transparent dark:bg-transparent dark:hover:bg-transparent',
+              className,
+            )}
           >
-            <span className='truncate'>
-              {displaySelectedLabel ?? cnt('selectDepartment')}
+            <span className='truncate font-normal'>
+              {/* {displaySelectedLabel ?? cnt('selectDepartment')} */}
+              {displaySelectedLabel ||
+                (!hidePlaceholder ? cnt('selectDepartment') : null)}
             </span>
 
             <ChevronsUpDown className='ms-2 h-4 w-4 shrink-0 opacity-50' />

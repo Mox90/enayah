@@ -4,7 +4,6 @@
 
 import { DatePicker } from '@/components/dialogs/date-picker'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -21,6 +20,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { OnboardingFormSection } from './onboarding-form-section'
 import { hasIdentificationData as hasIdentificationDataValue } from '@/modules/hr/onboarding/utils/has-identification-data'
 import { getTodayDateString } from '@/utils/utilities'
+import { FloatingField } from '@/components/forms/floating-field'
 
 interface Props {
   value: HireEmployeePayload
@@ -41,20 +41,9 @@ export function EmployeeIdentificationInformation({
   const isRtl = locale === 'ar'
 
   const identification = value.personal?.identifications?.[0]
-
   const identificationType = identification?.type ?? 'iqama'
-
-  // const hasIdentificationData = Boolean(
-  //   identification?.identificationNumber?.trim() ||
-  //   identification?.issueDate ||
-  //   identification?.expiryDate ||
-  //   identification?.sponsor?.trim() ||
-  //   identification?.issuingAuthority?.trim(),
-  // )
   const hasIdentificationData = hasIdentificationDataValue(identification)
-
   const requiresCommonFields = hasIdentificationData
-
   const requiresSponsor =
     hasIdentificationData && identificationType === 'iqama'
 
@@ -155,9 +144,11 @@ export function EmployeeIdentificationInformation({
       <div className='grid grid-cols-1 gap-x-5 gap-y-5 md:grid-cols-2'>
         {/* Identification Type */}
         <div className='space-y-2'>
-          <Label htmlFor='identification-type'>{t('idType')}</Label>
-
-          <div className='h-11'>
+          <FloatingField
+            id='identification-type'
+            label={t('idType')}
+            filled={Boolean(identificationType)}
+          >
             <Select
               dir={isRtl ? 'rtl' : 'ltr'}
               value={identificationType}
@@ -170,9 +161,10 @@ export function EmployeeIdentificationInformation({
             >
               <SelectTrigger
                 id='identification-type'
-                className='w-full data-[size=default]:h-11'
+                data-floating-control='true'
+                className='w-full bg-transparent dark:bg-transparent data-[size=default]:h-12'
               >
-                <SelectValue placeholder={t('idType')} />
+                <SelectValue />
               </SelectTrigger>
 
               <SelectContent>
@@ -183,40 +175,33 @@ export function EmployeeIdentificationInformation({
                 <SelectItem value='other'>{t('other')}</SelectItem>
               </SelectContent>
             </Select>
-          </div>
+          </FloatingField>
         </div>
 
         {/* Identification Number */}
         <div className='space-y-2'>
-          <Label
-            htmlFor='identification-number'
-            className={
-              personalErrors.identificationNumber
-                ? 'text-destructive'
-                : undefined
-            }
-          >
-            {t('idNumber')}
-
-            {hasIdentificationData && (
-              <span className='ms-1 text-destructive'>*</span>
-            )}
-          </Label>
-
-          <Input
+          <FloatingField
             id='identification-number'
-            className='h-11'
-            value={identification?.identificationNumber ?? ''}
-            aria-invalid={Boolean(personalErrors.identificationNumber)}
-            aria-describedby={
-              personalErrors.identificationNumber
-                ? 'identification-number-error'
-                : undefined
-            }
-            onChange={(event) =>
-              updateIdentification('identificationNumber', event.target.value)
-            }
-          />
+            label={t('idNumber')}
+            filled={Boolean(identification?.identificationNumber)}
+            invalid={Boolean(personalErrors.identificationNumber)}
+            required={hasIdentificationData}
+          >
+            <Input
+              id='identification-number'
+              required={hasIdentificationData}
+              value={identification?.identificationNumber ?? ''}
+              aria-invalid={Boolean(personalErrors.identificationNumber)}
+              aria-describedby={
+                personalErrors.identificationNumber
+                  ? 'identification-number-error'
+                  : undefined
+              }
+              onChange={(event) =>
+                updateIdentification('identificationNumber', event.target.value)
+              }
+            />
+          </FloatingField>
 
           {personalErrors.identificationNumber && (
             <p
@@ -230,29 +215,33 @@ export function EmployeeIdentificationInformation({
 
         {/* Issue Date */}
         <div className='space-y-2'>
-          <Label
-            htmlFor='identification-issue-date'
-            className={
-              personalErrors.identificationIssueDate
-                ? 'text-destructive'
-                : undefined
-            }
-          >
-            {ct('issueDate')}
-
-            {requiresCommonFields && (
-              <span className='ms-1 text-destructive'>*</span>
-            )}
-          </Label>
-
-          <DatePicker
+          <FloatingField
             id='identification-issue-date'
-            value={identification?.issueDate ?? null}
-            onChange={(date) => updateIdentification('issueDate', date)}
-          />
+            label={ct('issueDate')}
+            filled={Boolean(identification?.issueDate)}
+            invalid={Boolean(personalErrors.identificationIssueDate)}
+            required={requiresCommonFields}
+          >
+            <DatePicker
+              id='identification-issue-date'
+              value={identification?.issueDate ?? null}
+              hidePlaceholder
+              ariaInvalid={Boolean(personalErrors.identificationIssueDate)}
+              ariaDescribedBy={
+                personalErrors.identificationIssueDate
+                  ? 'identification-issue-date-error'
+                  : undefined
+              }
+              required={requiresCommonFields}
+              onChange={(date) => updateIdentification('issueDate', date)}
+            />
+          </FloatingField>
 
           {personalErrors.identificationIssueDate && (
-            <p className='text-sm text-destructive'>
+            <p
+              id='identification-issue-date-error'
+              className='text-xs font-medium text-destructive'
+            >
               {personalErrors.identificationIssueDate}
             </p>
           )}
@@ -260,29 +249,24 @@ export function EmployeeIdentificationInformation({
 
         {/* Expiry Date */}
         <div className='space-y-2'>
-          <Label
-            htmlFor='identification-expiry-date'
-            className={
-              personalErrors.identificationExpiryDate
-                ? 'text-destructive'
-                : undefined
-            }
-          >
-            {ct('expiryDate')}
-
-            {requiresCommonFields && (
-              <span className='ms-1 text-destructive'>*</span>
-            )}
-          </Label>
-
-          <DatePicker
+          <FloatingField
             id='identification-expiry-date'
-            value={identification?.expiryDate ?? null}
-            onChange={(date) => updateIdentification('expiryDate', date)}
-          />
+            label={ct('expiryDate')}
+            filled={Boolean(identification?.expiryDate)}
+            invalid={Boolean(personalErrors.identificationExpiryDate)}
+            required={requiresCommonFields}
+          >
+            <DatePicker
+              id='identification-expiry-date'
+              value={identification?.expiryDate ?? null}
+              hidePlaceholder
+              required={requiresCommonFields}
+              onChange={(date) => updateIdentification('expiryDate', date)}
+            />
+          </FloatingField>
 
           {personalErrors.identificationExpiryDate && (
-            <p className='text-sm text-destructive'>
+            <p className='text-xs font-medium text-destructive'>
               {personalErrors.identificationExpiryDate}
             </p>
           )}
@@ -291,33 +275,26 @@ export function EmployeeIdentificationInformation({
         {/* Sponsor - Iqama only */}
         {identificationType === 'iqama' && (
           <div className='space-y-2'>
-            <Label
-              htmlFor='identification-sponsor'
-              className={
-                personalErrors.identificationSponsor
-                  ? 'text-destructive'
-                  : undefined
-              }
-            >
-              {t('sponsor')}
-
-              {requiresSponsor && (
-                <span className='ms-1 text-destructive'>*</span>
-              )}
-            </Label>
-
-            <Input
+            <FloatingField
               id='identification-sponsor'
-              className='h-11'
-              value={identification?.sponsor ?? ''}
-              aria-invalid={Boolean(personalErrors.identificationSponsor)}
-              onChange={(event) =>
-                updateIdentification('sponsor', event.target.value || null)
-              }
-            />
+              label={t('sponsor')}
+              filled={Boolean(identification?.sponsor)}
+              invalid={Boolean(personalErrors.identificationSponsor)}
+              required={requiresSponsor}
+            >
+              <Input
+                id='identification-sponsor'
+                required={requiresSponsor}
+                value={identification?.sponsor ?? ''}
+                aria-invalid={Boolean(personalErrors.identificationSponsor)}
+                onChange={(event) =>
+                  updateIdentification('sponsor', event.target.value || null)
+                }
+              />
+            </FloatingField>
 
             {personalErrors.identificationSponsor && (
-              <p className='text-sm text-destructive'>
+              <p className='text-xs font-medium text-destructive'>
                 {personalErrors.identificationSponsor}
               </p>
             )}
@@ -326,38 +303,31 @@ export function EmployeeIdentificationInformation({
 
         {/* Issuing Authority */}
         <div className='space-y-2'>
-          <Label
-            htmlFor='identification-issuing-authority'
-            className={
-              personalErrors.identificationIssuingAuthority
-                ? 'text-destructive'
-                : undefined
-            }
-          >
-            {t('issuingAuthority')}
-
-            {requiresCommonFields && (
-              <span className='ms-1 text-destructive'>*</span>
-            )}
-          </Label>
-
-          <Input
+          <FloatingField
             id='identification-issuing-authority'
-            className='h-11'
-            value={identification?.issuingAuthority ?? ''}
-            aria-invalid={Boolean(
-              personalErrors.identificationIssuingAuthority,
-            )}
-            onChange={(event) =>
-              updateIdentification(
-                'issuingAuthority',
-                event.target.value || null,
-              )
-            }
-          />
+            label={t('issuingAuthority')}
+            filled={Boolean(identification?.issuingAuthority)}
+            invalid={Boolean(personalErrors.identificationIssuingAuthority)}
+            required={requiresCommonFields}
+          >
+            <Input
+              id='identification-issuing-authority'
+              required={requiresCommonFields}
+              value={identification?.issuingAuthority ?? ''}
+              aria-invalid={Boolean(
+                personalErrors.identificationIssuingAuthority,
+              )}
+              onChange={(event) =>
+                updateIdentification(
+                  'issuingAuthority',
+                  event.target.value || null,
+                )
+              }
+            />
+          </FloatingField>
 
           {personalErrors.identificationIssuingAuthority && (
-            <p className='text-sm text-destructive'>
+            <p className='text-xs font-medium text-destructive'>
               {personalErrors.identificationIssuingAuthority}
             </p>
           )}
