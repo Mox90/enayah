@@ -70,7 +70,8 @@
     "optional": "اختياري",
     "status": "حالة",
     "close": "قريب",
-    "excelExportFailed": "تعذر تصدير ملف Excel. يرجى المحاولة مرة أخرى."
+    "excelExportFailed": "تعذر تصدير ملف Excel. يرجى المحاولة مرة أخرى.",
+    "pdfExportFailed": "فشل تصدير ملف PDF. يرجى المحاولة مرة أخرى."
   },
 
   "auth": {
@@ -487,6 +488,7 @@
     "appointmentRemarks": "ملاحظات التعيين",
     "superseded": "تم استبداله",
     "active": "نشيط",
+    "ended_early": "انتهى مبكراً",
     "contractTimeline": "الجدول الزمني للعقد {length}",
     "loadingTimeline": "جارٍ تحميل الجدول الزمني للتوظيف...",
     "loadingTimelineFailed": "فشل تحميل الجدول الزمني للتوظيف.",

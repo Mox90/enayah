@@ -148,7 +148,13 @@ export function IqamaRenewalWorkflowActions({ renewalCase, access }: Props) {
             <div className='flex items-center gap-2 rounded-full border bg-background/80 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur'>
               <Sparkles className='h-3.5 w-3.5 text-amber-500' />
               {visibleActionCount}{' '}
-              {visibleActionCount === 1 ? 'action' : 'actions'}
+              {visibleActionCount === 1
+                ? isRtl
+                  ? 'نشاط'
+                  : 'action'
+                : isRtl
+                  ? 'نشاط'
+                  : 'actions'}
             </div>
           </div>
 
