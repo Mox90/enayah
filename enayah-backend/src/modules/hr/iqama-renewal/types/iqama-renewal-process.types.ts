@@ -51,13 +51,63 @@ export type UpdateIqamaRenewalCaseInput = z.infer<
   typeof UpdateIqamaRenewalCaseSchema
 >
 
+// export const ChangeIqamaRenewalStatusSchema = z
+//   .object({
+//     status: IqamaRenewalStatusSchema,
+//     assignedToUserId: z.string().uuid().nullable().optional(),
+//     governmentRelationsDueDate: z.string().date().nullable().optional(),
+//     denialReason: z.string().trim().max(5000).nullable().optional(),
+//     notes: z.string().trim().max(5000).nullable().optional(),
+//     version: z.coerce.number().int().positive(),
+//   })
+//   .superRefine((data, ctx) => {
+//     if (data.status === 'denied_by_mhrsd' && !data.denialReason?.trim()) {
+//       ctx.addIssue({
+//         code: z.ZodIssueCode.custom,
+//         path: ['denialReason'],
+//         message: 'Denial reason is required.',
+//       })
+//     }
+
+//     if (data.status === 'sent_to_government_relations') {
+//       if (!data.assignedToUserId) {
+//         ctx.addIssue({
+//           code: z.ZodIssueCode.custom,
+//           path: ['assignedToUserId'],
+//           message: 'A Government Relations user must be selected.',
+//         })
+//       }
+
+//       if (!data.governmentRelationsDueDate) {
+//         ctx.addIssue({
+//           code: z.ZodIssueCode.custom,
+//           path: ['governmentRelationsDueDate'],
+//           message: 'Government Relations due date is required.',
+//         })
+//       }
+//     }
+//   })
 export const ChangeIqamaRenewalStatusSchema = z
   .object({
     status: IqamaRenewalStatusSchema,
+
     assignedToUserId: z.string().uuid().nullable().optional(),
+
     governmentRelationsDueDate: z.string().date().nullable().optional(),
+
     denialReason: z.string().trim().max(5000).nullable().optional(),
+
+    /*
+     * Optional workflow comment.
+     *
+     * When supplied, this is stored in the
+     * case discussion after the status
+     * transition succeeds.
+     */
+    comment: iqamaRenewalCommentBodySchema.optional(),
+
     notes: z.string().trim().max(5000).nullable().optional(),
+
     version: z.coerce.number().int().positive(),
   })
   .superRefine((data, ctx) => {

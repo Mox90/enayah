@@ -70,7 +70,8 @@
     "optional": "Optional",
     "status": "Status",
     "close": "Close",
-    "excelExportFailed": "Failed to export the Excel file. Please try again."
+    "excelExportFailed": "Failed to export the Excel file. Please try again.",
+    "pdfExportFailed": "Failed to export the PDF file. Please try again."
   },
   "auth": {
     "loginTitle": "Login to Your Account",
@@ -492,6 +493,7 @@
     "appointmentRemarks": "Appointment Remarks",
     "superseded": "Superseded",
     "active": "Active",
+    "ended_early": "Ended Early",
     "contractTimeline": "Contract Timeline {length}",
     "loadingTimeline": "Loading employment timeline...",
     "loadingTimelineFailed": "Failed to load employment timeline.",
@@ -1609,11 +1611,6 @@
       "reports": {
         "hiring": "Hiring Analytics",
         "turnover": "Staff Turnover"
-      },
-      "staffTurnover": {
-        "title": "Staff Turnover",
-        "description": "Monthly employee separation trend.",
-        "noData": "Staff turnover analytics will be displayed here."
       },
       "staffTurnover": {
         "title": "Staff Turnover",

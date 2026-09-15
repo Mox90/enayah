@@ -3,6 +3,7 @@
 'use client'
 
 import { FilePlus2, Filter } from 'lucide-react'
+
 import { useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
@@ -12,17 +13,25 @@ import type {
   IqamaRenewalView,
 } from '../../types/iqama-renewal.types'
 
+import type { IqamaRenewalAccess } from '../../hooks/use-iqama-renewal-access'
+
 import { IqamaRenewalViewSwitcher } from '../iqama-renewal-view-switcher'
+
 import { IqamaRenewalSelectionActions } from './iqama-renewal-selection-actions'
 
 interface Props {
   view: IqamaRenewalView
+
   selectedIds: string[]
   selectedCases: IqamaRenewalCase[]
 
+  access: IqamaRenewalAccess
+
   onViewChange: (view: IqamaRenewalView) => void
+
   onCreate?: () => void
   onFilter?: () => void
+
   onOpen: (id: string) => void
 }
 
@@ -30,18 +39,21 @@ export function IqamaRenewalToolbar({
   view,
   selectedIds,
   selectedCases,
+  access,
   onViewChange,
   onCreate,
   onFilter,
   onOpen,
 }: Props) {
   const t = useTranslations('iqamaRenewal')
+
   const ct = useTranslations('common')
 
   return (
     <div className='rounded-2xl border bg-card/80 p-2.5 shadow-sm backdrop-blur'>
       <div className='flex min-w-0 items-center gap-1.5 sm:gap-2'>
         {/* Create */}
+
         <Button
           type='button'
           onClick={onCreate}
@@ -56,6 +68,7 @@ export function IqamaRenewalToolbar({
         </Button>
 
         {/* Filter */}
+
         <Button
           type='button'
           variant='outline'
@@ -71,13 +84,16 @@ export function IqamaRenewalToolbar({
         </Button>
 
         {/* Selected actions */}
+
         <IqamaRenewalSelectionActions
           selectedIds={selectedIds}
           selectedCases={selectedCases}
+          access={access}
           onOpen={onOpen}
         />
 
-        {/* Push switcher to opposite edge */}
+        {/* View switcher */}
+
         <div className='ms-auto shrink-0'>
           <IqamaRenewalViewSwitcher view={view} onViewChange={onViewChange} />
         </div>

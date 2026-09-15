@@ -125,9 +125,6 @@ function CommentItem({
     >
       <article className='rounded-2xl border border-border/60 bg-background p-4 shadow-sm transition-shadow hover:shadow-md'>
         <div className='flex items-start gap-3'>
-          {/* <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-primary/15 bg-primary/10 text-sm font-semibold text-primary'>
-            {getAuthorInitial(authorName)}
-          </div> */}
           <Avatar className='h-8 w-8 shrink-0 border border-primary/15'>
             {comment.authorAvatar && (
               <AvatarImage

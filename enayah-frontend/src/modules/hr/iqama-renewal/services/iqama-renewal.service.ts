@@ -141,6 +141,17 @@ export const iqamaRenewalService = {
     id: string,
     payload: ChangeIqamaRenewalStatusPayload,
   ): Promise<IqamaRenewalCase> => {
+    if (process.env.NODE_ENV === 'development') {
+      console.groupCollapsed('[Iqama Renewal] Change Status Request')
+
+      console.log('Case ID:', id)
+      console.log('Status:', payload.status)
+      console.log('Comment:', payload.comment)
+      console.log('Full payload:', payload)
+
+      console.groupEnd()
+    }
+
     const response = await api.patch<IqamaRenewalCase>(
       `${API_ENDPOINTS.hr.iqamaRenewal}/${id}/status`,
       payload,
@@ -148,6 +159,36 @@ export const iqamaRenewalService = {
 
     return response.data
   },
+
+  // changeIqamaRenewalStatus: async (
+  //   id: string,
+  //   payload: ChangeIqamaRenewalStatusPayload,
+  // ): Promise<IqamaRenewalCase> => {
+  //   const url = `${API_ENDPOINTS.hr.iqamaRenewal}/${id}/status`
+
+  //   console.group('[Iqama Renewal] Change Status Request')
+
+  //   console.log('URL:', url)
+  //   console.log('Case ID:', id)
+  //   console.log('Status:', payload.status)
+  //   console.log('Comment:', payload.comment)
+  //   console.log('Full payload:', payload)
+  //   console.groupEnd()
+
+  //   try {
+  //     console.log('[Iqama Renewal] BEFORE api.patch')
+
+  //     const response = await api.patch<IqamaRenewalCase>(url, payload)
+
+  //     console.log('[Iqama Renewal] AFTER api.patch', response)
+
+  //     return response.data
+  //   } catch (error) {
+  //     console.error('[Iqama Renewal] api.patch FAILED', error)
+
+  //     throw error
+  //   }
+  // },
 
   getGovernmentRelationsUsers: async (): Promise<AssigneeOption[]> => {
     const response = await api.get<AssigneeOption[]>(

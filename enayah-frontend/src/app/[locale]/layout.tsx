@@ -90,7 +90,13 @@ export default async function LocaleLayout({
             <ThemeProvider>
               <TooltipProvider delayDuration={300}>
                 <AuthProvider>{children}</AuthProvider>
-                <Toaster richColors duration={10000} />
+                <Toaster
+                  richColors
+                  duration={5000}
+                  position='bottom-right'
+                  expand={true}
+                  visibleToasts={5}
+                />
               </TooltipProvider>
             </ThemeProvider>
           </QueryProvider>

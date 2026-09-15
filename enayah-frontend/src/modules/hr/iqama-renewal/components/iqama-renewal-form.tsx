@@ -1,8 +1,9 @@
-// src/modules/hr/iqama-renewal/components/iqama-renewal-form.tsx
+// enayah-frontend/src/modules/hr/iqama-renewal/components/iqama-renewal-form.tsx
 
 'use client'
 
 import { type FormEvent, type ReactNode, useMemo, useState } from 'react'
+
 import {
   AlertCircle,
   ArrowLeft,
@@ -20,6 +21,7 @@ import {
   UserRoundCheck,
   type LucideIcon,
 } from 'lucide-react'
+
 import { useLocale, useTranslations } from 'next-intl'
 
 import { Button } from '@/components/ui/button'
@@ -29,30 +31,38 @@ import { Textarea } from '@/components/ui/textarea'
 
 import {
   useCreateIqamaRenewalProcess,
-  useGovernmentRelationsUsers,
   useIqamaRenewalProcess,
   useUpdateIqamaRenewalCase,
 } from '../hooks/use-iqama-renewal-processes'
 
-import type {
-  //AssigneeOption,
-  UpdateIqamaRenewalCasePayload,
-} from '../types/iqama-renewal.types'
+import type { IqamaRenewalAccess } from '../hooks/use-iqama-renewal-access'
+
+import type { UpdateIqamaRenewalCasePayload } from '../types/iqama-renewal.types'
+
+import { toArabic, toPersianDigits } from '@/utils/utilities'
 
 import { IqamaRenewalStatusBadge } from './iqama-renewal-status-badge'
-import { IqamaRenewalWorkflowActions } from './iqama-renewal-workflow-actions'
-import { toArabic, toPersianDigits } from '@/utils/utilities'
+
+import { IqamaRenewalWorkflowActions } from './workflow/iqama-renewal-workflow-actions'
+
 import { IqamaRenewalCaseDiscussion } from './iqama-renewal-case-discussion'
+
+//--------------------------------
+// Props
+//--------------------------------
 
 interface Props {
   caseId?: string | null
+
+  access: IqamaRenewalAccess
+
   onCancel: () => void
   onSaved: () => void
-  canManageWorkflow?: boolean
-  canCommentOnCase?: boolean
-  canProcessGovernmentRelations?: boolean
-  currentUserId?: string | null
 }
+
+//--------------------------------
+// Form types
+//--------------------------------
 
 type FormValues = {
   employeeId: string
@@ -77,14 +87,24 @@ type MilestoneItemProps = {
   isLast?: boolean
 }
 
+//--------------------------------
+// Initial values
+//--------------------------------
+
 const EMPTY_VALUES: FormValues = {
   employeeId: '',
   identificationId: '',
   notes: '',
 }
 
+//--------------------------------
+// Helpers
+//--------------------------------
+
 function toDateInputValue(value?: string | null) {
-  if (!value) return ''
+  if (!value) {
+    return ''
+  }
 
   return value.slice(0, 10)
 }
@@ -92,12 +112,17 @@ function toDateInputValue(value?: string | null) {
 function formatDisplayDate(value: string | null | undefined, locale: string) {
   const dateValue = toDateInputValue(value)
 
-  if (!dateValue) return '-'
+  if (!dateValue) {
+    return '-'
+  }
 
   const [year, month, day] = dateValue.split('-').map(Number)
+
   const date = new Date(year, month - 1, day)
 
-  if (Number.isNaN(date.getTime())) return dateValue
+  if (Number.isNaN(date.getTime())) {
+    return dateValue
+  }
 
   return new Intl.DateTimeFormat(locale, {
     calendar: 'gregory',
@@ -112,6 +137,10 @@ function toNullable(value: string) {
 
   return normalized === '' ? null : normalized
 }
+
+//--------------------------------
+// Detail item
+//--------------------------------
 
 function DetailItem({
   icon: Icon,
@@ -131,6 +160,7 @@ function DetailItem({
 
         <div className='min-w-0 flex-1'>
           <p className='text-xs font-medium text-muted-foreground'>{label}</p>
+
           <div
             className={
               emphasis
@@ -146,6 +176,10 @@ function DetailItem({
     </div>
   )
 }
+
+//--------------------------------
+// Milestone item
+//--------------------------------
 
 function MilestoneItem({
   icon: Icon,
@@ -175,11 +209,16 @@ function MilestoneItem({
 
       <div className='min-w-0 flex-1 pt-0.5'>
         <p className='text-sm font-medium text-foreground'>{label}</p>
+
         <p className='mt-0.5 text-xs text-muted-foreground'>{value}</p>
       </div>
     </div>
   )
 }
+
+//--------------------------------
+// Loading state
+//--------------------------------
 
 function LoadingState({ label }: { label: string }) {
   return (
@@ -187,6 +226,7 @@ function LoadingState({ label }: { label: string }) {
       <div className='border-b border-border/60 bg-gradient-to-br from-primary/[0.08] via-background to-background p-6 sm:p-8'>
         <div className='flex items-center gap-4'>
           <div className='h-12 w-12 animate-pulse rounded-2xl bg-primary/10' />
+
           <div className='space-y-2'>
             <div className='h-5 w-52 animate-pulse rounded-full bg-muted' />
             <div className='h-3 w-32 animate-pulse rounded-full bg-muted' />
@@ -194,8 +234,10 @@ function LoadingState({ label }: { label: string }) {
         </div>
       </div>
 
-      <div className='grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-4 sm:p-8'>
-        {Array.from({ length: 8 }).map((_, index) => (
+      <div className='grid gap-4 p-6 sm:grid-cols-2 sm:p-8 lg:grid-cols-4'>
+        {Array.from({
+          length: 8,
+        }).map((_, index) => (
           <div
             key={index}
             className='h-20 animate-pulse rounded-2xl border border-border/50 bg-muted/40'
@@ -205,25 +247,27 @@ function LoadingState({ label }: { label: string }) {
 
       <div className='flex items-center justify-center gap-2 border-t border-border/60 bg-muted/20 px-6 py-4 text-sm text-muted-foreground'>
         <LoaderCircle className='h-4 w-4 animate-spin' />
+
         {label}
       </div>
     </div>
   )
 }
 
-export function IqamaRenewalForm({
-  caseId,
-  onCancel,
-  onSaved,
-  canManageWorkflow = false,
-  canCommentOnCase = false,
-  canProcessGovernmentRelations = false,
-  currentUserId = null,
-  //governmentRelationsUsers = [],
-}: Props) {
+//--------------------------------
+// Component
+//--------------------------------
+
+export function IqamaRenewalForm({ caseId, access, onCancel, onSaved }: Props) {
   const t = useTranslations('iqamaRenewal')
+
   const locale = useLocale()
+
   const isArabic = locale.toLowerCase().startsWith('ar')
+
+  //--------------------------------
+  // API
+  //--------------------------------
 
   const {
     data: existingCase,
@@ -231,20 +275,21 @@ export function IqamaRenewalForm({
     isError: isCaseError,
   } = useIqamaRenewalProcess(caseId)
 
-  const shouldLoadGovernmentRelationsUsers =
-    canManageWorkflow && existingCase?.status === 'approved_by_mhrsd'
-
-  const {
-    data: governmentRelationsUsers = [],
-    isLoading: isLoadingGovernmentRelationsUsers,
-    isError: isGovernmentRelationsUsersError,
-  } = useGovernmentRelationsUsers(shouldLoadGovernmentRelationsUsers)
-
   const createProcess = useCreateIqamaRenewalProcess()
+
   const updateProcess = useUpdateIqamaRenewalCase()
 
+  //--------------------------------
+  // Mode
+  //--------------------------------
+
   const isEditing = Boolean(caseId)
+
   const isSaving = createProcess.isPending || updateProcess.isPending
+
+  //--------------------------------
+  // Initial values
+  //--------------------------------
 
   const initialValues = useMemo<FormValues>(() => {
     if (!existingCase) {
@@ -253,10 +298,16 @@ export function IqamaRenewalForm({
 
     return {
       employeeId: existingCase.employeeId,
+
       identificationId: existingCase.identificationId,
+
       notes: existingCase.notes ?? '',
     }
   }, [existingCase])
+
+  //--------------------------------
+  // Changes
+  //--------------------------------
 
   const [changes, setChanges] = useState<Partial<FormValues>>({})
 
@@ -265,10 +316,13 @@ export function IqamaRenewalForm({
     ...changes,
   }
 
-  //const hasChanges = Object.keys(changes).length > 0
   const hasChanges = (Object.keys(changes) as Array<keyof FormValues>).some(
     (key) => changes[key] !== initialValues[key],
   )
+
+  //--------------------------------
+  // Display values
+  //--------------------------------
 
   const employeeName = isArabic
     ? existingCase?.employeeNameAr
@@ -291,6 +345,10 @@ export function IqamaRenewalForm({
       ? t('mhrsdDeniedAt')
       : t('mhrsdDecision')
 
+  //--------------------------------
+  // Update field
+  //--------------------------------
+
   function updateField<K extends keyof FormValues>(
     field: K,
     value: FormValues[K],
@@ -301,10 +359,18 @@ export function IqamaRenewalForm({
     }))
   }
 
+  //--------------------------------
+  // Submit
+  //--------------------------------
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     try {
+      //--------------------------------
+      // Update
+      //--------------------------------
+
       if (caseId) {
         if (!existingCase || !hasChanges) {
           return
@@ -324,17 +390,28 @@ export function IqamaRenewalForm({
         })
 
         setChanges({})
-      } else {
+      }
+
+      //--------------------------------
+      // Create
+      //--------------------------------
+      else {
         if (!values.employeeId.trim() || !values.identificationId.trim()) {
           return
         }
 
         await createProcess.mutateAsync({
           employeeId: values.employeeId.trim(),
+
           identificationId: values.identificationId.trim(),
+
           notes: toNullable(values.notes),
         })
       }
+
+      //--------------------------------
+      // Complete
+      //--------------------------------
 
       onSaved()
     } catch (error) {
@@ -342,9 +419,17 @@ export function IqamaRenewalForm({
     }
   }
 
+  //--------------------------------
+  // Loading
+  //--------------------------------
+
   if (isEditing && isLoadingCase) {
     return <LoadingState label={t('loadingProcess')} />
   }
+
+  //--------------------------------
+  // Error
+  //--------------------------------
 
   if (isEditing && isCaseError) {
     return (
@@ -361,6 +446,7 @@ export function IqamaRenewalForm({
               <p className='font-semibold text-foreground'>
                 {t('loadProcessFailed')}
               </p>
+
               <p className='mt-1 text-sm text-muted-foreground'>
                 {t('editProcess')}
               </p>
@@ -374,6 +460,7 @@ export function IqamaRenewalForm({
             onClick={onCancel}
           >
             <ArrowLeft className={`h-4 w-4 ${isArabic ? 'rotate-180' : ''}`} />
+
             {t('back')}
           </Button>
         </div>
@@ -381,14 +468,25 @@ export function IqamaRenewalForm({
     )
   }
 
+  //--------------------------------
+  // Form
+  //--------------------------------
+
   return (
     <div className='space-y-6'>
       <form
         onSubmit={handleSubmit}
         className='relative overflow-hidden rounded-3xl border border-border/60 bg-card shadow-[0_24px_80px_-42px_rgba(15,23,42,0.45)]'
       >
+        {/* Background decorations */}
+
         <div className='pointer-events-none absolute -end-24 -top-24 h-72 w-72 rounded-full bg-primary/[0.08] blur-3xl' />
+
         <div className='pointer-events-none absolute -start-28 top-32 h-64 w-64 rounded-full bg-sky-500/[0.05] blur-3xl' />
+
+        {/* -----------------------------
+            Header
+        ----------------------------- */}
 
         <header className='relative border-b border-border/60 bg-gradient-to-br from-primary/[0.08] via-background/95 to-background px-5 py-6 sm:px-7 sm:py-7'>
           <div className='flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between'>
@@ -403,7 +501,7 @@ export function IqamaRenewalForm({
                     {isEditing ? t('editProcess') : t('createProcess')}
                   </h1>
 
-                  {existingCase && (
+                  {existingCase?.status && (
                     <IqamaRenewalStatusBadge status={existingCase.status} />
                   )}
                 </div>
@@ -412,10 +510,13 @@ export function IqamaRenewalForm({
                   <div className='mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground'>
                     <span className='inline-flex items-center gap-1.5'>
                       <UserRound className='h-3.5 w-3.5' />
+
                       {employeeNumber ?? '-'}
                     </span>
+
                     <span className='inline-flex items-center gap-1.5'>
                       <Fingerprint className='h-3.5 w-3.5' />
+
                       {iqamaNumber ?? '-'}
                     </span>
                   </div>
@@ -433,15 +534,26 @@ export function IqamaRenewalForm({
               <ArrowLeft
                 className={`h-4 w-4 ${isArabic ? 'rotate-180' : ''}`}
               />
+
               {t('back')}
             </Button>
           </div>
         </header>
 
+        {/* -----------------------------
+            Content
+        ----------------------------- */}
+
         <div className='relative p-5 sm:p-7'>
           {existingCase ? (
+            //--------------------------------
+            // Existing case
+            //--------------------------------
+
             <div className='grid gap-6 xl:grid-cols-[minmax(0,1fr)_340px]'>
               <div className='space-y-6'>
+                {/* Details */}
+
                 <section className='rounded-2xl border border-border/60 bg-muted/[0.18] p-4 sm:p-5'>
                   <div className='grid gap-3 sm:grid-cols-1 md:grid-cols-1 lg:grid-cols-2'>
                     <DetailItem
@@ -469,7 +581,6 @@ export function IqamaRenewalForm({
                     <DetailItem
                       icon={CalendarDays}
                       label={t('expiryDate')}
-                      //value={formatDisplayDate(existingCase.expiryDate, locale)}
                       value={
                         isArabic
                           ? toArabic(existingCase.expiryDate, 1)
@@ -494,6 +605,8 @@ export function IqamaRenewalForm({
                   </div>
                 </section>
 
+                {/* Denial reason */}
+
                 {existingCase.denialReason && (
                   <section className='relative overflow-hidden rounded-2xl border border-destructive/25 bg-destructive/[0.045] p-5'>
                     <div className='absolute inset-y-0 start-0 w-1 bg-destructive' />
@@ -507,6 +620,7 @@ export function IqamaRenewalForm({
                         <p className='text-sm font-semibold text-destructive'>
                           {t('denialReason')}
                         </p>
+
                         <p className='mt-1.5 whitespace-pre-wrap text-sm leading-6 text-foreground/85'>
                           {existingCase.denialReason}
                         </p>
@@ -515,11 +629,14 @@ export function IqamaRenewalForm({
                   </section>
                 )}
 
+                {/* Notes */}
+
                 <section className='rounded-2xl border border-border/60 bg-background p-5 shadow-sm'>
                   <div className='mb-4 flex items-center gap-3'>
                     <div className='flex h-9 w-9 items-center justify-center rounded-xl bg-primary/[0.07] text-primary'>
                       <FileText className='h-4 w-4' />
                     </div>
+
                     <Label
                       htmlFor='notes'
                       className='text-sm font-semibold text-foreground'
@@ -541,6 +658,10 @@ export function IqamaRenewalForm({
                 </section>
               </div>
 
+              {/* -----------------------------
+                  Workflow progress
+              ----------------------------- */}
+
               <aside className='h-fit rounded-2xl border border-border/60 bg-muted/[0.18] p-5 shadow-sm xl:sticky xl:top-6'>
                 <div className='mb-5 flex items-center gap-3'>
                   <div className='flex h-10 w-10 items-center justify-center rounded-xl border border-primary/10 bg-primary/[0.07] text-primary'>
@@ -551,13 +672,18 @@ export function IqamaRenewalForm({
                     <p className='text-sm font-semibold text-foreground'>
                       {t('currentStage')}
                     </p>
+
                     <div className='mt-1'>
-                      <IqamaRenewalStatusBadge status={existingCase.status} />
+                      {existingCase.status && (
+                        <IqamaRenewalStatusBadge status={existingCase.status} />
+                      )}
                     </div>
                   </div>
                 </div>
 
                 <div className='space-y-5 rounded-2xl border border-border/50 bg-background/80 p-4'>
+                  {/* MHRSD upload */}
+
                   <MilestoneItem
                     icon={existingCase.mhrsdUploadedAt ? CheckCircle2 : Clock3}
                     label={t('mhrsdUploadDate')}
@@ -567,6 +693,8 @@ export function IqamaRenewalForm({
                     )}
                     completed={Boolean(existingCase.mhrsdUploadedAt)}
                   />
+
+                  {/* MHRSD decision */}
 
                   <MilestoneItem
                     icon={
@@ -582,6 +710,8 @@ export function IqamaRenewalForm({
                     destructive={Boolean(existingCase.mhrsdDeniedAt)}
                   />
 
+                  {/* GR due date */}
+
                   <MilestoneItem
                     icon={CalendarDays}
                     label={t('governmentRelationsDueDate')}
@@ -596,13 +726,20 @@ export function IqamaRenewalForm({
               </aside>
             </div>
           ) : (
+            //--------------------------------
+            // New case
+            //--------------------------------
+
             <div className='space-y-6'>
               <section className='grid gap-4 md:grid-cols-2'>
+                {/* Employee ID */}
+
                 <div className='group rounded-2xl border border-border/60 bg-background p-4 shadow-sm transition-all focus-within:border-primary/35 focus-within:ring-4 focus-within:ring-primary/[0.06]'>
                   <div className='mb-3 flex items-center gap-3'>
                     <div className='flex h-9 w-9 items-center justify-center rounded-xl bg-primary/[0.07] text-primary'>
                       <UserRound className='h-4 w-4' />
                     </div>
+
                     <Label
                       htmlFor='employeeId'
                       className='text-sm font-semibold'
@@ -623,11 +760,14 @@ export function IqamaRenewalForm({
                   />
                 </div>
 
+                {/* Identification ID */}
+
                 <div className='group rounded-2xl border border-border/60 bg-background p-4 shadow-sm transition-all focus-within:border-primary/35 focus-within:ring-4 focus-within:ring-primary/[0.06]'>
                   <div className='mb-3 flex items-center gap-3'>
                     <div className='flex h-9 w-9 items-center justify-center rounded-xl bg-primary/[0.07] text-primary'>
                       <Fingerprint className='h-4 w-4' />
                     </div>
+
                     <Label
                       htmlFor='identificationId'
                       className='text-sm font-semibold'
@@ -649,11 +789,14 @@ export function IqamaRenewalForm({
                 </div>
               </section>
 
+              {/* Notes */}
+
               <section className='rounded-2xl border border-border/60 bg-background p-5 shadow-sm'>
                 <div className='mb-4 flex items-center gap-3'>
                   <div className='flex h-9 w-9 items-center justify-center rounded-xl bg-primary/[0.07] text-primary'>
                     <FileText className='h-4 w-4' />
                   </div>
+
                   <Label
                     htmlFor='notes'
                     className='text-sm font-semibold text-foreground'
@@ -674,6 +817,10 @@ export function IqamaRenewalForm({
             </div>
           )}
         </div>
+
+        {/* -----------------------------
+            Footer
+        ----------------------------- */}
 
         <footer className='relative flex flex-col-reverse gap-3 border-t border-border/60 bg-muted/[0.18] px-5 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-7'>
           <Button
@@ -696,31 +843,33 @@ export function IqamaRenewalForm({
             ) : (
               <Save className='h-4 w-4' />
             )}
+
             {isSaving ? t('saving') : t('save')}
           </Button>
         </footer>
       </form>
 
+      {/* -----------------------------
+          Workflow actions
+      ----------------------------- */}
+
       {existingCase && (
         <div className='rounded-3xl border border-border/60 bg-card p-1 shadow-[0_20px_60px_-38px_rgba(15,23,42,0.35)]'>
           <IqamaRenewalWorkflowActions
             renewalCase={existingCase}
-            canManageWorkflow={canManageWorkflow}
-            canProcessGovernmentRelations={canProcessGovernmentRelations}
-            currentUserId={currentUserId}
-            governmentRelationsUsers={governmentRelationsUsers}
-            isLoadingGovernmentRelationsUsers={
-              isLoadingGovernmentRelationsUsers
-            }
-            isGovernmentRelationsUsersError={isGovernmentRelationsUsersError}
+            access={access}
           />
         </div>
       )}
 
+      {/* -----------------------------
+          Discussion
+      ----------------------------- */}
+
       {existingCase && (
         <IqamaRenewalCaseDiscussion
           caseId={existingCase.id}
-          canComment={canCommentOnCase}
+          canComment={access.canCommentOnCase}
         />
       )}
     </div>
