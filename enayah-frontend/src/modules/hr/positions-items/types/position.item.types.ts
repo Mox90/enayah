@@ -12,6 +12,7 @@ export type PositionItemWorkforceCategory =
 export interface PositionItem {
   id: string
   itemNumber: string
+  establishedDate: string
   departmentId: string
   departmentNameEn: string | null
   departmentNameAr: string | null

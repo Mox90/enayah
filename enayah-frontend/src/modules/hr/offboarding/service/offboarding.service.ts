@@ -1,4 +1,4 @@
-// enayah-frontend/src/modules/hr/offboarding/services/offboarding.service.ts
+// enayah-frontend/src/modules/hr/offboarding/service/offboarding.service.ts
 
 import { api } from '@/lib/api/client'
 import { API_ENDPOINTS } from '@/lib/api/endpoints'

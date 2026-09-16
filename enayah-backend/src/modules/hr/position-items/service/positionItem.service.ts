@@ -1,25 +1,38 @@
 import { InferInsertModel } from 'drizzle-orm'
 import { db, employments } from '../../../../db'
 import { toPositionItemResponse } from '../dto/positionItem.mapper'
-import { PositionItemRepository } from '../repository/positionItem.repository'
+import {
+  PositionItemRepository,
+  type PositionItemMutationContext,
+} from '../repository/positionItem.repository'
 import {
   CreatePositionItemDTO,
   JobPositionItemQueryDTO,
   PositionItemLookupQueryDTO,
   UpdatePositionItemDTO,
 } from '../dto/positionItem.request'
+import { getTodayInRiyadh } from '../../offboarding/utils/offboarding-date.util'
 
 type EmploymentInsert = InferInsertModel<typeof employments>
 
 export const PositionItemService = {
-  assignEmployee: async (positionItemId: string, employeeId: string) => {
-    const today = new Date().toISOString().split('T')[0]!
+  assignEmployee: async (
+    positionItemId: string,
+    employeeId: string,
+    userId?: string,
+  ) => {
+    const today = getTodayInRiyadh() //new Date().toISOString().split('T')[0]!
 
     return db.transaction(async (tx) => {
       // 🔥 1. atomic check + update
       const item = await PositionItemRepository.assignIfAvailable(
         tx,
         positionItemId,
+        {
+          effectiveDate: today,
+          recordedBy: userId ?? null,
+          changeReason: 'Position item assigned to employee',
+        },
       )
 
       // 🔥 2. insert employment
@@ -33,8 +46,10 @@ export const PositionItemService = {
     })
   },
 
-  create: async (data: CreatePositionItemDTO) => {
-    return db.transaction((tx) => PositionItemRepository.create(tx, data))
+  create: async (data: CreatePositionItemDTO, userId?: string) => {
+    return db.transaction((tx) =>
+      PositionItemRepository.create(tx, data, userId),
+    )
   },
 
   findAll: async () => {
@@ -57,19 +72,34 @@ export const PositionItemService = {
     return PositionItemRepository.findLookup(params)
   },
 
+  // update: async (id: string, data: UpdatePositionItemDTO, userId?: string) => {
+  //   return db.transaction((tx) =>
+  //     PositionItemRepository.update(tx, id, data, userId),
+  //   )
+  // },
   update: async (id: string, data: UpdatePositionItemDTO, userId?: string) => {
     return db.transaction((tx) =>
-      PositionItemRepository.update(tx, id, data, userId),
+      PositionItemRepository.update(tx, id, data, {
+        effectiveDate: getTodayInRiyadh(),
+        recordedBy: userId ?? null,
+        changeReason: 'Position item details updated',
+      }),
     )
   },
 
-  unassignedEmployee: async (positionItemId: string) => {
-    await db.transaction((tx) =>
-      PositionItemRepository.updateStatus(tx, positionItemId, 'open'),
-    )
+  // unassignedEmployee: async (positionItemId: string, userId?: string) => {
+  //   await db.transaction((tx) =>
+  //     PositionItemRepository.updateStatus(tx, positionItemId, 'vacant', {
+  //       effectiveDate: getTodayInRiyadh(),
+  //       recordedBy: userId ?? null,
+  //       changeReason: 'Position item made vacant',
+  //     }),
+  //   )
 
-    return { message: 'Employee unassigned successfully' }
-  },
+  //   return {
+  //     message: 'Position item marked vacant successfully',
+  //   }
+  // },
 
   // delete: async (id: string, userId?: string) => {
   //   return db.transaction(async (tx) => {
@@ -79,7 +109,11 @@ export const PositionItemService = {
   // },
   delete: async (id: string, userId?: string) => {
     return db.transaction((tx) =>
-      PositionItemRepository.softDelete(tx, id, userId),
+      PositionItemRepository.softDelete(tx, id, {
+        effectiveDate: getTodayInRiyadh(),
+        recordedBy: userId ?? null,
+        changeReason: 'Position item deleted',
+      }),
     )
   },
 }
