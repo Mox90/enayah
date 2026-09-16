@@ -28,6 +28,13 @@ const categoryCodeMap = {
 export const createPositionItemSchema = z
   .object({
     itemNumber: z.string().trim().min(5).max(50),
+    establishedDate: z
+      .string()
+      .min(1, 'Establishment date is required')
+      .regex(
+        /^\d{4}-\d{2}-\d{2}$/,
+        'Establishment date must be in YYYY-MM-DD format',
+      ),
     departmentId: z.uuid(),
     positionId: z.uuid(),
     /*

@@ -443,7 +443,8 @@
     "updateSuccess": "Position item updated successfully.",
     "updateError": "Unable to update the position item.",
     "deleteSuccess": "Position item deleted successfully.",
-    "deleteError": "Unable to delete the position item."
+    "deleteError": "Unable to delete the position item.",
+    "establishedDate": "Established Date"
   },
   "contracts": {
     "contract": "Contract",

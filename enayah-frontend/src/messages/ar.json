@@ -306,7 +306,7 @@
     },
     "filterEmployeesDescription": "ضيّق نتائج دليل الموظفين بسرعة للوصول إلى ما تحتاجه.",
     "offboarding": {
-      "startOffboarding": "بدء إنهاء الخدمة",
+      "startOffboarding": "إنهاء خدمة موظف",
       "continueOffboarding": "عرض إجراءات إنهاء الخدمة"
     }
   },
@@ -438,7 +438,8 @@
     "updateSuccess": "تم تحديث البند الوظيفي بنجاح.",
     "updateError": "تعذر تحديث البند الوظيفي.",
     "deleteSuccess": "تم حذف البند الوظيفي بنجاح.",
-    "deleteError": "تعذر حذف البند الوظيفي."
+    "deleteError": "تعذر حذف البند الوظيفي.",
+    "establishedDate": "تاريخ استحداث الوظيفة"
   },
   "contracts": {
     "contract": "العقد",
@@ -1472,11 +1473,11 @@
     "types": {
       "eoc": "انتهاء العقد",
       "resignation": "استقالة",
-      "termination": "إنهاء الخدمة",
+      "termination": "فسخ عقد",
       "retirement": "تقاعد",
       "transferOut": "نقل خارج المنشأة",
       "death": "وفاة",
-      "mutualAgreement": "إنهاء بالتراضي",
+      "mutualAgreement": "اتفاق متبادل",
       "other": "أخرى"
     },
 

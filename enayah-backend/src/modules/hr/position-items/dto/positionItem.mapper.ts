@@ -36,6 +36,7 @@ export const toPositionItemDB = (dto: CreatePositionItemDTO) => ({
 
 export const toPositionItemUpdateDB = (dto: UpdatePositionItemDTO) => ({
   ...(dto.itemNumber !== undefined && { itemNumber: dto.itemNumber }),
+  //...(dto.establishedDate !== undefined && { establishedDate: dto.establishedDate }),
   ...(dto.departmentId !== undefined && { departmentId: dto.departmentId }),
   ...(dto.positionId !== undefined && { positionId: dto.positionId }),
   ...(dto.jobGradeId !== undefined && { jobGradeId: dto.jobGradeId }),

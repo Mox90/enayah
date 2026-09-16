@@ -147,7 +147,6 @@ function getChangedFields(
   }
 
   const beforeDeletedAt = before.deletedAt?.getTime() ?? null
-
   const afterDeletedAt = after.deletedAt?.getTime() ?? null
 
   if (beforeDeletedAt !== afterDeletedAt) {
@@ -569,15 +568,10 @@ export const PositionItemRepository = {
 
     await PositionItemHistoryRepository.createRevision(tx, deleted, {
       effectiveDate: context.effectiveDate,
-
       changeTypes,
-
       changedFields,
-
       changeReason: context.changeReason ?? 'Position item soft deleted',
-
       remarks: context.remarks ?? null,
-
       recordedBy: context.recordedBy ?? null,
     })
 
@@ -673,6 +667,7 @@ export const PositionItemRepository = {
       .select({
         id: positionItems.id,
         itemNumber: positionItems.itemNumber,
+        establishedDate: positionItems.establishedDate,
         departmentId: positionItems.departmentId,
         departmentNameEn: departments.nameEn,
         departmentNameAr: departments.nameAr,
@@ -729,13 +724,13 @@ export const PositionItemRepository = {
 
     const sortableColumns = {
       itemNumber: positionItems.itemNumber,
+      establishedDate: positionItems.establishedDate,
       departmentNameEn: departments.nameEn,
       departmentNameAr: departments.nameAr,
       positionTitleEn: positions.titleEn,
       positionTitleAr: positions.titleAr,
       categoryCode: positionItems.categoryCode,
       status: positionItems.status,
-      establishedDate: positionItems.establishedDate,
       createdAt: positionItems.createdAt,
     }
 
@@ -754,6 +749,7 @@ export const PositionItemRepository = {
       .select({
         id: positionItems.id,
         itemNumber: positionItems.itemNumber,
+        establishedDate: positionItems.establishedDate,
         departmentId: positionItems.departmentId,
         departmentNameEn: departments.nameEn,
         departmentNameAr: departments.nameAr,

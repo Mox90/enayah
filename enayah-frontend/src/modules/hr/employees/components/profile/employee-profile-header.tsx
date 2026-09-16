@@ -343,12 +343,6 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
               )}
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem className='text-amber-700 focus:bg-amber-50 focus:text-amber-800 dark:text-amber-400 dark:focus:bg-amber-950/30 dark:focus:text-amber-300'>
-                <UserMinus aria-hidden='true' className='me-2 h-4 w-4' />
-
-                {ct('deactivate')}
-              </DropdownMenuItem>
-
               {/* <DropdownMenuItem className='text-red-600 focus:bg-red-50 focus:text-red-700 dark:text-red-400 dark:focus:bg-red-950/30 dark:focus:text-red-300'>
                 <UserX aria-hidden='true' className='me-2 h-4 w-4' />
 
@@ -369,6 +363,12 @@ export function EmployeeProfileHeader({ profile, onAvatarUpload }: Props) {
                     : et('offboarding.startOffboarding')}
                 </DropdownMenuItem>
               )}
+
+              <DropdownMenuItem className='text-amber-700 focus:bg-amber-50 focus:text-amber-800 dark:text-amber-400 dark:focus:bg-amber-950/30 dark:focus:text-amber-300'>
+                <UserMinus aria-hidden='true' className='me-2 h-4 w-4' />
+
+                {ct('deactivate')}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

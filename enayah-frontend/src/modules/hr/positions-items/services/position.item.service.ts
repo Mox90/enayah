@@ -3,7 +3,10 @@
 import { api } from '@/lib/api/client'
 import { API_ENDPOINTS } from '@/lib/api/endpoints'
 
-import type { CreateJobPositionItemFormValues } from '../schemas/position.items.schema'
+import type {
+  CreateJobPositionItemFormValues,
+  UpdatePositionItemPayload,
+} from '../schemas/position.items.schema'
 import type {
   PaginatedPositionItems,
   PositionItem,
@@ -31,20 +34,21 @@ export const positionItemService = {
   },
 
   create: async (
-    data: CreateJobPositionItemFormValues,
+    payload: CreateJobPositionItemFormValues,
   ): Promise<PositionItem> => {
-    const response = await api.post(API_ENDPOINTS.hr.positionItems, data)
+    const response = await api.post(API_ENDPOINTS.hr.positionItems, payload)
 
     return response.data
   },
 
   update: async (
     id: string,
-    data: CreateJobPositionItemFormValues,
+    payload: UpdatePositionItemPayload,
   ): Promise<PositionItem> => {
+    console.log('updatePayload', payload)
     const response = await api.patch(
       `${API_ENDPOINTS.hr.positionItems}/${id}`,
-      data,
+      payload,
     )
 
     return response.data
