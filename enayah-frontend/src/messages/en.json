@@ -1460,17 +1460,20 @@
   "offboarding": {
     "title": "Offboard Employee",
     "description": "Start or review the employment separation process for {employee}.",
+
     "separationType": "Separation Type",
     "noticeDate": "Notice Date",
     "lastActiveDay": "Last Active Day",
     "reason": "Reason",
     "remarks": "Remarks",
     "currentStatus": "Current Status",
+
     "saveDraft": "Save Draft",
     "saveChanges": "Save Changes",
     "draftSaved": "Offboarding draft saved successfully.",
     "saveFailed": "Unable to save the offboarding process.",
-    "eocDateHint": "For End of Contract, the last active day must match the contract end date.",
+    "saving": "Saving...",
+
     "types": {
       "eoc": "End of Contract",
       "resignation": "Resignation",
@@ -1481,6 +1484,7 @@
       "mutualAgreement": "Mutual Agreement",
       "other": "Other"
     },
+
     "statuses": {
       "draft": "Draft",
       "pending_approval": "Pending Approval",
@@ -1488,13 +1492,7 @@
       "completed": "Completed",
       "cancelled": "Cancelled"
     },
-    "validation": {
-      "effectiveDateRequired": "Last active day is required.",
-      "beforeEmploymentStart": "Last active day cannot be before the employment start date.",
-      "afterContractEnd": "Last active day cannot be after the active contract end date.",
-      "noticeAfterEffectiveDate": "Notice date cannot be after the last active day.",
-      "eocMustMatchContractEnd": "For End of Contract, the last active day must match the contract end date."
-    },
+
     "employmentOverview": "Employment Overview",
     "employmentOverviewSub": "Review the employee and current contractual period before starting the separation process.",
     "employee": "Employee",
@@ -1502,31 +1500,100 @@
     "contractEndDate": "Contract End Date",
 
     "separationDetails": "Separation Details",
-    "separationDetailsSub": "Specify the reason the employee's employment relationship will end.",
+    "separationDetailsSub": "Specify how the employee's employment relationship will end.",
 
     "separationDates": "Separation Dates",
-    "separationDatesSub": "Record the notice date and the employee's final active working day.",
+    "separationDatesSub": "Record the notice date, when applicable, and the employee's final active working day.",
     "noticeDateSub": "The date formal notice of separation was given, when applicable.",
+    "noticeDateRequiredSub": "A notice date is required for this separation type.",
     "lastActiveDaySub": "This is the employee's final active day of employment.",
+    "eocDateHint": "For End of Contract, the last active day must match the contract end date.",
+
+    "separationReasons": "Separation Reasons",
+    "separationReasonsSub": "Select the primary reason and any additional factors associated with the employee's separation.",
+    "primaryReason": "Primary Reason",
+    "primaryReasonSub": "Select the main reason for the employee's separation.",
+    "selectPrimaryReason": "Select primary reason",
+    "contributingReasons": "Contributing Factors",
+    "contributingReasonsSub": "Select any additional factors that contributed to the separation.",
+    "selectedReasonSummary": "Selected Reasons",
+
+    "additionalReasonDetails": "Additional Reason Details",
+    "additionalReasonDetailsSub": "Provide any additional explanation or context regarding the selected separation reasons.",
+    "additionalReasonDetailsPlaceholder": "Enter any additional details regarding the employee's separation...",
 
     "reasonSub": "Provide the underlying reason or explanation for the separation.",
     "reasonPlaceholder": "Enter the reason for separation...",
 
-    "remarksSub": "Add any additional HR notes relevant to this separation process.",
+    "remarksSub": "Add any additional internal HR notes relevant to this separation process.",
     "remarksPlaceholder": "Enter additional remarks...",
 
-    "saving": "Saving...",
+    "reasons": {
+      "standardExpiry": "Project Completion / Standard Expiry",
+      "higherPay": "Salary / Higher Pay",
+      "alternativeOpportunity": "Alternative Employment Opportunity",
+      "lackRecognition": "Lack of Recognition",
+      "lackTrainingOpportunities": "Lack of Training Opportunities",
+      "limitedCareerAdvancement": "Limited Career Advancement",
+      "lackProfessionalDevelopmentSupport": "Lack of Professional Development Support",
+      "supervisorManagement": "Dissatisfaction with Supervisor / Management",
+      "workload": "Excessive Workload / Responsibilities",
+      "typeOfWork": "Dissatisfaction with Type of Work",
+      "employeeConflict": "Conflict with Other Employees",
+      "workEnvironment": "Dissatisfaction with Work Environment",
+      "relocation": "Relocation",
+      "study": "Return to School / Further Study",
+      "personalFamily": "Personal / Family Reasons",
+      "employerNonRenewal": "Employer Decision: Non-Renewal",
+      "amicableSeparation": "Mutual / Amicable Separation",
 
-    "workflowLockedTitle": "Separation workflow in progress",
+      "restructuring": "Restructuring",
+      "redundancy": "Redundancy / Position Elimination",
+      "layoff": "Layoff",
+      "misconductCause": "Misconduct / Cause",
+      "probationNonConfirmation": "Probation Non-Confirmation",
+
+      "statutoryAgeRetirement": "Statutory Age Retirement",
+      "earlyRetirement": "Early Retirement Scheme",
+
+      "transferOtherFacility": "Transfer to Another Facility",
+      "transferOtherEntity": "Transfer to Another Entity",
+
+      "deathOfEmployee": "Death of Employee",
+
+      "medicalUnfitness": "Long-term Disability / Medical Unfitness",
+      "forceMajeure": "Force Majeure",
+      "workPermitRevocation": "Revocation of Work Permit / Visa",
+      "legalInvalidation": "Legal Invalidation of Contract / Court Order",
+      "corporateDissolution": "Corporate Merger / Dissolution of Legal Entity",
+      "resignationDuringProbation": "Resignation During Probation"
+    },
+
+    "validation": {
+      "effectiveDateRequired": "Last active day is required.",
+      "beforeEmploymentStart": "Last active day cannot be before the employment start date.",
+      "afterContractEnd": "Last active day cannot be after the active contract end date.",
+      "noticeDateRequired": "Notice date is required for this separation type.",
+      "noticeAfterEffectiveDate": "Notice date cannot be after the last active day.",
+      "eocMustMatchContractEnd": "For End of Contract, the last active day must match the contract end date.",
+      "primaryReasonRequired": "A primary separation reason is required."
+    },
+
+    "workflowLockedTitle": "Separation Workflow in Progress",
     "workflowLockedDescription": "This separation is currently {status} and can no longer be edited from the employee profile.",
+
     "submitForApproval": "Submit for Approval",
     "submittedForApproval": "Offboarding submitted for approval.",
+
     "approve": "Approve Offboarding",
     "approvedSuccessfully": "Offboarding approved successfully.",
+
     "cancelOffboarding": "Cancel Offboarding",
     "cancelledSuccessfully": "Offboarding process cancelled.",
+
     "completeSeparation": "Complete Separation",
     "completedSuccessfully": "Employee separation completed successfully.",
+
     "workflowActionFailed": "Unable to complete the requested offboarding action.",
 
     "pendingApprovalTitle": "Pending Approval",
@@ -1545,8 +1612,15 @@
 
     "completeConfirmTitle": "Complete Employee Separation?",
     "completeConfirmDescription": "This will complete the separation for {employee} effective {date}. Employment, contract, movement and appointments will be closed and the assigned PCN may be released.",
-    "loadFailed": "Unable to load offboarding information",
-    "loadFailedDescription": "The employee's current offboarding status could not be retrieved. Close this window and try again."
+
+    "loadFailed": "Unable to Load Offboarding Information",
+    "loadFailedDescription": "The employee's current offboarding status could not be retrieved. Close this window and try again.",
+    "selectContributingReason": "Search and select a factor...",
+    "searchContributingReasons": "Search contributing factors...",
+    "noContributingReasons": "No matching factors found.",
+    "selectedContributingReasons": "Selected Factors",
+    "removeContributingReason": "Remove factor",
+    "allContributingReasonsSelected": "All available factors have been selected"
   },
   "hrDashboard": {
     "admin": {

@@ -1454,94 +1454,168 @@
   },
   "offboarding": {
     "title": "إنهاء خدمة الموظف",
-    "description": "بدء أو مراجعة إجراءات انتهاء خدمة الموظف {employee}.",
-    "separationType": "نوع انتهاء الخدمة",
+    "description": "بدء أو مراجعة إجراءات إنهاء العلاقة الوظيفية للموظف {employee}.",
+
+    "separationType": "نوع إنهاء الخدمة",
     "noticeDate": "تاريخ الإشعار",
-    "lastActiveDay": "آخر يوم عمل",
+    "lastActiveDay": "آخر يوم عمل فعلي",
     "reason": "السبب",
     "remarks": "ملاحظات",
     "currentStatus": "الحالة الحالية",
+
     "saveDraft": "حفظ كمسودة",
-    "saveChanges": "حفظ التعديلات",
+    "saveChanges": "حفظ التغييرات",
     "draftSaved": "تم حفظ مسودة إنهاء الخدمة بنجاح.",
     "saveFailed": "تعذر حفظ إجراءات إنهاء الخدمة.",
-    "eocDateHint": "في حالة انتهاء العقد، يجب أن يطابق آخر يوم عمل تاريخ انتهاء العقد.",
+    "saving": "جارٍ الحفظ...",
+
     "types": {
       "eoc": "انتهاء العقد",
       "resignation": "استقالة",
-      "termination": "إنهاء خدمة",
+      "termination": "إنهاء الخدمة",
       "retirement": "تقاعد",
       "transferOut": "نقل خارج المنشأة",
       "death": "وفاة",
-      "mutualAgreement": "اتفاق متبادل",
+      "mutualAgreement": "إنهاء بالتراضي",
       "other": "أخرى"
     },
+
     "statuses": {
       "draft": "مسودة",
-      "pending_approval": "بانتظار الموافقة",
+      "pending_approval": "بانتظار الاعتماد",
       "approved": "معتمد",
       "completed": "مكتمل",
-      "cancelled": "ملغي"
+      "cancelled": "ملغى"
     },
-    "validation": {
-      "effectiveDateRequired": "آخر يوم عمل مطلوب.",
-      "beforeEmploymentStart": "لا يمكن أن يكون آخر يوم عمل قبل تاريخ بدء الخدمة.",
-      "afterContractEnd": "لا يمكن أن يكون آخر يوم عمل بعد تاريخ انتهاء العقد الحالي.",
-      "noticeAfterEffectiveDate": "لا يمكن أن يكون تاريخ الإشعار بعد آخر يوم عمل.",
-      "eocMustMatchContractEnd": "في حالة انتهاء العقد، يجب أن يطابق آخر يوم عمل تاريخ انتهاء العقد."
-    },
-    "employmentOverview": "بيانات الخدمة",
-    "employmentOverviewSub": "راجع بيانات الموظف وفترة العقد الحالية قبل بدء إجراءات انتهاء الخدمة.",
+
+    "employmentOverview": "نظرة عامة على التوظيف",
+    "employmentOverviewSub": "راجع بيانات الموظف وفترة العقد الحالية قبل بدء إجراءات إنهاء الخدمة.",
     "employee": "الموظف",
-    "employmentStartDate": "تاريخ بدء الخدمة",
+    "employmentStartDate": "تاريخ بدء التوظيف",
     "contractEndDate": "تاريخ انتهاء العقد",
 
-    "separationDetails": "تفاصيل انتهاء الخدمة",
-    "separationDetailsSub": "حدد سبب انتهاء علاقة الموظف الوظيفية.",
+    "separationDetails": "تفاصيل إنهاء الخدمة",
+    "separationDetailsSub": "حدد الطريقة التي ستنتهي بها العلاقة الوظيفية للموظف.",
 
-    "separationDates": "تواريخ انتهاء الخدمة",
-    "separationDatesSub": "سجل تاريخ الإشعار وآخر يوم عمل فعلي للموظف.",
-    "noticeDateSub": "تاريخ تقديم الإشعار الرسمي بانتهاء الخدمة، عند انطباق ذلك.",
-    "lastActiveDaySub": "يمثل آخر يوم عمل فعلي للموظف.",
+    "separationDates": "تواريخ إنهاء الخدمة",
+    "separationDatesSub": "سجل تاريخ الإشعار، عند انطباقه، وآخر يوم عمل فعلي للموظف.",
+    "noticeDateSub": "تاريخ تقديم الإشعار الرسمي بإنهاء الخدمة، عند انطباقه.",
+    "noticeDateRequiredSub": "تاريخ الإشعار مطلوب لهذا النوع من إنهاء الخدمة.",
+    "lastActiveDaySub": "يمثل هذا التاريخ آخر يوم عمل فعلي للموظف.",
+    "eocDateHint": "في حالة انتهاء العقد، يجب أن يتطابق آخر يوم عمل فعلي مع تاريخ انتهاء العقد.",
 
-    "reasonSub": "أدخل السبب أو التوضيح الأساسي لانتهاء الخدمة.",
-    "reasonPlaceholder": "أدخل سبب انتهاء الخدمة...",
+    "separationReasons": "أسباب إنهاء الخدمة",
+    "separationReasonsSub": "حدد السبب الرئيسي وأي عوامل إضافية ساهمت في إنهاء خدمة الموظف.",
+    "primaryReason": "السبب الرئيسي",
+    "primaryReasonSub": "حدد السبب الرئيسي لإنهاء خدمة الموظف.",
+    "selectPrimaryReason": "اختر السبب الرئيسي",
+    "contributingReasons": "العوامل المساهمة",
+    "contributingReasonsSub": "حدد أي عوامل إضافية ساهمت في إنهاء الخدمة.",
+    "selectedReasonSummary": "ملخص الأسباب المحددة",
 
-    "remarksSub": "أضف أي ملاحظات إضافية للموارد البشرية تتعلق بإجراءات انتهاء الخدمة.",
+    "additionalReasonDetails": "تفاصيل إضافية عن الأسباب",
+    "additionalReasonDetailsSub": "أضف أي توضيحات أو معلومات إضافية تتعلق بأسباب إنهاء الخدمة المحددة.",
+    "additionalReasonDetailsPlaceholder": "أدخل أي تفاصيل إضافية تتعلق بإنهاء خدمة الموظف...",
+
+    "reasonSub": "أدخل السبب أو التوضيح الأساسي المتعلق بإنهاء الخدمة.",
+    "reasonPlaceholder": "أدخل سبب إنهاء الخدمة...",
+
+    "remarksSub": "أضف أي ملاحظات داخلية إضافية للموارد البشرية تتعلق بإجراءات إنهاء الخدمة.",
     "remarksPlaceholder": "أدخل ملاحظات إضافية...",
 
-    "saving": "جارٍ الحفظ...",
+    "reasons": {
+      "standardExpiry": "إكمال المشروع / الانتهاء الاعتيادي للعقد",
+      "higherPay": "راتب أو مزايا مالية أفضل",
+      "alternativeOpportunity": "فرصة وظيفية بديلة",
+      "lackRecognition": "نقص التقدير والاعتراف بالجهود",
+      "lackTrainingOpportunities": "نقص فرص التدريب",
+      "limitedCareerAdvancement": "محدودية فرص التقدم الوظيفي",
+      "lackProfessionalDevelopmentSupport": "نقص دعم التطوير المهني",
+      "supervisorManagement": "عدم الرضا عن المشرف / الإدارة",
+      "workload": "زيادة عبء العمل / المسؤوليات",
+      "typeOfWork": "عدم الرضا عن طبيعة العمل",
+      "employeeConflict": "خلافات مع موظفين آخرين",
+      "workEnvironment": "عدم الرضا عن بيئة العمل",
+      "relocation": "الانتقال إلى منطقة أخرى",
+      "study": "العودة للدراسة / استكمال الدراسة",
+      "personalFamily": "أسباب شخصية / عائلية",
+      "employerNonRenewal": "قرار جهة العمل بعدم التجديد",
+      "amicableSeparation": "إنهاء بالتراضي / اتفاق ودي",
 
-    "workflowLockedTitle": "إجراءات انتهاء الخدمة قيد التنفيذ",
-    "workflowLockedDescription": "حالة إجراءات انتهاء الخدمة الحالية هي {status} ولم يعد من الممكن تعديلها من ملف الموظف.",
+      "restructuring": "إعادة الهيكلة",
+      "redundancy": "الاستغناء الوظيفي / إلغاء الوظيفة",
+      "layoff": "تسريح من العمل",
+      "misconductCause": "سوء السلوك / سبب تأديبي",
+      "probationNonConfirmation": "عدم التثبيت بعد فترة التجربة",
+
+      "statutoryAgeRetirement": "التقاعد لبلوغ السن النظامي",
+      "earlyRetirement": "برنامج التقاعد المبكر",
+
+      "transferOtherFacility": "النقل إلى منشأة أخرى",
+      "transferOtherEntity": "النقل إلى جهة أخرى",
+
+      "deathOfEmployee": "وفاة الموظف",
+
+      "medicalUnfitness": "عجز طويل الأمد / عدم اللياقة الطبية",
+      "forceMajeure": "قوة قاهرة",
+      "workPermitRevocation": "إلغاء تصريح العمل / التأشيرة",
+      "legalInvalidation": "بطلان العقد قانونيًا / أمر قضائي",
+      "corporateDissolution": "اندماج المنشأة / حل الكيان القانوني",
+      "resignationDuringProbation": "الاستقالة خلال فترة التجربة"
+    },
+
+    "validation": {
+      "effectiveDateRequired": "آخر يوم عمل فعلي مطلوب.",
+      "beforeEmploymentStart": "لا يمكن أن يكون آخر يوم عمل فعلي قبل تاريخ بدء التوظيف.",
+      "afterContractEnd": "لا يمكن أن يكون آخر يوم عمل فعلي بعد تاريخ انتهاء العقد النشط.",
+      "noticeDateRequired": "تاريخ الإشعار مطلوب لهذا النوع من إنهاء الخدمة.",
+      "noticeAfterEffectiveDate": "لا يمكن أن يكون تاريخ الإشعار بعد آخر يوم عمل فعلي.",
+      "eocMustMatchContractEnd": "في حالة انتهاء العقد، يجب أن يتطابق آخر يوم عمل فعلي مع تاريخ انتهاء العقد.",
+      "primaryReasonRequired": "يجب تحديد سبب رئيسي لإنهاء الخدمة."
+    },
+
+    "workflowLockedTitle": "إجراءات إنهاء الخدمة قيد المعالجة",
+    "workflowLockedDescription": "حالة إجراءات إنهاء الخدمة الحالية هي {status} ولم يعد من الممكن تعديلها من ملف الموظف.",
+
     "submitForApproval": "إرسال للاعتماد",
-    "submittedForApproval": "تم إرسال إجراءات انتهاء الخدمة للاعتماد.",
-    "approve": "اعتماد انتهاء الخدمة",
-    "approvedSuccessfully": "تم اعتماد انتهاء الخدمة بنجاح.",
-    "cancelOffboarding": "إلغاء إجراءات انتهاء الخدمة",
-    "cancelledSuccessfully": "تم إلغاء إجراءات انتهاء الخدمة.",
-    "completeSeparation": "إكمال انتهاء الخدمة",
-    "completedSuccessfully": "تم إكمال انتهاء خدمة الموظف بنجاح.",
-    "workflowActionFailed": "تعذر تنفيذ الإجراء المطلوب على انتهاء الخدمة.",
+    "submittedForApproval": "تم إرسال إجراءات إنهاء الخدمة للاعتماد.",
+
+    "approve": "اعتماد إنهاء الخدمة",
+    "approvedSuccessfully": "تم اعتماد إنهاء الخدمة بنجاح.",
+
+    "cancelOffboarding": "إلغاء إجراءات إنهاء الخدمة",
+    "cancelledSuccessfully": "تم إلغاء إجراءات إنهاء الخدمة.",
+
+    "completeSeparation": "إكمال إنهاء الخدمة",
+    "completedSuccessfully": "تم إكمال إنهاء خدمة الموظف بنجاح.",
+
+    "workflowActionFailed": "تعذر تنفيذ الإجراء المطلوب لإنهاء الخدمة.",
 
     "pendingApprovalTitle": "بانتظار الاعتماد",
-    "pendingApprovalDescription": "تم إرسال طلب انتهاء الخدمة للاعتماد ولم يعد من الممكن تعديل البيانات.",
+    "pendingApprovalDescription": "تم إرسال طلب إنهاء الخدمة للاعتماد ولم يعد من الممكن تعديله.",
 
-    "approvedTitle": "تم اعتماد انتهاء الخدمة",
-    "approvedDescription": "تم اعتماد انتهاء الخدمة، ويظل الموظف على رأس العمل حتى {date}.",
+    "approvedTitle": "تم اعتماد إنهاء الخدمة",
+    "approvedDescription": "تم اعتماد إنهاء الخدمة، وستظل العلاقة الوظيفية نشطة حتى {date}.",
 
-    "readyForCompletionTitle": "جاهز للإكمال",
-    "readyForCompletionDescription": "تم الوصول إلى تاريخ انتهاء الخدمة المعتمد ويمكن الآن إكمال إجراءات إنهاء دورة الخدمة.",
+    "readyForCompletionTitle": "جاهز لإكمال إنهاء الخدمة",
+    "readyForCompletionDescription": "تم الوصول إلى التاريخ المعتمد لإنهاء الخدمة، ويمكن الآن إكمال دورة إنهاء العلاقة الوظيفية.",
 
-    "scheduledCompletion": "مجدول للإكمال بتاريخ {date}",
+    "scheduledCompletion": "مجدول لإكمال إنهاء الخدمة بتاريخ {date}",
 
-    "cancelConfirmTitle": "إلغاء إجراءات انتهاء الخدمة؟",
-    "cancelConfirmDescription": "سيتم إلغاء إجراءات انتهاء الخدمة الحالية دون تغيير حالة خدمة الموظف.",
+    "cancelConfirmTitle": "إلغاء إجراءات إنهاء الخدمة؟",
+    "cancelConfirmDescription": "سيؤدي هذا إلى إلغاء إجراءات إنهاء الخدمة الحالية، وستبقى العلاقة الوظيفية للموظف دون تغيير.",
 
-    "completeConfirmTitle": "إكمال انتهاء خدمة الموظف؟",
-    "completeConfirmDescription": "سيتم إكمال انتهاء خدمة {employee} اعتباراً من {date}، وإغلاق الخدمة والعقد والحركة والتكليفات وقد يتم تحرير رقم البند الوظيفي.",
-    "loadFailed": "تعذر تحميل بيانات إنهاء الخدمة",
-    "loadFailedDescription": "لم يتم استرجاع حالة إنهاء الخدمة الحالية للموظف. أغلق هذه النافذة وأعد المحاولة."
+    "completeConfirmTitle": "إكمال إنهاء خدمة الموظف؟",
+    "completeConfirmDescription": "سيؤدي هذا إلى إكمال إنهاء خدمة {employee} اعتبارًا من {date}. سيتم إغلاق التوظيف والعقد والحركة الوظيفية والتعيينات، وقد يتم تحرير البند الوظيفي (PCN) المخصص للموظف.",
+
+    "loadFailed": "تعذر تحميل معلومات إنهاء الخدمة",
+    "loadFailedDescription": "تعذر استرجاع الحالة الحالية لإجراءات إنهاء خدمة الموظف. أغلق هذه النافذة ثم حاول مرة أخرى.",
+    "selectContributingReason": "ابحث واختر أحد العوامل...",
+    "searchContributingReasons": "البحث في العوامل المساهمة...",
+    "noContributingReasons": "لم يتم العثور على عوامل مطابقة.",
+    "selectedContributingReasons": "العوامل المحددة",
+    "removeContributingReason": "إزالة العامل",
+    "allContributingReasonsSelected": "تم تحديد جميع العوامل المتاحة"
   },
   "hrDashboard": {
     "admin": {

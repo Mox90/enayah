@@ -287,6 +287,7 @@ export const employmentSeparations = pgTable(
   (table) => [
     index('idx_employment_separations_employment').on(table.employmentId),
     index('idx_employment_separations_status').on(table.status),
+    index('idx_employment_separations_type').on(table.separationType),
     index('idx_employment_separations_effective_date').on(table.effectiveDate),
     uniqueIndex('uq_employment_separation_open')
       .on(table.employmentId)
@@ -298,6 +299,41 @@ export const employmentSeparations = pgTable(
             'pending_approval',
             'approved'
           )
+        `,
+      ),
+  ],
+)
+
+export const employmentSeparationReasons = pgTable(
+  'employment_separation_reasons',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    separationId: uuid('separation_id')
+      .notNull()
+      .references(() => employmentSeparations.id, {
+        onDelete: 'cascade',
+      }),
+    reasonCode: varchar('reason_code', {
+      length: 100,
+    }).notNull(),
+    isPrimary: boolean('is_primary').default(false).notNull(),
+    ...baseColumns,
+  },
+
+  (table) => [
+    index('idx_employment_separation_reasons_separation').on(
+      table.separationId,
+    ),
+    index('idx_employment_separation_reasons_code').on(table.reasonCode),
+    uniqueIndex('uq_employment_separation_reason')
+      .on(table.separationId, table.reasonCode)
+      .where(sql`${table.isDeleted} = false`),
+    uniqueIndex('uq_employment_separation_primary_reason')
+      .on(table.separationId)
+      .where(
+        sql`
+          ${table.isDeleted} = false
+          AND ${table.isPrimary} = true
         `,
       ),
   ],
