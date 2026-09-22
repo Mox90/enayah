@@ -9,10 +9,12 @@ import { AxiosError } from 'axios'
 import {
   Ban,
   CheckCircle2,
+  ChevronsUpDown,
   Clock3,
   LoaderCircle,
   Send,
   UserX,
+  X,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useLocale, useTranslations } from 'next-intl'
@@ -21,15 +23,21 @@ import { DatePicker } from '@/components/dialogs/date-picker'
 import { Footer } from '@/components/footer/footer'
 import { FormDialog } from '@/components/forms'
 
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,15 +48,28 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 
 import {
   employmentSeparationTypeValues,
   type CreateSeparationPayload,
   type EmploymentSeparation,
+  type EmploymentSeparationReasonCode,
   type EmploymentSeparationStatus,
   type EmploymentSeparationType,
 } from '../types/offboarding.types'
+
+import { separationTypeConfigs } from '../config/separation-reasons.config'
 
 import {
   useApproveSeparation,
@@ -59,10 +80,11 @@ import {
   useSubmitSeparation,
   useUpdateSeparation,
 } from '../hooks/use-offboarding'
+
 import { getTodayInRiyadh } from '@/utils/utilities'
 
 /* -------------------------------------------------------------------------- */
-/* Types                                                                       */
+/* Types                                                                      */
 /* -------------------------------------------------------------------------- */
 
 interface Props {
@@ -82,9 +104,21 @@ interface OffboardingDialogContentProps extends Props {
 
 type FormState = {
   separationType: EmploymentSeparationType
+
   noticeDate: string | null
   effectiveDate: string
+
+  primaryReasonCode: EmploymentSeparationReasonCode | null
+  contributingReasonCodes: EmploymentSeparationReasonCode[]
+
+  /**
+   * Optional narrative explanation.
+   */
   reason: string
+
+  /**
+   * Internal HR remarks.
+   */
   remarks: string
 }
 
@@ -101,7 +135,7 @@ interface ReadOnlyFieldProps {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Constants                                                                   */
+/* Constants                                                                  */
 /* -------------------------------------------------------------------------- */
 
 const openStatuses: EmploymentSeparationStatus[] = [
@@ -113,7 +147,7 @@ const openStatuses: EmploymentSeparationStatus[] = [
 type ConfirmAction = 'cancel' | 'complete' | null
 
 /* -------------------------------------------------------------------------- */
-/* UI Helpers                                                                  */
+/* UI Helpers                                                                 */
 /* -------------------------------------------------------------------------- */
 
 function Section({ title, description, badge, children }: SectionProps) {
@@ -159,15 +193,24 @@ function ReadOnlyField({ label, value }: ReadOnlyFieldProps) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Form Initialization                                                         */
+/* Form Initialization                                                        */
 /* -------------------------------------------------------------------------- */
 
 function createInitialForm(existing?: EmploymentSeparation): FormState {
   if (existing) {
+    const primaryReason = existing.reasons?.find((reason) => reason.isPrimary)
+
+    const contributingReasonCodes =
+      existing.reasons
+        ?.filter((reason) => !reason.isPrimary)
+        .map((reason) => reason.reasonCode) ?? []
+
     return {
       separationType: existing.separationType,
       noticeDate: existing.noticeDate,
       effectiveDate: existing.effectiveDate,
+      primaryReasonCode: primaryReason?.reasonCode ?? null,
+      contributingReasonCodes,
       reason: existing.reason ?? '',
       remarks: existing.remarks ?? '',
     }
@@ -177,13 +220,15 @@ function createInitialForm(existing?: EmploymentSeparation): FormState {
     separationType: 'resignation',
     noticeDate: null,
     effectiveDate: '',
+    primaryReasonCode: null,
+    contributingReasonCodes: [],
     reason: '',
     remarks: '',
   }
 }
 
 /* -------------------------------------------------------------------------- */
-/* Dialog Content                                                              */
+/* Dialog Content                                                             */
 /* -------------------------------------------------------------------------- */
 
 function OffboardingDialogContent({
@@ -201,17 +246,29 @@ function OffboardingDialogContent({
   const t = useTranslations('offboarding')
   const common = useTranslations('common')
 
+  /* ------------------------------------------------------------------------ */
+  /* Mutations                                                                 */
+  /* ------------------------------------------------------------------------ */
+
   const createMutation = useCreateSeparation(employmentId)
   const updateMutation = useUpdateSeparation(employmentId)
-
-  const [form, setForm] = useState<FormState>(() => createInitialForm(existing))
-  const [error, setError] = useState<string | null>(null)
-
   const submitMutation = useSubmitSeparation(employmentId)
   const approveMutation = useApproveSeparation(employmentId)
   const cancelMutation = useCancelSeparation(employmentId)
   const completeMutation = useCompleteSeparation(employmentId)
+
+  /* ------------------------------------------------------------------------ */
+  /* State                                                                     */
+  /* ------------------------------------------------------------------------ */
+
+  const [form, setForm] = useState<FormState>(() => createInitialForm(existing))
+  const [error, setError] = useState<string | null>(null)
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null)
+  const [contributingOpen, setContributingOpen] = useState(false)
+
+  /* ------------------------------------------------------------------------ */
+  /* Workflow state                                                            */
+  /* ------------------------------------------------------------------------ */
 
   const isSubmitting =
     createMutation.isPending ||
@@ -221,29 +278,25 @@ function OffboardingDialogContent({
     cancelMutation.isPending ||
     completeMutation.isPending
 
-  /*
-   * Once submitted / approved, the employee profile
-   * provides a read-only view.
-   *
-   * The approval workflow can later live in the
-   * dedicated Offboarding workspace.
-   */
-  //const readOnly =
-  //  existing?.status === 'pending_approval' || existing?.status === 'approved'
-
   const isDraft = existing?.status === 'draft'
   const isPendingApproval = existing?.status === 'pending_approval'
   const isApproved = existing?.status === 'approved'
 
+  /**
+   * Once submitted / approved, employee-profile
+   * offboarding becomes read-only.
+   *
+   * The dedicated offboarding workspace may
+   * eventually own the approval workflow.
+   */
   const readOnly = isPendingApproval || isApproved
-
   const today = getTodayInRiyadh()
-
   const canCompleteNow = Boolean(
     isApproved && existing && existing.effectiveDate <= today,
   )
+
   /* ------------------------------------------------------------------------ */
-  /* Labels                                                                    */
+  /* Separation Labels                                                        */
   /* ------------------------------------------------------------------------ */
 
   const separationLabels: Record<EmploymentSeparationType, string> = {
@@ -257,15 +310,83 @@ function OffboardingDialogContent({
     other: t('types.other'),
   }
 
+  /* ------------------------------------------------------------------------ */
+  /* Reason Labels                                                            */
+  /* ------------------------------------------------------------------------ */
+
+  const reasonLabels: Record<EmploymentSeparationReasonCode, string> = {
+    standard_expiry: t('reasons.standardExpiry'),
+    higher_pay: t('reasons.higherPay'),
+    alternative_opportunity: t('reasons.alternativeOpportunity'),
+    lack_recognition: t('reasons.lackRecognition'),
+    lack_training_opportunities: t('reasons.lackTrainingOpportunities'),
+    limited_career_advancement: t('reasons.limitedCareerAdvancement'),
+    lack_professional_development_support: t(
+      'reasons.lackProfessionalDevelopmentSupport',
+    ),
+    supervisor_management: t('reasons.supervisorManagement'),
+    workload: t('reasons.workload'),
+    type_of_work: t('reasons.typeOfWork'),
+    employee_conflict: t('reasons.employeeConflict'),
+    work_environment: t('reasons.workEnvironment'),
+    relocation: t('reasons.relocation'),
+    study: t('reasons.study'),
+    personal_family: t('reasons.personalFamily'),
+    employer_nonrenewal: t('reasons.employerNonRenewal'),
+    amicable_separation: t('reasons.amicableSeparation'),
+    resignation_during_probation: t('reasons.resignationDuringProbation'),
+    restructuring: t('reasons.restructuring'),
+    redundancy: t('reasons.redundancy'),
+    layoff: t('reasons.layoff'),
+    misconduct_cause: t('reasons.misconductCause'),
+    probation_nonconfirmation: t('reasons.probationNonConfirmation'),
+    statutory_age_retirement: t('reasons.statutoryAgeRetirement'),
+    early_retirement: t('reasons.earlyRetirement'),
+    transfer_other_facility: t('reasons.transferOtherFacility'),
+    transfer_other_entity: t('reasons.transferOtherEntity'),
+    death_of_employee: t('reasons.deathOfEmployee'),
+    medical_unfitness: t('reasons.medicalUnfitness'),
+    force_majeure: t('reasons.forceMajeure'),
+    work_permit_revocation: t('reasons.workPermitRevocation'),
+    legal_invalidation: t('reasons.legalInvalidation'),
+    corporate_dissolution: t('reasons.corporateDissolution'),
+  }
+
+  /* ------------------------------------------------------------------------ */
+  /* Selected Type Configuration                                              */
+  /* ------------------------------------------------------------------------ */
+
+  const separationConfig = separationTypeConfigs[form.separationType]
+
+  /**
+   * Widen the type here so TypeScript
+   * does not infer the intersection of
+   * all presetReason arrays as never.
+   */
+  const allowedReasons: readonly EmploymentSeparationReasonCode[] =
+    separationConfig.presetReasons
+
+  const availableContributingReasons = allowedReasons.filter(
+    (reasonCode) =>
+      reasonCode !== form.primaryReasonCode &&
+      !form.contributingReasonCodes.includes(reasonCode),
+  )
+
   const currentStatusLabel = existing
     ? t(`statuses.${existing.status}`)
     : undefined
 
   /* ------------------------------------------------------------------------ */
-  /* Validation                                                                */
+  /* Validation                                                               */
   /* ------------------------------------------------------------------------ */
 
-  function validate() {
+  function validate(options?: { requireReasons?: boolean }) {
+    const requireReasons = options?.requireReasons ?? false
+
+    // ----------------------------------
+    // Effective date
+    // ----------------------------------
+
     if (!form.effectiveDate) {
       return t('validation.effectiveDateRequired')
     }
@@ -278,9 +399,21 @@ function OffboardingDialogContent({
       return t('validation.afterContractEnd')
     }
 
+    // ----------------------------------
+    // Notice date
+    // ----------------------------------
+
+    if (separationConfig.requiresNoticeDate && !form.noticeDate) {
+      return t('validation.noticeDateRequired')
+    }
+
     if (form.noticeDate && form.noticeDate > form.effectiveDate) {
       return t('validation.noticeAfterEffectiveDate')
     }
+
+    // ----------------------------------
+    // EOC
+    // ----------------------------------
 
     if (
       form.separationType === 'eoc' &&
@@ -289,14 +422,53 @@ function OffboardingDialogContent({
       return t('validation.eocMustMatchContractEnd')
     }
 
+    // ----------------------------------
+    // Structured reasons
+    // ----------------------------------
+
+    if (requireReasons && !form.primaryReasonCode) {
+      return t('validation.primaryReasonRequired')
+    }
+
     return null
   }
 
+  /* ------------------------------------------------------------------------ */
+  /* Build Payload                                                             */
+  /* ------------------------------------------------------------------------ */
+
   function buildPayload(): CreateSeparationPayload {
+    const reasons: NonNullable<CreateSeparationPayload['reasons']> = []
+
+    if (form.primaryReasonCode) {
+      reasons.push({
+        reasonCode: form.primaryReasonCode,
+        isPrimary: true,
+      })
+    }
+
+    for (const reasonCode of form.contributingReasonCodes) {
+      /**
+       * Defensive check:
+       *
+       * The same reason must never be both
+       * primary and contributing.
+       */
+      if (reasonCode === form.primaryReasonCode) {
+        continue
+      }
+
+      reasons.push({
+        reasonCode,
+        isPrimary: false,
+      })
+    }
+
     return {
       separationType: form.separationType,
       noticeDate: form.noticeDate,
       effectiveDate: form.effectiveDate,
+      reasons,
       reason: form.reason.trim() || null,
       remarks: form.remarks.trim() || null,
     }
@@ -313,6 +485,12 @@ function OffboardingDialogContent({
 
     setError(null)
 
+    /**
+     * Draft:
+     *
+     * structured reasons may still
+     * temporarily be empty.
+     */
     const validationError = validate()
 
     if (validationError) {
@@ -341,6 +519,10 @@ function OffboardingDialogContent({
     }
   }
 
+  /* ------------------------------------------------------------------------ */
+  /* Submit                                                                    */
+  /* ------------------------------------------------------------------------ */
+
   async function handleSubmitForApproval() {
     if (!existing || existing.status !== 'draft' || isSubmitting) {
       return
@@ -348,7 +530,13 @@ function OffboardingDialogContent({
 
     setError(null)
 
-    const validationError = validate()
+    /**
+     * Submission requires a
+     * primary structured reason.
+     */
+    const validationError = validate({
+      requireReasons: true,
+    })
 
     if (validationError) {
       setError(validationError)
@@ -356,8 +544,10 @@ function OffboardingDialogContent({
     }
 
     try {
-      /*
-       * Persist any unsaved edits first.
+      /**
+       * Persist any unsaved edits,
+       * including structured reasons,
+       * before submission.
        */
       await updateMutation.mutateAsync({
         separationId: existing.id,
@@ -374,6 +564,10 @@ function OffboardingDialogContent({
       setError(message ?? t('workflowActionFailed'))
     }
   }
+
+  /* ------------------------------------------------------------------------ */
+  /* Approve                                                                   */
+  /* ------------------------------------------------------------------------ */
 
   async function handleApprove() {
     if (!existing || existing.status !== 'pending_approval' || isSubmitting) {
@@ -394,6 +588,10 @@ function OffboardingDialogContent({
     }
   }
 
+  /* ------------------------------------------------------------------------ */
+  /* Confirmed Workflow Actions                                               */
+  /* ------------------------------------------------------------------------ */
+
   async function executeConfirmedAction() {
     if (!existing || !confirmAction) {
       return
@@ -402,22 +600,25 @@ function OffboardingDialogContent({
     setError(null)
 
     try {
+      // ----------------------------------
+      // Cancel
+      // ----------------------------------
+
       if (confirmAction === 'cancel') {
         await cancelMutation.mutateAsync(existing.id)
-
         toast.success(t('cancelledSuccessfully'))
-
         setConfirmAction(null)
         onOpenChange(false)
-
         return
       }
 
+      // ----------------------------------
+      // Complete
+      // ----------------------------------
+
       if (confirmAction === 'complete') {
         await completeMutation.mutateAsync(existing.id)
-
         toast.success(t('completedSuccessfully'))
-
         setConfirmAction(null)
         onOpenChange(false)
       }
@@ -431,6 +632,10 @@ function OffboardingDialogContent({
     }
   }
 
+  /* ------------------------------------------------------------------------ */
+  /* Close                                                                     */
+  /* ------------------------------------------------------------------------ */
+
   function closeDialog() {
     if (isSubmitting) {
       return
@@ -438,6 +643,10 @@ function OffboardingDialogContent({
 
     onOpenChange(false)
   }
+
+  /* ------------------------------------------------------------------------ */
+  /* Render                                                                    */
+  /* ------------------------------------------------------------------------ */
 
   return (
     <>
@@ -477,6 +686,10 @@ function OffboardingDialogContent({
           </div>
         </Section>
 
+        {/* ------------------------------------------------ */}
+        {/* Error */}
+        {/* ------------------------------------------------ */}
+
         {error && (
           <div className='rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm font-medium text-destructive'>
             {error}
@@ -502,27 +715,65 @@ function OffboardingDialogContent({
             <Select
               disabled={readOnly || isSubmitting}
               value={form.separationType}
+              dir={isRtl ? 'rtl' : 'ltr'}
               onValueChange={(value) => {
                 const separationType = value as EmploymentSeparationType
-
+                const nextConfig = separationTypeConfigs[separationType]
+                const nextAllowedReasons: readonly EmploymentSeparationReasonCode[] =
+                  nextConfig.presetReasons
                 setError(null)
-
-                setForm((current) => ({
-                  ...current,
-                  separationType,
-
+                setContributingOpen(false)
+                setForm((current) => {
                   /*
-                   * EOC always ends on the
-                   * active contract end date.
+                   * Preserve the current primary reason
+                   * only when it is also valid for the
+                   * newly selected separation type.
                    */
-                  effectiveDate:
-                    separationType === 'eoc'
-                      ? contractEndDate
-                      : current.effectiveDate,
-                }))
+                  const currentPrimaryIsStillValid =
+                    current.primaryReasonCode !== null &&
+                    nextAllowedReasons.includes(current.primaryReasonCode)
+                  /*
+                   * If the new type has only one valid
+                   * reason, automatically select it.
+                   *
+                   * Example:
+                   * death -> death_of_employee
+                   */
+                  const soleReason =
+                    nextAllowedReasons.length === 1
+                      ? nextAllowedReasons[0]
+                      : null
+                  const primaryReasonCode = currentPrimaryIsStillValid
+                    ? current.primaryReasonCode
+                    : soleReason
+                  /*
+                   * Preserve contributing factors only
+                   * when they remain valid under the new
+                   * type and are not the new primary.
+                   */
+                  const contributingReasonCodes =
+                    current.contributingReasonCodes.filter(
+                      (reasonCode) =>
+                        nextAllowedReasons.includes(reasonCode) &&
+                        reasonCode !== primaryReasonCode,
+                    )
+                  return {
+                    ...current,
+                    separationType,
+                    primaryReasonCode,
+                    contributingReasonCodes,
+                    effectiveDate:
+                      separationType === 'eoc'
+                        ? contractEndDate
+                        : current.effectiveDate,
+                  }
+                })
               }}
             >
-              <SelectTrigger id='offboarding-separation-type' className='h-11'>
+              <SelectTrigger
+                id='offboarding-separation-type'
+                className='w-full data-[size=default]:h-12 bg-transparent hover:bg-transparent focus:bg-transparent dark:bg-transparent'
+              >
                 <SelectValue />
               </SelectTrigger>
 
@@ -552,8 +803,16 @@ function OffboardingDialogContent({
           description={t('separationDatesSub')}
         >
           <div className='grid grid-cols-1 gap-5 md:grid-cols-2'>
+            {/* Notice date */}
+
             <div className='space-y-2'>
-              <Label htmlFor='offboarding-notice-date'>{t('noticeDate')}</Label>
+              <Label htmlFor='offboarding-notice-date'>
+                {t('noticeDate')}
+
+                {separationConfig.requiresNoticeDate && (
+                  <span className='ms-1 text-destructive'>*</span>
+                )}
+              </Label>
 
               <DatePicker
                 id='offboarding-notice-date'
@@ -570,9 +829,13 @@ function OffboardingDialogContent({
               />
 
               <p className='text-xs text-muted-foreground'>
-                {t('noticeDateSub')}
+                {separationConfig.requiresNoticeDate
+                  ? t('noticeDateRequiredSub')
+                  : t('noticeDateSub')}
               </p>
             </div>
+
+            {/* Effective date */}
 
             <div className='space-y-2'>
               <Label htmlFor='offboarding-effective-date'>
@@ -585,11 +848,16 @@ function OffboardingDialogContent({
                 id='offboarding-effective-date'
                 value={form.effectiveDate || null}
                 disabled={
-                  readOnly || isSubmitting || form.separationType === 'eoc'
+                  readOnly || isSubmitting //|| form.separationType === 'eoc'
                 }
+                minDate={
+                  form.separationType === 'eoc'
+                    ? contractEndDate
+                    : employmentStartDate
+                }
+                maxDate={contractEndDate}
                 onChange={(value) => {
                   setError(null)
-
                   setForm((current) => ({
                     ...current,
                     effectiveDate: value ?? '',
@@ -608,23 +876,324 @@ function OffboardingDialogContent({
               )}
             </div>
           </div>
-
-          {/* {error && (
-            <p className='mt-4 text-xs font-medium text-destructive'>{error}</p>
-          )} */}
         </Section>
 
         {/* ------------------------------------------------ */}
-        {/* Reason */}
+        {/* Structured Separation Reasons */}
         {/* ------------------------------------------------ */}
 
         <Section
-          title={t('reason')}
-          description={t('reasonSub')}
+          title={t('separationReasons')}
+          description={t('separationReasonsSub')}
+        >
+          <div className='space-y-6'>
+            {/* -------------------------------------------- */}
+            {/* Primary Reason */}
+            {/* -------------------------------------------- */}
+
+            <div className='space-y-2'>
+              <Label htmlFor='offboarding-primary-reason'>
+                {t('primaryReason')}
+
+                <span className='ms-1 text-destructive'>*</span>
+              </Label>
+
+              <Select
+                disabled={readOnly || isSubmitting}
+                value={form.primaryReasonCode ?? ''}
+                dir={isRtl ? 'rtl' : 'ltr'}
+                onValueChange={(value) => {
+                  const reasonCode = value as EmploymentSeparationReasonCode
+                  setContributingOpen(false)
+                  setError(null)
+                  setForm((current) => ({
+                    ...current,
+                    primaryReasonCode: reasonCode,
+
+                    /**
+                     * A reason cannot be
+                     * simultaneously primary
+                     * and contributing.
+                     */
+                    contributingReasonCodes:
+                      current.contributingReasonCodes.filter(
+                        (item) => item !== reasonCode,
+                      ),
+                  }))
+                }}
+              >
+                <SelectTrigger
+                  id='offboarding-primary-reason'
+                  className='w-full data-[size=default]:h-12 bg-transparent hover:bg-transparent focus:bg-transparent dark:bg-transparent'
+                >
+                  <SelectValue placeholder={t('selectPrimaryReason')} />
+                </SelectTrigger>
+
+                <SelectContent>
+                  {allowedReasons.map((reasonCode) => (
+                    <SelectItem key={reasonCode} value={reasonCode}>
+                      {reasonLabels[reasonCode]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <p className='text-xs leading-relaxed text-muted-foreground'>
+                {t('primaryReasonSub')}
+              </p>
+            </div>
+
+            {/* -------------------------------------------- */}
+            {/* Contributing Factors */}
+            {/* -------------------------------------------- */}
+
+            {form.primaryReasonCode !== null &&
+              (allowedReasons.length > 1 ||
+                form.contributingReasonCodes.length > 0) && (
+                <div className='space-y-4'>
+                  {/* -------------------------------------------- */}
+                  {/* Header */}
+                  {/* -------------------------------------------- */}
+
+                  <div className='space-y-1'>
+                    <Label htmlFor='offboarding-contributing-reasons'>
+                      {t('contributingReasons')}
+                    </Label>
+
+                    <p className='text-xs leading-relaxed text-muted-foreground'>
+                      {t('contributingReasonsSub')}
+                    </p>
+                  </div>
+
+                  {/* -------------------------------------------- */}
+                  {/* Searchable Combobox */}
+                  {/* -------------------------------------------- */}
+
+                  {!readOnly && (
+                    <Popover
+                      modal
+                      open={contributingOpen}
+                      onOpenChange={setContributingOpen}
+                    >
+                      <PopoverTrigger asChild>
+                        <Button
+                          id='offboarding-contributing-reasons'
+                          type='button'
+                          variant='outline'
+                          role='combobox'
+                          dir={isRtl ? 'rtl' : 'ltr'}
+                          aria-expanded={contributingOpen}
+                          disabled={
+                            isSubmitting ||
+                            availableContributingReasons.length === 0
+                          }
+                          className='h-12 w-full justify-between gap-2 font-normal bg-transparent hover:bg-transparent focus:bg-transparent dark:bg-transparent'
+                        >
+                          <span className='truncate text-muted-foreground'>
+                            {availableContributingReasons.length === 0
+                              ? t('allContributingReasonsSelected')
+                              : t('selectContributingReason')}
+                          </span>
+
+                          <ChevronsUpDown className='size-4 shrink-0 opacity-50' />
+                        </Button>
+                      </PopoverTrigger>
+
+                      <PopoverContent
+                        //align='start'
+                        dir={isRtl ? 'rtl' : 'ltr'}
+                        align={isRtl ? 'end' : 'start'}
+                        sideOffset={4}
+                        className='w-[var(--radix-popover-trigger-width)] p-0'
+                      >
+                        <Command>
+                          {/* ------------------------------------ */}
+                          {/* Search */}
+                          {/* ------------------------------------ */}
+
+                          <CommandInput
+                            placeholder={t('searchContributingReasons')}
+                          />
+
+                          <CommandList>
+                            <CommandEmpty>
+                              {t('noContributingReasons')}
+                            </CommandEmpty>
+
+                            <CommandGroup>
+                              {availableContributingReasons.map(
+                                (reasonCode) => (
+                                  <CommandItem
+                                    key={reasonCode}
+                                    value={`${reasonLabels[reasonCode]} ${reasonCode.replaceAll('_', ' ')}`}
+                                    onSelect={() => {
+                                      setError(null)
+
+                                      setForm((current) => {
+                                        // Prevent duplicate selections.
+                                        if (
+                                          current.contributingReasonCodes.includes(
+                                            reasonCode,
+                                          )
+                                        ) {
+                                          return current
+                                        }
+
+                                        // A primary reason cannot also
+                                        // be a contributing factor.
+                                        if (
+                                          current.primaryReasonCode ===
+                                          reasonCode
+                                        ) {
+                                          return current
+                                        }
+
+                                        // Verify the option is still
+                                        // valid for the current type.
+                                        const allowed: readonly EmploymentSeparationReasonCode[] =
+                                          separationTypeConfigs[
+                                            current.separationType
+                                          ].presetReasons
+
+                                        if (!allowed.includes(reasonCode)) {
+                                          return current
+                                        }
+
+                                        return {
+                                          ...current,
+                                          contributingReasonCodes: [
+                                            ...current.contributingReasonCodes,
+                                            reasonCode,
+                                          ],
+                                        }
+                                      })
+
+                                      // Close after selection.
+                                      setContributingOpen(false)
+                                    }}
+                                    className='cursor-pointer'
+                                  >
+                                    <span className='flex-1 text-start'>
+                                      {reasonLabels[reasonCode]}
+                                    </span>
+                                  </CommandItem>
+                                ),
+                              )}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+
+                  {/* -------------------------------------------- */}
+                  {/* Selected Factors */}
+                  {/* -------------------------------------------- */}
+
+                  {form.contributingReasonCodes.length > 0 && (
+                    <div className='space-y-3'>
+                      <div className='flex items-center justify-between gap-3'>
+                        <p className='text-xs font-medium text-muted-foreground'>
+                          {t('selectedContributingReasons')}
+                        </p>
+
+                        <span className='text-xs tabular-nums text-muted-foreground'>
+                          {form.contributingReasonCodes.length}
+                        </span>
+                      </div>
+
+                      <div className='flex flex-wrap gap-2'>
+                        {form.contributingReasonCodes.map((reasonCode) => (
+                          <div
+                            key={reasonCode}
+                            className='inline-flex max-w-full items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 py-1.5 ps-3 pe-1.5'
+                          >
+                            {/* Factor label */}
+
+                            <span className='min-w-0 text-sm font-medium leading-5 text-foreground'>
+                              {reasonLabels[reasonCode]}
+                            </span>
+
+                            {/* Remove button */}
+
+                            {!readOnly && (
+                              <Button
+                                type='button'
+                                variant='ghost'
+                                size='icon'
+                                disabled={isSubmitting}
+                                aria-label={`${t('removeContributingReason')}: ${
+                                  reasonLabels[reasonCode]
+                                }`}
+                                onClick={() => {
+                                  setError(null)
+
+                                  setForm((current) => ({
+                                    ...current,
+                                    contributingReasonCodes:
+                                      current.contributingReasonCodes.filter(
+                                        (item) => item !== reasonCode,
+                                      ),
+                                  }))
+                                }}
+                                className='size-6 shrink-0 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive'
+                              >
+                                <X className='size-3.5' />
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+            {/* -------------------------------------------- */}
+            {/* Selected summary */}
+            {/* -------------------------------------------- */}
+
+            {form.primaryReasonCode && (
+              <div className='rounded-xl border bg-muted/20 px-4 py-3'>
+                <div className='text-xs font-medium text-muted-foreground'>
+                  {t('selectedReasonSummary')}
+                </div>
+
+                <div className='mt-2 space-y-1.5'>
+                  <div className='text-sm'>
+                    <span className='font-medium'>{t('primaryReason')}:</span>{' '}
+                    {reasonLabels[form.primaryReasonCode]}
+                  </div>
+
+                  {form.contributingReasonCodes.length > 0 && (
+                    <div className='text-sm'>
+                      <span className='font-medium'>
+                        {t('contributingReasons')}:
+                      </span>{' '}
+                      {form.contributingReasonCodes
+                        .map((reasonCode) => reasonLabels[reasonCode])
+                        .join(', ')}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </Section>
+
+        {/* ------------------------------------------------ */}
+        {/* Additional Reason Details */}
+        {/* ------------------------------------------------ */}
+
+        <Section
+          title={t('additionalReasonDetails')}
+          description={t('additionalReasonDetailsSub')}
           badge={common('optional')}
         >
           <div className='space-y-2'>
-            <Label htmlFor='offboarding-reason'>{t('reason')}</Label>
+            <Label htmlFor='offboarding-reason'>
+              {t('additionalReasonDetails')}
+            </Label>
 
             <Textarea
               id='offboarding-reason'
@@ -635,10 +1204,11 @@ function OffboardingDialogContent({
               onChange={(event) => {
                 setForm((current) => ({
                   ...current,
+
                   reason: event.target.value,
                 }))
               }}
-              placeholder={t('reasonPlaceholder')}
+              placeholder={t('additionalReasonDetailsPlaceholder')}
             />
 
             <div className='flex justify-end'>
@@ -670,6 +1240,7 @@ function OffboardingDialogContent({
               onChange={(event) => {
                 setForm((current) => ({
                   ...current,
+
                   remarks: event.target.value,
                 }))
               }}
@@ -685,7 +1256,7 @@ function OffboardingDialogContent({
         </Section>
 
         {/* ------------------------------------------------ */}
-        {/* Read-only workflow notice */}
+        {/* Read-only Workflow Notice */}
         {/* ------------------------------------------------ */}
 
         {isPendingApproval && existing && (
@@ -905,6 +1476,10 @@ function OffboardingDialogContent({
         </div>
       )}
 
+      {/* ------------------------------------------------ */}
+      {/* Confirmation */}
+      {/* ------------------------------------------------ */}
+
       <AlertDialog
         open={confirmAction !== null}
         onOpenChange={(open) => {
@@ -925,6 +1500,7 @@ function OffboardingDialogContent({
               {confirmAction === 'complete'
                 ? t('completeConfirmDescription', {
                     employee: employeeName,
+
                     date: existing?.effectiveDate ?? '',
                   })
                 : t('cancelConfirmDescription')}
@@ -957,63 +1533,42 @@ function OffboardingDialogContent({
 }
 
 /* -------------------------------------------------------------------------- */
-/* Dialog                                                                      */
+/* Dialog                                                                     */
 /* -------------------------------------------------------------------------- */
 
 export function OffboardingDialog(props: Props) {
   const t = useTranslations('offboarding')
+
   const common = useTranslations('common')
 
-  // const { data: separations = [], isLoading } = useEmploymentSeparations(
-  //   props.employmentId,
-  //   props.open,
-  // )
   const {
     data: separations = [],
     isLoading,
     isError,
-    error,
   } = useEmploymentSeparations(props.employmentId, props.open)
 
+  /**
+   * One open process is permitted
+   * per employment by the backend
+   * partial unique constraint.
+   */
   const existing = separations.find((item) =>
     openStatuses.includes(item.status),
   )
 
-  /*
+  /**
    * Critical:
    *
    * When React Query changes from
    * "no separation loaded yet" to an
    * existing separation, the key changes
-   * and the form is remounted with the
-   * correct initial values.
+   * and the form remounts with the correct
+   * initial state, including structured
+   * reasons.
    */
   const dialogKey = `${props.employmentId}:${existing?.id ?? 'new'}`
 
   return (
-    // <FormDialog
-    //   open={props.open}
-    //   onOpenChange={props.onOpenChange}
-    //   title={t('title')}
-    //   description={t('description', {
-    //     employee: props.employeeName,
-    //   })}
-    //   className='flex h-[calc(100dvh-1rem)] min-h-0 w-[calc(100vw-1rem)] flex-col overflow-hidden p-0 sm:h-auto sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100vw-2rem)] md:w-[80vw] md:max-w-4xl lg:w-[70vw] lg:max-w-5xl'
-    //   headerClassName='shrink-0 border-b bg-gradient-to-r from-slate-950 via-slate-900 to-slate-800 px-6 py-5 text-white'
-    // >
-    //   {props.open &&
-    //     (isLoading ? (
-    //       <div className='flex min-h-72 flex-1 items-center justify-center'>
-    //         <LoaderCircle className='size-6 animate-spin text-muted-foreground' />
-    //       </div>
-    //     ) : (
-    //       <OffboardingDialogContent
-    //         key={dialogKey}
-    //         {...props}
-    //         existing={existing}
-    //       />
-    //     ))}
-    // </FormDialog>
     <FormDialog
       open={props.open}
       onOpenChange={props.onOpenChange}

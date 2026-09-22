@@ -15,21 +15,133 @@ import type {
   UpdateSeparationDto,
 } from '../dto/offboarding.request'
 
+import {
+  separationTypeConfigs,
+  type EmploymentSeparationReasonCode,
+} from '../config/separation-reasons.config'
+
 import { EmploymentSeparationRepository } from '../repository/employment-separation.repository'
+import { EmploymentSeparationReasonRepository } from '../repository/employment-separation-reason.repository'
+
 import { getTodayInRiyadh } from '../utils/offboarding-date.util'
 
-// type SeparationData = {
-//   separationType: CreateSeparationDto['separationType']
-//   noticeDate?: string | null
-//   effectiveDate: string
-//   reason?: string | null
-//   remarks?: string | null
-// }
+/* -------------------------------------------------------------------------- */
+/* Types                                                                      */
+/* -------------------------------------------------------------------------- */
 
 type SeparationData = Pick<
   CreateSeparationDto,
   'separationType' | 'noticeDate' | 'effectiveDate' | 'reason' | 'remarks'
 >
+
+type SelectedSeparationReason = {
+  reasonCode: EmploymentSeparationReasonCode
+  isPrimary: boolean
+}
+
+/* -------------------------------------------------------------------------- */
+/* Separation reason validation                                               */
+/* -------------------------------------------------------------------------- */
+
+function validateSeparationReasons(
+  separationType: CreateSeparationDto['separationType'],
+  reasons: SelectedSeparationReason[],
+  options?: {
+    requireReason?: boolean
+  },
+) {
+  const requireReason = options?.requireReason ?? false
+
+  // ----------------------------------
+  // Required at submit / approval
+  // ----------------------------------
+
+  if (requireReason && reasons.length === 0) {
+    throw new AppError('At least one separation reason is required', 400)
+  }
+
+  /**
+   * Draft records may temporarily contain
+   * no structured reasons.
+   */
+  if (reasons.length === 0) {
+    return
+  }
+
+  // ----------------------------------
+  // Duplicate reasons
+  // ----------------------------------
+
+  const reasonCodes = reasons.map((reason) => reason.reasonCode)
+
+  if (new Set(reasonCodes).size !== reasonCodes.length) {
+    throw new AppError('Duplicate separation reasons are not allowed', 400)
+  }
+
+  // ----------------------------------
+  // Exactly one primary reason
+  // ----------------------------------
+
+  const primaryCount = reasons.filter((reason) => reason.isPrimary).length
+
+  if (primaryCount !== 1) {
+    throw new AppError(
+      'Exactly one separation reason must be marked as primary',
+      400,
+    )
+  }
+
+  // ----------------------------------
+  // Reason must belong to type
+  // ----------------------------------
+
+  const allowedReasons: readonly EmploymentSeparationReasonCode[] =
+    separationTypeConfigs[separationType].presetReasons
+
+  const invalidReason = reasons.find(
+    (reason) => !allowedReasons.includes(reason.reasonCode),
+  )
+
+  if (invalidReason) {
+    throw new AppError(
+      `Reason "${invalidReason.reasonCode}" is not valid for separation type "${separationType}"`,
+      400,
+    )
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Notice requirement validation                                              */
+/* -------------------------------------------------------------------------- */
+
+function validateNoticeRequirement(
+  separationType: CreateSeparationDto['separationType'],
+  noticeDate: string | null | undefined,
+) {
+  const config = separationTypeConfigs[separationType]
+
+  if (config.requiresNoticeDate && !noticeDate) {
+    throw new AppError(
+      `Notice date is required for separation type "${separationType}"`,
+      400,
+    )
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Convert persisted reason rows into strongly typed business data            */
+/* -------------------------------------------------------------------------- */
+
+function mapStoredReasons(
+  reasons: Awaited<
+    ReturnType<typeof EmploymentSeparationReasonRepository.findBySeparationId>
+  >,
+): SelectedSeparationReason[] {
+  return reasons.map((reason) => ({
+    reasonCode: reason.reasonCode as EmploymentSeparationReasonCode,
+    isPrimary: reason.isPrimary,
+  }))
+}
 
 /* -------------------------------------------------------------------------- */
 /* Common lifecycle validation                                                */
@@ -50,7 +162,7 @@ async function validateSeparationAgainstLifecycle(
     throw new AppError('Employment not found', 404)
   }
 
-  /*
+  /**
    * Precise separation cause belongs to:
    *
    * employment_separations.separation_type
@@ -81,6 +193,12 @@ async function validateSeparationAgainstLifecycle(
   }
 
   // ----------------------------------
+  // Notice rule
+  // ----------------------------------
+
+  validateNoticeRequirement(data.separationType, data.noticeDate)
+
+  // ----------------------------------
   // Active Contract
   // ----------------------------------
 
@@ -100,7 +218,7 @@ async function validateSeparationAgainstLifecycle(
     )
   }
 
-  /*
+  /**
    * EOC means the employee completes
    * the agreed contractual term.
    */
@@ -183,7 +301,7 @@ async function completeSeparationInTransaction(
     )
   }
 
-  /*
+  /**
    * Future-dated approved separation:
    *
    * employee remains employed until the
@@ -197,7 +315,25 @@ async function completeSeparationInTransaction(
   }
 
   // ----------------------------------
-  // 2. Resolve employment
+  // 2. Revalidate structured reasons
+  // ----------------------------------
+
+  const separationReasons =
+    await EmploymentSeparationReasonRepository.findBySeparationId(
+      tx,
+      separation.id,
+    )
+
+  validateSeparationReasons(
+    separation.separationType,
+    mapStoredReasons(separationReasons),
+    {
+      requireReason: true,
+    },
+  )
+
+  // ----------------------------------
+  // 3. Resolve employment
   // ----------------------------------
 
   const employment = await EmploymentRepository.findById(
@@ -228,7 +364,7 @@ async function completeSeparationInTransaction(
   }
 
   // ----------------------------------
-  // 3. Resolve + lock active contract
+  // 4. Resolve + lock active contract
   // ----------------------------------
 
   const activeContract = await ContractRepository.findActiveByEmploymentId(
@@ -240,7 +376,7 @@ async function completeSeparationInTransaction(
     throw new AppError('Active contract not found for employment', 409)
   }
 
-  /*
+  /**
    * renew() and applyMovement() already lock
    * the contract row.
    *
@@ -278,7 +414,7 @@ async function completeSeparationInTransaction(
   }
 
   // ----------------------------------
-  // 4. Latest legal movement
+  // 5. Latest legal movement
   // ----------------------------------
 
   const movement = await ContractMovementRepository.findLatestByContractId(
@@ -298,14 +434,15 @@ async function completeSeparationInTransaction(
   }
 
   // ----------------------------------
-  // 5. End employment
+  // 6. End employment
   // ----------------------------------
 
-  /*
+  /**
    * Generic lifecycle status.
    *
    * WHY the employee left remains recorded
-   * in separation.separationType.
+   * in separation.separationType and
+   * employment_separation_reasons.
    */
   const endedEmployment = await EmploymentRepository.endEmployment(
     tx,
@@ -319,12 +456,10 @@ async function completeSeparationInTransaction(
   }
 
   // ----------------------------------
-  // 6. Close contract lifecycle
+  // 7. Close contract lifecycle
   // ----------------------------------
 
-  /*
-   * IMPORTANT:
-   *
+  /**
    * contracts.endDate remains the originally
    * agreed contractual end date.
    *
@@ -340,10 +475,10 @@ async function completeSeparationInTransaction(
   }
 
   // ----------------------------------
-  // 7. Close latest legal movement
+  // 8. Close latest legal movement
   // ----------------------------------
 
-  /*
+  /**
    * Separation effectiveDate is the
    * employee's LAST ACTIVE DAY.
    *
@@ -363,7 +498,7 @@ async function completeSeparationInTransaction(
   }
 
   // ----------------------------------
-  // 8. End active / overlapping
+  // 9. End active / overlapping
   //    operational appointments
   // ----------------------------------
 
@@ -374,7 +509,7 @@ async function completeSeparationInTransaction(
     userId,
   )
 
-  /*
+  /**
    * Any appointment beginning AFTER the
    * employee's final day can never become
    * effective.
@@ -392,7 +527,7 @@ async function completeSeparationInTransaction(
     )
 
   // ----------------------------------
-  // 9. Release PCN
+  // 10. Release PCN
   // ----------------------------------
 
   let releasedPositionItem = null
@@ -428,7 +563,7 @@ async function completeSeparationInTransaction(
   }
 
   // ----------------------------------
-  // 10. Complete separation
+  // 11. Complete separation
   // ----------------------------------
 
   const completedSeparation =
@@ -446,11 +581,14 @@ async function completeSeparationInTransaction(
   }
 
   // ----------------------------------
-  // 11. Return completed lifecycle
+  // 12. Return completed lifecycle
   // ----------------------------------
 
   return {
-    separation: completedSeparation,
+    separation: {
+      ...completedSeparation,
+      reasons: separationReasons,
+    },
     employment: endedEmployment,
     contract: endedContract,
     movement: endedMovement,
@@ -463,7 +601,7 @@ async function completeSeparationInTransaction(
 }
 
 /* -------------------------------------------------------------------------- */
-/* Service                                                                     */
+/* Service                                                                    */
 /* -------------------------------------------------------------------------- */
 
 export const OffboardingService = {
@@ -481,7 +619,16 @@ export const OffboardingService = {
       throw new AppError('Employment separation not found', 404)
     }
 
-    return separation
+    const reasons =
+      await EmploymentSeparationReasonRepository.findBySeparationId(
+        db,
+        separation.id,
+      )
+
+    return {
+      ...separation,
+      reasons,
+    }
   },
 
   // ----------------------------------
@@ -489,7 +636,35 @@ export const OffboardingService = {
   // ----------------------------------
 
   getEmploymentSeparations: async (employmentId: string) => {
-    return EmploymentSeparationRepository.findByEmploymentId(db, employmentId)
+    const separations = await EmploymentSeparationRepository.findByEmploymentId(
+      db,
+      employmentId,
+    )
+
+    if (separations.length === 0) {
+      return []
+    }
+
+    const reasons =
+      await EmploymentSeparationReasonRepository.findBySeparationIds(
+        db,
+        separations.map((item) => item.id),
+      )
+
+    const reasonsBySeparation = new Map<string, (typeof reasons)[number][]>()
+
+    for (const reason of reasons) {
+      const current = reasonsBySeparation.get(reason.separationId) ?? []
+
+      current.push(reason)
+
+      reasonsBySeparation.set(reason.separationId, current)
+    }
+
+    return separations.map((separation) => ({
+      ...separation,
+      reasons: reasonsBySeparation.get(separation.id) ?? [],
+    }))
   },
 
   // ----------------------------------
@@ -515,7 +690,23 @@ export const OffboardingService = {
         )
       }
 
+      // ----------------------------------
+      // Parent lifecycle validation
+      // ----------------------------------
+
       await validateSeparationAgainstLifecycle(tx, employmentId, dto)
+
+      // ----------------------------------
+      // Structured reason validation
+      //
+      // Draft may have no reasons yet.
+      // ----------------------------------
+
+      validateSeparationReasons(dto.separationType, dto.reasons ?? [])
+
+      // ----------------------------------
+      // Create parent
+      // ----------------------------------
 
       const separation = await EmploymentSeparationRepository.create(tx, {
         employmentId,
@@ -531,7 +722,22 @@ export const OffboardingService = {
         throw new AppError('Employment separation could not be created', 500)
       }
 
-      return separation
+      // ----------------------------------
+      // Create structured reasons
+      // ----------------------------------
+
+      const reasons =
+        await EmploymentSeparationReasonRepository.replaceForSeparation(
+          tx,
+          separation.id,
+          dto.reasons ?? [],
+          userId,
+        )
+
+      return {
+        ...separation,
+        reasons,
+      }
     })
   },
 
@@ -561,14 +767,43 @@ export const OffboardingService = {
         )
       }
 
-      const next = {
-        separationType: dto.separationType ?? separation.separationType,
+      // ----------------------------------
+      // Existing structured reasons
+      // ----------------------------------
+
+      const existingReasons =
+        await EmploymentSeparationReasonRepository.findBySeparationId(
+          tx,
+          separation.id,
+        )
+
+      // ----------------------------------
+      // Resolve complete next state
+      // ----------------------------------
+
+      const nextSeparationType = dto.separationType ?? separation.separationType
+
+      const nextReasons: SelectedSeparationReason[] =
+        dto.reasons !== undefined
+          ? dto.reasons
+          : mapStoredReasons(existingReasons)
+
+      const next: SeparationData = {
+        separationType: nextSeparationType,
+
         noticeDate:
           dto.noticeDate !== undefined ? dto.noticeDate : separation.noticeDate,
+
         effectiveDate: dto.effectiveDate ?? separation.effectiveDate,
+
         reason: dto.reason !== undefined ? dto.reason : separation.reason,
+
         remarks: dto.remarks !== undefined ? dto.remarks : separation.remarks,
       }
+
+      // ----------------------------------
+      // Validate complete next state
+      // ----------------------------------
 
       await validateSeparationAgainstLifecycle(
         tx,
@@ -576,11 +811,21 @@ export const OffboardingService = {
         next,
       )
 
+      validateSeparationReasons(nextSeparationType, nextReasons)
+
+      // ----------------------------------
+      // Update parent
+      // ----------------------------------
+
       const updated = await EmploymentSeparationRepository.updateDraft(
         tx,
         separation.id,
         {
-          ...dto,
+          separationType: dto.separationType,
+          noticeDate: dto.noticeDate,
+          effectiveDate: dto.effectiveDate,
+          reason: dto.reason,
+          remarks: dto.remarks,
           updatedBy: userId,
         },
       )
@@ -589,7 +834,27 @@ export const OffboardingService = {
         throw new AppError('Employment separation could not be updated', 409)
       }
 
-      return updated
+      // ----------------------------------
+      // Replace reasons only if PATCH
+      // explicitly supplied reasons.
+      // ----------------------------------
+
+      let reasons = existingReasons
+
+      if (dto.reasons !== undefined) {
+        reasons =
+          await EmploymentSeparationReasonRepository.replaceForSeparation(
+            tx,
+            separation.id,
+            dto.reasons,
+            userId,
+          )
+      }
+
+      return {
+        ...updated,
+        reasons,
+      }
     })
   },
 
@@ -615,11 +880,10 @@ export const OffboardingService = {
         )
       }
 
-      /*
-       * Revalidate at transition time because
-       * contract / employment state may have
-       * changed since the draft was created.
-       */
+      // ----------------------------------
+      // Revalidate lifecycle
+      // ----------------------------------
+
       await validateSeparationAgainstLifecycle(tx, separation.employmentId, {
         separationType: separation.separationType,
         noticeDate: separation.noticeDate,
@@ -627,6 +891,29 @@ export const OffboardingService = {
         reason: separation.reason,
         remarks: separation.remarks,
       })
+
+      // ----------------------------------
+      // Reasons become mandatory
+      // at submission.
+      // ----------------------------------
+
+      const reasons =
+        await EmploymentSeparationReasonRepository.findBySeparationId(
+          tx,
+          separation.id,
+        )
+
+      validateSeparationReasons(
+        separation.separationType,
+        mapStoredReasons(reasons),
+        {
+          requireReason: true,
+        },
+      )
+
+      // ----------------------------------
+      // Transition
+      // ----------------------------------
 
       const submitted =
         await EmploymentSeparationRepository.markPendingApproval(
@@ -639,7 +926,10 @@ export const OffboardingService = {
         throw new AppError('Employment separation could not be submitted', 409)
       }
 
-      return submitted
+      return {
+        ...submitted,
+        reasons,
+      }
     })
   },
 
@@ -665,6 +955,10 @@ export const OffboardingService = {
         )
       }
 
+      // ----------------------------------
+      // Revalidate lifecycle
+      // ----------------------------------
+
       await validateSeparationAgainstLifecycle(tx, separation.employmentId, {
         separationType: separation.separationType,
         noticeDate: separation.noticeDate,
@@ -672,6 +966,28 @@ export const OffboardingService = {
         reason: separation.reason,
         remarks: separation.remarks,
       })
+
+      // ----------------------------------
+      // Revalidate structured reasons
+      // ----------------------------------
+
+      const reasons =
+        await EmploymentSeparationReasonRepository.findBySeparationId(
+          tx,
+          separation.id,
+        )
+
+      validateSeparationReasons(
+        separation.separationType,
+        mapStoredReasons(reasons),
+        {
+          requireReason: true,
+        },
+      )
+
+      // ----------------------------------
+      // Approve
+      // ----------------------------------
 
       const approved = await EmploymentSeparationRepository.markApproved(
         tx,
@@ -683,14 +999,17 @@ export const OffboardingService = {
         throw new AppError('Employment separation could not be approved', 409)
       }
 
-      /*
+      /**
        * Do not alter employment here.
        *
-       * A future approved resignation, for
-       * example, leaves the employee active
-       * until its effective date.
+       * A future approved resignation,
+       * for example, leaves the employee
+       * active until its effective date.
        */
-      return approved
+      return {
+        ...approved,
+        reasons,
+      }
     })
   },
 
@@ -740,7 +1059,16 @@ export const OffboardingService = {
         throw new AppError('Employment separation could not be cancelled', 409)
       }
 
-      return cancelled
+      const reasons =
+        await EmploymentSeparationReasonRepository.findBySeparationId(
+          tx,
+          separation.id,
+        )
+
+      return {
+        ...cancelled,
+        reasons,
+      }
     })
   },
 
@@ -750,7 +1078,9 @@ export const OffboardingService = {
 
   processDueSeparations: async () => {
     const today = getTodayInRiyadh()
+
     const due = await EmploymentSeparationRepository.findDueApproved(db, today)
+
     const completed = []
 
     for (const separation of due) {

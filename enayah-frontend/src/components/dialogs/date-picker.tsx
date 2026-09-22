@@ -21,6 +21,8 @@ interface Props {
   required?: boolean
   ariaInvalid?: boolean
   ariaDescribedBy?: string
+  minDate?: string
+  maxDate?: string
 }
 
 /**
@@ -28,6 +30,8 @@ interface Props {
  *
  * Display format: DD/MM/YYYY
  * Stored value: YYYY-MM-DD
+ *
+ * minDate and maxDate are inclusive.
  *
  * The calendar uses portal mode so it is not clipped by
  * scrollable/overflow-hidden parent containers.
@@ -46,20 +50,15 @@ export function DatePicker({
   required = false,
   ariaInvalid = false,
   ariaDescribedBy,
+  minDate,
+  maxDate,
 }: Props) {
   const [portalTarget, setPortalTarget] = React.useState<HTMLElement>()
 
-  /*
-   * Resolve the appropriate portal container from the actual
-   * trigger button.
-   *
-   * - Inside a Radix/shadcn Dialog or Sheet:
-   *   render the calendar inside the active modal.
-   *
-   * - Outside a dialog:
-   *   render into document.body so parent overflow does not
-   *   clip the calendar.
-   */
+  /* ------------------------------------------------------------------------ */
+  /* Portal target                                                            */
+  /* ------------------------------------------------------------------------ */
+
   const setTriggerRef = React.useCallback((node: HTMLButtonElement | null) => {
     if (!node) {
       return
@@ -74,6 +73,10 @@ export function DatePicker({
     )
   }, [])
 
+  /* ------------------------------------------------------------------------ */
+  /* Selected date                                                            */
+  /* ------------------------------------------------------------------------ */
+
   const selectedDate = value
     ? new DateObject({
         date: value,
@@ -81,11 +84,37 @@ export function DatePicker({
       })
     : null
 
+  /* ------------------------------------------------------------------------ */
+  /* Date boundaries                                                          */
+  /* ------------------------------------------------------------------------ */
+
+  const minimumDate = minDate
+    ? new DateObject({
+        date: minDate,
+        format: 'YYYY-MM-DD',
+      })
+    : undefined
+
+  const maximumDate = maxDate
+    ? new DateObject({
+        date: maxDate,
+        format: 'YYYY-MM-DD',
+      })
+    : undefined
+
+  /* ------------------------------------------------------------------------ */
+  /* Display value                                                            */
+  /* ------------------------------------------------------------------------ */
+
   const displayValue = selectedDate
     ? selectedDate.format('DD/MM/YYYY')
     : hidePlaceholder
       ? ''
       : 'Select date'
+
+  /* ------------------------------------------------------------------------ */
+  /* Render                                                                   */
+  /* ------------------------------------------------------------------------ */
 
   return (
     <DatePickerBase
@@ -93,12 +122,26 @@ export function DatePicker({
       portalTarget={portalTarget}
       value={selectedDate}
       disabled={disabled}
+      // ------------------------------------------------
+      // Date restrictions
+      // ------------------------------------------------
+
+      minDate={minimumDate}
+      maxDate={maximumDate}
+      // ------------------------------------------------
+      // Formatting
+      // ------------------------------------------------
+
       format='DD/MM/YYYY'
       calendarPosition='bottom-left'
       className='enayah-date-picker'
       containerClassName='w-full'
       onOpenPickNewDate={false}
       showOtherDays
+      // ------------------------------------------------
+      // Calendar day styling
+      // ------------------------------------------------
+
       mapDays={({ date, currentMonth }) => {
         const isOtherMonth = date.month.index !== currentMonth.index
 
@@ -118,6 +161,10 @@ export function DatePicker({
           className: classes,
         }
       }}
+      // ------------------------------------------------
+      // Trigger button
+      // ------------------------------------------------
+
       render={(_, openCalendar) => (
         <Button
           ref={setTriggerRef}
@@ -148,13 +195,35 @@ export function DatePicker({
           {displayValue && <span>{displayValue}</span>}
         </Button>
       )}
-      onChange={(selectedDate: DateObject | null) => {
-        if (!selectedDate) {
+      // ------------------------------------------------
+      // Date selection
+      // ------------------------------------------------
+
+      onChange={(date: DateObject | null) => {
+        if (!date) {
           onChange(null)
           return
         }
 
-        onChange(selectedDate.format('YYYY-MM-DD'))
+        const nextValue = date.format('YYYY-MM-DD')
+
+        /*
+         * Additional defensive validation.
+         *
+         * Since all values use YYYY-MM-DD,
+         * string comparisons preserve
+         * chronological ordering.
+         */
+
+        if (minDate && nextValue < minDate) {
+          return false
+        }
+
+        if (maxDate && nextValue > maxDate) {
+          return false
+        }
+
+        onChange(nextValue)
       }}
     />
   )

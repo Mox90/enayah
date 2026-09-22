@@ -28,11 +28,16 @@ import {
 } from '@/modules/hr/positions/components/position-combobox'
 
 import { useUpdatePositionItem } from '../hooks/use-update-position-item'
+// import {
+//   createPositionItemSchema,
+//   type CreateJobPositionItemFormValues,
+// } from '../schemas/position.items.schema'
 import {
-  createPositionItemSchema,
-  type CreateJobPositionItemFormValues,
+  editPositionItemFormSchema,
+  type EditPositionItemFormValues,
 } from '../schemas/position.items.schema'
 import type { PositionItem } from '../types/position.item.types'
+import { DatePicker } from '@/components/dialogs/date-picker'
 
 interface Props {
   positionItem: PositionItem
@@ -115,60 +120,51 @@ export function EditPositionItemDialog({
   const wasOpenRef = useRef(false)
   const initializedItemIdRef = useRef<string | null>(null)
 
-  const form = useForm<CreateJobPositionItemFormValues>({
-    resolver: zodResolver(createPositionItemSchema),
+  const form = useForm<EditPositionItemFormValues>({
+    resolver: zodResolver(editPositionItemFormSchema),
 
     defaultValues: {
       itemNumber: positionItem.itemNumber,
+      //establishedDate: positionItem.establishedDate ?? '',
       departmentId: positionItem.departmentId,
       positionId: positionItem.positionId,
-
       workforceCategory: positionItem.workforceCategory ?? undefined,
-
       categoryCode: positionItem.categoryCode ?? undefined,
-
       minSalary:
         positionItem.minSalary !== null && positionItem.minSalary !== undefined
           ? Number(positionItem.minSalary)
           : undefined,
-
       maxSalary:
         positionItem.maxSalary !== null && positionItem.maxSalary !== undefined
           ? Number(positionItem.maxSalary)
           : undefined,
-
       status: positionItem.status,
     },
   })
 
   useEffect(() => {
     const justOpened = open && !wasOpenRef.current
-
     const selectedItemChanged =
       open && initializedItemIdRef.current !== positionItem.id
 
     if (open && (justOpened || selectedItemChanged)) {
       form.reset({
         itemNumber: positionItem.itemNumber,
+        //establishedDate: positionItem.establishedDate ?? '',
         departmentId: positionItem.departmentId,
         positionId: positionItem.positionId,
-
         workforceCategory: positionItem.workforceCategory ?? undefined,
-
         categoryCode: positionItem.categoryCode ?? undefined,
-
         minSalary:
           positionItem.minSalary !== null &&
           positionItem.minSalary !== undefined
             ? Number(positionItem.minSalary)
             : undefined,
-
         maxSalary:
           positionItem.maxSalary !== null &&
           positionItem.maxSalary !== undefined
             ? Number(positionItem.maxSalary)
             : undefined,
-
         status: positionItem.status,
       })
 
@@ -182,26 +178,21 @@ export function EditPositionItemDialog({
   }, [open, positionItem, form])
 
   const workforceCategory = form.watch('workforceCategory')
-
   const categoryCode = form.watch('categoryCode')
-
   const status = form.watch('status')
-
   const selectedDepartmentLabel =
     departmentLabel ??
     (isRtl
       ? (positionItem.departmentNameAr ?? positionItem.departmentNameEn)
       : (positionItem.departmentNameEn ?? positionItem.departmentNameAr))
-
   const selectedPositionLabel =
     positionLabel ??
     (isRtl
       ? (positionItem.positionTitleAr ?? positionItem.positionTitleEn)
       : (positionItem.positionTitleEn ?? positionItem.positionTitleAr))
-
   const isSaving = updatePositionItem.isPending
-
-  const onSubmit = async (values: CreateJobPositionItemFormValues) => {
+  const onSubmit = async (values: EditPositionItemFormValues) => {
+    //console.log('VALID FORM:', values)
     try {
       await updatePositionItem.mutateAsync({
         id: positionItem.id,
@@ -222,23 +213,19 @@ export function EditPositionItemDialog({
   function resetForm() {
     form.reset({
       itemNumber: positionItem.itemNumber,
+      //establishedDate: positionItem.establishedDate ?? '',
       departmentId: positionItem.departmentId,
       positionId: positionItem.positionId,
-
       workforceCategory: positionItem.workforceCategory ?? undefined,
-
       categoryCode: positionItem.categoryCode ?? undefined,
-
       minSalary:
         positionItem.minSalary !== null && positionItem.minSalary !== undefined
           ? Number(positionItem.minSalary)
           : undefined,
-
       maxSalary:
         positionItem.maxSalary !== null && positionItem.maxSalary !== undefined
           ? Number(positionItem.maxSalary)
           : undefined,
-
       status: positionItem.status,
     })
 
@@ -286,6 +273,42 @@ export function EditPositionItemDialog({
                   control={form.control}
                   name='itemNumber'
                   label={t('itemNumber')}
+                />
+
+                {/* <FormField
+                  control={form.control}
+                  name='establishedDate'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        {t('establishedDate')}
+                        <span className='ms-1 text-destructive'>*</span>
+                      </FormLabel>
+
+                      <DatePicker
+                        id='edit-position-item-established-date'
+                        value={field.value || null}
+                        onChange={(value) => {
+                          field.onChange(value ?? '')
+                        }}
+                        required
+                        ariaInvalid={!!form.formState.errors.establishedDate}
+                      />
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                /> */}
+                <ReadOnlyField
+                  label={t('establishedDate')}
+                  value={
+                    positionItem.establishedDate
+                      ? positionItem.establishedDate
+                          .split('-')
+                          .reverse()
+                          .join('/')
+                      : null
+                  }
                 />
 
                 <ReadOnlyField label={t('status')} value={t(status)} />

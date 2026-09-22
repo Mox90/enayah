@@ -33,6 +33,7 @@ import {
   createPositionItemSchema,
   type CreateJobPositionItemFormValues,
 } from '../schemas/position.items.schema'
+import { DatePicker } from '@/components/dialogs/date-picker'
 
 interface SectionProps {
   title: string
@@ -102,12 +103,11 @@ export function CreatePositionItemDialog() {
   const et = useTranslations('employees')
 
   const createPositionItem = useCreatePositionItem()
-
   const form = useForm<CreateJobPositionItemFormValues>({
     resolver: zodResolver(createPositionItemSchema),
-
     defaultValues: {
       itemNumber: '',
+      establishedDate: '',
       departmentId: '',
       positionId: '',
       workforceCategory: undefined,
@@ -119,16 +119,14 @@ export function CreatePositionItemDialog() {
   })
 
   const workforceCategory = form.watch('workforceCategory')
-
   const categoryCode = form.watch('categoryCode')
-
   const status = form.watch('status')
-
   const isSaving = createPositionItem.isPending
 
   function resetForm() {
     form.reset({
       itemNumber: '',
+      establishedDate: '',
       departmentId: '',
       positionId: '',
       workforceCategory: undefined,
@@ -202,6 +200,32 @@ export function CreatePositionItemDialog() {
                     control={form.control}
                     name='itemNumber'
                     label={t('itemNumber')}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name='establishedDate'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t('establishedDate')}
+
+                          <span className='ms-1 text-destructive'>*</span>
+                        </FormLabel>
+
+                        <DatePicker
+                          id='position-item-established-date'
+                          value={field.value || null}
+                          onChange={(value) => {
+                            field.onChange(value ?? '')
+                          }}
+                          required
+                          ariaInvalid={!!form.formState.errors.establishedDate}
+                        />
+
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
 
                   <ReadOnlyField label={t('status')} value={t(status)} />
