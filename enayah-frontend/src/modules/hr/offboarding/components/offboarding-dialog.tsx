@@ -334,6 +334,7 @@ function OffboardingDialogContent({
     personal_family: t('reasons.personalFamily'),
     employer_nonrenewal: t('reasons.employerNonRenewal'),
     amicable_separation: t('reasons.amicableSeparation'),
+    resignation_during_probation: t('reasons.resignationDuringProbation'),
     restructuring: t('reasons.restructuring'),
     redundancy: t('reasons.redundancy'),
     layoff: t('reasons.layoff'),

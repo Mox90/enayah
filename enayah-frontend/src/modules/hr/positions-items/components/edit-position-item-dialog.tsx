@@ -28,9 +28,13 @@ import {
 } from '@/modules/hr/positions/components/position-combobox'
 
 import { useUpdatePositionItem } from '../hooks/use-update-position-item'
+// import {
+//   createPositionItemSchema,
+//   type CreateJobPositionItemFormValues,
+// } from '../schemas/position.items.schema'
 import {
-  createPositionItemSchema,
-  type CreateJobPositionItemFormValues,
+  editPositionItemFormSchema,
+  type EditPositionItemFormValues,
 } from '../schemas/position.items.schema'
 import type { PositionItem } from '../types/position.item.types'
 import { DatePicker } from '@/components/dialogs/date-picker'
@@ -116,12 +120,12 @@ export function EditPositionItemDialog({
   const wasOpenRef = useRef(false)
   const initializedItemIdRef = useRef<string | null>(null)
 
-  const form = useForm<CreateJobPositionItemFormValues>({
-    resolver: zodResolver(createPositionItemSchema),
+  const form = useForm<EditPositionItemFormValues>({
+    resolver: zodResolver(editPositionItemFormSchema),
 
     defaultValues: {
       itemNumber: positionItem.itemNumber,
-      establishedDate: positionItem.establishedDate ?? '',
+      //establishedDate: positionItem.establishedDate ?? '',
       departmentId: positionItem.departmentId,
       positionId: positionItem.positionId,
       workforceCategory: positionItem.workforceCategory ?? undefined,
@@ -146,7 +150,7 @@ export function EditPositionItemDialog({
     if (open && (justOpened || selectedItemChanged)) {
       form.reset({
         itemNumber: positionItem.itemNumber,
-        establishedDate: positionItem.establishedDate ?? '',
+        //establishedDate: positionItem.establishedDate ?? '',
         departmentId: positionItem.departmentId,
         positionId: positionItem.positionId,
         workforceCategory: positionItem.workforceCategory ?? undefined,
@@ -187,8 +191,8 @@ export function EditPositionItemDialog({
       ? (positionItem.positionTitleAr ?? positionItem.positionTitleEn)
       : (positionItem.positionTitleEn ?? positionItem.positionTitleAr))
   const isSaving = updatePositionItem.isPending
-  const onSubmit = async (values: CreateJobPositionItemFormValues) => {
-    console.log('VALID FORM:', values)
+  const onSubmit = async (values: EditPositionItemFormValues) => {
+    //console.log('VALID FORM:', values)
     try {
       await updatePositionItem.mutateAsync({
         id: positionItem.id,
@@ -209,7 +213,7 @@ export function EditPositionItemDialog({
   function resetForm() {
     form.reset({
       itemNumber: positionItem.itemNumber,
-      establishedDate: positionItem.establishedDate ?? '',
+      //establishedDate: positionItem.establishedDate ?? '',
       departmentId: positionItem.departmentId,
       positionId: positionItem.positionId,
       workforceCategory: positionItem.workforceCategory ?? undefined,
@@ -271,7 +275,7 @@ export function EditPositionItemDialog({
                   label={t('itemNumber')}
                 />
 
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name='establishedDate'
                   render={({ field }) => (
@@ -294,6 +298,17 @@ export function EditPositionItemDialog({
                       <FormMessage />
                     </FormItem>
                   )}
+                /> */}
+                <ReadOnlyField
+                  label={t('establishedDate')}
+                  value={
+                    positionItem.establishedDate
+                      ? positionItem.establishedDate
+                          .split('-')
+                          .reverse()
+                          .join('/')
+                      : null
+                  }
                 />
 
                 <ReadOnlyField label={t('status')} value={t(status)} />

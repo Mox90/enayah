@@ -15,13 +15,24 @@ export const separationTypeConfigs = {
     requiresNoticeDate: false,
     presetReasons: [
       'standard_expiry',
+      'employer_nonrenewal',
+
       'higher_pay',
       'alternative_opportunity',
-      'study',
-      'relocation',
-      'personal_family',
+
+      'supervisor_management',
+      'workload',
+      'lack_recognition',
+      'lack_training_opportunities',
+      'limited_career_advancement',
+      'lack_professional_development_support',
+      'type_of_work',
+      'employee_conflict',
       'work_environment',
-      'employer_nonrenewal',
+
+      'relocation',
+      'study',
+      'personal_family',
     ],
   },
 
@@ -42,6 +53,7 @@ export const separationTypeConfigs = {
       'relocation',
       'study',
       'personal_family',
+      'resignation_during_probation',
     ],
   },
 

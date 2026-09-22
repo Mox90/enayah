@@ -78,6 +78,8 @@ export const EmploymentSeparationReasonRepository = {
         isDeleted: true,
         updatedAt: new Date(),
         updatedBy: userId,
+        deletedAt: new Date(),
+        deletedBy: userId,
         version: sql`
           ${employmentSeparationReasons.version} + 1
         `,

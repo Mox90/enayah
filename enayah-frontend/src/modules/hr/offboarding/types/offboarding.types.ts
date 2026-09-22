@@ -48,6 +48,7 @@ export const employmentSeparationReasonValues = [
   'personal_family',
   'employer_nonrenewal',
   'amicable_separation',
+  'resignation_during_probation',
 
   // Termination
   'restructuring',
